@@ -51,8 +51,11 @@ trait TimelineView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editab
   def transportView : TransportView  [S]
 
   // ---- GUI actions ----
+  def actionSelectAll           : Action
+  def actionSelectFollowing     : Action
   def actionDelete              : Action
   def actionSplitObjects        : Action
+  def actionCleanUpObjects      : Action
   def actionStopAllSound        : Action
   def actionClearSpan           : Action
   def actionRemoveSpan          : Action

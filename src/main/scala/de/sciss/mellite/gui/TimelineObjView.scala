@@ -30,6 +30,7 @@ object TimelineObjView {
 
   final val Unnamed = "<unnamed>"
 
+  /** A useful view for `RangedSeq`. It gives (start, stop) of the view's span */
   implicit def viewToPoint[S <: stm.Sys[S]](view: TimelineObjView[S]): (Long, Long) = spanToPoint(view.spanValue)
 
   def spanToPoint(span: SpanLike): (Long, Long) = span match {

@@ -24,7 +24,9 @@ trait TimelineProcCanvas[S <: Sys[S]] extends TimelineCanvas {
 
   def selectionModel: TimelineObjView.SelectionModel[S]
 
-  def intersect(span: Span): Iterator[TimelineObjView[S]]
+  def iterator: Iterator[TimelineObjView[S]]
+
+  def intersect(span: Span.NonVoid): Iterator[TimelineObjView[S]]
 
   def findRegion(frame: Long, hitTrack: Int): Option[TimelineObjView[S]]
 

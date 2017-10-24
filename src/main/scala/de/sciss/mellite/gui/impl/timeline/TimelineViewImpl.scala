@@ -245,19 +245,30 @@ object TimelineViewImpl {
         case ValueChanged(_) => canvas.trackIndexOffset = ggTrackPos.value
       }
 
+      var hadSelectedObjects = false
+
       selectionModel.addListener {
         case _ =>
           val hasSome = selectionModel.nonEmpty
-          actionAttr                .enabled = hasSome
-          actionSplitObjects        .enabled = hasSome
-          actionAlignObjectsToCursor.enabled = hasSome
+          if (hadSelectedObjects != hasSome) {
+            hadSelectedObjects = hasSome
+            actionAttr                .enabled = hasSome
+            actionSplitObjects        .enabled = hasSome
+            actionCleanUpObjects      .enabled = hasSome
+            actionAlignObjectsToCursor.enabled = hasSome
+          }
       }
+
+      var hasSelectedSpan = false
 
       timelineModel.addListener {
         case TimelineModel.Selection(_, span) if span.before.isEmpty != span.now.isEmpty =>
           val hasSome = span.now.nonEmpty
-          actionClearSpan .enabled = hasSome
-          actionRemoveSpan.enabled = hasSome
+          if (hasSelectedSpan != hasSome) {
+            hasSelectedSpan = hasSome
+            actionClearSpan .enabled = hasSome
+            actionRemoveSpan.enabled = hasSome
+          }
       }
 
       val pane2 = new SplitPane(Orientation.Vertical, globalView.component, canvas.component)
@@ -520,7 +531,19 @@ object TimelineViewImpl {
 
       def timeline(implicit tx: S#Tx): Timeline[S] = impl.plainGroup
 
-      def intersect(span: Span): Iterator[TimelineObjView[S]] = viewRange.filterOverlaps((span.start, span.stop))
+      def iterator: Iterator[TimelineObjView[S]] = viewRange.iterator
+
+      def intersect(span: Span.NonVoid): Iterator[TimelineObjView[S]] = {
+        val start = span match {
+          case hs: Span.HasStart => hs.start
+          case _ => Long.MinValue
+        }
+        val stop  = span match {
+          case hs: Span.HasStop  => hs.stop
+          case _ => Long.MaxValue
+        }
+        viewRange.filterOverlaps((start, stop))
+      }
 
       def findRegion(pos: Long, hitTrack: Int): Option[TimelineObjView[S]] = {
         val span = Span(pos, pos + 1)

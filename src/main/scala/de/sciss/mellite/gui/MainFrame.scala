@@ -15,10 +15,11 @@ package de.sciss.mellite
 package gui
 
 import java.awt.{Color, Font}
+import java.net.{URI, URL}
 
 import de.sciss.audiowidgets.PeakMeter
 import de.sciss.desktop
-import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
+import de.sciss.desktop.{Desktop, Menu, OptionPane, Preferences, Window, WindowHandler}
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
@@ -33,7 +34,7 @@ import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{Ref, atomic}
 import scala.swing.Swing._
-import scala.swing.event.{ButtonClicked, ValueChanged}
+import scala.swing.event.{ButtonClicked, MouseClicked, ValueChanged}
 import scala.swing.{Action, Alignment, BoxPanel, Button, CheckBox, Component, FlowPanel, Label, Orientation, Slider, ToggleButton}
 
 final class MainFrame extends desktop.impl.WindowImpl { me =>
@@ -41,10 +42,10 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   def handler: WindowHandler = Application.windowHandler
 
-  private val lbSensors = new Label("Sensors:")
-  private val lbAudio   = new Label("Audio:")
+  private[this] val lbSensors = new Label("Sensors:")
+  private[this] val lbAudio   = new Label("Audio:")
 
-  private lazy val ggSensors = {
+  private[this] lazy val ggSensors = {
     val res = new PeakMeter
     res.orientation   = Orientation.Horizontal
     res.holdPainted   = false
@@ -52,7 +53,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     res
   }
 
-  locally {
+  {
     lbSensors.horizontalAlignment = Alignment.Trailing
     lbAudio  .horizontalAlignment = Alignment.Trailing
     if (Prefs.useSensorMeters) {
@@ -69,7 +70,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     lbAudio  .preferredSize = p2
   }
 
-  private val ggDumpSensors: CheckBox = new CheckBox("Dump") {
+  private[this] val ggDumpSensors: CheckBox = new CheckBox("Dump") {
     listenTo(this)
     reactions += {
       case ButtonClicked(_) =>
@@ -84,7 +85,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     enabled = false
   }
 
-  private val actionStartStopSensors: Action = new Action("Start") {
+  private[this] val actionStartStopSensors: Action = new Action("Start") {
     def apply(): Unit = {
       val isRunning = step { implicit tx =>
         sensorSystem.serverOption.isDefined
@@ -93,7 +94,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     }
   }
 
-  private val sensorServerPane = new BoxPanel(Orientation.Horizontal) {
+  private[this] val sensorServerPane = new BoxPanel(Orientation.Horizontal) {
     contents += HStrut(4)
     contents += lbSensors
     contents += HStrut(4)
@@ -105,10 +106,10 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     contents += HGlue
   }
 
-  private val audioServerPane = new ServerStatusPanel()
+  private[this] val audioServerPane = new ServerStatusPanel()
   audioServerPane.bootAction = Some(() => { Mellite.startAuralSystem(); () })
 
-  private val boxPane = new BoxPanel(Orientation.Vertical)
+  private[this] val boxPane = new BoxPanel(Orientation.Vertical)
   boxPane.contents += sensorServerPane
   boxPane.contents += new BoxPanel(Orientation.Horizontal) {
     contents += HStrut(4)
@@ -122,11 +123,61 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   component.peer.getRootPane.putClientProperty("apple.awt.brushMetalLook", true)
   resizable = false
   contents  = boxPane
-  handler.menuFactory.get("actions").foreach {
-    case g: Menu.Group =>
-      g.add(Some(this), Menu.Item("server-tree", ActionShowTree))
-      g.add(Some(this), Menu.Item("toggle-debug-log")("Toggle Debug Log")(toggleDebugLog()))
-    case _ =>
+
+  {
+    import de.sciss.desktop.Menu.{Group, Item}
+    val mf      = handler.menuFactory
+    val gHelp   = Group("help", "Help")
+    val itAbout = Item.About(Application)(showAbout())
+    if (itAbout.visible) gHelp.add(itAbout)
+    gHelp
+      .add(Item("index")("Online Documentation")(
+        Desktop.browseURI(new URI(Mellite.homepage))))
+      .add(Item("issues")("Report a Bug")(
+        Desktop.browseURI(new URI("https://github.com/Sciss/Mellite/issues"))))
+
+    mf.get("actions").foreach {
+      case g: Menu.Group =>
+        g.add(Some(this), Menu.Item("server-tree", ActionShowTree))
+        g.add(Some(this), Menu.Item("toggle-debug-log")("Toggle Debug Log")(toggleDebugLog()))
+      case _ =>
+    }
+
+    val me = Some(this)
+    mf.add(me, gHelp)
+  }
+
+  private def showAbout(): Unit = {
+    val url   = Mellite.homepage
+    val addr  = url // url.substring(math.min(url.length, url.indexOf("//") + 2))
+    val html  =
+      s"""<html><center>
+         |<font size=+1><b>${Application.name}</b></font><p>
+         |Version ${Mellite.version}<p>
+         |<p>
+         |Copyright (c) 2012&ndash;2017 Hanns Holger Rutz. All rights reserved.<p>
+         |This software is published under the ${Mellite.license}
+         |<p>&nbsp;<p><i>
+         |Scala v${de.sciss.mellite.BuildInfo.scalaVersion}<br>
+         |Java v${sys.props.getOrElse("java.version", "?")}<br>
+         |</i>
+         |<p>&nbsp;<p>
+         |<a href="$url">$addr</a>
+         |<p>&nbsp;
+         |""".stripMargin
+    val lb = new Label(html) {
+      // cf. http://stackoverflow.com/questions/527719/how-to-add-hyperlink-in-jlabel
+      // There is no way to directly register a HyperlinkListener, despite hyper links
+      // being rendered... A simple solution is to accept any mouse click on the label
+      // to open the corresponding website.
+      cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
+      listenTo(mouse.clicks)
+      reactions += {
+        case MouseClicked(_, _, _, 1, false) => Desktop.browseURI(new URL(url).toURI)
+      }
+    }
+
+    OptionPane.message(message = lb.peer, icon = Logo.icon(128)).show(None, title = "About")
   }
 
   private def toggleDebugLog(): Unit = {
@@ -154,13 +205,13 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       }
   }
 
-  private val meter       = Ref(Option.empty[AudioBusMeter])
-  private var onlinePane  = Option.empty[Component]
+  private[this] val meter       = Ref(Option.empty[AudioBusMeter])
+  private[this] var onlinePane  = Option.empty[Component]
 
-  private val smallFont   = new Font("SansSerif", Font.PLAIN, 9)
+  private[this] val smallFont   = new Font("SansSerif", Font.PLAIN, 9)
 
   private def step[A](fun: Txn => A): A = atomic { implicit itx =>
-    implicit val tx = Txn.wrap(itx)
+    implicit val tx: Txn = Txn.wrap(itx)
     fun(tx)
   }
 

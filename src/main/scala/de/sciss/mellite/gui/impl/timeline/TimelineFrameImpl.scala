@@ -16,8 +16,7 @@ package gui
 package impl
 package timeline
 
-import de.sciss.desktop.impl.UndoManagerImpl
-import de.sciss.desktop.{KeyStrokes, Menu, OptionPane, Window}
+import de.sciss.desktop.{Menu, OptionPane, UndoManager, Window}
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.CellView
@@ -25,12 +24,11 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc.{Timeline, Workspace}
 
 import scala.swing.Action
-import scala.swing.event.Key
 
 object TimelineFrameImpl {
   def apply[S <: Sys[S]](group: Timeline[S])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): TimelineFrame[S] = {
-    implicit val undoMgr  = new UndoManagerImpl
+    implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = TimelineView[S](group)
     val name    = AttrCellView.name(group)
     import Timeline.serializer
@@ -51,6 +49,7 @@ object TimelineFrameImpl {
       val me = Some(window)
 
       bindMenus(
+        "edit.select-all"         -> view.actionSelectAll,
         "edit.delete"             -> view.actionDelete,
         "actions.stop-all-sound"  -> view.actionStopAllSound,
         // "timeline.splitObjects" -> view.splitObjectsAction,
@@ -93,26 +92,26 @@ object TimelineFrameImpl {
       )
 
       // --- timeline menu ---
-      import KeyStrokes._
-      import Menu.{Group, Item, proxy}
+      import Menu.{Group, Item}
       val mTimeline = Group("timeline", "Timeline")
         // .add(Item("trimToSelection",    proxy("Trim to Selection",        (menu1 + Key.F5))))
-        .add(Item("insert-span"           , proxy(("Insert Span...",          menu1 + shift + Key.E))))
+//        .add(Item("insert-span"           , proxy(("Insert Span...",          menu1 + shift + Key.E))))
         .add(Item("clear-span"            , view.actionClearSpan ))
         .add(Item("remove-span"           , view.actionRemoveSpan))
-        .add(Item("dup-span-to-pos"       , "Duplicate Span to Cursor"))
+//        .add(Item("dup-span-to-pos"       , "Duplicate Span to Cursor"))
         .addLine()
-        .add(Item("nudge-amount"          , "Nudge Amount..."))
-        .add(Item("nudge-left"            , proxy(("Nudge Objects Backward",  plain + Key.Minus))))
-        .add(Item("nudge-right"           , proxy(("Nudge Objects Forward",   plain + Key.Plus))))
-        .addLine()
-        .add(Item("select-following"      , proxy(("Select Following Objects", menu2 + Key.F))))
+//        .add(Item("nudge-amount"          , "Nudge Amount..."))
+//        .add(Item("nudge-left"            , proxy(("Nudge Objects Backward",  plain + Key.Minus))))
+//        .add(Item("nudge-right"           , proxy(("Nudge Objects Forward",   plain + Key.Plus))))
+//        .addLine()
+        .add(Item("select-following"      , view.actionSelectFollowing))
         .add(Item("align-obj-start-to-pos", view.actionAlignObjectsToCursor))
         .add(Item("split-objects"         , view.actionSplitObjects))
+        .add(Item("clean-up-objects"      , view.actionCleanUpObjects))
         .addLine()
-        .add(Item("sel-stop-to-start"     , "Flip Selection Backward"))
-        .add(Item("sel-start-to-stop"     , "Flip Selection Forward"))
-        .addLine()
+//        .add(Item("sel-stop-to-start"     , "Flip Selection Backward"))
+//        .add(Item("sel-start-to-stop"     , "Flip Selection Forward"))
+//        .addLine()
         .add(Item("drop-marker"           , view.actionDropMarker))
         .add(Item("drop-named-marker"     , view.actionDropNamedMarker))
 

@@ -17,17 +17,21 @@ package impl.timeline
 
 import javax.swing.undo.UndoableEdit
 
+import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
+import de.sciss.fingertree.RangedSeq
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj, Type}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ProcActions.Move
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
-import de.sciss.mellite.gui.impl.ProcGUIActions
+import de.sciss.mellite.gui.impl.{ProcGUIActions, ProcObjView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}
+import de.sciss.topology.Topology
 
 import scala.swing.Action
 import scala.swing.event.Key
@@ -58,6 +62,30 @@ trait TimelineActions[S <: Sys[S]] {
     }
   }
 
+  object actionSelectAll extends Action("Select All") {
+    def apply(): Unit = {
+      canvas.iterator.foreach { view =>
+        if (!selectionModel.contains(view)) selectionModel += view
+      }
+    }
+  }
+
+  object actionSelectFollowing extends Action("Select Following Objects") {
+    accelerator = Some(menu2 + Key.F)
+    def apply(): Unit = {
+      selectionModel.clear()
+      val pos = timelineModel.position
+      canvas.intersect(Span.from(pos)).foreach { view =>
+        // XXX TODO --- this is an additional filter we need because `intersect` doesn't allow >= condition for start
+        val ok = view.spanValue match {
+          case hs: Span.HasStart => hs.start >= pos
+          case _ => false
+        }
+        if (ok) selectionModel += view
+      }
+    }
+  }
+
   object actionDelete extends Action("Delete") {
     def apply(): Unit = {
       val editOpt = withSelection { implicit tx => views =>
@@ -81,6 +109,88 @@ trait TimelineActions[S <: Sys[S]] {
       val editOpt = withFilteredSelection(pv => pv.spanValue.contains(pos1) && pv.spanValue.contains(pos2)) { implicit tx =>
         splitObjects(pos)
       }
+      editOpt.foreach(undoManager.add)
+    }
+  }
+
+  object actionCleanUpObjects extends Action("Vertically Arrange Overlapping Objects") {
+    enabled = false
+
+    def apply(): Unit = {
+      type V = TimelineObjView[S]
+      case class E(sourceVertex: V, targetVertex: V) extends Topology.Edge[V]
+      case class Placed(view: TimelineObjView[S], y: Int) {
+        def nextY         : Int     = view.trackHeight + y + 1
+        def deltaY        : Int     = y - view.trackIndex
+        def isSignificant : Boolean = deltaY != 0
+      }
+
+      val edits: List[UndoableEdit] = if (selectionModel.isEmpty) Nil else {
+        val sel     = selectionModel.iterator
+        val top0    = (Topology.empty[V, E] /: sel)(_ addVertex _)
+        val viewSet = top0.vertices.toSet
+        cursor.step { implicit tx =>
+          val top = (top0 /: top0.vertices) {
+            case (topIn, pv: ProcObjView.Timeline[S]) =>
+              val targetIt = pv.targets.iterator.map(_.attr.parent).filter(viewSet.contains)
+              (topIn /: targetIt) { case (topIn1, target) =>
+                topIn1.addEdge(E(pv, target)).fold(_ => topIn1, _._1)
+              }
+
+            case (topIn, _) => topIn
+          }
+
+          val range0  = RangedSeq.empty[Placed, Long](pl => TimelineObjView.spanToPoint(pl.view.spanValue), Ordering.Long)
+          val pl0     = List.empty[Placed]
+          val (_, plRes) = ((range0, pl0) /: top.vertices.indices) { case ((rangeIn, plIn), viewIdx) =>
+            val view      = top.vertices(viewIdx)
+            val tup       = TimelineObjView.spanToPoint(view.spanValue)
+            val it0       = rangeIn.filterOverlaps(tup).map(_.nextY)
+            val it1       = if (viewIdx < top.unconnected) it0 else it0 ++ Iterator.single(plIn.head.nextY)
+            val nextY     = if (it1.isEmpty) 0 else it1.max
+            val pl        = Placed(view, nextY)
+            val rangeOut  = rangeIn + pl
+            val plOut     = pl :: plIn
+            (rangeOut, plOut)
+          }
+
+          val tl = timeline
+          plRes.flatMap { pl =>
+            if (!pl.isSignificant) None else {
+              val move = Move(deltaTime = 0L, deltaTrack = pl.deltaY, copy = false)
+              Edits.moveOrCopy(pl.view.span, pl.view.obj, tl, move, minStart = Long.MinValue)
+            }
+          }
+        }
+      }
+
+//            def checkLink(source: TimelineObjView[S], target: TimelineObjView[S]): Unit = {
+//              val targets = getTargets(source)
+//              if (targets.contains(target)) {
+//                val edge = E(source, target)
+//                top.addEdge(edge).foreach { case (top1, moveOpt) =>
+//                  top = top1
+//                  moveOpt.foreach { move =>
+//                    // - In case that the reference is the source vertex of the added edge, the affected vertices
+//                    //   should be moved _after_ the reference and keep their internal grouping order.
+//                    // - In case the reference is the target vertex, the affected vertices should be
+//                    //   moved _before_ the reference
+//                    if (move.isAfter) {
+//                      val thisPl = placed.getOrElseUpdate(view, Placed(trkIdx = view.trackIndex, trkH = view.trackHeight))
+//                      move.affected.foreach {}
+//                      ???
+//                    } else {
+//                      ???
+//                    }
+//                  }
+//                }
+//              }
+//            }
+//
+//            checkLink(view, that)
+//            checkLink(that, view)
+
+      val editOpt = CompoundEdit(edits, name = title)
       editOpt.foreach(undoManager.add)
     }
   }
@@ -313,7 +423,7 @@ trait TimelineActions[S <: Sys[S]] {
       case Span.HasStart(leftStart) =>
         val leftSpan  = Span(leftStart, time)
         // oldSpan()     = leftSpan
-        implicit val spanLikeTpe = SpanLikeObj
+        implicit val spanLikeTpe: Type.Expr[SpanLike, SpanLikeObj] = SpanLikeObj
         val edit = EditVar.Expr[S, SpanLike, SpanLikeObj]("Resize", oldSpan, leftSpan)
         Some(edit)
     }

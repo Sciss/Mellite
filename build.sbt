@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.17.1"
+lazy val projectVersion             = "2.18.0-SNAPSHOT"
 lazy val mimaVersion                = "2.17.0"
 
 lazy val loggingEnabled             = true
@@ -14,8 +14,8 @@ lazy val authorEMail                = "contact@sciss.de"
 // ---- dependencies ----
 
 lazy val soundProcessesVersion      = "3.14.1"
-lazy val fscapeVersion              = "2.9.0"
-lazy val nuagesVersion              = "2.18.0"
+lazy val fscapeVersion              = "2.9.1"
+lazy val nuagesVersion              = "2.18.1"
 lazy val fileUtilVersion            = "1.1.3"
 lazy val interpreterPaneVersion     = "1.8.1"
 lazy val scalaColliderVersion       = "1.22.4"
@@ -34,7 +34,7 @@ lazy val raphaelIconsVersion        = "1.0.4"
 lazy val modelVersion               = "0.3.4"
 lazy val pdflitzVersion             = "1.2.2"
 lazy val webLaFVersion              = "2.1.3"
-lazy val subminVersion              = "0.2.1"
+lazy val subminVersion              = "0.2.2"
 lazy val jlineVersion               = "2.14.5"
 lazy val pegDownVersion             = "1.6.0"
 
@@ -51,10 +51,10 @@ def appNameL                        = baseNameL
 lazy val commonSettings = Seq(
   version            := projectVersion,
   organization       := "de.sciss",
-  homepage           := Some(url(s"https://github.com/Sciss/$baseName")),
+  homepage           := Some(url(s"https://sciss.github.io/$baseName")),
   licenses           := Seq("GNU General Public License v3+" -> url("http://www.gnu.org/licenses/gpl-3.0.txt")),
-  scalaVersion       := "2.12.3",
-  crossScalaVersions := Seq("2.12.3", "2.11.11"),
+  scalaVersion       := "2.12.4",
+  crossScalaVersions := Seq("2.12.4", "2.11.11"),
   scalacOptions ++= {
     val xs = Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_")
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
