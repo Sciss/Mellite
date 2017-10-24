@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.18.0-SNAPSHOT"
-lazy val mimaVersion                = "2.17.0"
+lazy val projectVersion             = "2.18.0"
+lazy val mimaVersion                = "2.18.0"
 
 lazy val loggingEnabled             = true
 
@@ -22,11 +22,12 @@ lazy val scalaColliderVersion       = "1.22.4"
 lazy val scalaColliderUGenVersion   = "1.16.6"
 lazy val lucreVersion               = "3.4.1"
 lazy val equalVersion               = "0.1.2"
+lazy val spanVersion                = "1.3.3"
 lazy val freesoundVersion           = "1.4.0"
 lazy val playJSONVersion            = "0.4.0"
 lazy val scalaColliderSwingVersion  = "1.34.1"
 lazy val lucreSwingVersion          = "1.6.0"
-lazy val audioWidgetsVersion        = "1.11.0"
+lazy val audioWidgetsVersion        = "1.11.1"
 lazy val swingPlusVersion           = "0.2.4"
 lazy val desktopVersion             = "0.8.0"
 lazy val sonogramVersion            = "1.9.1"
@@ -185,6 +186,7 @@ lazy val root = Project(id = baseName, base = file("."))
       "de.sciss"    %% s"lucre-$bdb"                    % lucreVersion,               // database backend
       "de.sciss"    %% "lucre-expr"                     % lucreVersion,
       "de.sciss"    %% "equal"                          % equalVersion,               // type-safe equals
+      "de.sciss"    %% "span"                           % spanVersion,                // (sbt bug)
       "de.sciss"    %% "fileutil"                       % fileUtilVersion,            // (sbt bug)
       "de.sciss"    %% "wolkenpumpe"                    % nuagesVersion,              // live improv
       "de.sciss"    %% "scalacolliderswing-core"        % scalaColliderSwingVersion,  // (sbt bug)

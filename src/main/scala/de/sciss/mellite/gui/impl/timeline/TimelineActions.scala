@@ -35,6 +35,7 @@ import de.sciss.topology.Topology
 
 import scala.swing.Action
 import scala.swing.event.Key
+import scala.util.Success
 
 /** Implements the actions defined for the timeline-view. */
 trait TimelineActions[S <: Sys[S]] {
@@ -134,7 +135,10 @@ trait TimelineActions[S <: Sys[S]] {
             case (topIn, pv: ProcObjView.Timeline[S]) =>
               val targetIt = pv.targets.iterator.map(_.attr.parent).filter(viewSet.contains)
               (topIn /: targetIt) { case (topIn1, target) =>
-                topIn1.addEdge(E(pv, target)).fold(_ => topIn1, _._1)
+                topIn1.addEdge(E(pv, target)) match {
+                  case Success((topNew, _)) => topNew
+                  case _                    => topIn1
+                }
               }
 
             case (topIn, _) => topIn
