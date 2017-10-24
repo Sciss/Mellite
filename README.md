@@ -32,7 +32,7 @@ The current version `v` is `"2.17.1"`.
 
 ## building
 
-Mellite builds with sbt 0.13 and Scala 2.12. The last version to support Scala 2.10 is 2.10.2. The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during development.
+Mellite builds with [sbt](http://scala-sbt.org/) 0.13 and Scala 2.12. The last version to support Scala 2.10 is 2.10.2. The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during development. For convenience, the [sbt script by Paul Phillips](https://github.com/paulp/sbt-extras) has been included, which is covered by a BSD-3-clause license. Therefore, on Linux and Mac you can just use `./sbt run` or `./sbt universal:packageBin` to get going without having to separately install sbt.
 
 Dependencies not found are all available from their respective [GitHub repositories](https://github.com/Sciss?tab=repositories), so in case you want to build a snapshot version, you may need to check out these projects and publish them yourself using `sbt publish-local`.
 
