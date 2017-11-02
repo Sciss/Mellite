@@ -519,7 +519,7 @@ object ObjViewImpl {
 
       def factory: ObjView.Factory = Color
 
-      implicit val exprType: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
+      val exprType: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
 
       def expr(implicit tx: S#Tx): proc.Color.Obj[S] = objH()
 
@@ -1049,7 +1049,6 @@ object ObjViewImpl {
     def initAttrs(obj: Obj[S])(implicit tx: S#Tx): this.type = {
       val attr      = obj.attr
 
-      implicit val stringTpe: Type.Expr[_String, StringObj]= StringObj
       val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
       disposables ::= nameView.react { implicit tx => opt =>
         deferAndRepaint {
@@ -1058,7 +1057,6 @@ object ObjViewImpl {
       }
       nameOption   = nameView()
 
-      implicit val colorTpe: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
       val colorView = AttrCellView[S, Color, proc.Color.Obj](attr, ObjView.attrColor)
       disposables ::= colorView.react { implicit tx => opt =>
         deferAndRepaint {

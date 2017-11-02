@@ -23,7 +23,7 @@ import de.sciss.desktop.OptionPane
 import de.sciss.file._
 import de.sciss.fingertree.RangedSeq
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj, Type}
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap, Obj, TxnLike}
 import de.sciss.lucre.swing.{Window, deferTx}
@@ -746,7 +746,6 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
       initAttrs(id, span, obj)
 
       val attr    = obj.attr
-      implicit val tpe: Type.Expr[AudioCue, AudioCue.Obj] = AudioCue.Obj
       val cueView = AttrCellView[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
       disposables ::= cueView.react { implicit tx => newAudio =>
         deferAndRepaint {

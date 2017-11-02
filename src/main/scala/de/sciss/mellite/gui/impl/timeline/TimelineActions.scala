@@ -21,7 +21,7 @@ import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
 import de.sciss.fingertree.RangedSeq
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj, Type}
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
@@ -425,9 +425,7 @@ trait TimelineActions[S <: Sys[S]] {
         Edits.resize(oldSpan, leftObj, resize, minStart = minStart)
 
       case Span.HasStart(leftStart) =>
-        val leftSpan  = Span(leftStart, time)
-        // oldSpan()     = leftSpan
-        implicit val spanLikeTpe: Type.Expr[SpanLike, SpanLikeObj] = SpanLikeObj
+        val leftSpan = Span(leftStart, time)
         val edit = EditVar.Expr[S, SpanLike, SpanLikeObj]("Resize", oldSpan, leftSpan)
         Some(edit)
     }

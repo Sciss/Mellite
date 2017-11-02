@@ -21,7 +21,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.{SpanLikeObj, Type}
+import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -99,12 +99,7 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
       val res     = FadeSpec(fr, curve, valIn.floor)
       val elem    = FadeSpec.Obj.newConst[S](res)
 
-      implicit val fadeTpe: Type.Expr[FadeSpec, FadeSpec.Obj] = FadeSpec.Obj
       val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-In", obj, ObjKeys.attrFadeIn, Some(elem))
-//      { ex =>
-//        val vr = FadeSpec.Obj.newVar(ex)
-//        vr /// FadeSpec.Obj(vr)
-//      }
 
       edits ::= edit
 
@@ -140,12 +135,7 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
       val fr      = valOut.numFrames + dOut
       val res     = FadeSpec(fr, curve, valOut.floor)
       val elem    = FadeSpec.Obj.newConst[S](res)
-      implicit val fadeTpe: Type.Expr[FadeSpec, FadeSpec.Obj] = FadeSpec.Obj
       val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-Out", obj, ObjKeys.attrFadeOut, Some(elem))
-//      { ex =>
-//        val vr = FadeSpec.Obj.newVar(ex)
-//        vr // FadeSpec.Obj(vr)
-//      }
 
       edits ::= edit
 

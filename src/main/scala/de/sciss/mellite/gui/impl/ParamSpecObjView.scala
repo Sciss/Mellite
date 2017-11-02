@@ -340,7 +340,6 @@ object ParamSpecObjView extends ListObjView.Factory {
         objH() match {
           case ParamSpec.Obj.Var(pVr) =>
             val pVal  = ParamSpec.Obj.newConst[S](newSpec)
-            implicit val tpe: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
             val edit  = EditVar.Expr[S, ParamSpec, ParamSpec.Obj](s"Edit $humanName", pVr, pVal)
             Some(edit)
           case _ => None

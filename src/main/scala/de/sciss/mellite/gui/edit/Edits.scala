@@ -18,14 +18,14 @@ package edit
 import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.{IntObj, LongObj, SpanLikeObj, StringObj, Type}
-import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.expr.{IntObj, LongObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.{SynthGraph, proc}
 import de.sciss.synth.proc.{AudioCue, Code, Folder, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.{SynthGraph, proc}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
@@ -34,13 +34,9 @@ import scala.util.control.NonFatal
 object Edits {
   def setBus[S <: Sys[S]](objects: Iterable[Obj[S]], intExpr: IntObj[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
-    val name  = "Set Bus"
-    implicit val intTpe: Type.Expr[Int, IntObj] = IntObj
+    val name = "Set Bus"
     val edits: List[UndoableEdit] = objects.map { obj =>
       EditAttrMap.expr[S, Int, IntObj](name, obj, ObjKeys.attrBus, Some(intExpr))
-//      { ex =>
-//        IntObj(IntObj.newVar(ex))
-//      }
     } (breakOut)
     CompoundEdit(edits, name)
   }
@@ -79,7 +75,6 @@ object Edits {
 
         procs.foreach { p =>
           val graphEx = SynthGraphObj.newConst[S](sg)  // XXX TODO: ideally would link to code updates
-          implicit val sgTpe: Type.Expr[SynthGraph, SynthGraphObj] = SynthGraphObj
           val edit1   = EditVar.Expr[S, SynthGraph, SynthGraphObj](editName, p.graph, graphEx)
           edits += edit1
           if (attrNameOpt.nonEmpty) {
@@ -117,14 +112,8 @@ object Edits {
   }
 
   def setName[S <: Sys[S]](obj: Obj[S], nameOpt: Option[StringObj[S]])
-                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
-    implicit val stringTpe: Type.Expr[String, StringObj] = StringObj
-    val edit = EditAttrMap.expr[S, String, StringObj]("Rename Object", obj, ObjKeys.attrName, nameOpt)
-//    { ex =>
-//      StringObj(StringObj.newVar(ex))
-//    }
-    edit
-  }
+                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit =
+    EditAttrMap.expr[S, String, StringObj]("Rename Object", obj, ObjKeys.attrName, nameOpt)
 
   def addLink[S <: Sys[S]](source: Output[S], sink: Proc[S], key: String)
                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
@@ -233,7 +222,6 @@ object Edits {
         val newSpanEx = SpanLikeObj.newConst[S](newSpan)
         if (newSpanEx === oldSpan) None else {
           val name  = "Resize"
-          implicit val spanLikeTpe: Type.Expr[SpanLike, SpanLikeObj] = SpanLikeObj
           val edit0 = EditVar.Expr[S, SpanLike, SpanLikeObj](name, vr, newSpanEx)
           val edit1Opt: Option[UndoableEdit] = if (dStartCC == 0L) None else obj match {
             case objT: Proc[S] =>
@@ -246,7 +234,6 @@ object Edits {
                     import expr.Ops._
                     amt match {
                       case LongObj.Var(amtVr) =>
-                        implicit val longObj: Type.Expr[Long, LongObj] = LongObj
                         EditVar.Expr[S, Long, LongObj](name, amtVr, amtVr() + dStartCC)
                       case _ =>
                         val newCue = AudioCue.Obj.Shift(peer, LongObj.newVar[S](amt + dStartCC))
@@ -318,7 +305,6 @@ object Edits {
       }
       import de.sciss.equal.Implicits._
       val newTrackOpt = if (newTrack === IntObj.newConst[S](0)) None else Some(newTrack)
-      implicit val intTpe: Type.Expr[Int, IntObj] = IntObj
       val edit = EditAttrMap.expr[S, Int, IntObj]("Adjust Track Placement", obj,
         TimelineObjView.attrTrackIndex, newTrackOpt)
 
@@ -334,7 +320,6 @@ object Edits {
           // s.transform(_ shift deltaC)
           import expr.Ops._
           val newSpan = vr() shift deltaC
-          implicit val spanLikeTpe: Type.Expr[SpanLike, SpanLikeObj] = SpanLikeObj
           val edit    = EditVar.Expr[S, SpanLike, SpanLikeObj](name, vr, newSpan)
           edits ::= edit
         case _ =>

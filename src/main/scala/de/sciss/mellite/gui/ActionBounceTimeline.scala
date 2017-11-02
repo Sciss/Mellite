@@ -755,14 +755,14 @@ object ActionBounceTimeline {
                       ok
 
                     case Right((name, directory)) =>
-                      val (edit, source) = cursor.step { implicit tx =>
+                      val (edit0, source) = cursor.step { implicit tx =>
                         val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
                         val folder  = document.rootH()
                         val index   = folder.size
                         val _edit   = EditFolderInsertObj("Location", folder, index, locObj)
                         (_edit, tx.newHandle(locObj))
                       }
-                      undoManager.add(edit)
+                      undoManager.add(edit0)
                       settings = settings.copy(location = Some(source))
                       ok
                   }

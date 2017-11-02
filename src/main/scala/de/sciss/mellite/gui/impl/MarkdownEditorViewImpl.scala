@@ -20,7 +20,6 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.edit.EditVar
@@ -108,7 +107,6 @@ object MarkdownEditorViewImpl {
     private def saveText(newTextValue: String)(implicit tx: S#Tx): Option[UndoableEdit] =
       if (!editable) None else Markdown.Var.unapply(markdownH()).map { vr =>
         val newMarkdown = Markdown.newConst[S](newTextValue)
-        implicit val codeTpe: Type.Expr[Markdown.Value, Markdown] = Markdown
         EditVar.Expr[S, Markdown.Value, Markdown]("Change Source Markdown", vr, newMarkdown)
       }
 

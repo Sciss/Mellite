@@ -23,7 +23,7 @@ import javax.swing.{CellEditor, DropMode}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.expr.{StringObj, Type}
+import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
@@ -138,7 +138,6 @@ object FolderViewImpl {
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)
         }
         val attr      = obj.attr
-        implicit val stringTpe: Type.Expr[String, StringObj] = StringObj
         val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
         val attrReact = nameView.react { implicit tx => nameOpt =>
           val isDirty = updateObjectName(obj, nameOpt)
@@ -211,13 +210,10 @@ object FolderViewImpl {
               if (editColumn == 0) {
                 val valueOpt: Option[StringObj[S]] /* Obj[S] */ = if (text.isEmpty || text.toLowerCase == "<unnamed>") None else {
                   val expr = StringObj.newConst[S](text)
-                  // Some(Obj(StringObj(elem)))
                   Some(expr)
                 }
-                // val ed = EditAttrMap[S](s"Rename ${objView.prefix} Element", objView.obj(), ObjKeys.attrName, valueOpt)
-                implicit val stringTpe: Type.Expr[String, StringObj] = StringObj
                 val ed = EditAttrMap.expr[S, String, StringObj](s"Rename ${objView.humanName} Element", objView.obj, ObjKeys.attrName,
-                  valueOpt) // (StringObj[S](_))
+                  valueOpt)
                 Some(ed)
               } else {
                 objView.tryEdit(text)

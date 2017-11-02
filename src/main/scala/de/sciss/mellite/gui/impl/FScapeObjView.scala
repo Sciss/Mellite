@@ -20,7 +20,6 @@ import de.sciss.desktop
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
@@ -119,7 +118,6 @@ object FScapeObjView extends ListObjView.Factory {
 
       def save(in: Unit, out: Graph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        implicit val tpe: Type.Expr[Graph, GraphObj] = GraphObj
         EditVar.Expr[S, Graph, GraphObj]("Change FScape Graph", obj.graph, GraphObj.newConst[S](out))
       }
 

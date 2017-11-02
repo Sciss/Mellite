@@ -16,7 +16,7 @@ package gui
 package impl
 package timeline
 
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj, Type}
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
@@ -40,7 +40,6 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
   def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
     val attr      = obj.attr
 
-    implicit val intTpe: Type.Expr[Int, IntObj] = IntObj
     val trackIdxView = AttrCellView[S, Int, IntObj](attr, TimelineObjView.attrTrackIndex)
     disposables ::= trackIdxView.react { implicit tx => opt =>
       deferTx {

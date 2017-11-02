@@ -21,7 +21,6 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IDPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -64,7 +63,6 @@ object CodeFrameImpl {
 
       def save(in: Unit, out: SynthGraph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        implicit val sgTpe: Type.Expr[SynthGraph, SynthGraphObj] = SynthGraphObj
         EditVar.Expr[S, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[S](out))
       }
 

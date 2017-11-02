@@ -25,7 +25,6 @@ import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Sys, TxnLike}
 import de.sciss.lucre.swing.edit.EditVar
@@ -151,7 +150,6 @@ object CodeViewImpl {
       // val imp = ExprImplicits[S]
       codeVarHOpt.map { source =>
         val newCode = Code.Obj.newConst[S](code.updateSource(newSource))
-        implicit val codeTpe: Type.Expr[Code, Code.Obj] = Code.Obj
         EditVar.Expr[S, Code, Code.Obj]("Change Source Code", source(), newCode)
       }
     }
