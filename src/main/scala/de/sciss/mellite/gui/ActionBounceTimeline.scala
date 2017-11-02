@@ -907,7 +907,7 @@ object ActionBounceTimeline {
 
   def perform[S <: Sys[S]](document: Workspace[S], settings: PerformSettings[S])
                           (implicit cursor: stm.Cursor[S]): Processor[File] = {
-    implicit val workspace = document
+    implicit val workspace: Workspace[S] = document
 
     // for real-time, we generally have to overshoot because in SC 3.6, DiskOut's
     // buffer is not flushed after synth is stopped.
@@ -954,7 +954,7 @@ object ActionBounceTimeline {
     }
     bnc.span    = span1
     bnc.beforePrepare = { (_tx, s) =>
-      implicit val tx = _tx
+      implicit val tx: S#Tx = _tx
       // make sure no private bus overlaps with the virutal output
       if (numInChans > numChannels) {
         s.allocAudioBus(numInChans - numChannels)

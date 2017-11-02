@@ -107,9 +107,9 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = StringObj[~]
 
-      def factory = String
+      def factory: ObjView.Factory = String
 
-      val exprType = StringObj
+      val exprType: Type.Expr[String, StringObj] = StringObj
 
       def convertEditValue(v: Any): Option[_String] = Some(v.toString)
 
@@ -168,9 +168,9 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = LongObj[~]
 
-      def factory = Long
+      def factory: ObjView.Factory = Long
 
-      val exprType = LongObj
+      val exprType: Type.Expr[_Long, LongObj] = LongObj
 
       def expr(implicit tx: S#Tx): LongObj[S] = objH()
 
@@ -230,9 +230,9 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = DoubleObj[~]
 
-      def factory = Double
+      def factory: ObjView.Factory = Double
 
-      val exprType = DoubleObj
+      val exprType: Type.Expr[_Double, DoubleObj] = DoubleObj
 
       def expr(implicit tx: S#Tx): DoubleObj[S] = objH()
 
@@ -292,7 +292,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = BooleanObj[~]
 
-      def factory = Boolean
+      def factory: ObjView.Factory = Boolean
 
       def expr(implicit tx: S#Tx): BooleanObj[S] = objH()
     }
@@ -348,7 +348,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _IntVector[~]
 
-      def factory = IntVector
+      def factory: ObjView.Factory = IntVector
 
       val exprType: Type.Expr[Vec[Int], _IntVector] = _IntVector
 
@@ -419,7 +419,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _DoubleVector[~]
 
-      def factory = DoubleVector
+      def factory: ObjView.Factory = DoubleVector
 
       val exprType: Type.Expr[Vec[Double], _DoubleVector] = _DoubleVector
 
@@ -517,9 +517,9 @@ object ObjViewImpl {
 
       def isEditable = false    // not until we have proper editing components
 
-      def factory = Color
+      def factory: ObjView.Factory = Color
 
-      val exprType = proc.Color.Obj
+      implicit val exprType: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
 
       def expr(implicit tx: S#Tx): proc.Color.Obj[S] = objH()
 
@@ -556,7 +556,6 @@ object ObjViewImpl {
               val editOpt = cursor.step { implicit tx =>
                 objH() match {
                   case proc.Color.Obj.Var(vr) =>
-                    implicit val colorTpe = proc.Color.Obj
                     Some(EditVar.Expr[S, Color, proc.Color.Obj]("Change Color", vr, proc.Color.Obj.newConst[S](colr)))
                   case _ => None
                 }
@@ -636,7 +635,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _Folder[~]
 
-      def factory = Folder
+      def factory: ObjView.Factory = Folder
 
       def isViewable = true
 
@@ -689,7 +688,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _Timeline[~]
 
-      def factory = Timeline
+      def factory: ObjView.Factory = Timeline
 
       def isViewable = true
 
@@ -741,7 +740,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _Grapheme[~]
 
-      def factory = Grapheme
+      def factory: ObjView.Factory = Grapheme
 
       def isViewable = true
 
@@ -798,7 +797,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _FadeSpec.Obj[~]
 
-      def factory = FadeSpec
+      def factory: ObjView.Factory = FadeSpec
 
       def init(obj: _FadeSpec.Obj[S])(implicit tx: S#Tx): this.type = {
         initAttrs(obj)
@@ -900,7 +899,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _Ensemble[~]
 
-      def factory = Ensemble
+      def factory: ObjView.Factory = Ensemble
 
       def isViewable = true
 
@@ -975,7 +974,7 @@ object ObjViewImpl {
 
       type E[~ <: stm.Sys[~]] = _Nuages[~]
 
-      def factory = Nuages
+      def factory: ObjView.Factory = Nuages
 
       def isViewable = true
 
@@ -1050,7 +1049,7 @@ object ObjViewImpl {
     def initAttrs(obj: Obj[S])(implicit tx: S#Tx): this.type = {
       val attr      = obj.attr
 
-      implicit val stringTpe = StringObj
+      implicit val stringTpe: Type.Expr[_String, StringObj]= StringObj
       val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
       disposables ::= nameView.react { implicit tx => opt =>
         deferAndRepaint {
@@ -1059,7 +1058,7 @@ object ObjViewImpl {
       }
       nameOption   = nameView()
 
-      implicit val colorTpe = proc.Color.Obj
+      implicit val colorTpe: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
       val colorView = AttrCellView[S, Color, proc.Color.Obj](attr, ObjView.attrColor)
       disposables ::= colorView.react { implicit tx => opt =>
         deferAndRepaint {

@@ -31,7 +31,7 @@ object AttrCellView {
   }
 
   def name[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx): CellView[S#Tx, String] = {
-    implicit val stringEx = StringObj
+    implicit val stringEx: Type.Expr[String, StringObj] = StringObj
     apply[S, String, StringObj](obj.attr, ObjKeys.attrName).map(_.getOrElse("<unnamed>"))
   }
 }

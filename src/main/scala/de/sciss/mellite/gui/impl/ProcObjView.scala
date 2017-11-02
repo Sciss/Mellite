@@ -23,7 +23,7 @@ import de.sciss.desktop.OptionPane
 import de.sciss.file._
 import de.sciss.fingertree.RangedSeq
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Identifiable, IdentifierMap, Obj, TxnLike}
 import de.sciss.lucre.swing.{Window, deferTx}
@@ -44,12 +44,12 @@ import scala.util.control.NonFatal
 object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Proc[~]
 
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Cogs)
-  val prefix            = "Proc"
-  val humanName         = "Process"
-  def tpe               = Proc
-  def category: String  = ObjView.categComposition
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Cogs)
+  val prefix        : String    = "Proc"
+  val humanName     : String    = "Process"
+  def tpe           : Obj.Type  = Proc
+  def category      : String    = ObjView.categComposition
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx): ProcObjView[S] with ListObjView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
@@ -103,9 +103,8 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
 
     override def obj(implicit tx: S#Tx): Proc[S] = objH()
 
-    final def factory = ProcObjView
-
-    final def isViewable = true
+    final def factory   : ObjView.Factory = ProcObjView
+    final def isViewable: Boolean         = true
 
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
@@ -747,7 +746,7 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
       initAttrs(id, span, obj)
 
       val attr    = obj.attr
-      implicit val tpe = AudioCue.Obj
+      implicit val tpe: Type.Expr[AudioCue, AudioCue.Obj] = AudioCue.Obj
       val cueView = AttrCellView[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
       disposables ::= cueView.react { implicit tx => newAudio =>
         deferAndRepaint {

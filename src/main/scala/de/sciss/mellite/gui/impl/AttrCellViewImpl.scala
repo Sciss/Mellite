@@ -127,7 +127,7 @@ object AttrCellViewImpl {
     extends Basic[S, A, E] with CellView.Var[S, Option[A]] {
 
     def serializer: Serializer[S#Tx, S#Acc, Repr] = {
-      implicit val exSer = tpe.serializer[S]
+      implicit val exSer: Serializer[S#Tx, S#Acc, E[S]] = tpe.serializer[S]
       Serializer.option[S#Tx, S#Acc, E[S]]
     }
 

@@ -20,11 +20,12 @@ import javax.swing.SwingUtilities
 import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.{CellView, defer}
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{SoundProcesses, Workspace, WorkspaceLike}
+import de.sciss.synth.proc.{Durable, SoundProcesses, Workspace, WorkspaceLike}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
@@ -52,13 +53,13 @@ object ActionOpenWorkspace extends Action("Open...") {
     doc match {
       case cf: Workspace.Confluent =>
         implicit val workspace: Workspace.Confluent  = cf
-        implicit val cursor = workspace.system.durable
+        implicit val cursor: stm.Cursor[Durable] = workspace.system.durable
         GUI.atomic[proc.Durable, Unit](fullTitle, s"Opening cursor window for '${doc.name}'") {
           implicit tx => DocumentCursorsFrame(cf)
         }
       case eph =>
         implicit val workspace: Workspace[S] = eph
-        implicit val cursor = eph.cursor
+        implicit val cursor: stm.Cursor[S] = eph.cursor
         val nameView = CellView.const[S, String](doc.name)
         GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${doc.name}'") {
           implicit tx => FolderFrame[S](name = nameView, isWorkspaceRoot = true)

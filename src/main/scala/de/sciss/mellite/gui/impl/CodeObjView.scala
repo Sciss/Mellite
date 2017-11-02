@@ -33,12 +33,12 @@ import scala.swing.{Component, Label}
 
 object CodeObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Code.Obj[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Code)
-  val prefix            = "Code"
-  def humanName         = "Source Code"
-  def tpe               = Code.Obj
-  def category: String  = ObjView.categMisc
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Code)
+  val prefix        : String    = "Code"
+  def humanName     : String    = "Source Code"
+  def tpe           : Obj.Type  = Code.Obj
+  def category      : String    = ObjView.categMisc
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ListObjView[S] = {
     val value   = obj.value
@@ -103,7 +103,7 @@ object CodeObjView extends ListObjView.Factory {
 
     override def obj(implicit tx: S#Tx): Code.Obj[S] = objH()
 
-    def factory = CodeObjView
+    def factory: ObjView.Factory = CodeObjView
 
     // def isUpdateVisible(update: Any)(implicit tx: S#Tx): Boolean = false
 

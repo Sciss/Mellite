@@ -15,8 +15,7 @@ package de.sciss.mellite
 package gui
 package impl
 
-import de.sciss.desktop.OptionPane
-import de.sciss.desktop.impl.UndoManagerImpl
+import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
@@ -29,7 +28,7 @@ import scala.concurrent.{Future, Promise}
 object MarkdownFrameImpl {
   def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownEditorFrame[S] = {
-    implicit val undo = new UndoManagerImpl
+    implicit val undo: UndoManager = UndoManager()
     val view  = MarkdownEditorView(obj, bottom = bottom)
     val res   = new EditorFrameImpl(view).init()
     trackTitle(res, view.renderer)

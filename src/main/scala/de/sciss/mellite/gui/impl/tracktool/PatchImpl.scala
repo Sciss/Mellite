@@ -54,7 +54,7 @@ object PatchImpl {
   private lazy val cursor =
     Toolkit.getDefaultToolkit.createCustomCursor(mkImage(aa = Desktop.isMac), new Point(8, 8), "patch")
 }
-final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends RegionImpl[S, TrackTool.Patch[S]] with Dragging[S, TrackTool.Patch[S]] {
 
   import TrackTool.Patch

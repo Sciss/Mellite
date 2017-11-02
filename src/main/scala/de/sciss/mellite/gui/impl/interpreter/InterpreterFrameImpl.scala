@@ -111,7 +111,7 @@ private[gui] object InterpreterFrameImpl {
     lazy val intp = InterpreterPane(interpreterConfig = intpCfg, codePaneConfig = codeCfg)
 
     new InterpreterFrame {
-      val component = new de.sciss.desktop.impl.WindowImpl {
+      val component: desktop.Window = new de.sciss.desktop.impl.WindowImpl {
         frame =>
 
         def handler: WindowHandler = Application.windowHandler

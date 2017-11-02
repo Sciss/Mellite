@@ -157,7 +157,7 @@ object TimelineViewImpl {
     private[this] var viewRange = RangedSeq.empty[TimelineObjView[S], Long]
     private[this] val viewSet   = TSet     .empty[TimelineObjView[S]]
 
-    var canvas: TimelineProcCanvasImpl[S] = _
+    var canvas: TimelineTrackCanvasImpl[S] = _
     val disposables = Ref(List.empty[Disposable[S#Tx]])
 
     protected val auxMap: IdentifierMap[S#ID, S#Tx, Any]                      = tx0.newInMemoryIDMap
@@ -523,7 +523,7 @@ object TimelineViewImpl {
       editOpt.isDefined
     }
 
-    private final class View extends TimelineProcCanvasImpl[S] {
+    private final class View extends TimelineTrackCanvasImpl[S] {
       canvasImpl =>
 
       def timelineModel : TimelineModel                         = impl.timelineModel

@@ -21,7 +21,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.SpanLikeObj
+import de.sciss.lucre.expr.{SpanLikeObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -30,10 +30,10 @@ import de.sciss.span.Span
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 
-final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends BasicRegion[S, TrackTool.Fade] {
 
-  import TrackTool.{Fade, EmptyFade}
+  import TrackTool.{EmptyFade, Fade}
 
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR)
   val name                  = "Fade"
@@ -99,7 +99,7 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
       val res     = FadeSpec(fr, curve, valIn.floor)
       val elem    = FadeSpec.Obj.newConst[S](res)
 
-      implicit val fadeTpe = FadeSpec.Obj
+      implicit val fadeTpe: Type.Expr[FadeSpec, FadeSpec.Obj] = FadeSpec.Obj
       val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-In", obj, ObjKeys.attrFadeIn, Some(elem))
 //      { ex =>
 //        val vr = FadeSpec.Obj.newVar(ex)
@@ -140,7 +140,7 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
       val fr      = valOut.numFrames + dOut
       val res     = FadeSpec(fr, curve, valOut.floor)
       val elem    = FadeSpec.Obj.newConst[S](res)
-      implicit val fadeTpe = FadeSpec.Obj
+      implicit val fadeTpe: Type.Expr[FadeSpec, FadeSpec.Obj] = FadeSpec.Obj
       val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-Out", obj, ObjKeys.attrFadeOut, Some(elem))
 //      { ex =>
 //        val vr = FadeSpec.Obj.newVar(ex)
@@ -164,5 +164,5 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
     CompoundEdit(edits,s"Adjust $name")
   }
 
-  protected def dialog() = None // XXX TODO
+  protected def dialog(): Option[TrackTool.Fade] = None // XXX TODO
 }

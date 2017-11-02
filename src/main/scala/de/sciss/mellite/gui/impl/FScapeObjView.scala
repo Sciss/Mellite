@@ -17,10 +17,10 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop
-import de.sciss.desktop.OptionPane
-import de.sciss.desktop.impl.UndoManagerImpl
+import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
+import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
@@ -37,12 +37,12 @@ import scala.util.Failure
 
 object FScapeObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = FScape[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(Shapes.Sparks)
-  val prefix            = "FScape"
-  def humanName: String = prefix
-  def tpe               = FScape
-  def category: String  = ObjView.categComposition
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Sparks)
+  val prefix        : String    = "FScape"
+  def humanName     : String    = prefix
+  def tpe           : Obj.Type  = FScape
+  def category      : String    = ObjView.categComposition
+  def hasMakeDialog : Boolean   = true
 
   private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 
@@ -81,7 +81,7 @@ object FScapeObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = FScape[~]
 
-    def factory = FScapeObjView
+    def factory: ObjView.Factory = FScapeObjView
 
     def isViewable = true
 
@@ -119,7 +119,7 @@ object FScapeObjView extends ListObjView.Factory {
 
       def save(in: Unit, out: Graph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        implicit val tpe = GraphObj
+        implicit val tpe: Type.Expr[Graph, GraphObj] = GraphObj
         EditVar.Expr[S, Graph, GraphObj]("Change FScape Graph", obj.graph, GraphObj.newConst[S](out))
       }
 
@@ -170,7 +170,7 @@ object FScapeObjView extends ListObjView.Factory {
               }
             }
 
-            implicit val context = GenContext[S]
+            implicit val context: GenContext[S] = GenContext[S]
             val rendering = obj.run(config)
             deferTx {
               actionCancel.enabled = true
@@ -205,7 +205,7 @@ object FScapeObjView extends ListObjView.Factory {
 
     val bottom = viewProgress :: viewCancel :: viewRender :: viewDebug :: Nil
 
-    implicit val undo = new UndoManagerImpl
+    implicit val undo: UndoManager = UndoManager()
     val rightView = FScapeOutputsView[S](obj)
     make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = Some(rightView),
       canBounce = false)  // XXX TODO --- perhaps a standard bounce option would be useful

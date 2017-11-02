@@ -32,7 +32,7 @@ import de.sciss.synth.proc.Timeline
 
 import scala.swing.{FlowPanel, Label, TextField}
 
-final class CursorImpl[S <: Sys[S]](val canvas: TimelineProcCanvas[S]) extends RegionImpl[S, TrackTool.Cursor] {
+final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends RegionImpl[S, TrackTool.Cursor] {
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")

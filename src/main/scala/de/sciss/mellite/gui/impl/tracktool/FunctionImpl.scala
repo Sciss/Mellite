@@ -29,7 +29,7 @@ import de.sciss.mellite.gui.edit.EditTimelineInsertObj
 import de.sciss.span.Span
 import de.sciss.synth.proc.Proc
 
-final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S], tlv: TimelineView[S])
+final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
   extends RegionLike[S, TrackTool.Function] with Dragging[S, TrackTool.Function] {
 
   import TrackTool.Function

@@ -14,38 +14,10 @@
 package de.sciss.mellite
 package gui
 
-import java.awt.geom.Path2D
-import java.awt.{Paint, Rectangle, Stroke}
+import java.awt.{Paint, Stroke}
 
-import de.sciss.sonogram
-
-/** Paint support. */
-trait TimelineRendering extends sonogram.PaintController {
-  /** For general use. */
-  def shape1                      : Path2D
-  /** For general use. */
-  def shape2                      : Path2D
-
-  def pntFadeFill                 : Paint
-  def pntFadeOutline              : Paint
-
-  def pntBackground               : Paint
-
-  def pntNameShadowDark           : Paint
-  def pntNameShadowLight          : Paint
-  def pntNameDark                 : Paint
-  def pntNameLight                : Paint
-
-  def pntRegionBackground         : Paint
-  def pntRegionBackgroundMuted    : Paint
-  def pntRegionBackgroundSelected : Paint
-
-  def pntRegionOutline            : Paint
-  def pntRegionOutlineSelected    : Paint
-
-  def regionTitleHeight           : Int
-  def regionTitleBaseline         : Int
-
+/** Paint support for timeline obj views. */
+trait TimelineRendering extends BasicRendering {
   def pntInlet                    : Paint
   def pntInletSpan                : Paint
   def strokeInletSpan             : Stroke
@@ -55,16 +27,4 @@ trait TimelineRendering extends sonogram.PaintController {
   def ttGainState                 : TrackTool.Gain
   def ttFadeState                 : TrackTool.Fade
   def ttFunctionState             : TrackTool.Function
-
-  /* Of current drawing operation. */
-  def clipRect                    : Rectangle
-
-  var sonogramBoost               : Float
-
-  /* General purpose. */
-
-  /** Size guaranteed to be even. */
-  def intArray1 : Array[Int]
-  /** Size guaranteed to be even. */
-  def intArray2 : Array[Int]
 }

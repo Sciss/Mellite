@@ -20,13 +20,12 @@ import java.awt.datatransfer.Transferable
 
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineModelImpl
-import de.sciss.desktop.Util
-import de.sciss.desktop.impl.UndoManagerImpl
+import de.sciss.desktop.{UndoManager, Util}
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.{DoubleSpinnerView, View, deferTx}
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.swing.{DoubleSpinnerView, View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.span.Span
@@ -49,7 +48,7 @@ object ViewImpl {
     // val sampleRate    = f.spec.sampleRate
     type I            = _workspace.I
     import _workspace.inMemoryBridge
-    implicit val itx  = inMemoryBridge(tx)
+    implicit val itx: I#Tx = inMemoryBridge(tx)
     val timeline      = Timeline[I] // proc.ProcGroup.Modifiable[I]
     // val groupObj      = Obj(ProcGroupElem(group))
     val srRatio       = audioCueV.spec.sampleRate / TimeRef.SampleRate
@@ -89,7 +88,7 @@ object ViewImpl {
     transport.addObject(timeline) // Obj(Timeline(timeline)))
     transport.addObject(diff)
 
-    implicit val undoManager = new UndoManagerImpl
+    implicit val undoManager: UndoManager = UndoManager()
     // val offsetView  = LongSpinnerView  (grapheme.offset, "Offset")
     val gainView    = DoubleSpinnerView[S](audioCue.value.gain /* RRR */, "Gain", width = 90)
     val res: Impl[S, I] = new Impl[S, I](gainView = gainView) {

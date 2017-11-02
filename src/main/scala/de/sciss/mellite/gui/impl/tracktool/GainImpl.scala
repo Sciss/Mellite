@@ -20,7 +20,7 @@ import java.awt.Cursor
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj}
+import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj, Type}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.{expr, stm}
@@ -28,7 +28,7 @@ import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.synth
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 
-final class GainImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends BasicRegion[S, TrackTool.Gain] {
 
   import TrackTool.Gain
@@ -64,7 +64,7 @@ final class GainImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
       }
       import de.sciss.equal.Implicits._
       val newGainOpt = if (newGain === DoubleObj.newConst[S](1.0)) None else Some(newGain)
-      implicit val doubleTpe = DoubleObj
+      implicit val doubleTpe: Type.Expr[Double, DoubleObj] = DoubleObj
       val edit = EditAttrMap.expr[S, Double, DoubleObj](s"Adjust $name", obj, ObjKeys.attrGain, newGainOpt)
 //      { ex =>
 //        DoubleObj.newVar(ex))

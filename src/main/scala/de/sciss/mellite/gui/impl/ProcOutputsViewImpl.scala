@@ -60,8 +60,8 @@ object ProcOutputsViewImpl {
                                         undoManager: UndoManager)
     extends MapViewImpl[S, ProcOutputsView[S]](list0) with ProcOutputsView[S] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx) = None
-    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx) = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
+    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true

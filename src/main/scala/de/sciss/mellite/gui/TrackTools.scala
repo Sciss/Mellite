@@ -37,7 +37,7 @@ object TrackTools {
   final case class FadeViewModeChanged  [S <: stm.Sys[S]](change: Change[FadeViewMode   ]) extends Update[S]
   final case class RegionViewModeChanged[S <: stm.Sys[S]](change: Change[RegionViewMode ]) extends Update[S]
 
-  def apply  [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTools[S] = new ToolsImpl(canvas)
+  def apply  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTools[S] = new ToolsImpl(canvas)
   def palette[S <: Sys[S]](control: TrackTools[S], tools: Vec[TrackTool[S, _]]): Component =
     new PaletteImpl[S](control, tools)
 }
@@ -139,18 +139,18 @@ object TrackTool {
 
   type Listener = Model.Listener[Update[Any]]
 
-  def cursor  [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Cursor  ] = new CursorImpl  (canvas)
-  def move    [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Move    ] = new MoveImpl    (canvas)
-  def resize  [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Resize  ] = new ResizeImpl  (canvas)
-  def gain    [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Gain    ] = new GainImpl    (canvas)
-  def mute    [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Mute    ] = new MuteImpl    (canvas)
-  def fade    [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Fade    ] = new FadeImpl    (canvas)
-  def function[S <: Sys[S]](canvas: TimelineProcCanvas[S], view: TimelineView[S]): TrackTool[S, Function] =
+  def cursor  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Cursor  ] = new CursorImpl  (canvas)
+  def move    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Move    ] = new MoveImpl    (canvas)
+  def resize  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Resize  ] = new ResizeImpl  (canvas)
+  def gain    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Gain    ] = new GainImpl    (canvas)
+  def mute    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Mute    ] = new MuteImpl    (canvas)
+  def fade    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Fade    ] = new FadeImpl    (canvas)
+  def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TrackTool[S, Function] =
     new FunctionImpl(canvas, view)
 
-  def patch   [S <: Sys[S]](canvas: TimelineProcCanvas[S]): TrackTool[S, Patch[S]] = new PatchImpl   (canvas)
+  def patch   [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TrackTool[S, Patch[S]] = new PatchImpl   (canvas)
 
-  def audition[S <: Sys[S]](canvas: TimelineProcCanvas[S], view: TimelineView[S]): TrackTool[S, Unit] =
+  def audition[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TrackTool[S, Unit] =
     new AuditionImpl(canvas, view)
 }
 

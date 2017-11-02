@@ -26,7 +26,7 @@ trait RegionLike[S <: Sys[S], A] extends TrackTool[S, A] with ModelImpl[TrackToo
   tool =>
 
   // protected def trackList: TrackList
-  protected def canvas: TimelineProcCanvas[S]
+  protected def canvas: TimelineTrackCanvas[S]
 
   /** Applies standard mouse selection techniques regarding regions.
     *

@@ -288,8 +288,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     private def copyListData1[In <: Sys[In]](data: ListObjView.Drag[In]): Option[UndoableEdit] =
       Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: S#Tx) =>
         parentOption(tx).map { case (parent, idx) =>
-          implicit val txIn0  = txIn
-          implicit val txOut0 = tx
+          implicit val txIn0 : In#Tx = txIn
+          implicit val txOut0: S #Tx = tx
           val idx1    = if (idx >= 0) idx else parent.size
           val context = Copy[In, S]
           val nv      = data.view

@@ -17,8 +17,7 @@ package gui
 package impl
 package grapheme
 
-import de.sciss.desktop.impl.UndoManagerImpl
-import de.sciss.desktop.{KeyStrokes, Menu, Window}
+import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
@@ -29,7 +28,7 @@ import scala.swing.event.Key
 object GraphemeFrameImpl {
   def apply[S <: Sys[S]](group: Grapheme[S])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): GraphemeFrame[S] = {
-    implicit val undoMgr  = new UndoManagerImpl
+    implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = GraphemeView[S](group)
     val name    = AttrCellView.name(group)
     import Grapheme.serializer

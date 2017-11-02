@@ -22,7 +22,6 @@ import de.sciss.desktop
 import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.CellView
@@ -37,7 +36,7 @@ import scala.swing.{Action, Component}
 object AttrMapFrameImpl {
   def apply[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx, workspace: Workspace[S],
                                       cursor: stm.Cursor[S]): AttrMapFrame[S] = {
-    implicit val undoMgr  = new UndoManagerImpl
+    implicit val undoMgr: UndoManager = UndoManager()
     val contents  = AttrMapView[S](obj)
     val view      = new ViewImpl[S](contents)
     view.init()

@@ -15,6 +15,7 @@ package de.sciss.mellite
 package impl
 
 import de.sciss.file._
+import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.mellite.DocumentHandler.Document
 import de.sciss.model.impl.ModelImpl
@@ -36,7 +37,6 @@ object DocumentHandlerImpl {
     // def openRead(path: String): Document = ...
 
     def addDocument[S <: Sys[S]](doc: Workspace[S])(implicit tx: S#Tx): Unit = {
-      implicit val itx = tx.peer
       doc.folder.foreach { p =>
         require(!map.contains(p), s"Workspace for path '$p' is already registered")
         map += p -> doc
@@ -55,7 +55,6 @@ object DocumentHandlerImpl {
     private def deferTx(code: => Unit)(implicit tx: TxnLike): Unit = tx.afterCommit(code)
 
     private def removeDoc[S <: Sys[S]](doc: Workspace[S])(implicit tx: S#Tx): Unit = {
-      implicit val itx = tx.peer
       all.transform { in =>
         val idx = in.indexOf(doc)
         require(idx >= 0, s"Workspace ${doc.folder.fold("") { p => s"for path '$p'" }} was not registered")

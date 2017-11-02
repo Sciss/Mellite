@@ -60,7 +60,7 @@ object GenericObjView extends ObjView.Factory {
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   private trait Impl[S <: stm.Sys[S]] extends ObjViewImpl.Impl[S] {
-    def factory = GenericObjView
+    def factory: ObjView.Factory = GenericObjView
 
     final def value: Any = ()
 

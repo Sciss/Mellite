@@ -26,12 +26,12 @@ import de.sciss.synth.proc.{Output, Workspace}
 
 object OutputObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Output[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
-  val prefix            = "Output"
-  val humanName         = s"Process $prefix"
-  def tpe               = Output
-  def category: String  = ObjView.categMisc
-  def hasMakeDialog     = false
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
+  val prefix        : String    = "Output"
+  val humanName     : String    = s"Process $prefix"
+  def tpe           : Obj.Type  = Output
+  def category      : String    = ObjView.categMisc
+  def hasMakeDialog : Boolean   = false
 
   def mkListView[S <: Sys[S]](obj: Output[S])(implicit tx: S#Tx): OutputObjView[S] with ListObjView[S] = {
     val value = obj.key
@@ -56,7 +56,7 @@ object OutputObjView extends ListObjView.Factory {
 
     override def obj(implicit tx: S#Tx): Output[S] = objH()
 
-    def factory = OutputObjView
+    def factory: ObjView.Factory = OutputObjView
   }
 }
 trait OutputObjView[S <: stm.Sys[S]] extends ObjView[S] {

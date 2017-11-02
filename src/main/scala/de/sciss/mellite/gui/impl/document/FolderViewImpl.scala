@@ -23,7 +23,7 @@ import javax.swing.{CellEditor, DropMode}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.expr.StringObj
+import de.sciss.lucre.expr.{StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
@@ -33,6 +33,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.model.impl.ModelImpl
+import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{Folder, ObjKeys, Workspace}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
@@ -47,7 +48,7 @@ object FolderViewImpl {
   def apply[S <: Sys[S]](root0: Folder[S])
                         (implicit tx: S#Tx, workspace: Workspace[S],
                          cursor: stm.Cursor[S], undoManager: UndoManager): FolderView[S] = {
-    implicit val folderSer = Folder.serializer[S]
+    implicit val folderSer: Serializer[S#Tx, S#Acc, Folder[S]] = Folder.serializer[S]
 
     new Impl[S] {
 //      val mapViews: IdentifierMap[S#ID, S#Tx, ObjView[S]]               = tx.newInMemoryIDMap  // folder IDs to renderers
@@ -137,7 +138,7 @@ object FolderViewImpl {
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)
         }
         val attr      = obj.attr
-        implicit val stringTpe = StringObj
+        implicit val stringTpe: Type.Expr[String, StringObj] = StringObj
         val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
         val attrReact = nameView.react { implicit tx => nameOpt =>
           val isDirty = updateObjectName(obj, nameOpt)
@@ -214,7 +215,7 @@ object FolderViewImpl {
                   Some(expr)
                 }
                 // val ed = EditAttrMap[S](s"Rename ${objView.prefix} Element", objView.obj(), ObjKeys.attrName, valueOpt)
-                implicit val stringTpe = StringObj
+                implicit val stringTpe: Type.Expr[String, StringObj] = StringObj
                 val ed = EditAttrMap.expr[S, String, StringObj](s"Rename ${objView.humanName} Element", objView.obj, ObjKeys.attrName,
                   valueOpt) // (StringObj[S](_))
                 Some(ed)

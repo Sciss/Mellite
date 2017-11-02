@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui
 package impl.timeline
 
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, SpanLikeObj}
+import de.sciss.lucre.expr.{BooleanObj, DoubleObj, SpanLikeObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
@@ -59,7 +59,7 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      implicit val doubleTpe = DoubleObj
+      implicit val doubleTpe: Type.Expr[Double, DoubleObj] = DoubleObj
       val gainView = AttrCellView[S, Double, DoubleObj](obj.attr, ObjKeys.attrGain)
       disposables ::= gainView.react { implicit tx => opt =>
         deferTx {
@@ -78,7 +78,7 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      implicit val booleanTpe = BooleanObj
+      implicit val booleanTpe: Type.Expr[Boolean, BooleanObj] = BooleanObj
       val muteView = AttrCellView[S, Boolean, BooleanObj](obj.attr, ObjKeys.attrMute)
       disposables ::= muteView.react { implicit tx => opt =>
         deferTx {
@@ -98,7 +98,7 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      implicit val fadeTpe = FadeSpec.Obj
+      implicit val fadeTpe: Type.Expr[FadeSpec, FadeSpec.Obj] = FadeSpec.Obj
       val fadeInView = AttrCellView[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)
       disposables ::= fadeInView.react { implicit tx => opt =>
         deferTx {

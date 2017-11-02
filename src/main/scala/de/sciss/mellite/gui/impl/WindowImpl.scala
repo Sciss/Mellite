@@ -47,7 +47,7 @@ object WindowImpl {
       case fv: View.File => file = Some(fv.file)
       case _ =>
     }
-    file.map(_.base).foreach(title = _)
+    file.map(_.base).foreach(title_=)
 
     contents  = view.component
     closeOperation = desktop.Window.CloseIgnore

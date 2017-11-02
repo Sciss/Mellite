@@ -28,7 +28,7 @@ import de.sciss.lucre.swing.{CellView, deferTx}
 import de.sciss.lucre.{confluent, stm}
 import de.sciss.model.Change
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Cursors, Workspace}
+import de.sciss.synth.proc.{Confluent, Cursors, Durable, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -182,7 +182,7 @@ object CursorsFrameImpl {
         case (Some(_), seminalDate: Date) =>
           val parentElem = parent.elem
           confluent.Cursor.wrap(parentElem.cursor)(workspace.system).step { implicit tx =>
-            implicit val dtx = tx.durable: D#Tx // proc.Confluent.durable(tx)
+            implicit val dtx: D#Tx = tx.durable // proc.Confluent.durable(tx)
             val seminal = tx.inputAccess.takeUntil(seminalDate.getTime)
             // lucre.event.showLog = true
             parentElem.addChild(seminal)
@@ -317,10 +317,10 @@ object CursorsFrameImpl {
         t.selection.paths.foreach { path =>
           val view  = path.last
           val elem  = view.elem
-          implicit val cursor = confluent.Cursor.wrap(elem.cursor)(workspace.system)
+          implicit val cursor: confluent.Cursor[S, D] = confluent.Cursor.wrap(elem.cursor)(workspace.system)
           GUI.atomic[S, Unit]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
-            implicit val dtxView  = workspace.system.durableTx _ // (tx)
-            implicit val dtx      = dtxView(tx)
+            implicit val dtxView: Confluent.Txn => Durable.Txn = workspace.system.durableTx _ // (tx)
+            implicit val dtx: Durable.Txn = dtxView(tx)
             // import StringObj.serializer
             //            val nameD = ExprView.expr[D, String](elem.name)
             //            val name  = nameD.map()

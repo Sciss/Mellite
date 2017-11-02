@@ -14,6 +14,7 @@
 package de.sciss.mellite.gui.impl
 
 import java.awt.datatransfer.Transferable
+import javax.swing.undo.UndoableEdit
 import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
@@ -62,8 +63,8 @@ object FScapeOutputsViewImpl {
                                            undoManager: UndoManager)
     extends MapViewImpl[S, FScapeOutputsView[S]](list0) with FScapeOutputsView[S] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx) = None
-    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx) = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
+    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true

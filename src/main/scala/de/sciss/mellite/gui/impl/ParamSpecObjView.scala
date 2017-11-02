@@ -20,11 +20,10 @@ import java.util.Locale
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 
 import de.sciss.audiowidgets.RotaryKnob
-import de.sciss.desktop
-import de.sciss.numbers
 import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
+import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -33,25 +32,26 @@ import de.sciss.lucre.swing.{CellView, View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
+import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Workspace
 
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.stm.Ref
+import scala.concurrent.{Future, Promise}
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Alignment, BorderPanel, BoxPanel, Component, Dialog, FlowPanel, Label, Orientation, Swing, TextField}
 
 object ParamSpecObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Thermometer)
-  val prefix            = "ParamSpec"
-  def humanName: String = "Param Spec"
-  def tpe               = ParamSpec.Obj
-  def category: String  = ObjView.categOrganisation
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Thermometer)
+  val prefix        : String    = "ParamSpec"
+  def humanName     : String    = "Param Spec"
+  def tpe           : Obj.Type  = ParamSpec.Obj
+  def category      : String    = ObjView.categOrganisation
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ListObjView[S] = {
     val value     = obj.value
@@ -340,7 +340,7 @@ object ParamSpecObjView extends ListObjView.Factory {
         objH() match {
           case ParamSpec.Obj.Var(pVr) =>
             val pVal  = ParamSpec.Obj.newConst[S](newSpec)
-            implicit val tpe = ParamSpec.Obj
+            implicit val tpe: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
             val edit  = EditVar.Expr[S, ParamSpec, ParamSpec.Obj](s"Edit $humanName", pVr, pVal)
             Some(edit)
           case _ => None
@@ -404,9 +404,9 @@ object ParamSpecObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
 
-    def factory = ParamSpecObjView
+    def factory: ObjView.Factory = ParamSpecObjView
 
-    val exprType = ParamSpec.Obj
+    val exprType: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
 
     def expr(implicit tx: S#Tx): ParamSpec.Obj[S] = obj
 

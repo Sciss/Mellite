@@ -57,8 +57,8 @@ object PlayToggleButton {
     def init()(implicit tx: S#Tx): this.type = {
       deferTx(guiInit())
       obs = transport.react { implicit tx => {
-        case Transport.Play(_, _) => select(true )
-        case Transport.Stop(_, _) => select(false)
+        case Transport.Play(_, _) => select(state = true )
+        case Transport.Stop(_, _) => select(state = false)
         case _ =>
       }}
       this

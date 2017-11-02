@@ -32,12 +32,12 @@ import de.sciss.synth.proc.Workspace
 
 object ArtifactLocationObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = ArtifactLocation[~] // Elem[S]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Location)
-  val prefix            = "ArtifactLocation"
-  def humanName         = "File Location"
-  def tpe               = ArtifactLocation
-  def category: String  = ObjView.categResources
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Location)
+  val prefix        : String    = "ArtifactLocation"
+  def humanName     : String    = "File Location"
+  def tpe           : Obj.Type  = ArtifactLocation
+  def category      : String    = ObjView.categResources
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: ArtifactLocation[S])(implicit tx: S#Tx): ArtifactLocationObjView[S] with ListObjView[S] = {
     val peer      = obj
@@ -72,7 +72,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = ArtifactLocation[~]
 
-    def factory = ArtifactLocationObjView
+    def factory: ObjView.Factory = ArtifactLocationObjView
 
     def value: File = directory
 

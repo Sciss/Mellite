@@ -50,7 +50,7 @@ object AuditionImpl {
   *
   * TODO: update -- this is partly fixed now.
   */
-class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S], tlv: TimelineView[S])
+class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
   extends RegionLike[S, Unit] with RubberBand[S, Unit] {
 
   // import TrackTool.{Cursor => _}

@@ -18,7 +18,7 @@ package impl
 import javax.swing.{Icon, SpinnerNumberModel}
 
 import de.sciss.desktop
-import de.sciss.lucre.expr.IntObj
+import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -30,12 +30,12 @@ import scala.util.Try
 
 object IntObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = IntObj[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(Shapes.IntegerNumber)
-  val prefix            = "Int"
-  def humanName: String = prefix
-  def tpe               = IntObj
-  def category: String  = ObjView.categPrimitives
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.IntegerNumber)
+  val prefix        : String    = "Int"
+  def humanName     : String    = prefix
+  def tpe           : Obj.Type  = IntObj
+  def category      : String    = ObjView.categPrimitives
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ListObjView[S] = {
     val ex          = obj
@@ -81,9 +81,9 @@ object IntObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = IntObj[~]
 
-    def factory = IntObjView
+    def factory: ObjView.Factory = IntObjView
 
-    val exprType = IntObj
+    val exprType: Type.Expr[Int, IntObj] = IntObj
 
     def expr(implicit tx: S#Tx): IntObj[S] = obj
 

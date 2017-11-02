@@ -49,7 +49,7 @@ object ToolsImpl {
     new ImageIcon(image)
   }
 }
-final class ToolsImpl[S <: Sys[S]](canvas: TimelineProcCanvas[S])
+final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
   extends TrackTools[S] with ModelImpl[TrackTools.Update[S]] {
 
   import TrackTools._

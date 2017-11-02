@@ -1,5 +1,5 @@
 /*
- *  TimelineProcCanvas.scala
+ *  TimelineTrackCanvas.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
@@ -19,7 +19,7 @@ import de.sciss.lucre.stm.Sys
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 
-trait TimelineProcCanvas[S <: Sys[S]] extends TimelineCanvas {
+trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas {
   def timeline(implicit tx: S#Tx): Timeline[S]
 
   def selectionModel: TimelineObjView.SelectionModel[S]

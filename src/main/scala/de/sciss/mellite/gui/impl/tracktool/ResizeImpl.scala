@@ -28,7 +28,7 @@ import de.sciss.mellite.gui.edit.Edits
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 
-final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends BasicRegion[S, TrackTool.Resize] {
 
   import TrackTool.Resize

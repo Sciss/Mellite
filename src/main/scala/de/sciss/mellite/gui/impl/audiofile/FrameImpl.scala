@@ -20,12 +20,12 @@ import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{AudioCue, Workspace}
+import de.sciss.synth.proc.{AudioCue, AuralSystem, Workspace}
 
 object FrameImpl {
   def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): AudioFileFrame[S] = {
-    implicit val aural = Mellite.auralSystem
+    implicit val aural: AuralSystem = Mellite.auralSystem
     val afv       = AudioFileView(obj)
     val name0     = AttrCellView.name(obj)
     val file      = obj.value.artifact

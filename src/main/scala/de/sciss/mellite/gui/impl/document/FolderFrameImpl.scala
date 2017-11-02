@@ -21,7 +21,6 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.Obj
@@ -44,7 +43,7 @@ object FolderFrameImpl {
                          folder: Folder[S],
                          isWorkspaceRoot: Boolean)(implicit tx: S#Tx,
                          workspace: Workspace[S], cursor: stm.Cursor[S]): FolderFrame[S] = {
-    implicit val undoMgr  = new UndoManagerImpl
+    implicit val undoMgr: UndoManager = UndoManager()
     val folderView      = FolderView(folder)
 //    val interceptQuit   = isWorkspaceRoot && workspace.folder.isEmpty // i.e. an in-memory workspace
     val view            = new ViewImpl[S](folderView)

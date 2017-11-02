@@ -17,12 +17,14 @@ package impl
 
 import javax.swing.undo.UndoableEdit
 
+import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.expr.{BooleanObj, Expr, Type}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.stm
+import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{Confluent, Workspace}
 
 import scala.language.higherKinds
@@ -106,7 +108,7 @@ object ListObjViewImpl {
     // protected def testValue       (v: Any): Option[A]
     protected def convertEditValue(v: Any): Option[A]
 
-    protected val exprType: Type.Expr[A, Ex]
+    protected implicit val exprType: Type.Expr[A, Ex]
 
     protected def expr(implicit tx: S#Tx): Ex[S]
 
@@ -123,7 +125,6 @@ object ListObjViewImpl {
                 // vr() = newValue
 //                implicit val ser    = exprType.serializer   [S]
 //                implicit val serVr  = exprType.varSerializer[S]
-                implicit val _exprType = exprType
                 val ed = EditVar.Expr[S, A, Ex](s"Change $humanName Value", vr, exprType.newConst[S](newValue))
                 Some(ed)
             }
@@ -149,8 +150,8 @@ object ListObjViewImpl {
       workspace match {
         case cf: Workspace.Confluent =>
           // XXX TODO - all this casting is horrible
-          implicit val ctx = tx.asInstanceOf[Confluent#Tx]
-          implicit val ser = exprType.serializer[Confluent]
+          implicit val ctx: Confluent#Tx = tx.asInstanceOf[Confluent#Tx]
+          implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
           val name = AttrCellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
             .map(n => s"History for '$n'")
           val w = new WindowImpl[Confluent](name) {
@@ -190,7 +191,7 @@ object ListObjViewImpl {
   trait BooleanExprLike[S <: Sys[S]] extends ExprLike[S, Boolean, BooleanObj] {
     _: ListObjView[S] =>
 
-    val exprType = BooleanObj
+    val exprType: Type.Expr[Boolean, BooleanObj] = BooleanObj
 
     def convertEditValue(v: Any): Option[Boolean] = v match {
       case num: Boolean  => Some(num)

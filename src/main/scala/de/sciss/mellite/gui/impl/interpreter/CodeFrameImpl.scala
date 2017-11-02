@@ -19,9 +19,9 @@ package interpreter
 import javax.swing.event.{AncestorEvent, AncestorListener}
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
+import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IDPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -64,14 +64,14 @@ object CodeFrameImpl {
 
       def save(in: Unit, out: SynthGraph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        implicit val sgTpe = SynthGraphObj
+        implicit val sgTpe: Type.Expr[SynthGraph, SynthGraphObj] = SynthGraphObj
         EditVar.Expr[S, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[S](out))
       }
 
       def dispose()(implicit tx: S#Tx): Unit = ()
     }
 
-    implicit val undo = new UndoManagerImpl
+    implicit val undo: UndoManager = UndoManager()
     val rightView = ProcOutputsView [S](obj)
     val viewPower = PlayToggleButton[S](obj)
 
@@ -131,7 +131,7 @@ object CodeFrameImpl {
 
     val bottom = viewExecute :: Nil
 
-    implicit val undo = new UndoManagerImpl
+    implicit val undo: UndoManager = UndoManager()
     make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None, canBounce = false)
   }
 
@@ -142,7 +142,7 @@ object CodeFrameImpl {
                          compiler: Code.Compiler): CodeFrame[S] = {
     val _codeEx = obj
     val _code   = _codeEx.value
-    implicit val undo = new UndoManagerImpl
+    implicit val undo: UndoManager = UndoManager()
     val objH    = tx.newHandle(obj)
     make[S, _code.In, _code.Out](obj, objH, obj, _code, None, bottom = bottom, rightViewOpt = None,
       canBounce = canBounce)

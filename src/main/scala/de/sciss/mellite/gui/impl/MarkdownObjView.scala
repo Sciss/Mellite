@@ -18,6 +18,7 @@ package impl
 import javax.swing.Icon
 
 import de.sciss.desktop
+import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
@@ -27,12 +28,12 @@ import de.sciss.synth.proc.{Markdown, Workspace}
 
 object MarkdownObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Markdown[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(Shapes.Markdown)
-  val prefix            = "Markdown"
-  def humanName: String = s"$prefix Text"
-  def tpe               = Markdown
-  def category: String  = ObjView.categOrganisation
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Markdown)
+  val prefix        : String    = "Markdown"
+  def humanName     : String    = s"$prefix Text"
+  def tpe           : Obj.Type  = Markdown
+  def category      : String    = ObjView.categOrganisation
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ListObjView[S] = {
     val ex    = obj
@@ -75,9 +76,9 @@ object MarkdownObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = Markdown[~]
 
-    def factory = MarkdownObjView
+    def factory: ObjView.Factory = MarkdownObjView
 
-    val exprType = Markdown
+    val exprType: Type.Expr[Markdown.Value, Markdown] = Markdown
 
     def expr(implicit tx: S#Tx): Markdown[S] = obj
 

@@ -43,7 +43,7 @@ object InterpreterSingleton {
       }
     }
 
-  private lazy val makeOne = {
+  private lazy val makeOne: Unit = {
     val cfg = Interpreter.Config()
     cfg.imports ++= Seq(
       "de.sciss.synth",

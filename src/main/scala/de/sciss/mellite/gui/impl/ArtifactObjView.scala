@@ -35,12 +35,12 @@ import scala.swing.event.SelectionChanged
 
 object ArtifactObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Artifact[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.PagePortrait)
-  val prefix            = "Artifact"
-  def humanName         = "File"
-  def tpe               = Artifact
-  def category: String  = ObjView.categResources
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.PagePortrait)
+  val prefix        : String    = "Artifact"
+  def humanName     : String    = "File"
+  def tpe           : Obj.Type  = Artifact
+  def category      : String    = ObjView.categResources
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Artifact[S])(implicit tx: S#Tx): ArtifactObjView[S] with ListObjView[S] = {
     val peer      = obj

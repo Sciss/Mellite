@@ -20,7 +20,7 @@ import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
 import TrackTool.EmptyRubber
 
-trait TimelineProcCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineProcCanvas[S] {
+trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineTrackCanvas[S] {
   final val trackTools: TrackTools[S] = TrackTools(this)
 
   import TrackTools._

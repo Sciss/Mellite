@@ -26,12 +26,12 @@ import de.sciss.synth.proc.Workspace
 
 object FScapeOutputObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = FScape.Output[~]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
-  val prefix            = "FScape.Output"
-  def humanName: String = prefix
-  def tpe               = FScape.Output
-  def category: String  = ObjView.categMisc
-  def hasMakeDialog     = false
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
+  val prefix        : String    = "FScape.Output"
+  def humanName     : String    = prefix
+  def tpe           : Obj.Type  = FScape.Output
+  def category      : String    = ObjView.categMisc
+  def hasMakeDialog : Boolean   = false
 
   private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 
@@ -61,7 +61,7 @@ object FScapeOutputObjView extends ListObjView.Factory {
 
     override def obj(implicit tx: S#Tx): FScape.Output[S] = objH()
 
-    def factory = FScapeOutputObjView
+    def factory: ObjView.Factory = FScapeOutputObjView
   }
 }
 trait FScapeOutputObjView[S <: stm.Sys[S]] extends ObjView[S] {

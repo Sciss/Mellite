@@ -113,7 +113,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
 
     TxnExecutor.defaultAtomic { implicit itx =>
-      implicit val tx = Txn.wrap(itx)
+      implicit val tx: Txn = Txn.wrap(itx)
       auralSystem.start(config)
     }
     true
@@ -156,7 +156,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     config.command        = Prefs.sensorCommand.getOrElse(Prefs.defaultSensorCommand)
 
     atomic { implicit itx =>
-      implicit val tx = TxnLike.wrap(itx)
+      implicit val tx: TxnLike = TxnLike.wrap(itx)
       sensorSystem.start(config.build)
     }
   }

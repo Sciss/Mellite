@@ -21,7 +21,7 @@ import java.awt.{Cursor, Point, Toolkit}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.expr.{BooleanObj, SpanLikeObj}
+import de.sciss.lucre.expr.{BooleanObj, SpanLikeObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -37,7 +37,7 @@ object MuteImpl {
     tk.createCustomCursor(img, new Point(4, 4), "Mute")
   }
 }
-final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends RegionImpl[S, Mute] with RubberBand[S, Mute] {
 
   def defaultCursor: Cursor = MuteImpl.cursor
@@ -54,7 +54,7 @@ final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
     }
     import de.sciss.equal.Implicits._
     val newMuteOpt = if (newMute === BooleanObj.newConst[S](false)) None else Some(newMute)
-    implicit val booleanTpe = BooleanObj
+    implicit val booleanTpe: Type.Expr[Boolean, BooleanObj] = BooleanObj
     val edit = EditAttrMap.expr[S, Boolean, BooleanObj](s"Adjust $name", obj, ObjKeys.attrMute, newMuteOpt)
     Some(edit)
   }

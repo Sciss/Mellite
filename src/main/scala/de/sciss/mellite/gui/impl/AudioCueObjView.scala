@@ -35,12 +35,12 @@ import scala.util.Try
 
 object AudioCueObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = AudioCue.Obj[~] // Grapheme.Expr.Audio[S]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Music)
-  val prefix            = "AudioCue"
-  def humanName         = "Audio File"
-  def tpe               = AudioCue.Obj // ElemImpl.AudioGrapheme.typeID
-  def category: String  = ObjView.categResources
-  def hasMakeDialog     = true
+  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Music)
+  val prefix        : String    = "AudioCue"
+  def humanName     : String    = "Audio File"
+  def tpe           : Obj.Type  = AudioCue.Obj // ElemImpl.AudioGrapheme.typeID
+  def category      : String    = ObjView.categResources
+  def hasMakeDialog : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])
                              (implicit tx: S#Tx): AudioCueObjView[S] with ListObjView[S] = {
@@ -96,7 +96,7 @@ object AudioCueObjView extends ListObjView.Factory {
 
     type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
 
-    def factory = AudioCueObjView
+    def factory: ObjView.Factory = AudioCueObjView
 
     def init(obj: AudioCue.Obj[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)

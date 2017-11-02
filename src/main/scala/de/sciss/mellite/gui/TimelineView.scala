@@ -45,7 +45,7 @@ trait TimelineView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editab
   def timelineH: stm.Source[S#Tx , Timeline[S]]
   def timeline(implicit tx: S#Tx): Timeline[S]
 
-  def canvas        : TimelineProcCanvas[S]
+  def canvas        : TimelineTrackCanvas[S]
 
   def globalView    : GlobalProcsView[S]
   def transportView : TransportView  [S]

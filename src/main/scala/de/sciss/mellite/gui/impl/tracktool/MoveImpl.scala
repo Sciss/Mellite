@@ -29,7 +29,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
 import de.sciss.synth.proc.Timeline
 
-final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineProcCanvas[S])
+final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   extends BasicRegion[S, TrackTool.Move] with RubberBand[S, TrackTool.Move] {
 
   import TrackTool.Move

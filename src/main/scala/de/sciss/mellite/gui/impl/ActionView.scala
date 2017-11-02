@@ -32,11 +32,11 @@ import proc.Implicits._
 
 object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]
-  val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
-  val prefix            = "Action"
-  def humanName: String = prefix
-  def tpe               = Action
-  def category: String  = ObjView.categComposition
+  val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
+  val prefix    : String    = "Action"
+  def humanName : String    = prefix
+  def tpe       : Obj.Type  = Action
+  def category  : String    = ObjView.categComposition
 
   def mkListView[S <: Sys[S]](obj: Action[S])(implicit tx: S#Tx): ListObjView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
@@ -74,7 +74,7 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
 
     final type E[~ <: stm.Sys[~]] = Action[~] // .Elem[~]
 
-    final def factory = ActionView
+    final def factory: ObjView.Factory = ActionView
 
     final def isViewable = true
 
