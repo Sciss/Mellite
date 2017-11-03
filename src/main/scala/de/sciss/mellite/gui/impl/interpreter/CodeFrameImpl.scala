@@ -26,6 +26,7 @@ import de.sciss.lucre.stm.{IDPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{CellView, View, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.impl.ActionImpl

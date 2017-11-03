@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl.proc
+package gui.impl.proc
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -25,6 +24,7 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.ObjViewImpl
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{ObjKeys, Proc, Workspace}
@@ -73,7 +73,7 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
                                   context: TimelineObjView.Context[S])(implicit tx: S#Tx): ProcObjView.Timeline[S] = {
     val attr = obj.attr
     val bus  = attr.$[IntObj](ObjKeys.attrBus    ).map(_.value)
-    new TimelineImpl[S](tx.newHandle(obj), busOption = bus, context = context)
+    new ProcObjTimelineViewImpl[S](tx.newHandle(obj), busOption = bus, context = context)
       .init(timedID, span, obj)
   }
 

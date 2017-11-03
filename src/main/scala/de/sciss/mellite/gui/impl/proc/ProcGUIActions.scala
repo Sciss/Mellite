@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl.proc
+package gui.impl.proc
 
 import javax.swing.undo.UndoableEdit
 
@@ -21,6 +20,7 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.requireEDT
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.TimelineObjView
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.synth.proc.Timeline
 

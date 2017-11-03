@@ -1,3 +1,16 @@
+/*
+ *  ProcObjTimelineViewImpl.scala
+ *  (Mellite)
+ *
+ *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *
+ *  This software is published under the GNU General Public License v3+
+ *
+ *
+ *  For further information, please contact Hanns Holger Rutz at
+ *  contact@sciss.de
+ */
+
 package de.sciss.mellite
 package gui.impl.proc
 
@@ -19,8 +32,8 @@ import scala.concurrent.stm.{Ref, TSet}
 import scala.swing.Graphics2D
 import scala.util.control.NonFatal
 
-final class TimelineImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc[S]],
-                                              var busOption : Option[Int], val context: TimelineObjView.Context[S])
+final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc[S]],
+                                                 var busOption : Option[Int], val context: TimelineObjView.Context[S])
   extends ProcObjViewImpl[S]
     with TimelineObjViewImpl.HasGainImpl[S]
     with TimelineObjViewImpl.HasMuteImpl[S]

@@ -22,6 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.{CellView, View, Window, deferTx, requireEDT}
+import de.sciss.mellite.util.Veto
 
 import scala.concurrent.Future
 import scala.concurrent.stm.Ref

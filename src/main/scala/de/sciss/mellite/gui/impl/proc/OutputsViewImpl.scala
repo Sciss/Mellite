@@ -1,5 +1,5 @@
 /*
- *  ProcOutputsViewImpl.scala
+ *  OutputsViewImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
@@ -35,7 +35,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
-object ProcOutputsViewImpl {
+object OutputsViewImpl {
   def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
                                            workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>

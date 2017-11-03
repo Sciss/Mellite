@@ -14,6 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.stm.Disposable
+import de.sciss.mellite.util.Veto
 
 /** A dependent that should be consulted first before calling `dispose`. */
 trait DependentMayVeto[-Tx] extends Disposable[Tx] {

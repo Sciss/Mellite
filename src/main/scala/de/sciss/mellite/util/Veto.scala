@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
+package de.sciss.mellite.util
 
 import scala.concurrent.Future
 

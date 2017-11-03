@@ -30,6 +30,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{CellView, View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
 import de.sciss.{desktop, numbers}

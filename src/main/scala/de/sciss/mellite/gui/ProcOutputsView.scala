@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.DragAndDrop.Flavor
-import de.sciss.mellite.gui.impl.proc.ProcOutputsViewImpl
+import de.sciss.mellite.gui.impl.proc.OutputsViewImpl
 import de.sciss.synth.proc.{Proc, Workspace}
 
 object ProcOutputsView {
@@ -29,6 +29,6 @@ object ProcOutputsView {
 
   def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
                                            workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] =
-    ProcOutputsViewImpl(obj)
+    OutputsViewImpl(obj)
 }
 trait ProcOutputsView[S <: Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S]

@@ -19,6 +19,7 @@ import de.sciss.desktop.KeyStrokes._
 import de.sciss.desktop.Window
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.deferTx
+import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.Workspace
 

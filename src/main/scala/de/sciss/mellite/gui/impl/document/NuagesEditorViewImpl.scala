@@ -27,6 +27,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{Window, defer, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.util.Veto
 import de.sciss.synth.proc
 import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
