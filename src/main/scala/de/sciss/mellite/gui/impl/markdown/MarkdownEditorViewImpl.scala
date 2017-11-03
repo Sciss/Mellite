@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl.markdown
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import javax.swing.undo.UndoableEdit
@@ -26,6 +25,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.gui.{GUI, MarkdownEditorView, MarkdownRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Fonts
 import de.sciss.scalainterpreter.impl.CodePaneImpl

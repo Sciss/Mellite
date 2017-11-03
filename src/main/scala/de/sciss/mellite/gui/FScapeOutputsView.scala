@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.DragAndDrop.Flavor
-import de.sciss.mellite.gui.impl.{FScapeOutputsViewImpl => Impl}
+import de.sciss.mellite.gui.impl.fscape.FScapeOutputsViewImpl
 import de.sciss.synth.proc.Workspace
 
 object FScapeOutputsView {
@@ -29,6 +29,6 @@ object FScapeOutputsView {
 
   def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
                                        workspace: Workspace[S], undoManager: UndoManager): FScapeOutputsView[S] =
-    Impl(obj)
+    FScapeOutputsViewImpl(obj)
 }
 trait FScapeOutputsView[S <: Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S]

@@ -19,12 +19,12 @@ import javax.swing.Icon
 
 import de.sciss.desktop
 import de.sciss.icons.raphael
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.lucre.stm
 import de.sciss.swingplus.ComboBox
-import de.sciss.synth.proc
+import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Workspace}
 
 import scala.swing.{Component, Label}
@@ -85,7 +85,6 @@ object CodeObjView extends ListObjView.Factory {
   }
 
   def makeObj[S <: Sys[S]](config: (String, Code))(implicit tx: S#Tx): List[Obj[S]] = {
-    import proc.Implicits._
     val (name, value) = config
     val peer  = Code.Obj.newVar[S](Code.Obj.newConst(value))
     val obj   = peer // Obj(Code.Elem(peer))

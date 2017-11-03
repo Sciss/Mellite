@@ -11,7 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl
+package de.sciss.mellite
+package gui.impl.fscape
 
 import javax.swing.Icon
 
@@ -21,6 +22,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
 import de.sciss.synth.proc.Workspace
 

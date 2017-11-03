@@ -20,7 +20,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
+import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.{GenericObjView, ObjViewImpl}
+
+import scala.swing.Graphics2D
 
 object GraphemeObjViewImpl {
   private val sync = new AnyRef
@@ -33,11 +36,11 @@ object GraphemeObjViewImpl {
 
   def factories: Iterable[Factory] = map.values
 
-  def apply[S <: Sys[S]](time: LongObj[S], obj: Obj[S] /* , context: Context[S] */)
+  def apply[S <: Sys[S]](time: LongObj[S], obj: Obj[S], mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] = {
     val tid   = obj.tpe.typeID
     map.get(tid).fold(GenericObjView.mkGraphemeView(/* timed.id, */ time, obj)) { f =>
-      f.mkGraphemeView(/* timed.id, */ time, obj.asInstanceOf[f.E[S]] /* , context */)
+      f.mkGraphemeView(time, obj.asInstanceOf[f.E[S]], mode)
     }
   }
 
@@ -62,5 +65,8 @@ object GraphemeObjViewImpl {
       // idH           = tx.newHandle(id)
       initAttrs(obj)
     }
+
+    def paintBack (g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = ()
+    def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = ()
   }
 }

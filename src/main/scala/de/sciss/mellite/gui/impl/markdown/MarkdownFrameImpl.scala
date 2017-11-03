@@ -12,13 +12,14 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl.markdown
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.{AttrCellView, MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.{Markdown, Workspace}
 

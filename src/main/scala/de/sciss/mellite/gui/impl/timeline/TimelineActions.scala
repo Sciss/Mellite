@@ -27,7 +27,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ProcActions.Move
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
-import de.sciss.mellite.gui.impl.{ProcGUIActions, ProcObjView}
+import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}

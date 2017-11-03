@@ -19,6 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.gui.impl.markdown.MarkdownRenderViewImpl
 import de.sciss.synth.proc.{Markdown, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -26,7 +27,7 @@ import scala.collection.immutable.{Seq => ISeq}
 object MarkdownRenderView {
   def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
                          (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownRenderView[S] =
-    impl.MarkdownRenderViewImpl[S](init, bottom, embedded = embedded)
+    MarkdownRenderViewImpl[S](init, bottom, embedded = embedded)
 
   sealed trait Update[S <: Sys[S]] { def view: MarkdownRenderView[S] }
   final case class FollowedLink[S <: Sys[S]](view: MarkdownRenderView[S], now: Markdown[S]) extends Update[S]

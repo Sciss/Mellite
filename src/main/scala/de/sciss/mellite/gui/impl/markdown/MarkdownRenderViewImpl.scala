@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl.markdown
 
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
 
@@ -27,6 +26,7 @@ import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRenderView}
 import de.sciss.mellite.gui.impl.component.NavigationHistory
 import de.sciss.swingplus.EditorPane
 import de.sciss.synth.proc

@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl.proc
 
 import java.awt.datatransfer.Transferable
 import javax.swing.undo.UndoableEdit
@@ -26,13 +25,15 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{DragAndDrop, GUI, ListObjView, MapView, ProcOutputsView}
 import de.sciss.mellite.gui.edit.{EditAddProcOutput, EditRemoveProcOutput}
+import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.synth.proc.{Proc, Workspace}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
-import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 import scala.swing.Swing.HGlue
+import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
 object ProcOutputsViewImpl {
   def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],

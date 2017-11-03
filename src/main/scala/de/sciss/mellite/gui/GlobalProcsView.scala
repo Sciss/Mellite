@@ -18,7 +18,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ProcObjView
+import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.{GlobalProcsViewImpl => Impl}
 import de.sciss.swingplus.Table
 import de.sciss.synth.proc.{Timeline, Workspace}

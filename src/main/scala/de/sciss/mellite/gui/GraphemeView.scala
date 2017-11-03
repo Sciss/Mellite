@@ -29,11 +29,17 @@ object GraphemeView {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          undoManager: UndoManager): GraphemeView[S] =
     Impl[S](group)
+
+  sealed trait Mode
+  object Mode {
+    case object OneDim extends Mode
+    case object TwoDim extends Mode
+  }
 }
 trait GraphemeView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S] {
   def timelineModel: TimelineModel
   
-  def selectionModel  : GraphemeObjView.SelectionModel[S]
+  def selectionModel: GraphemeObjView.SelectionModel[S]
 
   def graphemeH: stm.Source[S#Tx, Grapheme[S]]
   def grapheme(implicit tx: S#Tx): Grapheme[S]

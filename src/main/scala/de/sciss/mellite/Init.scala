@@ -18,7 +18,8 @@ import java.io.File
 import de.sciss.filecache.Limit
 import de.sciss.freesound.lucre.Retrieval
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
-import de.sciss.mellite.gui.impl.{FScapeObjView, FScapeOutputObjView, FreesoundRetrievalObjView}
+import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
+import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.synth.proc.{GenView, SoundProcesses}
 

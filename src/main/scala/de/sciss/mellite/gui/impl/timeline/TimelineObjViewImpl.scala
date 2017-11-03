@@ -21,7 +21,8 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.TimelineObjView.{Context, Factory}
-import de.sciss.mellite.gui.impl.{ActionView, GenericObjView, ProcObjView}
+import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.impl.{ActionView, GenericObjView}
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 
 object TimelineObjViewImpl {

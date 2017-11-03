@@ -32,11 +32,13 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.{GraphemeHasIterator, stm}
+import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.model.Change
 import de.sciss.span.Span
 import de.sciss.synth.proc.{Grapheme, TimeRef, Workspace}
 
 import scala.collection.immutable.{SortedMap => ISortedMap}
+import scala.collection.mutable
 import scala.concurrent.stm.{Ref, TMap, TSet}
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
@@ -52,9 +54,9 @@ object GraphemeViewImpl {
     Array[Float](0f, 0.23f, 0.77f, 1f), Array[awt.Color](new awt.Color(0x00, 0x00, 0xE6), colrRegionOutlineSel,
       colrRegionOutlineSel, new awt.Color(0x1A, 0x1A, 0xFF)))
 
-  private val DEBUG = true
+  private val DEBUG   = false
 
-  private val NoMove      = TrackTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
+  private val NoMove  = TrackTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
 
   import de.sciss.mellite.{logTimeline => logT}
 
@@ -117,12 +119,16 @@ object GraphemeViewImpl {
 
     import cursor.step
 
-    private var viewRange = ISortedMap.empty[Long, GraphemeObjView[S]]
-    private val viewSet   = TSet.empty[GraphemeObjView[S]]
+    private[this] var viewRange     = ISortedMap.empty[Long, GraphemeObjView[S]]
+    private[this] val viewSet       = TSet.empty[GraphemeObjView[S]]
+//    private[this] val viewMaxHoriz  = mutable.PriorityQueue.empty[Insets](Insets.maxHorizOrdering)
+    private[this] val viewMaxHoriz  = mutable.SortedMap.empty[Int, Int] // maxHoriz to count
 
-    private var canvasView: View    = _
+    private[this] var canvasView: View    = _
 
     val disposables           = Ref(List.empty[Disposable[S#Tx]])
+
+    def mode: Mode = Mode.TwoDim
 
 //    private lazy val toolCursor   = TrackTool.cursor  [S](canvasView)
 //    private lazy val toolMove     = TrackTool.move    [S](canvasView)
@@ -212,6 +218,18 @@ object GraphemeViewImpl {
 
     private def repaintAll(): Unit = canvasView.canvasComponent.repaint()
 
+    private def addInsets(i: Insets): Unit = {
+      val h = i.maxHoriz
+      val c = viewMaxHoriz.getOrElse(h, 0) + 1
+      viewMaxHoriz.put(h, c)
+    }
+
+    private def removeInsets(i: Insets): Unit = {
+      val h = i.maxHoriz
+      val c = viewMaxHoriz(h) - 1
+      if (c == 0) viewMaxHoriz.remove(h) else viewMaxHoriz.put(h, c)
+    }
+
     def objAdded(time: Long, entry: Grapheme.Entry[S], repaint: Boolean)(implicit tx: S#Tx): Unit = {
       import TxnLike.peer
       logT(s"objAdded($time / ${TimeRef.framesToSecs(time)}, $entry)")
@@ -219,12 +237,13 @@ object GraphemeViewImpl {
       // val proc = entry.value
 
       // val pv = ProcView(entry, viewMap, scanMap)
-      val view = GraphemeObjView(entry.key, entry.value)
+      val view = GraphemeObjView(entry.key, entry.value, mode)
       viewMap.put(time, view)
       viewSet.add(view)(tx.peer)
 
       def doAdd(): Unit = {
         viewRange += time -> view
+        addInsets(view.insets)
         if (repaint) repaintAll()    // XXX TODO: optimize dirty rectangle
       }
 
@@ -236,6 +255,12 @@ object GraphemeViewImpl {
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
         case ObjView.Repaint(_) => objUpdated(view)
+        case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHoriz != now.maxHoriz =>
+          deferTx {
+            removeInsets(before)
+            addInsets   (now   )
+            repaintAll()    // XXX TODO: optimize dirty rectangle
+          }
         case _ =>
       }}
     }
@@ -252,6 +277,7 @@ object GraphemeViewImpl {
         viewSet.remove(view)(tx.peer)
         deferTx {
           viewRange -= time
+          removeInsets(view.insets)
           repaintAll() // XXX TODO: optimize dirty rectangle
         }
         view.dispose()
@@ -369,8 +395,10 @@ object GraphemeViewImpl {
 
           g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
+          val maxHorizF = if (viewMaxHoriz.isEmpty) 0L else screenToFrames(viewMaxHoriz.lastKey).toLong
+
           // warning: iterator, we need to traverse twice!
-          viewRange.range(visStart, visStop).foreach { case (_, view) =>
+          viewRange.range(visStart - maxHorizF, visStop + maxHorizF).foreach { case (_, view) =>
             val selected  = sel.contains(view)
 
             def drawProc(start: Long, x1: Int, x2: Int, move: Long): Unit = {

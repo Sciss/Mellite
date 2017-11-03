@@ -20,7 +20,7 @@ import javax.swing.undo.UndoableEdit
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ProcObjView
+import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.tracktool.{AuditionImpl, CursorImpl, FadeImpl, FunctionImpl, GainImpl, MoveImpl, MuteImpl, PaletteImpl, PatchImpl, ResizeImpl, ToolsImpl}
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span

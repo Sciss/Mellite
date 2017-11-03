@@ -29,6 +29,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
+import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.synth.proc.{Proc, Timeline}
 
 object PatchImpl {

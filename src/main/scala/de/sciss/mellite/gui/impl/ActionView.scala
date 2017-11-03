@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl
 
 import javax.swing.Icon
 
@@ -21,14 +20,14 @@ import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.lucre.stm
+import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.synth.proc
 import de.sciss.synth.proc.{Action, Workspace}
-import proc.Implicits._
+import de.sciss.synth.proc.Implicits._
 
 object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]
@@ -80,7 +79,7 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
 
     final def openView(parent: Option[Window[S]])
                       (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
-      import de.sciss.mellite.Mellite.compiler
+      import Mellite.compiler
       val frame = CodeFrame.action(obj)
       Some(frame)
     }

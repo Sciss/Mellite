@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 package gui
-package impl
+package impl.proc
 
 import javax.swing.undo.UndoableEdit
 

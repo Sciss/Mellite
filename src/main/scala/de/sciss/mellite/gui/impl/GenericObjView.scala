@@ -74,5 +74,8 @@ object GenericObjView extends ObjView.Factory {
     extends Impl[S] with TimelineObjViewBasicImpl[S] with ObjViewImpl.NonViewable[S]
 
   private final class GraphemeImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Obj[S]])
-    extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S]
+    extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
+
+    def insets: Insets = Insets.empty
+  }
 }

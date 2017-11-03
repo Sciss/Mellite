@@ -35,9 +35,8 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.swingplus.{ColorChooser, GroupPanel, Spinner}
-import de.sciss.synth.proc
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Color, Confluent, ObjKeys, TimeRef, Workspace}
+import de.sciss.synth.proc.{Color => _Color, Confluent, ObjKeys, TimeRef, Workspace}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -443,38 +442,38 @@ object ObjViewImpl {
   // -------- Color --------
 
   object Color extends ListObjView.Factory {
-    type E[~ <: stm.Sys[~]] = proc.Color.Obj[~]
+    type E[~ <: stm.Sys[~]] = _Color.Obj[~]
     val icon: Icon          = raphaelIcon(raphael.Shapes.Paint)
     val prefix              = "Color"
     def humanName: _String  = prefix
-    def tpe: Obj.Type       = proc.Color.Obj
+    def tpe: Obj.Type       = _Color.Obj
     def category: _String   = ObjView.categOrganisation
     def hasMakeDialog       = true
 
-    def mkListView[S <: Sys[S]](obj: proc.Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
+    def mkListView[S <: Sys[S]](obj: _Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
       val value       = ex.value
       val isEditable  = ex match {
-        case proc.Color.Obj.Var(_)  => true
-        case _            => false
+        case _Color.Obj.Var(_)  => true
+        case _                  => false
       }
       new Color.Impl[S](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[Color]
+    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Color]
 
     def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
                                    (implicit cursor: stm.Cursor[S]): Unit = {
       val (ggValue, ggChooser) = mkColorEditor()
-      val res = primitiveConfig[S, Color](window, tpe = prefix, ggValue = ggValue, prepare =
+      val res = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
         Some(fromAWT(ggChooser.color)))
       res.foreach(ok(_))
     }
 
     private def mkColorEditor(): (Component, ColorChooser) = {
       val chooser = new ColorChooser()
-      val bPredef = proc.Color.Palette.map { colr =>
+      val bPredef = _Color.Palette.map { colr =>
         val action = new Action(null /* colr.name */) {
           private val awtColor = toAWT(colr)
           icon = new PaintIcon(awtColor, 32, 32)
@@ -494,34 +493,34 @@ object ObjViewImpl {
       (panel, chooser)
     }
 
-    def toAWT(c: Color): java.awt.Color = new java.awt.Color(c.rgba)
-    def fromAWT(c: java.awt.Color): Color = {
+    def toAWT(c: _Color): java.awt.Color = new java.awt.Color(c.rgba)
+    def fromAWT(c: java.awt.Color): _Color = {
       val rgba = c.getRGB
-      proc.Color.Palette.find(_.rgba == rgba).getOrElse(proc.Color.User(rgba))
+      _Color.Palette.find(_.rgba == rgba).getOrElse(_Color.User(rgba))
     }
 
-    def makeObj[S <: Sys[S]](config: (String, Color))(implicit tx: S#Tx): List[Obj[S]] = {
+    def makeObj[S <: Sys[S]](config: (String, _Color))(implicit tx: S#Tx): List[Obj[S]] = {
       val (name, value) = config
-      val obj = proc.Color.Obj.newVar(proc.Color.Obj.newConst[S](value))
+      val obj = _Color.Obj.newVar(_Color.Obj.newConst[S](value))
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
 
-    final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, proc.Color.Obj[S]],
-                                  var value: Color, isEditable0: _Boolean)
+    final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, _Color.Obj[S]],
+                                  var value: _Color, isEditable0: _Boolean)
       extends ListObjView /* .Color */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, Color, proc.Color.Obj] {
+      with ListObjViewImpl.SimpleExpr[S, _Color, _Color.Obj] {
 
-      type E[~ <: stm.Sys[~]] = proc.Color.Obj[~]
+      type E[~ <: stm.Sys[~]] = _Color.Obj[~]
 
       def isEditable = false    // not until we have proper editing components
 
       def factory: ObjView.Factory = Color
 
-      val exprType: Type.Expr[proc.Color, proc.Color.Obj] = proc.Color.Obj
+      val exprType: Type.Expr[_Color, _Color.Obj] = _Color.Obj
 
-      def expr(implicit tx: S#Tx): proc.Color.Obj[S] = objH()
+      def expr(implicit tx: S#Tx): _Color.Obj[S] = objH()
 
       def configureRenderer(label: Label): Component = {
         // renderers are used for "stamping", so we can reuse a single object.
@@ -530,8 +529,8 @@ object ObjViewImpl {
         label
       }
 
-      def convertEditValue(v: Any): Option[Color] = v match {
-        case c: Color  => Some(c)
+      def convertEditValue(v: Any): Option[_Color] = v match {
+        case c: _Color  => Some(c)
         case _          => None
       }
 
@@ -555,8 +554,8 @@ object ObjViewImpl {
               val colr = Color.fromAWT(chooser.color)
               val editOpt = cursor.step { implicit tx =>
                 objH() match {
-                  case proc.Color.Obj.Var(vr) =>
-                    Some(EditVar.Expr[S, Color, proc.Color.Obj]("Change Color", vr, proc.Color.Obj.newConst[S](colr)))
+                  case _Color.Obj.Var(vr) =>
+                    Some(EditVar.Expr[S, _Color, _Color.Obj]("Change Color", vr, _Color.Obj.newConst[S](colr)))
                   case _ => None
                 }
               }
@@ -1034,7 +1033,7 @@ object ObjViewImpl {
     def icon: Icon = factory.icon
 
     var nameOption : Option[String] = None
-    var colorOption: Option[Color ] = None
+    var colorOption: Option[_Color] = None
 
     protected var disposables: List[Disposable[S#Tx]] = Nil
 
@@ -1057,7 +1056,7 @@ object ObjViewImpl {
       }
       nameOption   = nameView()
 
-      val colorView = AttrCellView[S, Color, proc.Color.Obj](attr, ObjView.attrColor)
+      val colorView = AttrCellView[S, _Color, _Color.Obj](attr, ObjView.attrColor)
       disposables ::= colorView.react { implicit tx => opt =>
         deferAndRepaint {
           colorOption = opt

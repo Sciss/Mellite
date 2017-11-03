@@ -11,7 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl
+package de.sciss.mellite
+package gui.impl.fscape
 
 import java.awt.datatransfer.Transferable
 import javax.swing.undo.UndoableEdit
@@ -27,6 +28,7 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
+import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.{DragAndDrop, FScapeOutputsView, GUI, ListObjView, MapView}
 import de.sciss.swingplus.{ComboBox, ListView}

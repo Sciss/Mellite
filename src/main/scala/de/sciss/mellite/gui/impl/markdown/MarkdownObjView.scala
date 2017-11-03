@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl.markdown
 
 import javax.swing.Icon
 
@@ -23,6 +22,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{ListObjView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Markdown, Workspace}
 

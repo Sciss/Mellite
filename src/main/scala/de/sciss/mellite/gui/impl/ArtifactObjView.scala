@@ -27,7 +27,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.swingplus.ComboBox
-import de.sciss.synth.proc
+import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Workspace
 
 import scala.swing.FlowPanel
@@ -80,7 +80,6 @@ object ArtifactObjView extends ListObjView.Factory {
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    import proc.Implicits._
     import config._
     val (list0, loc) = location match {
       case Left(source) => (Nil, source())

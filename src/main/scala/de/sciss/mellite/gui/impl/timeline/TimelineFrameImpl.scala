@@ -21,6 +21,7 @@ import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.synth.proc.{Timeline, Workspace}
 
 import scala.swing.Action
