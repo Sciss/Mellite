@@ -38,7 +38,6 @@ import de.sciss.span.Span
 import de.sciss.synth.proc.{Grapheme, TimeRef, Workspace}
 
 import scala.collection.immutable.{SortedMap => ISortedMap}
-import scala.collection.mutable
 import scala.concurrent.stm.{Ref, TMap, TSet}
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
@@ -122,7 +121,7 @@ object GraphemeViewImpl {
     private[this] var viewRange     = ISortedMap.empty[Long, GraphemeObjView[S]]
     private[this] val viewSet       = TSet.empty[GraphemeObjView[S]]
 //    private[this] val viewMaxHoriz  = mutable.PriorityQueue.empty[Insets](Insets.maxHorizOrdering)
-    private[this] val viewMaxHoriz  = mutable.SortedMap.empty[Int, Int] // maxHoriz to count
+    private[this] var viewMaxHoriz  = ISortedMap.empty[Int, Int] // maxHoriz to count
 
     private[this] var canvasView: View    = _
 
@@ -221,13 +220,13 @@ object GraphemeViewImpl {
     private def addInsets(i: Insets): Unit = {
       val h = i.maxHoriz
       val c = viewMaxHoriz.getOrElse(h, 0) + 1
-      viewMaxHoriz.put(h, c)
+      viewMaxHoriz += h -> c
     }
 
     private def removeInsets(i: Insets): Unit = {
       val h = i.maxHoriz
       val c = viewMaxHoriz(h) - 1
-      if (c == 0) viewMaxHoriz.remove(h) else viewMaxHoriz.put(h, c)
+      if (c == 0) viewMaxHoriz -= h else viewMaxHoriz += h -> c
     }
 
     def objAdded(time: Long, entry: Grapheme.Entry[S], repaint: Boolean)(implicit tx: S#Tx): Unit = {
