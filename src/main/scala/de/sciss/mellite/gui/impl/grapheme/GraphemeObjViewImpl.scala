@@ -15,13 +15,12 @@ package de.sciss.mellite
 package gui
 package impl.grapheme
 
-import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.{GenericObjView, ObjViewImpl}
+import de.sciss.synth.proc.Grapheme
 
 import scala.swing.Graphics2D
 
@@ -36,11 +35,11 @@ object GraphemeObjViewImpl {
 
   def factories: Iterable[Factory] = map.values
 
-  def apply[S <: Sys[S]](time: LongObj[S], obj: Obj[S], mode: Mode)
+  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] = {
-    val tid   = obj.tpe.typeID
-    map.get(tid).fold(GenericObjView.mkGraphemeView(/* timed.id, */ time, obj)) { f =>
-      f.mkGraphemeView(time, obj.asInstanceOf[f.E[S]], mode)
+    val tid = entry.value.tpe.typeID
+    map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, numFrames = numFrames, mode = mode)) { f =>
+      f.mkGraphemeView(entry = entry, numFrames = numFrames, mode = mode)
     }
   }
 
@@ -50,19 +49,11 @@ object GraphemeObjViewImpl {
   )
 
   trait BasicImpl[S <: stm.Sys[S]] extends GraphemeObjView[S] with ObjViewImpl.Impl[S] {
-    var timeValue   : Long = _
-    var timeH       : stm.Source[S#Tx, LongObj[S]] = _
+    var timeValue: Long = _
 
-    // protected var idH  : stm.Source[S#Tx, S#ID] = _
-
-    def time(implicit tx: S#Tx): LongObj[S] = timeH()
-
-    // def id  (implicit tx: S#Tx) = idH()
-
-    def initAttrs(/* id: S#ID, */ time: LongObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
-      timeH         = tx.newHandle(time)
+    def initAttrs(entry: Grapheme.Entry[S])(implicit tx: S#Tx): this.type = {
+      val time      = entry.key
       timeValue     = time.value
-      // idH           = tx.newHandle(id)
       initAttrs(obj)
     }
 

@@ -24,21 +24,24 @@ import javax.swing.{JComponent, UIManager}
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineModelImpl
 import de.sciss.desktop
-import de.sciss.desktop.{UndoManager, Window}
+import de.sciss.desktop.UndoManager
 import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
-import de.sciss.lucre.stm.{Cursor, Disposable, TxnLike}
+import de.sciss.lucre.stm
+import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.stm.{Cursor, Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.lucre.{GraphemeHasIterator, stm}
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.model.Change
 import de.sciss.span.Span
+import de.sciss.synth.UGenSource.Vec
 import de.sciss.synth.proc.{Grapheme, TimeRef, Workspace}
 
+import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
-import scala.concurrent.stm.{Ref, TMap, TSet}
+import scala.concurrent.stm.Ref
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
 
@@ -67,29 +70,44 @@ object GraphemeViewImpl {
     val sampleRate      = TimeRef.SampleRate
     val tlm             = new TimelineModelImpl(Span(0L, (sampleRate * 60 * 60).toLong), sampleRate)
     tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
-    val grapheme        = obj
+    val _grapheme       = obj
     val graphemeH       = tx.newHandle(obj)
     var disposables     = List.empty[Disposable[S#Tx]]
-    val viewMap         = TMap.empty[Long, GraphemeObjView[S]] // tx.newInMemoryIDMap[GraphemeObjView[S]]
     val selectionModel  = SelectionModel[S, GraphemeObjView[S]]
-    val grView          = new Impl[S](graphemeH, viewMap, tlm, selectionModel)
+    val grView          = new Impl[S](graphemeH, tlm, selectionModel)
 
-    import GraphemeHasIterator._
+    // XXX TODO --- this is all horrible; we really need a proper iterator on grapheme
+    // that gives time values and full leaf data
+    _grapheme.firstEvent.foreach { time0 =>
+      @tailrec
+      def populate(time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
+        val timeSuccOpt = _grapheme.eventAfter(time)
+        val numFrames   = timeSuccOpt.fold(Long.MaxValue)(_ - time)
+        entries.reverseIterator.foreach { entry =>
+          grView.objAddedI(time, numFrames = Long.MaxValue, entry = entry, isInit = true)
+        }
+        timeSuccOpt match {
+          case Some(timeSucc) =>
+            val entriesSucc = _grapheme.intersect(timeSucc)
+            populate(timeSucc, entriesSucc)
+          case None =>
+        }
+      }
 
-    grapheme.iterator.foreach { case (time, entry) =>
-      if (DEBUG) println(s"ADD $time / ${TimeRef.framesToSecs(time)}, ${entry.value}")
-      grView.objAdded(time, entry, repaint = false)
+      val entries0 = _grapheme.intersect(time0)
+      populate(time0, entries0)
     }
 
-    val obsGrapheme = grapheme.changed.react { implicit tx => upd =>
+    val obsGrapheme = _grapheme.changed.react { implicit tx => upd =>
+      val gr = upd.pin
       upd.changes.foreach {
-        case BiPin.Added  (time, entry) =>
+        case BiPin.Added(time, entry) =>
           if (DEBUG) println(s"Added   $time, $entry")
-          grView.objAdded(time, entry, repaint = true)
+          grView.objAdded(gr, time, entry)
 
         case BiPin.Removed(time, entry) =>
           if (DEBUG) println(s"Removed $time, $entry")
-          grView.objRemoved(time, entry)
+          grView.objRemoved(gr, time, entry)
 
         case BiPin.Moved  (timeChange, entry) =>
           if (DEBUG) println(s"Moved   $entry, $timeChange")
@@ -98,14 +116,13 @@ object GraphemeViewImpl {
     }
     disposables ::= obsGrapheme
 
-    grView.disposables.set(disposables)(tx.peer)
+    grView.disposables.set(disposables)
 
     deferTx(grView.guiInit())
     grView
   }
 
   private final class Impl[S <: Sys[S]](val graphemeH     : stm.Source[S#Tx, Grapheme[S]],
-                                        val viewMap       : TMap[Long, GraphemeObjView[S]],
                                         val timelineModel : TimelineModel,
                                         val selectionModel: SelectionModel[S, GraphemeObjView[S]])
                                        (implicit val workspace: Workspace[S], val cursor: Cursor[S],
@@ -118,10 +135,12 @@ object GraphemeViewImpl {
 
     import cursor.step
 
-    private[this] var viewRange     = ISortedMap.empty[Long, GraphemeObjView[S]]
-    private[this] val viewSet       = TSet.empty[GraphemeObjView[S]]
-//    private[this] val viewMaxHoriz  = mutable.PriorityQueue.empty[Insets](Insets.maxHorizOrdering)
-    private[this] var viewMaxHoriz  = ISortedMap.empty[Int, Int] // maxHoriz to count
+    // GUI-thread map of views; always reflects viewMapT
+    private[this] var viewMapG      = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
+    // transactional map of views
+    private[this] val viewMapT      = Ref(viewMapG)
+    // kind-of priority queue keeping track of horizontal margin needed when querying views to paint
+    private[this] var viewMaxHorizG = ISortedMap.empty[Int, Int] // maxHoriz to count
 
     private[this] var canvasView: View    = _
 
@@ -135,23 +154,18 @@ object GraphemeViewImpl {
     def grapheme  (implicit tx: S#Tx): Grapheme[S] = graphemeH()
     def plainGroup(implicit tx: S#Tx): Grapheme[S] = grapheme
 
-    def window: Window = component.peer.getClientProperty("de.sciss.mellite.Window").asInstanceOf[Window]
+//    def window: Window = component.peer.getClientProperty("de.sciss.mellite.Window").asInstanceOf[Window]
 
     def canvasComponent: Component = canvasView.canvasComponent
 
     def dispose()(implicit tx: S#Tx): Unit = {
+      val empty = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
       deferTx {
-        viewRange = ISortedMap.empty
+        viewMapG = empty
       }
-      disposables.swap(Nil)(tx.peer).foreach(_.dispose())
-      viewSet.foreach(_.dispose())(tx.peer)
-      clearSet(viewSet)
-      // this is already included in `disposables`:
-      // viewMap.dispose()
+      disposables.swap(Nil).foreach(_.dispose())
+      viewMapT.swap(empty).foreach(_._2.foreach(_.dispose()))
     }
-
-    private def clearSet[A](s: TSet[A])(implicit tx: S#Tx): Unit =
-      s.retain(_ => false)(tx.peer) // no `clear` method
 
     def guiInit(): Unit = {
       canvasView = new View
@@ -217,47 +231,59 @@ object GraphemeViewImpl {
 
     private def repaintAll(): Unit = canvasView.canvasComponent.repaint()
 
-    private def addInsets(i: Insets): Unit = {
+    private def addInsetsG(i: Insets): Unit = {
       val h = i.maxHoriz
-      val c = viewMaxHoriz.getOrElse(h, 0) + 1
-      viewMaxHoriz += h -> c
+      val c = viewMaxHorizG.getOrElse(h, 0) + 1
+      viewMaxHorizG += h -> c
     }
 
-    private def removeInsets(i: Insets): Unit = {
+    private def removeInsetsG(i: Insets): Unit = {
       val h = i.maxHoriz
-      val c = viewMaxHoriz(h) - 1
-      if (c == 0) viewMaxHoriz -= h else viewMaxHoriz += h -> c
+      val c = viewMaxHorizG(h) - 1
+      if (c == 0) viewMaxHorizG -= h else viewMaxHorizG += h -> c
     }
 
-    def objAdded(time: Long, entry: Grapheme.Entry[S], repaint: Boolean)(implicit tx: S#Tx): Unit = {
-      import TxnLike.peer
-      logT(s"objAdded($time / ${TimeRef.framesToSecs(time)}, $entry)")
+    def objAdded(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
+      val numFrames = gr.eventAfter(time).fold(Long.MaxValue)(time - _)
+      gr.eventBefore(time).foreach { timePred =>
+        viewMapT().get(timePred).foreach { viewsPred =>
+          viewsPred.foreach { viewPred =>
+            // note: objAdded will call repaintAll
+            viewPred.numFrames = time - timePred
+          }
+        }
+      }
+
+      objAddedI(time = time, numFrames = numFrames, entry = entry, isInit = false)
+    }
+
+    def objAddedI(time: Long, numFrames: Long, entry: Grapheme.Entry[S], isInit: Boolean)(implicit tx: S#Tx): Unit = {
+      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, numFrames = $numFrames / ${TimeRef.framesToSecs(numFrames)}, $entry)")
       // entry.span
       // val proc = entry.value
 
       // val pv = ProcView(entry, viewMap, scanMap)
-      val view = GraphemeObjView(entry.key, entry.value, mode)
-      viewMap.put(time, view)
-      viewSet.add(view)(tx.peer)
+      val view = GraphemeObjView(entry = entry, numFrames = numFrames, mode = mode)
+      val _viewMapG = viewMapT.transformAndGet(m => m + (time -> (view :: m.getOrElse(time, Nil))))
 
       def doAdd(): Unit = {
-        viewRange += time -> view
-        addInsets(view.insets)
-        if (repaint) repaintAll()    // XXX TODO: optimize dirty rectangle
+        viewMapG = _viewMapG
+        addInsetsG(view.insets)
+        if (!isInit) repaintAll()    // XXX TODO: optimize dirty rectangle
       }
 
-      if (repaint)
-        deferTx(doAdd())
-      else
+      if (isInit)
         doAdd()
+      else
+        deferTx(doAdd())
 
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
         case ObjView.Repaint(_) => objUpdated(view)
         case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHoriz != now.maxHoriz =>
           deferTx {
-            removeInsets(before)
-            addInsets   (now   )
+            removeInsetsG(before)
+            addInsetsG   (now   )
             repaintAll()    // XXX TODO: optimize dirty rectangle
           }
         case _ =>
@@ -267,19 +293,54 @@ object GraphemeViewImpl {
     private def warnViewNotFound(action: String, entry: Grapheme.Entry[S]): Unit =
       Console.err.println(s"Warning: Grapheme - $action. View for object $entry not found.")
 
-    def objRemoved(time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-      import TxnLike.peer
+    def objRemoved(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
+//      gr.eventBefore(time + 1).foreach { timePred =>
+//        viewMap.get(timePred).foreach { viewPred =>
+//          // note: objRemoved will call repaintAll
+//          viewPred.numFrames = time - timePred
+//        }
+//      }
+
       logT(s"objRemoved($time, $entry)")
-      viewMap.remove(time).fold {
+      val _viewMapG0 = viewMapT()
+      _viewMapG0.get(time).fold {
         warnViewNotFound("remove", entry)
-      } { view =>
-        viewSet.remove(view)(tx.peer)
-        deferTx {
-          viewRange -= time
-          removeInsets(view.insets)
-          repaintAll() // XXX TODO: optimize dirty rectangle
+      } { views =>
+        views.find(_.entry == entry).fold {
+          warnViewNotFound("remove", entry)
+        } { view =>
+          val viewsNew = views.filterNot(_ == view)
+          val _viewMapG1 = if (viewsNew.isEmpty) {
+            // there are no other views at the same time location,
+            // we need to update the `numFrames` of the preceding view(s)
+            gr.eventBefore(time).foreach { timePred =>
+              val numFramesPred = gr.eventAfter(time).fold(Long.MaxValue)(_ - timePred)
+              _viewMapG0.get(timePred).fold {
+                warnViewNotFound("remove", entry)
+              } { viewsPred =>
+                deferTx {
+                  viewsPred.foreach { viewPred =>
+                    viewPred.numFrames = numFramesPred
+                  }
+                }
+              }
+            }
+            _viewMapG0 + (time -> viewsNew)
+
+          } else {
+            // there are other views at the same time location, so no need to update numFrames
+            _viewMapG0 - time
+          }
+          viewMapT() = _viewMapG1
+
+          val insets = view.insets
+          view.dispose()
+          deferTx {
+            viewMapG = _viewMapG1
+            removeInsetsG(view.insets)
+            repaintAll() // XXX TODO: optimize dirty rectangle
+          }
         }
-        view.dispose()
       }
     }
 
@@ -287,25 +348,22 @@ object GraphemeViewImpl {
     // by using trackCh = Change(0,0), and vice versa
     def objMoved(entry: Grapheme.Entry[S], timeCh: Change[Long])
                 (implicit tx: S#Tx): Unit = {
-      import TxnLike.peer
       logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, $entry)")
-      viewMap.remove(timeCh.before).fold {
-        warnViewNotFound("move", entry)
-      } { view =>
-        viewMap.put(timeCh.now, view)
-        deferTx {
-          viewRange -= timeCh.before
-          view.timeValue = timeCh .now
-          viewRange += timeCh.now -> view
-          repaintAll()  // XXX TODO: optimize dirty rectangle
-        }
-      }
+      ???!
+//      viewMap.remove(timeCh.before).fold {
+//        warnViewNotFound("move", entry)
+//      } { view =>
+//        viewMap.put(timeCh.now, view)
+//        deferTx {
+//          viewRange -= timeCh.before
+//          view.timeValue = timeCh .now
+//          viewRange += timeCh.now -> view
+//          repaintAll()  // XXX TODO: optimize dirty rectangle
+//        }
+//      }
     }
 
     private def objUpdated(view: GraphemeObjView[S]): Unit = {
-      //      if (view.isGlobal)
-      //        globalView.updated(view)
-      //      else
       repaintAll() // XXX TODO: optimize dirty rectangle
     }
 
@@ -318,7 +376,7 @@ object GraphemeViewImpl {
       def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
 
       def findView(pos: Long): Option[GraphemeObjView[S]] =
-        viewRange.range(pos, Long.MaxValue).headOption.map(_._2)
+        viewMapG.range(pos, Long.MaxValue).headOption.flatMap(_._2.headOption)
 
 //      def findRegions(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]] = {
 //        val views = intersect(r.span)
@@ -394,10 +452,10 @@ object GraphemeViewImpl {
 
           g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
-          val maxHorizF = if (viewMaxHoriz.isEmpty) 0L else screenToFrames(viewMaxHoriz.lastKey).toLong
+          val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else screenToFrames(viewMaxHorizG.lastKey).toLong
 
           // warning: iterator, we need to traverse twice!
-          viewRange.range(visStart - maxHorizF, visStop + maxHorizF).foreach { case (_, view) =>
+          viewMapG.range(visStart - maxHorizF, visStop + maxHorizF).foreach { case (_, view :: _) =>
             val selected  = sel.contains(view)
 
             def drawProc(start: Long, x1: Int, x2: Int, move: Long): Unit = {

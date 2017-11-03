@@ -19,13 +19,14 @@ import javax.swing.Icon
 
 import de.sciss.desktop
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{LongObj, SpanLikeObj}
+import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewBasicImpl
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.{Grapheme, Workspace}
 
 import scala.swing.{Component, Label}
 
@@ -51,8 +52,9 @@ object GenericObjView extends ObjView.Factory {
     res
   }
 
-  def mkGraphemeView[S <: Sys[S]](/* id: S#ID, */ time: LongObj[S], obj: Obj[S])(implicit tx: S#Tx): GraphemeObjView[S] = {
-    val res = new GraphemeImpl(tx.newHandle(obj)).initAttrs(time, obj)
+  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+                                 (implicit tx: S#Tx): GraphemeObjView[S] = {
+    val res = new GraphemeImpl(tx.newHandle(entry), tx.newHandle(entry.value), numFrames = numFrames).initAttrs(entry)
     res
   }
 
@@ -73,8 +75,11 @@ object GenericObjView extends ObjView.Factory {
   private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Obj[S]])
     extends Impl[S] with TimelineObjViewBasicImpl[S] with ObjViewImpl.NonViewable[S]
 
-  private final class GraphemeImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Obj[S]])
+  private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Grapheme.Entry[S]],
+  val objH: stm.Source[S#Tx, Obj[S]], var numFrames: Long)
     extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
+
+    def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
 
     def insets: Insets = Insets.empty
   }

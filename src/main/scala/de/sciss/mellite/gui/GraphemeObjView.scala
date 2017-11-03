@@ -14,13 +14,13 @@
 package de.sciss.mellite
 package gui
 
-import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{IdentifierMap, Obj}
+import de.sciss.lucre.stm.IdentifierMap
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeObjViewImpl => Impl}
 import de.sciss.model.Change
+import de.sciss.synth.proc.Grapheme
 
 import scala.swing.Graphics2D
 
@@ -31,31 +31,33 @@ object GraphemeObjView {
 
   trait Factory extends ObjView.Factory {
     /** Creates a new grapheme view
-      *
-      * @param time     the time position on the grapheme
-      * @param obj      the object placed on the grapheme
       */
-    def mkGraphemeView[S <: Sys[S]](time: LongObj[S], obj: E[S], mode: Mode)(implicit tx: S#Tx): GraphemeObjView[S]
+    def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+                                   (implicit tx: S#Tx): GraphemeObjView[S]
   }
 
   def addFactory(f: Factory): Unit = Impl.addFactory(f)
 
   def factories: Iterable[Factory] = Impl.factories
 
-  def apply[S <: Sys[S]](time: LongObj[S], value: Obj[S], mode: Mode)(implicit tx: S#Tx): GraphemeObjView[S] =
-    Impl(time, value, mode)
+  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+                        (implicit tx: S#Tx): GraphemeObjView[S] =
+    Impl(entry = entry, numFrames = numFrames, mode = mode)
 
   final case class InsetsChanged[S <: stm.Sys[S]](view: GraphemeObjView[S], ch: Change[Insets])
     extends ObjView.Update[S]
 }
 trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  def timeH: stm.Source[S#Tx, LongObj[S]]
+  def entryH: stm.Source[S#Tx, Grapheme.Entry[S]]
 
-  def time(implicit tx: S#Tx): LongObj[S]
+  def entry(implicit tx: S#Tx): Grapheme.Entry[S]
 
   // def id(implicit tx: S#Tx): S#ID
 
   var timeValue: Long
+
+  /** If there are no follow up values, this should be set to `Long.MaxValue` */
+  var numFrames: Long
 
   def insets: Insets
 
