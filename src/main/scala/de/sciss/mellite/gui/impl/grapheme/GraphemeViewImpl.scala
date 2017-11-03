@@ -82,14 +82,14 @@ object GraphemeViewImpl {
       @tailrec
       def populate(time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
         val timeSuccOpt = _grapheme.eventAfter(time)
-        val numFrames   = timeSuccOpt.fold(Long.MaxValue)(_ - time)
+        val entriesSucc = timeSuccOpt.fold(Vector.empty: Grapheme.Leaf[S])(_grapheme.intersect(_))
+//        val succ        = entriesSucc.headOption
+//        val numFrames   = timeSuccOpt.fold(Long.MaxValue)(_ - time)
         entries.reverseIterator.foreach { entry =>
-          grView.objAddedI(time, numFrames = Long.MaxValue, entry = entry, isInit = true)
+          grView.objAddedI(time, succ = ???!, entry = entry, isInit = true)
         }
         timeSuccOpt match {
-          case Some(timeSucc) =>
-            val entriesSucc = _grapheme.intersect(timeSucc)
-            populate(timeSucc, entriesSucc)
+          case Some(timeSucc) => populate(timeSucc, entriesSucc)
           case None =>
         }
       }
@@ -244,26 +244,28 @@ object GraphemeViewImpl {
     }
 
     def objAdded(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-      val numFrames = gr.eventAfter(time).fold(Long.MaxValue)(time - _)
+//      val numFrames = gr.eventAfter(time).fold(Long.MaxValue)(time - _)
       gr.eventBefore(time).foreach { timePred =>
         viewMapT().get(timePred).foreach { viewsPred =>
           viewsPred.foreach { viewPred =>
             // note: objAdded will call repaintAll
-            viewPred.numFrames = time - timePred
+            ???! // viewPred.numFrames = time - timePred
           }
         }
       }
 
-      objAddedI(time = time, numFrames = numFrames, entry = entry, isInit = false)
+      objAddedI(time = time, succ = ???!, entry = entry, isInit = false)
     }
 
-    def objAddedI(time: Long, numFrames: Long, entry: Grapheme.Entry[S], isInit: Boolean)(implicit tx: S#Tx): Unit = {
-      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, numFrames = $numFrames / ${TimeRef.framesToSecs(numFrames)}, $entry)")
+    def objAddedI(time: Long, succ: Option[GraphemeObjView[S]], entry: Grapheme.Entry[S], isInit: Boolean)
+                 (implicit tx: S#Tx): Unit = {
+      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, $entry)")
       // entry.span
       // val proc = entry.value
 
       // val pv = ProcView(entry, viewMap, scanMap)
-      val view = GraphemeObjView(entry = entry, numFrames = numFrames, mode = mode)
+      val view = GraphemeObjView(entry = entry, mode = mode)
+      view.succ = succ
       val _viewMapG = viewMapT.transformAndGet(m => m + (time -> (view :: m.getOrElse(time, Nil))))
 
       def doAdd(): Unit = {
@@ -320,7 +322,7 @@ object GraphemeViewImpl {
               } { viewsPred =>
                 deferTx {
                   viewsPred.foreach { viewPred =>
-                    viewPred.numFrames = numFramesPred
+                    ???! // viewPred.numFrames = numFramesPred
                   }
                 }
               }
@@ -455,7 +457,9 @@ object GraphemeViewImpl {
           val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else screenToFrames(viewMaxHorizG.lastKey).toLong
 
           // warning: iterator, we need to traverse twice!
-          viewMapG.range(visStart - maxHorizF, visStop + maxHorizF).foreach { case (_, view :: _) =>
+          viewMapG.range(visStart - maxHorizF, visStop + maxHorizF).foreach { tup =>
+            val views     = tup._2
+            val view      = views.head
             val selected  = sel.contains(view)
 
             def drawProc(start: Long, x1: Int, x2: Int, move: Long): Unit = {

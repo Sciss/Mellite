@@ -52,9 +52,9 @@ object GenericObjView extends ObjView.Factory {
     res
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
-    val res = new GraphemeImpl(tx.newHandle(entry), tx.newHandle(entry.value), numFrames = numFrames).initAttrs(entry)
+    val res = new GraphemeImpl(tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
     res
   }
 
@@ -76,11 +76,13 @@ object GenericObjView extends ObjView.Factory {
     extends Impl[S] with TimelineObjViewBasicImpl[S] with ObjViewImpl.NonViewable[S]
 
   private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Grapheme.Entry[S]],
-  val objH: stm.Source[S#Tx, Obj[S]], var numFrames: Long)
+                                                val objH: stm.Source[S#Tx, Obj[S]])
     extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
 
     def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
 
     def insets: Insets = Insets.empty
+
+    var succ = Option.empty[GraphemeObjView[S]]
   }
 }

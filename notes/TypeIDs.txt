@@ -17,7 +17,7 @@
 12  Grapheme.Value.Curve
 13  Grapheme.Value.Audio
 14  FadeSpec.Value
-15  Env.ConstShape
+15  Env.ConstShape  -- ?
 16  SynthGraph
 17  IncompleteProduct (SoundDesigner)
 18  UGenSource (SoundDesigner)

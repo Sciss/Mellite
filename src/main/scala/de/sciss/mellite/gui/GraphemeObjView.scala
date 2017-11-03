@@ -32,7 +32,7 @@ object GraphemeObjView {
   trait Factory extends ObjView.Factory {
     /** Creates a new grapheme view
       */
-    def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+    def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                                    (implicit tx: S#Tx): GraphemeObjView[S]
   }
 
@@ -40,9 +40,9 @@ object GraphemeObjView {
 
   def factories: Iterable[Factory] = Impl.factories
 
-  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] =
-    Impl(entry = entry, numFrames = numFrames, mode = mode)
+    Impl(entry = entry, mode = mode)
 
   final case class InsetsChanged[S <: stm.Sys[S]](view: GraphemeObjView[S], ch: Change[Insets])
     extends ObjView.Update[S]
@@ -56,8 +56,10 @@ trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
 
   var timeValue: Long
 
-  /** If there are no follow up values, this should be set to `Long.MaxValue` */
-  var numFrames: Long
+//  /** If there are no follow up values, this should be set to `Long.MaxValue` */
+//  var numFrames: Long
+
+  var succ: Option[GraphemeObjView[S]]
 
   def insets: Insets
 

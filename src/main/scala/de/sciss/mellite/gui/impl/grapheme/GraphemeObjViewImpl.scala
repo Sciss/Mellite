@@ -35,11 +35,11 @@ object GraphemeObjViewImpl {
 
   def factories: Iterable[Factory] = map.values
 
-  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], numFrames: Long, mode: Mode)
+  def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] = {
     val tid = entry.value.tpe.typeID
-    map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, numFrames = numFrames, mode = mode)) { f =>
-      f.mkGraphemeView(entry = entry, numFrames = numFrames, mode = mode)
+    map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, mode = mode)) { f =>
+      f.mkGraphemeView(entry = entry, mode = mode)
     }
   }
 
