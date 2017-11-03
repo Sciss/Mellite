@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.audiocue
 
 import javax.swing.Icon
 
@@ -27,6 +25,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjectActions
+import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, ListObjView, ObjView}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec, SampleFormat}
 import de.sciss.synth.proc.{AudioCue, Workspace}
 

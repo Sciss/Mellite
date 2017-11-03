@@ -24,8 +24,10 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.stm
+import de.sciss.mellite.gui.impl.artifact.{ArtifactLocationObjView, ArtifactObjView}
+import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
-import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{Confluent, Workspace}
 

@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui
 package impl
-package audiofile
+package audiocue
 
 import de.sciss.file._
 import de.sciss.lucre.stm

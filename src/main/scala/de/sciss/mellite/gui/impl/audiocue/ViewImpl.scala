@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui
 package impl
-package audiofile
+package audiocue
 
 import java.awt.datatransfer.Transferable
 

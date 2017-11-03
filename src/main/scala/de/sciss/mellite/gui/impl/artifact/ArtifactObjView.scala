@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.artifact
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -26,6 +24,8 @@ import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Workspace
