@@ -16,8 +16,7 @@ package gui
 package impl
 package grapheme
 
-import java.awt
-import java.awt.{Font, Graphics2D, LinearGradientPaint, RenderingHints}
+import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
 import javax.swing.{JComponent, UIManager}
 
@@ -29,7 +28,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.stm.{Cursor, Disposable, Obj, TxnLike}
+import de.sciss.lucre.stm.{Cursor, Disposable, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
@@ -46,16 +45,6 @@ import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
 
 object GraphemeViewImpl {
-  private val colrBg              = awt.Color.darkGray
-  private val colrRegionOutline   = new awt.Color(0x68, 0x68, 0x68)
-  private val colrRegionOutlineSel= awt.Color.blue
-  private val pntRegionBg         = new LinearGradientPaint(0f, 1f, 0f, 62f,
-    Array[Float](0f, 0.23f, 0.77f, 1f), Array[awt.Color](new awt.Color(0x5E, 0x5E, 0x5E), colrRegionOutline,
-      colrRegionOutline, new awt.Color(0x77, 0x77, 0x77)))
-  private val pntRegionBgSel       = new LinearGradientPaint(0f, 1f, 0f, 62f,
-    Array[Float](0f, 0.23f, 0.77f, 1f), Array[awt.Color](new awt.Color(0x00, 0x00, 0xE6), colrRegionOutlineSel,
-      colrRegionOutlineSel, new awt.Color(0x1A, 0x1A, 0xFF)))
-
   private val DEBUG   = false
 
   private val NoMove  = TrackTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
@@ -80,22 +69,24 @@ object GraphemeViewImpl {
     // that gives time values and full leaf data
     _grapheme.firstEvent.foreach { time0 =>
       @tailrec
-      def populate(time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
+      def populate(pred: List[GraphemeObjView[S]], time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
+        val curr = entries.reverseIterator.map { entry =>
+          val view = grView.objAddedI(time, entry = entry, isInit = true)
+          view
+        } .toList
+        val succOpt = curr.headOption
+        pred.foreach(_.succ = succOpt)
         val timeSuccOpt = _grapheme.eventAfter(time)
-        val entriesSucc = timeSuccOpt.fold(Vector.empty: Grapheme.Leaf[S])(_grapheme.intersect(_))
-//        val succ        = entriesSucc.headOption
-//        val numFrames   = timeSuccOpt.fold(Long.MaxValue)(_ - time)
-        entries.reverseIterator.foreach { entry =>
-          grView.objAddedI(time, succ = ???!, entry = entry, isInit = true)
-        }
         timeSuccOpt match {
-          case Some(timeSucc) => populate(timeSucc, entriesSucc)
+          case Some(timeSucc) =>
+            val entriesSucc = _grapheme.intersect(time)
+            populate(curr, timeSucc, entriesSucc)
           case None =>
         }
       }
 
       val entries0 = _grapheme.intersect(time0)
-      populate(time0, entries0)
+      populate(Nil, time0, entries0)
     }
 
     val obsGrapheme = _grapheme.changed.react { implicit tx => upd =>
@@ -244,34 +235,40 @@ object GraphemeViewImpl {
     }
 
     def objAdded(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-//      val numFrames = gr.eventAfter(time).fold(Long.MaxValue)(time - _)
+      val view = objAddedI(time = time, entry = entry, isInit = false)
+      val succOpt = Some(view)
       gr.eventBefore(time).foreach { timePred =>
         viewMapT().get(timePred).foreach { viewsPred =>
-          viewsPred.foreach { viewPred =>
-            // note: objAdded will call repaintAll
-            ???! // viewPred.numFrames = time - timePred
+          deferTx {
+            viewsPred.foreach { viewPred =>
+              viewPred.succ = succOpt
+            }
           }
         }
       }
-
-      objAddedI(time = time, succ = ???!, entry = entry, isInit = false)
+      gr.eventAfter(time).foreach { timeSucc =>
+        viewMapT().get(timeSucc).foreach { viewsSucc =>
+          deferTx {
+            view.succ = viewsSucc.headOption
+          }
+        }
+      }
+      deferTx(repaintAll())    // XXX TODO: optimize dirty rectangle
     }
 
-    def objAddedI(time: Long, succ: Option[GraphemeObjView[S]], entry: Grapheme.Entry[S], isInit: Boolean)
-                 (implicit tx: S#Tx): Unit = {
-      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, $entry)")
+    def objAddedI(time: Long, entry: Grapheme.Entry[S], isInit: Boolean)
+                 (implicit tx: S#Tx): GraphemeObjView[S] = {
+      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry = $entry / tpe: ${entry.value.tpe})")
       // entry.span
       // val proc = entry.value
 
       // val pv = ProcView(entry, viewMap, scanMap)
       val view = GraphemeObjView(entry = entry, mode = mode)
-      view.succ = succ
       val _viewMapG = viewMapT.transformAndGet(m => m + (time -> (view :: m.getOrElse(time, Nil))))
 
       def doAdd(): Unit = {
         viewMapG = _viewMapG
         addInsetsG(view.insets)
-        if (!isInit) repaintAll()    // XXX TODO: optimize dirty rectangle
       }
 
       if (isInit)
@@ -290,19 +287,14 @@ object GraphemeViewImpl {
           }
         case _ =>
       }}
+
+      view
     }
 
     private def warnViewNotFound(action: String, entry: Grapheme.Entry[S]): Unit =
       Console.err.println(s"Warning: Grapheme - $action. View for object $entry not found.")
 
     def objRemoved(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-//      gr.eventBefore(time + 1).foreach { timePred =>
-//        viewMap.get(timePred).foreach { viewPred =>
-//          // note: objRemoved will call repaintAll
-//          viewPred.numFrames = time - timePred
-//        }
-//      }
-
       logT(s"objRemoved($time, $entry)")
       val _viewMapG0 = viewMapT()
       _viewMapG0.get(time).fold {
@@ -311,26 +303,27 @@ object GraphemeViewImpl {
         views.find(_.entry == entry).fold {
           warnViewNotFound("remove", entry)
         } { view =>
-          val viewsNew = views.filterNot(_ == view)
-          val _viewMapG1 = if (viewsNew.isEmpty) {
-            // there are no other views at the same time location,
-            // we need to update the `numFrames` of the preceding view(s)
+          val succOld     = views.headOption
+          val viewsNew    = views.filterNot(_ == view)
+          val succNew     = viewsNew.headOption
+
+          if (succOld != succNew) {
             gr.eventBefore(time).foreach { timePred =>
-              val numFramesPred = gr.eventAfter(time).fold(Long.MaxValue)(_ - timePred)
               _viewMapG0.get(timePred).fold {
                 warnViewNotFound("remove", entry)
               } { viewsPred =>
                 deferTx {
                   viewsPred.foreach { viewPred =>
-                    ???! // viewPred.numFrames = numFramesPred
+                    viewPred.succ = succNew
                   }
                 }
               }
             }
-            _viewMapG0 + (time -> viewsNew)
+          }
 
+          val _viewMapG1  = if (viewsNew.isEmpty) {
+            _viewMapG0 + (time -> viewsNew)
           } else {
-            // there are other views at the same time location, so no need to update numFrames
             _viewMapG0 - time
           }
           viewMapT() = _viewMapG1
@@ -339,7 +332,7 @@ object GraphemeViewImpl {
           view.dispose()
           deferTx {
             viewMapG = _viewMapG1
-            removeInsetsG(view.insets)
+            removeInsetsG(insets)
             repaintAll() // XXX TODO: optimize dirty rectangle
           }
         }
@@ -377,8 +370,13 @@ object GraphemeViewImpl {
       def selectionModel: SelectionModel[S, GraphemeObjView[S]] = impl.selectionModel
       def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
 
-      def findView(pos: Long): Option[GraphemeObjView[S]] =
-        viewMapG.range(pos, Long.MaxValue).headOption.flatMap(_._2.headOption)
+//      def findView(pos: Long): Option[GraphemeObjView[S]] =
+//        viewMapG.range(pos, Long.MaxValue).headOption.flatMap(_._2.headOption)
+
+      def findView(pos: Long): Option[GraphemeObjView[S]] = {
+        val it = viewMapG.valuesIteratorFrom(pos)
+        if (it.hasNext) it.next().headOption else None
+      }
 
 //      def findRegions(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]] = {
 //        val views = intersect(r.span)
@@ -399,8 +397,8 @@ object GraphemeViewImpl {
         editOpt.foreach(undoManager.add)
       }
 
-      private var _toolState    = Option.empty[Any]
-      private var moveState     = NoMove
+      private[this] var _toolState    = Option.empty[Any]
+      private[this] var moveState     = NoMove
 
       protected def toolState: Option[Any] = _toolState
       protected def toolState_=(state: Option[Any]): Unit = {
@@ -438,116 +436,37 @@ object GraphemeViewImpl {
 
         def imageObserver: JComponent = peer
 
+        final val rendering: GraphemeRendering = new GraphemeRenderingImpl(this, Mellite.isDarkSkin)
+
         override protected def paintComponent(g: Graphics2D): Unit = {
           super.paintComponent(g)
           val w = peer.getWidth
           val h = peer.getHeight
-          g.setColor(colrBg) // g.setPaint(pntChecker)
+          g.setPaint(rendering.pntBackground)
           g.fillRect(0, 0, w, h)
 
-          val total     = graphemeModel.bounds
-          val clipOrig  = g.getClip
-          val cr        = clipOrig.getBounds
-          val visStart  = screenToFrame(cr.x).toLong
-          val visStop   = screenToFrame(cr.x + cr.width).toLong + 1 // plus one to avoid glitches
-          val sel       = selectionModel
+          import rendering.clipRect
+          g.getClipBounds(clipRect)
+
+          val visStart  = screenToFrame(clipRect.x).toLong
+          val visStop   = screenToFrame(clipRect.x + clipRect.width).toLong + 1 // plus one to avoid glitches
 
           g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
           val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else screenToFrames(viewMaxHorizG.lastKey).toLong
 
-          // warning: iterator, we need to traverse twice!
-          viewMapG.range(visStart - maxHorizF, visStop + maxHorizF).foreach { tup =>
-            val views     = tup._2
-            val view      = views.head
-            val selected  = sel.contains(view)
+          // warning: if we use iterator, beware that we need to traverse twice!
+          val range = viewMapG.range(visStart - maxHorizF, visStop + maxHorizF)
+          range.foreach { tup =>
+            val view = tup._2.head
+            view.paintBack(g, impl, rendering)
+          }
+          range.foreach { tup =>
+            val view = tup._2.head
+            view.paintFront(g, impl, rendering)
+          }
 
-            def drawProc(start: Long, x1: Int, x2: Int, move: Long): Unit = {
-              // val pTrk  = if (selected) math.max(0, view.trackIndex + moveState.deltaTrack) else view.trackIndex
-              val py    = 0 // trackToScreen(pTrk)
-              val px    = x1
-              val pw    = x2 - x1
-              val ph    = peer.getHeight // trackToScreen(pTrk + view.trackHeight) - py
-
-              // clipped coordinates
-              val px1C    = math.max(px + 1, cr.x - 2)
-              val px2C    = math.min(px + pw, cr.x + cr.width + 3)
-              if (px1C < px2C) {  // skip this if we are not overlapping with clip
-
-                g.translate(px, py)
-                g.setColor(if (selected) colrRegionOutlineSel else colrRegionOutline)
-                g.fillRoundRect(0, 0, pw, ph, 5, 5)
-                g.setPaint(if (selected) pntRegionBgSel else pntRegionBg)
-                g.fillRoundRect(1, 1, pw - 2, ph - 2, 4, 4)
-                g.translate(-px, -py)
-
-                g.setColor(colrBg)
-                g.drawLine(px - 1, py, px - 1, py + ph - 1) // better distinguish directly neighbouring views
-
-//                val hndl = 0
-//                val innerH  = ph - (hndl + 1)
-//                val innerY  = py + hndl
-//                g.clipRect(px + 1, innerY, pw - 2, innerH)
-//                g.setClip(clipOrig)
-              }
-            }
-
-            def adjustStart(start: Long): Long =
-              if (selected) {
-                val dt0 = moveState.deltaTime // + resizeState.deltaStart
-                if (dt0 >= 0) dt0 else {
-                  math.max(-(start - total.start), dt0)
-                }
-              } else 0L
-
-            def adjustStop(stop: Long): Long =
-              if (selected) {
-                val dt0 = moveState.deltaTime // + resizeState.deltaStop
-                if (dt0 >= 0) dt0 else {
-                  math.max(-(stop - total.start + TimelineView.MinDur), dt0)
-                }
-              } else 0L
-
-            def adjustMove(start: Long): Long =
-              if (selected) {
-                val dt0 = moveState.deltaTime
-                if (dt0 >= 0) dt0 else {
-                  math.max(-(start - total.start), dt0)
-                }
-              } else 0L
-
-//            view.spanValue match {
-//              case Span(start, stop) =>
-            val start = view.timeValue
-            val stop  = start
-                val dStart    = adjustStart(start)
-                val dStop     = adjustStop (stop )
-                val newStart  = start + dStart
-                val newStop   = math.max(newStart + TimelineView.MinDur, stop + dStop)
-                val x1        = frameToScreen(newStart).toInt
-                val x2        = frameToScreen(newStop ).toInt
-                drawProc(start, x1, x2, adjustMove(start))
-//
-//              case Span.From(start) =>
-//                val dStart    = adjustStart(start)
-//                val newStart  = start + dStart
-//                val x1        = frameToScreen(newStart).toInt
-//                drawProc(start, x1, w + 5, adjustMove(start))
-//
-//              case Span.Until(stop) =>
-//                val dStop     = adjustStop(stop)
-//                val newStop   = stop + dStop
-//                val x2        = frameToScreen(newStop).toInt
-//                drawProc(Long.MinValue, -5, x2, 0L)
-//
-//              case Span.All =>
-//                drawProc(Long.MinValue, -5, w + 5, 0L)
-//
-//              case _ => // don't draw Span.Void
-//            }
-         }
-
-          // --- grapheme cursor and selection ---
+          // --- timeline cursor and selection ---
           paintPosAndSelection(g, h)
         }
       }

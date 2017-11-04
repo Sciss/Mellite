@@ -25,7 +25,7 @@ import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, LongObj, StringObj, Type}
+import de.sciss.lucre.expr.{BooleanObj, LongObj, StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -36,7 +36,7 @@ import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.swingplus.{ColorChooser, GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Color => _Color, Confluent, ObjKeys, TimeRef, Workspace}
+import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Color}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -51,7 +51,7 @@ object ObjViewImpl {
   import de.sciss.nuages.{Nuages => _Nuages}
   import de.sciss.synth.proc.{Ensemble => _Ensemble, FadeSpec => _FadeSpec, Folder => _Folder, Grapheme => _Grapheme, Timeline => _Timeline}
 
-  import scala.{Boolean => _Boolean, Double => _Double, Long => _Long}
+  import scala.{Boolean => _Boolean, Long => _Long}
 
   def nameOption[S <: stm.Sys[S]](obj: Obj[S])(implicit tx: S#Tx): Option[_String] =
     obj.attr.$[StringObj](ObjKeys.attrName).map(_.value)
@@ -176,68 +176,6 @@ object ObjViewImpl {
       def convertEditValue(v: Any): Option[_Long] = v match {
         case num: _Long => Some(num)
         case s: _String => Try(s.toLong).toOption
-      }
-    }
-  }
-
-  // -------- Double --------
-
-  object Double extends ListObjView.Factory {
-    type E[S <: stm.Sys[S]] = DoubleObj[S]
-    val icon: Icon          = raphaelIcon(Shapes.RealNumber)
-    val prefix              = "Double"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = DoubleObj
-    def hasMakeDialog       = true
-    def category: _String   = ObjView.categPrimitives
-
-    def mkListView[S <: Sys[S]](obj: DoubleObj[S])(implicit tx: S#Tx): ListObjView[S] = {
-      val ex          = obj
-      val value       = ex.value
-      val isEditable  = ex match {
-        case DoubleObj.Var(_)  => true
-        case _            => false
-      }
-      val isViewable  = tx.isInstanceOf[Confluent.Txn]
-      new Double.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
-    }
-
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Double]
-
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
-      val model     = new SpinnerNumberModel(0.0, _Double.NegativeInfinity, _Double.PositiveInfinity, 1.0)
-      val ggValue   = new Spinner(model)
-      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Some(model.getNumber.doubleValue))
-      res.foreach(ok(_))
-    }
-
-    def makeObj[S <: Sys[S]](config: (String, _Double))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = DoubleObj.newVar(DoubleObj.newConst[S](value))
-      if (!name.isEmpty) obj.name = name
-      obj :: Nil
-    }
-
-    final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, DoubleObj[S]], var value: _Double,
-                                  override val isEditable: _Boolean, val isViewable: _Boolean)
-      extends ListObjView /* .Double */[S]
-      with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, _Double, DoubleObj]
-      with ListObjViewImpl.StringRenderer {
-
-      type E[~ <: stm.Sys[~]] = DoubleObj[~]
-
-      def factory: ObjView.Factory = Double
-
-      val exprType: Type.Expr[_Double, DoubleObj] = DoubleObj
-
-      def expr(implicit tx: S#Tx): DoubleObj[S] = objH()
-
-      def convertEditValue(v: Any): Option[_Double] = v match {
-        case num: _Double => Some(num)
-        case s: _String => Try(s.toDouble).toOption
       }
     }
   }

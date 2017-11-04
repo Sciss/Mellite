@@ -620,7 +620,7 @@ object TimelineViewImpl {
         protected def timelineModel : TimelineModel = impl.timelineModel
         protected def workspace     : Workspace[S]  = impl.workspace
 
-        private var currentDrop = Option.empty[DnD.Drop[S]]
+        private[this] var currentDrop = Option.empty[DnD.Drop[S]]
 
         font = {
           val f = UIManager.getFont("Slider.font", Locale.US)
@@ -640,7 +640,7 @@ object TimelineViewImpl {
 
         protected def acceptDnD(drop: DnD.Drop[S]): Boolean = performDrop(drop)
 
-        final val rendering = new TimelineRenderingImpl(this, Mellite.isDarkSkin)
+        final val rendering: TimelineRenderingImpl = new TimelineRenderingImpl(this, Mellite.isDarkSkin)
 
         override protected def paintComponent(g: Graphics2D): Unit = {
           super.paintComponent(g)

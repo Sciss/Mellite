@@ -12,8 +12,7 @@
  */
 
 package de.sciss.mellite
-package gui
-package impl
+package gui.impl
 
 import javax.swing.{Icon, SpinnerNumberModel}
 
@@ -22,6 +21,7 @@ import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.{Confluent, Workspace}
 import de.sciss.synth.proc.Implicits._
@@ -45,7 +45,7 @@ object IntObjView extends ListObjView.Factory {
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new Impl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).initAttrs(obj)
+    new ListImpl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).initAttrs(obj)
   }
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Int]
@@ -67,7 +67,7 @@ object IntObjView extends ListObjView.Factory {
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, IntObj[S]],
+  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, IntObj[S]],
                                 var value: Int,
                                 override val isEditable: Boolean, val isViewable: Boolean)
     extends IntObjView[S]

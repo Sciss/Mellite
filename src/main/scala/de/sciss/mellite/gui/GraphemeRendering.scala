@@ -14,9 +14,7 @@
 package de.sciss.mellite
 package gui
 
-import de.sciss.sonogram
-
 /** Paint support for grapheme obj views. */
-trait GraphemeRendering extends sonogram.PaintController {
+trait GraphemeRendering extends BasicRendering {
 
 }

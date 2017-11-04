@@ -58,7 +58,7 @@ object ListObjViewImpl {
     ObjViewImpl.String          .tpe.typeID -> ObjViewImpl.String,
     IntObjView                  .tpe.typeID -> IntObjView,
     ObjViewImpl.Long            .tpe.typeID -> ObjViewImpl.Long,
-    ObjViewImpl.Double          .tpe.typeID -> ObjViewImpl.Double,
+    DoubleObjView               .tpe.typeID -> DoubleObjView,
     ObjViewImpl.IntVector       .tpe.typeID -> ObjViewImpl.IntVector,
     ObjViewImpl.DoubleVector    .tpe.typeID -> ObjViewImpl.DoubleVector,
     ObjViewImpl.Boolean         .tpe.typeID -> ObjViewImpl.Boolean,
