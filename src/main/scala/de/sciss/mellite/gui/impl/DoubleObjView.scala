@@ -14,7 +14,6 @@
 package de.sciss.mellite
 package gui.impl
 
-import java.awt.Color
 import javax.swing.{Icon, SpinnerNumberModel}
 
 import de.sciss.desktop
@@ -120,12 +119,33 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
       val c   = gv.canvas
+      val jc  = c.canvasComponent.peer
+      val h   = jc.getHeight
       val x   = c.frameToScreen(timeValue)
-      val xi  = x.toInt
-      val h   = c.canvasComponent.peer.getHeight
-      g.setColor(Color.red)
-      g.drawLine(xi, 0, xi, h - 1)
-      g.drawString(f"$value%g", xi + 4, 12)
+//      val xi  = x.toInt
+      val y   = value * (h - 1) // (h - 4) + 2
+//      g.setColor(Color.red)
+//      g.drawLine(xi, 0, xi, h - 1)
+//      g.drawString(f"$value%g", xi + 4, 12)
+      val selected = gv.selectionModel.contains(this)
+      val p = r.ellipse1 // r.shape1
+
+//      p.reset()
+//      p.moveTo(x - 2, y - 2)
+//      p.lineTo(x + 2, y - 2)
+//      p.lineTo(x + 2, y + 2)
+//      p.lineTo(x - 2, y + 2)
+//      p.closePath()
+
+//      g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
+      p.setFrame(x - 2, y - 2, 4, 4)
+      g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
+//      g.setPaint(r.pntNameDark)
+      g.fill(p)
+      p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
+      g.setPaint(if (selected) r.pntRegionOutlineSelected else r.pntRegionOutline)
+//      g.setPaint(r.pntNameDark)
+      g.draw(p)
     }
   }
 }

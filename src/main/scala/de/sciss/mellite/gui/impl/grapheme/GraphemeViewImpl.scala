@@ -451,7 +451,8 @@ object GraphemeViewImpl {
           val visStart  = screenToFrame(clipRect.x).toLong
           val visStop   = screenToFrame(clipRect.x + clipRect.width).toLong + 1 // plus one to avoid glitches
 
-          g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+          g.setRenderingHint(RenderingHints.KEY_ANTIALIASING  , RenderingHints.VALUE_ANTIALIAS_ON)
+          g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE )
 
           val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else {
             val x = viewMaxHorizG.lastKey
