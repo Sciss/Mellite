@@ -460,14 +460,26 @@ object GraphemeViewImpl {
           }
 
           // warning: if we use iterator, beware that we need to traverse twice!
-          val range = viewMapG.range(visStart - maxHorizF, visStop + maxHorizF)
-          range.foreach { tup =>
-            val view = tup._2.head
+          val visStartExt = visStart - maxHorizF
+          val visStopExt  = visStop  + maxHorizF
+          // val range = viewMapG.range(visStartExt, visStopExt)
+          def range = viewMapG.iteratorFrom(visStartExt) // .takeWhile(_._1 < visStopExt)
+  //          println(s"clipRect.x ${clipRect.x}, .x ${clipRect.width}, visStart $visStart, visStop $visStop, maxHorizF $maxHorizF, size = ${range.size}")
+          var it    = range
+          var done  = false
+          while (it.hasNext && !done) {
+            val tup   = it.next()
+            val view  = tup._2.head
             view.paintBack(g, impl, rendering)
+            if (tup._1 >= visStopExt) done = true
           }
-          range.foreach { tup =>
-            val view = tup._2.head
+          it    = range
+          done  = false
+          while (it.hasNext && !done) {
+            val tup   = it.next()
+            val view  = tup._2.head
             view.paintFront(g, impl, rendering)
+            if (tup._1 >= visStopExt) done = true
           }
 
           // --- timeline cursor and selection ---
