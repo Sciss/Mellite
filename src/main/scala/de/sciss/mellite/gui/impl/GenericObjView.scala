@@ -30,7 +30,7 @@ import de.sciss.synth.proc.{Grapheme, Workspace}
 
 import scala.swing.{Component, Label}
 
-object GenericObjView extends ObjView.Factory {
+object GenericObjView extends ObjView.Factory with ListObjView.Factory with GraphemeObjView.Factory {
   val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
   val prefix            = "Generic"
   def humanName: String = prefix
@@ -52,7 +52,7 @@ object GenericObjView extends ObjView.Factory {
     res
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
+  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], value: Obj[S], mode: Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
     val res = new GraphemeImpl(tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
     res
@@ -79,10 +79,6 @@ object GenericObjView extends ObjView.Factory {
                                                 val objH: stm.Source[S#Tx, Obj[S]])
     extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
 
-    def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
-
     def insets: Insets = Insets.empty
-
-    var succ = Option.empty[GraphemeObjView[S]]
   }
 }

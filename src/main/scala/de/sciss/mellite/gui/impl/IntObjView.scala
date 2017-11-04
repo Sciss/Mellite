@@ -71,11 +71,10 @@ object IntObjView extends ListObjView.Factory {
                                 var value: Int,
                                 override val isEditable: Boolean, val isViewable: Boolean)
     extends IntObjView[S]
-    with ListObjView /* .Int */[S]
+    with ListObjView[S]
     with ObjViewImpl.Impl[S]
     with ListObjViewImpl.SimpleExpr[S, Int, IntObj]
-    with ListObjViewImpl.StringRenderer
-    /* with NonViewable[S] */ {
+    with ListObjViewImpl.StringRenderer {
 
     override def obj(implicit tx: S#Tx): IntObj[S] = objH()
 
@@ -88,13 +87,8 @@ object IntObjView extends ListObjView.Factory {
     def expr(implicit tx: S#Tx): IntObj[S] = obj
 
     def convertEditValue(v: Any): Option[Int] = v match {
-      case num: Int  => Some(num)
-      case s: String => Try(s.toInt).toOption
-    }
-
-    def testValue(v: Any): Option[Int] = v match {
-      case i: Int  => Some(i)
-      case _        => None
+      case num: Int     => Some(num)
+      case s  : String  => Try(s.toInt).toOption
     }
   }
 }

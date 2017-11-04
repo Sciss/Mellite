@@ -32,7 +32,7 @@ object GraphemeObjView {
   trait Factory extends ObjView.Factory {
     /** Creates a new grapheme view
       */
-    def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
+    def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], value: E[S], mode: Mode)
                                    (implicit tx: S#Tx): GraphemeObjView[S]
   }
 

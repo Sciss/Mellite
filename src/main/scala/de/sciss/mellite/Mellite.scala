@@ -39,7 +39,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  //  lucre.confluent.showLog = true
 //  proc.showAuralLog       = true
 //  proc.showTransportLog   = true
-  showTimelineLog         = true
+//  showTimelineLog         = true
 //  de.sciss.lucre.bitemp.impl.BiGroupImpl.showLog = true
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true

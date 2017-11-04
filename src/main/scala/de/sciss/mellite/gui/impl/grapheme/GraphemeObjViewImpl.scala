@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
-import de.sciss.mellite.gui.impl.{GenericObjView, ObjViewImpl}
+import de.sciss.mellite.gui.impl.{DoubleObjView, GenericObjView, ObjViewImpl}
 import de.sciss.synth.proc.Grapheme
 
 import scala.swing.Graphics2D
@@ -38,18 +38,23 @@ object GraphemeObjViewImpl {
   def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] = {
     val tid = entry.value.tpe.typeID
-    map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, mode = mode)) { f =>
-      f.mkGraphemeView(entry = entry, mode = mode)
+    map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, value = entry.value, mode = mode)) { f =>
+      f.mkGraphemeView(entry = entry, value = entry.value.asInstanceOf[f.E[S]], mode = mode)
     }
   }
 
   private var map = Map[Int, Factory](
+    DoubleObjView.tpe.typeID -> DoubleObjView
 //    ProcObjView .tpe.typeID -> ProcObjView,
 //    ActionView  .tpe.typeID -> ActionView
   )
 
   trait BasicImpl[S <: stm.Sys[S]] extends GraphemeObjView[S] with ObjViewImpl.Impl[S] {
-    var timeValue: Long = _
+    final var timeValue: Long = _
+
+    final var succ = Option.empty[GraphemeObjView[S]]
+
+    final def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
 
     def initAttrs(entry: Grapheme.Entry[S])(implicit tx: S#Tx): this.type = {
       val time      = entry.key

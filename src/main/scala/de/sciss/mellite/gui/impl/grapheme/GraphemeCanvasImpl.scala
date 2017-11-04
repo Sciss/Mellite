@@ -1,5 +1,5 @@
 /*
- *  GraphemeCanvas.scala
+ *  GraphemeCanvasImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
@@ -19,7 +19,7 @@ package grapheme
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.stm.Sys
 
-trait GraphemeCanvas[S <: Sys[S]] extends TimelineCanvasImpl {
+trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCanvas[S] {
   // def timeline(implicit tx: S#Tx): Timeline[S]
 
   def selectionModel: GraphemeObjView.SelectionModel[S]

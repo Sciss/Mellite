@@ -22,8 +22,6 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeViewImpl => Impl}
 import de.sciss.synth.proc.{Grapheme, Workspace}
 
-import scala.swing.Component
-
 object GraphemeView {
   def apply[S <: Sys[S]](group: Grapheme[S])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
@@ -44,7 +42,7 @@ trait GraphemeView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editab
   def graphemeH: stm.Source[S#Tx, Grapheme[S]]
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 
-  def canvasComponent: Component
+  def canvas: GraphemeCanvas[S]
 
   // def transportView: TransportView[S]
 

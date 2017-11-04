@@ -133,7 +133,7 @@ object GraphemeViewImpl {
     // kind-of priority queue keeping track of horizontal margin needed when querying views to paint
     private[this] var viewMaxHorizG = ISortedMap.empty[Int, Int] // maxHoriz to count
 
-    private[this] var canvasView: View    = _
+    var canvas: GraphemeCanvasImpl[S] = _
 
     val disposables           = Ref(List.empty[Disposable[S#Tx]])
 
@@ -147,7 +147,7 @@ object GraphemeViewImpl {
 
 //    def window: Window = component.peer.getClientProperty("de.sciss.mellite.Window").asInstanceOf[Window]
 
-    def canvasComponent: Component = canvasView.canvasComponent
+//    def canvasComponent: Component = canvasView.canvasComponent
 
     def dispose()(implicit tx: S#Tx): Unit = {
       val empty = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
@@ -159,7 +159,7 @@ object GraphemeViewImpl {
     }
 
     def guiInit(): Unit = {
-      canvasView = new View
+      canvas = new View
 
       val actionAttr: Action = Action(null) {
         withSelection { implicit tx =>
@@ -202,7 +202,7 @@ object GraphemeViewImpl {
 //          actionRemoveSpan.enabled = hasSome
 //      }
 
-      val pane2 = canvasView.component
+      val pane2 = canvas.component
 //      pane2.dividerSize         = 4
 //      pane2.border              = null
 //      pane2.oneTouchExpandable  = true
@@ -220,7 +220,7 @@ object GraphemeViewImpl {
       // DocumentViewHandler.instance.add(this)
     }
 
-    private def repaintAll(): Unit = canvasView.canvasComponent.repaint()
+    private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
     private def addInsetsG(i: Insets): Unit = {
       val h = i.maxHoriz
@@ -362,7 +362,7 @@ object GraphemeViewImpl {
       repaintAll() // XXX TODO: optimize dirty rectangle
     }
 
-    private final class View extends GraphemeCanvas[S] {
+    private final class View extends GraphemeCanvasImpl[S] {
       canvasImpl =>
 
       // import AbstractGraphemeView._
@@ -453,7 +453,11 @@ object GraphemeViewImpl {
 
           g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
-          val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else screenToFrames(viewMaxHorizG.lastKey).toLong
+          val maxHorizF = if (viewMaxHorizG.isEmpty) 0L else {
+            val x = viewMaxHorizG.lastKey
+//            println(s"viewMaxHoriz = $x")
+            screenToFrames(x).toLong
+          }
 
           // warning: if we use iterator, beware that we need to traverse twice!
           val range = viewMapG.range(visStart - maxHorizF, visStop + maxHorizF)

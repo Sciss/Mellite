@@ -24,8 +24,9 @@ import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
+import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.expr.{BooleanObj, LongObj, StringObj, Type}
+import de.sciss.lucre.expr.{BooleanObj, Expr, LongObj, StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -34,6 +35,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
+import de.sciss.serial.Serializer
 import de.sciss.swingplus.{ColorChooser, GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Color}
@@ -60,12 +62,12 @@ object ObjViewImpl {
 
   object String extends ListObjView.Factory {
     type E[~ <: stm.Sys[~]] = StringObj[~]
-    val icon: Icon          = raphaelIcon(raphael.Shapes.Font)
-    val prefix              = "String"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = StringObj
-    def category: _String   = ObjView.categPrimitives
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.Font)
+    val prefix        : _String   = "String"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = StringObj
+    def category      : _String   = ObjView.categPrimitives
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: StringObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -120,12 +122,12 @@ object ObjViewImpl {
 
   object Long extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = LongObj[S]
-    val icon: Icon          = raphaelIcon(Shapes.IntegerNumber)  // XXX TODO
-    val prefix              = "Long"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = LongObj
-    def category: _String   = ObjView.categPrimitives
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(Shapes.IntegerNumber)  // XXX TODO
+    val prefix        : _String   = "Long"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = LongObj
+    def category      : _String   = ObjView.categPrimitives
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: LongObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -184,12 +186,12 @@ object ObjViewImpl {
 
   object Boolean extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = BooleanObj[S]
-    val icon: Icon          = raphaelIcon(Shapes.BooleanNumber)
-    val prefix              = "Boolean"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = BooleanObj
-    def category: _String   = ObjView.categPrimitives
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(Shapes.BooleanNumber)
+    val prefix        : _String   = "Boolean"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = BooleanObj
+    def category      : _String   = ObjView.categPrimitives
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -239,12 +241,12 @@ object ObjViewImpl {
 
   object IntVector extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = _IntVector[S]
-    val icon: Icon          = raphaelIcon(Shapes.IntegerNumberVector)
-    val prefix              = "IntVector"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _IntVector
-    def category: _String   = ObjView.categPrimitives
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(Shapes.IntegerNumberVector)
+    val prefix        : _String   = "IntVector"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _IntVector
+    def category      : _String   = ObjView.categPrimitives
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _IntVector[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -310,12 +312,12 @@ object ObjViewImpl {
 
   object DoubleVector extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = _DoubleVector[S]
-    val icon: Icon          = raphaelIcon(Shapes.RealNumberVector)
-    val prefix              = "DoubleVector"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _DoubleVector
-    def category: _String   = ObjView.categPrimitives
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(Shapes.RealNumberVector)
+    val prefix        : _String   = "DoubleVector"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _DoubleVector
+    def category      : _String   = ObjView.categPrimitives
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _DoubleVector[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -381,12 +383,12 @@ object ObjViewImpl {
 
   object Color extends ListObjView.Factory {
     type E[~ <: stm.Sys[~]] = _Color.Obj[~]
-    val icon: Icon          = raphaelIcon(raphael.Shapes.Paint)
-    val prefix              = "Color"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _Color.Obj
-    def category: _String   = ObjView.categOrganisation
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.Paint)
+    val prefix        : _String   = "Color"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _Color.Obj
+    def category      : _String   = ObjView.categOrganisation
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -535,12 +537,12 @@ object ObjViewImpl {
 
   object Folder extends ListObjView.Factory {
     type E[~ <: stm.Sys[~]] = _Folder[~]
-    def icon: Icon          = UIManager.getIcon("Tree.openIcon")  // Swing.EmptyIcon
-    val prefix              = "Folder"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _Folder
-    def category: _String   = ObjView.categOrganisation
-    def hasMakeDialog       = true
+    def icon          : Icon      = UIManager.getIcon("Tree.openIcon")  // Swing.EmptyIcon
+    val prefix        : _String   = "Folder"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _Folder
+    def category      : _String   = ObjView.categOrganisation
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Folder[S])(implicit tx: S#Tx): ListObjView[S] =
       new Folder.Impl[S](tx.newHandle(obj)).initAttrs(obj)
@@ -589,12 +591,12 @@ object ObjViewImpl {
 
   object Timeline extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = _Timeline[S]
-    val icon: Icon          = raphaelIcon(raphael.Shapes.Ruler)
-    val prefix              = "Timeline"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _Timeline
-    def category: _String   = ObjView.categComposition
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.Ruler)
+    val prefix        : _String   = "Timeline"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _Timeline
+    def category      : _String   = ObjView.categComposition
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Timeline[S])(implicit tx: S#Tx): ListObjView[S] =
       new Timeline.Impl(tx.newHandle(obj)).initAttrs(obj)
@@ -641,12 +643,12 @@ object ObjViewImpl {
 
   object Grapheme extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = _Grapheme[S]
-    val icon: Icon          = raphaelIcon(raphael.Shapes.LineChart)
-    val prefix              = "Grapheme"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _Grapheme
-    def category: _String   = ObjView.categComposition
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
+    val prefix        : _String   = "Grapheme"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _Grapheme
+    def category      : _String   = ObjView.categComposition
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Grapheme[S])(implicit tx: S#Tx): ListObjView[S] =
       new Grapheme.Impl(tx.newHandle(obj)).initAttrs(obj)
@@ -693,12 +695,12 @@ object ObjViewImpl {
 
   object FadeSpec extends ListObjView.Factory {
     type E[~ <: stm.Sys[~]] = _FadeSpec.Obj[~]
-    val icon: Icon        = raphaelIcon(Shapes.Aperture)
-    val prefix            = "FadeSpec"
-    val humanName         = "Fade"
-    def tpe: Obj.Type     = _FadeSpec.Obj
-    def category: _String = ObjView.categComposition
-    def hasMakeDialog     = false
+    val icon          : Icon      = raphaelIcon(Shapes.Aperture)
+    val prefix        : _String   = "FadeSpec"
+    val humanName     : _String   = "Fade"
+    def tpe           : Obj.Type  = _FadeSpec.Obj
+    def category      : _String   = ObjView.categComposition
+    def hasMakeDialog : Boolean   = false
 
     def mkListView[S <: Sys[S]](obj: _FadeSpec.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val value   = obj.value
@@ -759,17 +761,17 @@ object ObjViewImpl {
 
   object Ensemble extends ListObjView.Factory {
     type E[~ <: stm.Sys[~]] = _Ensemble[~]
-    val icon: Icon          = raphaelIcon(raphael.Shapes.Cube2)
-    val prefix              = "Ensemble"
-    def humanName: _String  = prefix
-    def tpe: Obj.Type       = _Ensemble
-    def category: _String   = ObjView.categComposition
-    def hasMakeDialog       = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.Cube2)
+    val prefix        : _String   = "Ensemble"
+    def humanName     : _String   = prefix
+    def tpe           : Obj.Type  = _Ensemble
+    def category      : _String   = ObjView.categComposition
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Ensemble[S])(implicit tx: S#Tx): ListObjView[S] = {
-      val ens     = obj
-      val playingEx = ens.playing
-      val playing = playingEx.value
+      val ens         = obj
+      val playingEx   = ens.playing
+      val playing     = playingEx.value
       val isEditable  = playingEx match {
         case BooleanObj.Var(_)  => true
         case _            => false
@@ -874,12 +876,12 @@ object ObjViewImpl {
 
   object Nuages extends ListObjView.Factory {
     type E[S <: stm.Sys[S]] = _Nuages[S]
-    val icon: Icon        = raphaelIcon(raphael.Shapes.CloudWhite)
-    val prefix            = "Nuages"
-    val humanName         = "Wolkenpumpe"
-    def tpe: Obj.Type     = _Nuages
-    def category: _String = ObjView.categComposition
-    def hasMakeDialog     = true
+    val icon          : Icon      = raphaelIcon(raphael.Shapes.CloudWhite)
+    val prefix        : _String   = "Nuages"
+    val humanName     : _String   = "Wolkenpumpe"
+    def tpe           : Obj.Type  = _Nuages
+    def category      : _String   = ObjView.categComposition
+    def hasMakeDialog : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Nuages[S])(implicit tx: S#Tx): ListObjView[S] =
       new Nuages.Impl[S](tx.newHandle(obj)).initAttrs(obj)
@@ -950,9 +952,11 @@ object ObjViewImpl {
 
   private[this] val colrIconDark = new AWTColor(200, 200, 200)
 
+  final val IconExtent = 16
+
   def raphaelIcon(shape: Path2D => Unit): Icon = {
     val fill = if (Mellite.isDarkSkin) colrIconDark else AWTColor.black
-    raphael.Icon(extent = 16, fill = fill)(shape)
+    raphael.Icon(extent = IconExtent, fill = fill)(shape)
   }
 
   trait Impl[S <: stm.Sys[S]] extends ObjView[S] /* with ModelImpl[ObjView.Update[S]] */
@@ -1002,6 +1006,31 @@ object ObjViewImpl {
       }
       colorOption  = colorView()
       this
+    }
+  }
+
+  trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ObjView[S] {
+    protected def expr(implicit tx: S#Tx): Ex[S]
+
+    protected implicit def exprType: Type.Expr[A, Ex]
+
+    // XXX TODO - this is a quick hack for demo
+    def openView(parent: Option[Window[S]])
+                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+      workspace match {
+        case cf: Workspace.Confluent =>
+          // XXX TODO - all this casting is horrible
+          implicit val ctx: Confluent#Tx = tx.asInstanceOf[Confluent#Tx]
+          implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
+          val name = AttrCellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
+            .map(n => s"History for '$n'")
+          val w = new WindowImpl[Confluent](name) {
+            val view: ViewHasWorkspace[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])
+            init()
+          }
+          Some(w.asInstanceOf[Window[S]])
+        case _ => None
+      }
     }
   }
 

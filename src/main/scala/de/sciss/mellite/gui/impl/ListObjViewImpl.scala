@@ -17,19 +17,16 @@ package impl
 
 import javax.swing.undo.UndoableEdit
 
-import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.expr.{BooleanObj, Expr, Type}
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.{Window, deferTx}
-import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.artifact.{ArtifactLocationObjView, ArtifactObjView}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
-import de.sciss.serial.Serializer
-import de.sciss.synth.proc.{Confluent, Workspace}
 
 import scala.language.higherKinds
 import scala.swing.{CheckBox, Component, Label}
@@ -103,18 +100,14 @@ object ListObjViewImpl {
     }
   }
 
-  trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ListObjView[S] {
-    protected var exprValue: A
+  trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]]
+    extends ObjViewImpl.ExprLike[S, A, Ex] with ListObjView[S] {
 
-    // def obj: stm.Source[S#Tx, Obj.T[S, Elem { type Peer = Expr[S, A] }]]
+    protected var exprValue: A
 
     // /** Tests a value from a `Change` update. */
     // protected def testValue       (v: Any): Option[A]
     protected def convertEditValue(v: Any): Option[A]
-
-    protected implicit val exprType: Type.Expr[A, Ex]
-
-    protected def expr(implicit tx: S#Tx): Ex[S]
 
     def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
       convertEditValue(value).flatMap { newValue =>
@@ -136,36 +129,6 @@ object ListObjViewImpl {
           case _ => None
         }
       }
-
-//    def isUpdateVisible(update: Any)(implicit tx: S#Tx): Boolean = update match {
-//      case Change(_, now) =>
-//        testValue(now).exists { valueNew =>
-//          deferTx {
-//            exprValue = valueNew
-//          }
-//          true
-//        }
-//      case _ => false
-//    }
-
-    // XXX TODO - this is a quick hack for demo
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
-      workspace match {
-        case cf: Workspace.Confluent =>
-          // XXX TODO - all this casting is horrible
-          implicit val ctx: Confluent#Tx = tx.asInstanceOf[Confluent#Tx]
-          implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
-          val name = AttrCellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
-            .map(n => s"History for '$n'")
-          val w = new WindowImpl[Confluent](name) {
-            val view: ViewHasWorkspace[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])
-            init()
-          }
-          Some(w.asInstanceOf[Window[S]])
-        case _ => None
-      }
-    }
   }
 
   trait SimpleExpr[S <: Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ExprLike[S, A, Ex]
