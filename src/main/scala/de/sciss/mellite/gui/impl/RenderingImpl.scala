@@ -74,6 +74,7 @@ object RenderingImpl {
   private val pntInletSpan      : Paint   = JColor.gray
   private val strkInletSpan     : Stroke  = new BasicStroke(1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f,
     Array[Float](0.5f, 1.5f), 0f)
+  private val strkNormal        : Stroke  = new BasicStroke()
 }
 
 abstract class RenderingImpl(component: Component, isDark: Boolean)
@@ -107,6 +108,7 @@ abstract class RenderingImpl(component: Component, isDark: Boolean)
   final val pntInlet                    : Paint             = Impl.pntInlet
   final val pntInletSpan                : Paint             = Impl.pntInletSpan
   final val strokeInletSpan             : Stroke            = Impl.strkInletSpan
+  final val strokeNormal                : Stroke            = Impl.strkNormal
 
   final val clipRect                    : Rectangle         = new Rectangle
 

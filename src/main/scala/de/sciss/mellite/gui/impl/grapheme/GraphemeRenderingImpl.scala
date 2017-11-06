@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui.impl.grapheme
 
-import java.awt.geom.Ellipse2D
+import java.awt.geom.{AffineTransform, Area, Ellipse2D}
 
 import de.sciss.mellite.gui.GraphemeRendering
 import de.sciss.mellite.gui.impl.RenderingImpl
@@ -24,5 +24,8 @@ import scala.swing.Component
 final class GraphemeRenderingImpl(component: Component, isDark: Boolean)
   extends RenderingImpl(component, isDark) with GraphemeRendering {
 
-  val ellipse1: Ellipse2D = new Ellipse2D.Float()
+  val ellipse1  : Ellipse2D       = new Ellipse2D.Float()
+  val transform1: AffineTransform = new AffineTransform()
+  val area1     : Area            = new Area
+  val area2     : Area            = new Area
 }

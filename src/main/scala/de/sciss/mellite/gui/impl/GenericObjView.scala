@@ -28,7 +28,7 @@ import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewBasicImpl
 import de.sciss.synth.proc.{Grapheme, Workspace}
 
-import scala.swing.{Component, Label}
+import scala.swing.{Component, Graphics2D, Label}
 
 object GenericObjView extends ObjView.Factory with ListObjView.Factory with GraphemeObjView.Factory {
   val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
@@ -79,6 +79,26 @@ object GenericObjView extends ObjView.Factory with ListObjView.Factory with Grap
                                                 val objH: stm.Source[S#Tx, Obj[S]])
     extends Impl[S] with GraphemeObjViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
 
-    def insets: Insets = Insets.empty
+    val insets = Insets(8, 8, 8, 8)
+
+    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+      val c   = gv.canvas
+      val jc  = c.canvasComponent.peer
+      val h   = jc.getHeight
+      val x   = c.frameToScreen(timeValue)
+      val y   = h/2
+      val p   = r.shape1
+      p.reset()
+      raphael.Shapes.No(p)
+      val at  = r.transform1
+      at.setToTranslation(x - 8, y - 8)
+//      at.setToScale(0.5, 0.5)
+//      at.translate(x - 8, y - 8)
+      at.scale(0.5, 0.5)
+      val pt  = at.createTransformedShape(p)
+      val selected = gv.selectionModel.contains(this)
+      g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
+      g.fill(pt)
+    }
   }
 }

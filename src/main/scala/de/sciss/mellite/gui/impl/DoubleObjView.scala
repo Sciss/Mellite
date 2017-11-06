@@ -33,7 +33,8 @@ import scala.swing.Graphics2D
 import scala.util.Try
 
 object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
-  type E[S <: stm.Sys[S]] = DoubleObj[S]
+  type E[S <: stm.Sys[S]]       = DoubleObj[S]
+  type V                        = Double
   val icon          : Icon      = raphaelIcon(Shapes.RealNumber)
   val prefix        : String    = "Double"
   def humanName     : String    = prefix
@@ -41,7 +42,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   def category      : String    = ObjView.categPrimitives
   def hasMakeDialog : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: DoubleObj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -52,7 +53,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     new ListImpl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = PrimitiveConfig[Double]
+  type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
 
   def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
@@ -63,14 +64,14 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     res.foreach(ok(_))
   }
 
-  def makeObj[S <: Sys[S]](config: (String, Double))(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[S <: Sys[S]](config: (String, V))(implicit tx: S#Tx): List[Obj[S]] = {
     val (name, value) = config
     val obj = DoubleObj.newVar(DoubleObj.newConst[S](value))
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], value: DoubleObj[S], mode: GraphemeView.Mode)
+  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], value: E[S], mode: GraphemeView.Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(value), value = value.value, isViewable = isViewable)
@@ -79,73 +80,60 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
   // ---- basic ----
 
-  private abstract class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, DoubleObj[S]], val isViewable: Boolean)
+  private abstract class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, E[S]], val isViewable: Boolean)
     extends ObjViewImpl.Impl[S]
-    with ObjViewImpl.ExprLike[S, Double, DoubleObj] {
+    with ObjViewImpl.ExprLike[S, V, E] {
 
     final def factory: ObjView.Factory = DoubleObjView
 
-    final def exprType: Type.Expr[Double, DoubleObj] = DoubleObj
+    final def exprType: Type.Expr[V, E] = DoubleObj
 
-    final def expr(implicit tx: S#Tx): DoubleObj[S] = objH()
+    final def expr(implicit tx: S#Tx): E[S] = objH()
   }
 
   // ---- ListObjView ----
 
-  private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, DoubleObj[S]], var value: Double,
+  private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: Double,
                                             override val isEditable: Boolean, isViewable: Boolean)
     extends Impl(objH, isViewable = isViewable) with ListObjView[S]
-      with ListObjViewImpl.SimpleExpr[S, Double, DoubleObj]
+      with ListObjViewImpl.SimpleExpr[S, V, E]
       with ListObjViewImpl.StringRenderer {
 
     def convertEditValue(v: Any): Option[Double] = v match {
-      case num: Double => Some(num)
-      case s  : String => Try(s.toDouble).toOption
+      case num: V       => Some(num)
+      case s  : String  => Try(s.toDouble).toOption
     }
   }
 
   // ---- GraphemeObjView ----
 
+  def graphemePaintFront[S <: Sys[S]](view: GraphemeObjView[S], value: Double, g: Graphics2D,
+                                      gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+    val c   = gv.canvas
+    val jc  = c.canvasComponent.peer
+    val h   = jc.getHeight
+    val x   = c.frameToScreen(view.timeValue)
+    val y   = value * (h - 1)
+    val selected = gv.selectionModel.contains(view)
+    val p = r.ellipse1
+    p.setFrame(x - 2, y - 2, 4, 4)
+    g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
+    g.fill(p)
+    p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
+    g.setPaint(if (selected) r.pntRegionOutlineSelected else r.pntRegionOutline)
+    g.draw(p)
+  }
+
   private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
-                                                objH: stm.Source[S#Tx, DoubleObj[S]],
-                                                private var value: Double,
+                                                objH: stm.Source[S#Tx, E[S]],
+                                                value: V,
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
     with GraphemeObjViewImpl.BasicImpl[S] {
 
     def insets: Insets = Insets(4, 4, 4, 4)
 
-    override def paintBack (g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = ()
-
-    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
-      val c   = gv.canvas
-      val jc  = c.canvasComponent.peer
-      val h   = jc.getHeight
-      val x   = c.frameToScreen(timeValue)
-//      val xi  = x.toInt
-      val y   = value * (h - 1) // (h - 4) + 2
-//      g.setColor(Color.red)
-//      g.drawLine(xi, 0, xi, h - 1)
-//      g.drawString(f"$value%g", xi + 4, 12)
-      val selected = gv.selectionModel.contains(this)
-      val p = r.ellipse1 // r.shape1
-
-//      p.reset()
-//      p.moveTo(x - 2, y - 2)
-//      p.lineTo(x + 2, y - 2)
-//      p.lineTo(x + 2, y + 2)
-//      p.lineTo(x - 2, y + 2)
-//      p.closePath()
-
-//      g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
-      p.setFrame(x - 2, y - 2, 4, 4)
-      g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
-//      g.setPaint(r.pntNameDark)
-      g.fill(p)
-      p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
-      g.setPaint(if (selected) r.pntRegionOutlineSelected else r.pntRegionOutline)
-//      g.setPaint(r.pntNameDark)
-      g.draw(p)
-    }
+    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit =
+      graphemePaintFront(this, value, g, gv, r)
   }
 }

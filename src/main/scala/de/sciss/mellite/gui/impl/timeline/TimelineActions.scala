@@ -150,7 +150,7 @@ trait TimelineActions[S <: Sys[S]] {
             val view      = top.vertices(viewIdx)
             val tup       = TimelineObjView.spanToPoint(view.spanValue)
             val it0       = rangeIn.filterOverlaps(tup).map(_.nextY)
-            val it1       = if (viewIdx < top.unconnected) it0 else it0 ++ Iterator.single(plIn.head.nextY)
+            val it1       = if (viewIdx < top.unconnected || plIn.isEmpty) it0 else it0 ++ Iterator.single(plIn.head.nextY)
             val nextY     = if (it1.isEmpty) 0 else it1.max
             val pl        = Placed(view, nextY)
             val rangeOut  = rangeIn + pl

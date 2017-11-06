@@ -14,9 +14,12 @@
 package de.sciss.mellite
 package gui
 
-import java.awt.geom.{Ellipse2D, Path2D}
+import java.awt.geom.{AffineTransform, Area, Ellipse2D}
 
 /** Paint support for grapheme obj views. */
 trait GraphemeRendering extends BasicRendering {
-  def ellipse1: Ellipse2D
+  def ellipse1  : Ellipse2D
+  def transform1: AffineTransform
+  def area1     : Area
+  def area2     : Area
 }

@@ -42,6 +42,7 @@ import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Co
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
 import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
 import scala.util.Try
@@ -49,7 +50,7 @@ import scala.util.Try
 object ObjViewImpl {
   import java.lang.{String => _String}
 
-  import de.sciss.lucre.expr.{DoubleVector => _DoubleVector, IntVector => _IntVector}
+  import de.sciss.lucre.expr.{IntVector => _IntVector}
   import de.sciss.nuages.{Nuages => _Nuages}
   import de.sciss.synth.proc.{Ensemble => _Ensemble, FadeSpec => _FadeSpec, Folder => _Folder, Grapheme => _Grapheme, Timeline => _Timeline}
 
@@ -299,77 +300,6 @@ object ObjViewImpl {
           case _ => None
         }
         case s: _String  => IntVector.parseString(s)
-      }
-
-      def configureRenderer(label: Label): Component = {
-        label.text = value.mkString(" ")
-        label
-      }
-    }
-  }
-
-  // -------- DoubleVector --------
-
-  object DoubleVector extends ListObjView.Factory {
-    type E[S <: stm.Sys[S]] = _DoubleVector[S]
-    val icon          : Icon      = raphaelIcon(Shapes.RealNumberVector)
-    val prefix        : _String   = "DoubleVector"
-    def humanName     : _String   = prefix
-    def tpe           : Obj.Type  = _DoubleVector
-    def category      : _String   = ObjView.categPrimitives
-    def hasMakeDialog : Boolean   = true
-
-    def mkListView[S <: Sys[S]](obj: _DoubleVector[S])(implicit tx: S#Tx): ListObjView[S] = {
-      val ex          = obj
-      val value       = ex.value
-      val isEditable  = ex match {
-        case _DoubleVector.Var(_)  => true
-        case _            => false
-      }
-      val isViewable  = tx.isInstanceOf[Confluent.Txn]
-      new DoubleVector.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
-    }
-
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[Vec[Double]]
-
-    private def parseString(s: String): Option[Vec[Double]] =
-      Try(s.split(" ").map(x => x.trim().toDouble)(breakOut): Vec[Double]).toOption
-
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
-      val ggValue = new TextField("0.0 0.0")
-      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
-      res.foreach(ok(_))
-    }
-
-    def makeObj[S <: Sys[S]](config: (String, Vec[Double]))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = _DoubleVector.newVar(_DoubleVector.newConst[S](value))
-      if (!name.isEmpty) obj.name = name
-      obj :: Nil
-    }
-
-    final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, _DoubleVector[S]], var value: Vec[Double],
-                                  override val isEditable: _Boolean, val isViewable: _Boolean)
-      extends ListObjView[S]
-        with ObjViewImpl.Impl[S]
-        with ListObjViewImpl.SimpleExpr[S, Vec[Double], _DoubleVector] {
-
-      type E[~ <: stm.Sys[~]] = _DoubleVector[~]
-
-      def factory: ObjView.Factory = DoubleVector
-
-      val exprType: Type.Expr[Vec[Double], _DoubleVector] = _DoubleVector
-
-      def expr(implicit tx: S#Tx): _DoubleVector[S] = objH()
-
-      def convertEditValue(v: Any): Option[Vec[Double]] = v match {
-        case num: Vec[_] => (Option(Vec.empty[Double]) /: num) {
-          case (Some(prev), d: Double) => Some(prev :+ d)
-          case _ => None
-        }
-        case s: _String  => DoubleVector.parseString(s)
       }
 
       def configureRenderer(label: Label): Component = {

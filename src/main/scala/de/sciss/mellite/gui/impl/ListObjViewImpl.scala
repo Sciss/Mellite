@@ -57,7 +57,7 @@ object ListObjViewImpl {
     ObjViewImpl.Long            .tpe.typeID -> ObjViewImpl.Long,
     DoubleObjView               .tpe.typeID -> DoubleObjView,
     ObjViewImpl.IntVector       .tpe.typeID -> ObjViewImpl.IntVector,
-    ObjViewImpl.DoubleVector    .tpe.typeID -> ObjViewImpl.DoubleVector,
+    DoubleVectorObjView         .tpe.typeID -> DoubleVectorObjView,
     ObjViewImpl.Boolean         .tpe.typeID -> ObjViewImpl.Boolean,
     ObjViewImpl.Color           .tpe.typeID -> ObjViewImpl.Color,
     AudioCueObjView             .tpe.typeID -> AudioCueObjView,

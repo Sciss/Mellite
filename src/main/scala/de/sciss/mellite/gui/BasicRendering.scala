@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui
 
 import java.awt.geom.Path2D
-import java.awt.{Paint, Rectangle}
+import java.awt.{Paint, Rectangle, Stroke}
 
 import de.sciss.sonogram
 
@@ -45,6 +45,11 @@ trait BasicRendering extends sonogram.PaintController {
 
   def regionTitleHeight           : Int
   def regionTitleBaseline         : Int
+
+  def pntInlet                    : Paint
+  def pntInletSpan                : Paint
+  def strokeInletSpan             : Stroke
+  def strokeNormal                : Stroke
 
   /* Of current drawing operation. */
   def clipRect                    : Rectangle
