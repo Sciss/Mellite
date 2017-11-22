@@ -13,31 +13,31 @@ lazy val authorEMail                = "contact@sciss.de"
 
 // ---- dependencies ----
 
-lazy val soundProcessesVersion      = "3.15.0"
-lazy val fscapeVersion              = "2.10.0"
-lazy val nuagesVersion              = "2.19.0"
-lazy val fileUtilVersion            = "1.1.3"
-lazy val interpreterPaneVersion     = "1.8.1"
-lazy val scalaColliderVersion       = "1.22.4"
-lazy val scalaColliderUGenVersion   = "1.16.7"
-lazy val lucreVersion               = "3.5.0"
-lazy val equalVersion               = "0.1.2"
-lazy val spanVersion                = "1.3.3"
-lazy val freesoundVersion           = "1.5.0"
-lazy val playJSONVersion            = "0.4.0"
-lazy val scalaColliderSwingVersion  = "1.34.1"
-lazy val lucreSwingVersion          = "1.7.0"
 lazy val audioWidgetsVersion        = "1.11.1"
-lazy val swingPlusVersion           = "0.2.4"
 lazy val desktopVersion             = "0.8.0"
-lazy val sonogramVersion            = "1.9.1"
-lazy val raphaelIconsVersion        = "1.0.4"
+lazy val equalVersion               = "0.1.2"
+lazy val fileUtilVersion            = "1.1.3"
+lazy val freesoundVersion           = "1.6.0"
+lazy val fscapeVersion              = "2.11.0"
+lazy val interpreterPaneVersion     = "1.8.1"
+lazy val jlineVersion               = "2.14.5"
+lazy val lucreVersion               = "3.5.0"
+lazy val lucreSwingVersion          = "1.7.0"
 lazy val modelVersion               = "0.3.4"
 lazy val pdflitzVersion             = "1.2.2"
-lazy val webLaFVersion              = "2.1.3"
-lazy val subminVersion              = "0.2.2"
-lazy val jlineVersion               = "2.14.5"
 lazy val pegDownVersion             = "1.6.0"
+lazy val playJSONVersion            = "0.4.0"
+lazy val raphaelIconsVersion        = "1.0.4"
+lazy val scalaColliderVersion       = "1.23.0"
+lazy val scalaColliderSwingVersion  = "1.35.0"
+lazy val scalaColliderUGenVersion   = "1.17.1"
+lazy val sonogramVersion            = "1.9.1"
+lazy val soundProcessesVersion      = "3.16.1"
+lazy val spanVersion                = "1.3.3"
+lazy val subminVersion              = "0.2.2"
+lazy val swingPlusVersion           = "0.2.4"
+lazy val webLaFVersion              = "2.1.3"
+lazy val wolkenpumpeVersion         = "2.21.1"
 
 lazy val bdb = "bdb" // either "bdb" or "bdb6"
 
@@ -188,7 +188,7 @@ lazy val root = Project(id = baseName, base = file("."))
       "de.sciss"    %% "equal"                          % equalVersion,               // type-safe equals
       "de.sciss"    %% "span"                           % spanVersion,                // (sbt bug)
       "de.sciss"    %% "fileutil"                       % fileUtilVersion,            // (sbt bug)
-      "de.sciss"    %% "wolkenpumpe"                    % nuagesVersion,              // live improv
+      "de.sciss"    %% "wolkenpumpe"                    % wolkenpumpeVersion,         // live improv
       "de.sciss"    %% "scalacolliderswing-core"        % scalaColliderSwingVersion,  // (sbt bug)
       "de.sciss"    %% "scalacolliderswing-interpreter" % scalaColliderSwingVersion,  // REPL view
       "de.sciss"    %% "lucreswing"                     % lucreSwingVersion,          // reactive Swing components

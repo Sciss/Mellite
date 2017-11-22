@@ -17,7 +17,7 @@
 12  Grapheme.Value.Curve
 13  Grapheme.Value.Audio
 14  FadeSpec.Value
-15  Env.ConstShape  -- ?
+15  CurveObj
 16  SynthGraph
 17  IncompleteProduct (SoundDesigner)
 18  UGenSource (SoundDesigner)
@@ -33,6 +33,7 @@
 27  BiGroup
 28  BiGroup.Entry
 29  Markdown
+30  EnvSegment.Obj
 
 100 fscape.GraphObj
 200 freesound.lucre.TextSearchObj

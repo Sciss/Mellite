@@ -50,7 +50,7 @@ Before you submit your pull request consider the following guidelines:
 - Make your changes in a new git branch:
 
      ```shell
-     git checkout -b issue-descriptive-name-branch master
+     git checkout -b issue-descriptive-name-branch work
      ```
 
 - Create your patch, __including appropriate test cases__ if applicable.
@@ -72,8 +72,8 @@ Before you submit your pull request consider the following guidelines:
     git push origin issue-descriptive-name-branch
     ```
 
-- In GitHub, send a pull request to the upstream master branch. Be aware that sometimes ongoing
-  work might occur in a branch such as 'work'. If you see that such branch is way ahead of master,
+- In GitHub, send a pull request to the upstream `work` branch, or to `master` branch if no `work` branch exists.
+  If you are unsure about which branch to use as reference,
   consult with us first (through the issue tracker) to determine the best point of merge.
 - If we suggest changes then:
     - Please make the required updates.
@@ -84,7 +84,7 @@ Before you submit your pull request consider the following guidelines:
 If the PR gets too outdated we may ask you to rebase and force push to update the PR:
 
     ```shell
-    git rebase master -i
+    git rebase work -i
     git push origin issue-descriptive-name-branch -f
     ```
 
@@ -104,10 +104,10 @@ from the main (upstream) repository:
     git push origin --delete issue-descriptive-name-branch
     ```
 
-- Check out the master branch (or the branch into which your work was merged):
+- Check out the `work` branch, or if it does not exist, the `master` branch (or the branch into which your work was merged):
 
     ```shell
-    git checkout master -f
+    git checkout work -f
     ```
 
 - Delete the local branch:
@@ -116,10 +116,10 @@ from the main (upstream) repository:
     git branch -D issue-descriptive-name-branch
     ```
 
-- Update your master (or the branch into which your work was merged) with the latest upstream version:
+- Update your `work` branch (or the branch into which your work was merged) with the latest upstream version:
 
     ```shell
-    git pull --ff upstream master
+    git pull --ff upstream work
     ```
 
 ## <a name="rules"></a> Coding Rules

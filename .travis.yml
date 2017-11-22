@@ -2,7 +2,7 @@ language: scala
 
 scala:
   - 2.12.4
-  - 2.11.11
+  - 2.11.12
 
 env:
   - JDK=oraclejdk8
