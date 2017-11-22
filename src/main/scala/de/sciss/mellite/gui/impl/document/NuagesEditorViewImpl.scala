@@ -18,22 +18,22 @@ package document
 
 import javax.swing.SpinnerNumberModel
 
-import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager, Util}
-import de.sciss.{desktop, equal}
+import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{BooleanObj, IntVector}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{Window, defer, deferTx}
+import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.util.Veto
-import de.sciss.synth.proc
 import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}
 import de.sciss.synth.UGenSource.Vec
+import de.sciss.synth.proc
 import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.{desktop, equal}
 
 import scala.concurrent.Future
 import scala.swing.Swing._
@@ -152,17 +152,7 @@ object NuagesEditorViewImpl {
           sCfg.generatorChannels  = genChans
           sCfg.audioFilesFolder   = audioFilesFolder
           // sCfg.masterGroups       = ...
-          import Mellite.compiler
-          val fut = ScissProcs.compileAndApply[S](n, nCfg, sCfg)
-          fut.failed.foreach { ex =>
-            defer {
-              Dialog.showMessage(
-                message     = s"Unable to compile processes\n\n${Util.formatException(ex)}",
-                title       = title,
-                messageType = Dialog.Message.Error
-              )
-            }
-          }
+          ScissProcs[S](n, nCfg, sCfg)
         }
 
         import equal.Implicits._
