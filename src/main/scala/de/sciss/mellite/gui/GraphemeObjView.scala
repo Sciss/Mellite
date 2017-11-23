@@ -22,6 +22,7 @@ import de.sciss.mellite.gui.impl.grapheme.{GraphemeObjViewImpl => Impl}
 import de.sciss.model.Change
 import de.sciss.synth.proc.Grapheme
 
+import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D
 
 object GraphemeObjView {
@@ -46,6 +47,10 @@ object GraphemeObjView {
 
   final case class InsetsChanged[S <: stm.Sys[S]](view: GraphemeObjView[S], ch: Change[Insets])
     extends ObjView.Update[S]
+
+  trait HasStartLevels[S <: stm.Sys[S]] extends GraphemeObjView[S] {
+    def startLevels: Vec[Double]
+  }
 }
 trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
   def entryH: stm.Source[S#Tx, Grapheme.Entry[S]]
@@ -59,7 +64,9 @@ trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
 //  /** If there are no follow up values, this should be set to `Long.MaxValue` */
 //  var numFrames: Long
 
-  var succ: Option[GraphemeObjView[S]]
+//  var succ: Option[GraphemeObjView[S]]
+
+  def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit
 
   def insets: Insets
 

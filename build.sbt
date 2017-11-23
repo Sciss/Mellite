@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.19.0-SNAPSHOT"
+lazy val projectVersion             = "2.19.0"
 lazy val mimaVersion                = "2.19.0"
 
 lazy val loggingEnabled             = true
@@ -55,7 +55,7 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.github.io/$baseName")),
   licenses           := Seq("GNU General Public License v3+" -> url("http://www.gnu.org/licenses/gpl-3.0.txt")),
   scalaVersion       := "2.12.4",
-  crossScalaVersions := Seq("2.12.4", "2.11.11"),
+  crossScalaVersions := Seq("2.12.4", "2.11.12"),
   scalacOptions ++= {
     val xs = Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_")
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")

@@ -22,13 +22,17 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.GraphemeObjView.HasStartLevels
 import de.sciss.mellite.gui.impl.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
+import de.sciss.synth.Curve
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.{EnvSegment, Workspace}
 
+import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D
 
 object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
@@ -91,16 +95,90 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
   // ---- GraphemeObjView ----
 
+//  private final class SegmentEnd[S <: Sys[S]](val frame: Long, val view: ScalarOptionView[S], obs: Disposable[S#Tx])
+//    extends Disposable[S#Tx] {
+//
+//    def dispose()(implicit tx: S#Tx): Unit = obs.dispose()
+//  }
+
   private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
                                                 objH: stm.Source[S#Tx, E[S]],
                                                 value: V)
     extends Impl[S](objH)
-      with GraphemeObjViewImpl.BasicImpl[S] {
+      with GraphemeObjViewImpl.BasicImpl[S]
+      with GraphemeObjView.HasStartLevels[S] {
 
     private[this] val allSame =
       value.numChannels <= 1 || { val v0 = value.startLevels; val vh = v0.head; v0.forall(_ == vh) }
 
+    def startLevels: Vec[Double] = value.startLevels
+
     def insets: Insets = Insets(4, 4, 4, 4)
+
+    private[this] var succOpt = Option.empty[HasStartLevels[S]]
+
+    override def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit = deferTx {
+      succOpt = opt.collect {
+        case hs: HasStartLevels[S] => hs
+      }
+      // XXX TODO --- fire repaint?
+    }
+
+    override def paintBack(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = succOpt match {
+      case Some(succ) =>
+        val startLvl  = value.startLevels
+        val endLvl    = succ .startLevels
+        val numChS    = startLvl.size
+        val numChE    = endLvl  .size
+        if (numChS == 0 || numChE == 0) return
+
+        val numCh     = math.max(numChS, numChE)
+        val c         = gv.canvas
+        val x1        = c.frameToScreen(this.timeValue)
+        val x2        = c.frameToScreen(succ.timeValue)
+        val jc        = c.canvasComponent.peer
+        val h         = jc.getHeight
+        val hm        = h - 1
+        g.setStroke(r.strokeInletSpan)
+        g.setPaint (r.pntInletSpan)
+        val path      = r.shape1
+        path.reset()
+
+        var ch = 0
+        while (ch < numCh) {
+          val v1 = startLvl(ch % numChS)
+          val y1 = (1 - v1) * hm
+          val v2 = endLvl  (ch % numChE)
+          val y2 = (1 - v2) * hm
+          path.moveTo(x1, y1)
+
+          value.curve match {
+            case Curve.linear =>
+            case Curve.step   =>
+              path.lineTo(x2, y1)
+
+            case curve =>
+              var x   = x1 + 4
+              val y1f = y1.toFloat
+              val y2f = y2.toFloat
+              val dx  = x2 - x1
+              if (dx > 0) while (x < x2) {
+                val pos = ((x - x1) / dx).toFloat
+                val y = curve.levelAt(pos, y1f, y2f)
+                path.lineTo(x, y)
+                x += 4
+              }
+              // XXX TODO
+
+          }
+
+          path.lineTo(x2, y2)
+          ch += 1
+        }
+        g.draw(path)
+
+      case _ =>
+    }
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
       if (value.numChannels == 0) return
@@ -110,34 +188,35 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
         return
       }
 
-      val c   = gv.canvas
-      val jc  = c.canvasComponent.peer
-      val h   = jc.getHeight
-      val x   = c.frameToScreen(timeValue)
+      val c     = gv.canvas
+      val jc    = c.canvasComponent.peer
+      val h     = jc.getHeight
+      val x     = c.frameToScreen(timeValue)
 
-      val a1  = r.area1
-      val a2  = r.area2
-      val p   = r.ellipse1 // r.shape1
+      val a1    = r.area1
+      val a2    = r.area2
+      val p     = r.ellipse1 // r.shape1
       a1.reset()
       a2.reset()
-      val hm  = h - 1
-      var i   = 0
-      var min = Double.MaxValue
-      var max = Double.MinValue
-      while (i < levels.size) {
-        val v = levels(i)
-        i += 1
-        val y = v * hm
+      val hm    = h - 1
+      var ch    = 0
+      val numCh = levels.size
+      var min   = Double.MaxValue
+      var max   = Double.MinValue
+      while (ch < numCh) {
+        val v = levels(ch)
+        val y = (1 - v) * hm
         p.setFrame(x - 2, y - 2, 4, 4)
         a1.add(new Area(p))
         p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
         a2.add(new Area(p))
         if (y < min) min = y
         if (y > max) max = y
+        ch += 1
       }
 
       g.setStroke(r.strokeInletSpan)
-      g.setPaint(r.pntInletSpan)
+      g.setPaint (r.pntInletSpan)
       val ln = r.shape1
       ln.reset()
       ln.moveTo(x, min)

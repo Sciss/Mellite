@@ -54,7 +54,9 @@ object GraphemeObjViewImpl {
   trait BasicImpl[S <: stm.Sys[S]] extends GraphemeObjView[S] with ObjViewImpl.Impl[S] {
     final var timeValue: Long = _
 
-    final var succ = Option.empty[GraphemeObjView[S]]
+//    final var succ = Option.empty[GraphemeObjView[S]]
+
+    def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit = ()
 
     final def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
 

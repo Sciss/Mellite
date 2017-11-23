@@ -29,6 +29,7 @@ import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Workspace}
 
+import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Component, Graphics2D, Label}
 import scala.util.Try
 
@@ -117,7 +118,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     val jc  = c.canvasComponent.peer
     val h   = jc.getHeight
     val x   = c.frameToScreen(view.timeValue)
-    val y   = value * (h - 1)
+    val y   = (1 - value) * (h - 1)
     val selected = gv.selectionModel.contains(view)
     val p = r.ellipse1
     p.setFrame(x - 2, y - 2, 4, 4)
@@ -133,9 +134,12 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
                                                 value: V,
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
-    with GraphemeObjViewImpl.BasicImpl[S] {
+    with GraphemeObjViewImpl.BasicImpl[S]
+    with GraphemeObjView.HasStartLevels[S] {
 
     def insets: Insets = Insets(4, 4, 4, 4)
+
+    def startLevels: Vec[Double] = value +: Vector.empty
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit =
       graphemePaintFront(this, value, g, gv, r)

@@ -75,7 +75,7 @@ object GraphemeViewImpl {
           view
         } .toList
         val succOpt = curr.headOption
-        pred.foreach(_.succ = succOpt)
+        pred.foreach(_.succ_=(succOpt))
         val timeSuccOpt = _grapheme.eventAfter(time)
         timeSuccOpt match {
           case Some(timeSucc) =>
@@ -239,18 +239,18 @@ object GraphemeViewImpl {
       val succOpt = Some(view)
       gr.eventBefore(time).foreach { timePred =>
         viewMapT().get(timePred).foreach { viewsPred =>
-          deferTx {
+//          deferTx {
             viewsPred.foreach { viewPred =>
-              viewPred.succ = succOpt
+              viewPred.succ_=(succOpt)
             }
-          }
+//          }
         }
       }
       gr.eventAfter(time).foreach { timeSucc =>
         viewMapT().get(timeSucc).foreach { viewsSucc =>
-          deferTx {
-            view.succ = viewsSucc.headOption
-          }
+//          deferTx {
+            view.succ_=(viewsSucc.headOption)
+//          }
         }
       }
       deferTx(repaintAll())    // XXX TODO: optimize dirty rectangle
@@ -312,11 +312,11 @@ object GraphemeViewImpl {
               _viewMapG0.get(timePred).fold {
                 warnViewNotFound("remove", entry)
               } { viewsPred =>
-                deferTx {
+//                deferTx {
                   viewsPred.foreach { viewPred =>
-                    viewPred.succ = succNew
+                    viewPred.succ_=(succNew)
                   }
-                }
+//                }
               }
             }
           }

@@ -123,11 +123,14 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
                                                 value: V,
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
-      with GraphemeObjViewImpl.BasicImpl[S] {
+      with GraphemeObjViewImpl.BasicImpl[S]
+      with GraphemeObjView.HasStartLevels[S] {
 
     private[this] val allSame = value.size <= 1 || { val v0 = value.head; value.forall(_ == v0) }
 
     def insets: Insets = Insets(4, 4, 4, 4)
+
+    def startLevels: Vec[Double] = value
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
       if (value.isEmpty) return
