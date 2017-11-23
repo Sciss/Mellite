@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
-import de.sciss.mellite.gui.impl.{DoubleObjView, DoubleVectorObjView, GenericObjView, ObjViewImpl}
+import de.sciss.mellite.gui.impl.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
 import de.sciss.synth.proc.Grapheme
 
 import scala.swing.Graphics2D
@@ -45,7 +45,8 @@ object GraphemeObjViewImpl {
 
   private var map = Map[Int, Factory](
     DoubleObjView       .tpe.typeID -> DoubleObjView,
-    DoubleVectorObjView .tpe.typeID -> DoubleVectorObjView
+    DoubleVectorObjView .tpe.typeID -> DoubleVectorObjView,
+    EnvSegmentObjView   .tpe.typeID -> EnvSegmentObjView
 //    ProcObjView .tpe.typeID -> ProcObjView,
 //    ActionView  .tpe.typeID -> ActionView
   )

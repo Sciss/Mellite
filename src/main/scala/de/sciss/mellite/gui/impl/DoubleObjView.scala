@@ -29,7 +29,7 @@ import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Workspace}
 
-import scala.swing.Graphics2D
+import scala.swing.{Component, Graphics2D, Label}
 import scala.util.Try
 
 object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
@@ -96,8 +96,12 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: Double,
                                             override val isEditable: Boolean, isViewable: Boolean)
     extends Impl(objH, isViewable = isViewable) with ListObjView[S]
-      with ListObjViewImpl.SimpleExpr[S, V, E]
-      with ListObjViewImpl.StringRenderer {
+      with ListObjViewImpl.SimpleExpr[S, V, E] {
+
+    def configureRenderer(label: Label): Component = {
+      label.text = value.toFloat.toString   // avoid excessive number of digits!
+      label
+    }
 
     def convertEditValue(v: Any): Option[Double] = v match {
       case num: V       => Some(num)

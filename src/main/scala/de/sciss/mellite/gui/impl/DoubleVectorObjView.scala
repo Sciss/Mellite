@@ -111,7 +111,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     }
 
     def configureRenderer(label: Label): Component = {
-      label.text = value.mkString(" ")
+      label.text = value.iterator.map(_.toFloat).mkString(" ")  // avoid excessive number of digits!
       label
     }
   }

@@ -406,7 +406,7 @@ object ParamSpecObjView extends ListObjView.Factory {
 
     def factory: ObjView.Factory = ParamSpecObjView
 
-    val exprType: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
+    def exprType: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
 
     def expr(implicit tx: S#Tx): ParamSpec.Obj[S] = obj
 

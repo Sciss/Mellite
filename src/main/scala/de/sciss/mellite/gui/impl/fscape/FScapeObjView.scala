@@ -45,9 +45,9 @@ object FScapeObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categComposition
   def hasMakeDialog : Boolean   = true
 
-  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
-
-  def init(): Unit = _init
+//  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
+//
+//  def init(): Unit = _init
 
   def mkListView[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx): FScapeObjView[S] with ListObjView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)

@@ -63,9 +63,9 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
 
   private[this] final val ClientId  = "WxJZb6eY0rqYVYqzkkfP"
 
-  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
-
-  def init(): Unit = _init
+//  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
+//
+//  def init(): Unit = _init
 
   def mkListView[S <: Sys[S]](obj: Retrieval[S])(implicit tx: S#Tx): FreesoundRetrievalObjView[S] with ListObjView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)

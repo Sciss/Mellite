@@ -79,7 +79,7 @@ object MarkdownObjView extends ListObjView.Factory {
 
     def factory: ObjView.Factory = MarkdownObjView
 
-    val exprType: Type.Expr[Markdown.Value, Markdown] = Markdown
+    def exprType: Type.Expr[Markdown.Value, Markdown] = Markdown
 
     def expr(implicit tx: S#Tx): Markdown[S] = obj
 

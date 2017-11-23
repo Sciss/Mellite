@@ -25,6 +25,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.artifact.{ArtifactLocationObjView, ArtifactObjView}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
+import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 
@@ -52,30 +53,33 @@ object ListObjViewImpl {
   }
 
   private var map = scala.Predef.Map[Int, ListObjView.Factory](
-    ObjViewImpl.String          .tpe.typeID -> ObjViewImpl.String,
-    IntObjView                  .tpe.typeID -> IntObjView,
-    ObjViewImpl.Long            .tpe.typeID -> ObjViewImpl.Long,
-    DoubleObjView               .tpe.typeID -> DoubleObjView,
-    ObjViewImpl.IntVector       .tpe.typeID -> ObjViewImpl.IntVector,
-    DoubleVectorObjView         .tpe.typeID -> DoubleVectorObjView,
-    ObjViewImpl.Boolean         .tpe.typeID -> ObjViewImpl.Boolean,
-    ObjViewImpl.Color           .tpe.typeID -> ObjViewImpl.Color,
-    AudioCueObjView             .tpe.typeID -> AudioCueObjView,
-    ArtifactLocationObjView     .tpe.typeID -> ArtifactLocationObjView,
-    ArtifactObjView             .tpe.typeID -> ArtifactObjView,
-//    FScapeObjView               .tpe.typeID -> FScapeObjView,
-    ObjViewImpl.Folder          .tpe.typeID -> ObjViewImpl.Folder,
-    ProcObjView                 .tpe.typeID -> ProcObjView,
-    ObjViewImpl.Timeline        .tpe.typeID -> ObjViewImpl.Timeline,
-    ObjViewImpl.Grapheme        .tpe.typeID -> ObjViewImpl.Grapheme,
-    CodeObjView                 .tpe.typeID -> CodeObjView,
-    ObjViewImpl.FadeSpec        .tpe.typeID -> ObjViewImpl.FadeSpec,
-    ActionView                  .tpe.typeID -> ActionView,
-    ObjViewImpl.Ensemble        .tpe.typeID -> ObjViewImpl.Ensemble,
-    ObjViewImpl.Nuages          .tpe.typeID -> ObjViewImpl.Nuages,
-    OutputObjView               .tpe.typeID -> OutputObjView,
-    MarkdownObjView             .tpe.typeID -> MarkdownObjView,
-    ParamSpecObjView            .tpe.typeID -> ParamSpecObjView
+    ActionView                .tpe.typeID -> ActionView,
+    ArtifactLocationObjView   .tpe.typeID -> ArtifactLocationObjView,
+    ArtifactObjView           .tpe.typeID -> ArtifactObjView,
+    AudioCueObjView           .tpe.typeID -> AudioCueObjView,
+    CodeObjView               .tpe.typeID -> CodeObjView,
+    DoubleObjView             .tpe.typeID -> DoubleObjView,
+    DoubleVectorObjView       .tpe.typeID -> DoubleVectorObjView,
+    EnvSegmentObjView         .tpe.typeID -> EnvSegmentObjView,
+    FreesoundRetrievalObjView .tpe.typeID -> FreesoundRetrievalObjView,
+    FScapeObjView             .tpe.typeID -> FScapeObjView,
+    FScapeOutputObjView       .tpe.typeID -> FScapeOutputObjView,
+    IntObjView                .tpe.typeID -> IntObjView,
+    MarkdownObjView           .tpe.typeID -> MarkdownObjView,
+    ObjViewImpl.Boolean       .tpe.typeID -> ObjViewImpl.Boolean,
+    ObjViewImpl.Color         .tpe.typeID -> ObjViewImpl.Color,
+    ObjViewImpl.Ensemble      .tpe.typeID -> ObjViewImpl.Ensemble,
+    ObjViewImpl.FadeSpec      .tpe.typeID -> ObjViewImpl.FadeSpec,
+    ObjViewImpl.Folder        .tpe.typeID -> ObjViewImpl.Folder,
+    ObjViewImpl.Grapheme      .tpe.typeID -> ObjViewImpl.Grapheme,
+    ObjViewImpl.IntVector     .tpe.typeID -> ObjViewImpl.IntVector,
+    ObjViewImpl.Long          .tpe.typeID -> ObjViewImpl.Long,
+    ObjViewImpl.Nuages        .tpe.typeID -> ObjViewImpl.Nuages,
+    ObjViewImpl.String        .tpe.typeID -> ObjViewImpl.String,
+    ObjViewImpl.Timeline      .tpe.typeID -> ObjViewImpl.Timeline,
+    OutputObjView             .tpe.typeID -> OutputObjView,
+    ParamSpecObjView          .tpe.typeID -> ParamSpecObjView,
+    ProcObjView               .tpe.typeID -> ProcObjView
   )
 
   /** A trait that when mixed in provides `isEditable` and `tryEdit` as non-op methods. */
@@ -109,26 +113,23 @@ object ListObjViewImpl {
     // protected def testValue       (v: Any): Option[A]
     protected def convertEditValue(v: Any): Option[A]
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+      val tpe = exprType  // make IntelliJ happy
       convertEditValue(value).flatMap { newValue =>
         expr match {
-          case exprType.Var(vr) =>
+          case tpe.Var(vr) =>
             import de.sciss.equal.Implicits._
             vr() match {
               case Expr.Const(x) if x === newValue => None
               case _ =>
-                // val imp = ExprImplicits[S]
-                // import imp._
-                // vr() = newValue
-//                implicit val ser    = exprType.serializer   [S]
-//                implicit val serVr  = exprType.varSerializer[S]
-                val ed = EditVar.Expr[S, A, Ex](s"Change $humanName Value", vr, exprType.newConst[S](newValue))
+                val ed = EditVar.Expr[S, A, Ex](s"Change $humanName Value", vr, tpe.newConst[S](newValue))
                 Some(ed)
             }
 
           case _ => None
         }
       }
+    }
   }
 
   trait SimpleExpr[S <: Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ExprLike[S, A, Ex]
@@ -158,7 +159,7 @@ object ListObjViewImpl {
   trait BooleanExprLike[S <: Sys[S]] extends ExprLike[S, Boolean, BooleanObj] {
     _: ListObjView[S] =>
 
-    val exprType: Type.Expr[Boolean, BooleanObj] = BooleanObj
+    def exprType: Type.Expr[Boolean, BooleanObj] = BooleanObj
 
     def convertEditValue(v: Any): Option[Boolean] = v match {
       case num: Boolean  => Some(num)
