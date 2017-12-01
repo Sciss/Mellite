@@ -8,4 +8,7 @@ trait GraphemeCanvas[S <: Sys[S]] extends TimelineCanvas {
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 
   def selectionModel: GraphemeObjView.SelectionModel[S]
+
+  def screenYToModel(y: Int   ): Double
+  def modelToScreenY(m: Double): Int
 }

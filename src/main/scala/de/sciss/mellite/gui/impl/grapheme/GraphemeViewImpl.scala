@@ -207,13 +207,19 @@ object GraphemeViewImpl {
 //      pane2.border              = null
 //      pane2.oneTouchExpandable  = true
 
+      val boxWest = new BoxPanel(Orientation.Vertical) {
+        contents += VStrut(16) // XXX TODO --- incorrect: transportPane.preferredSize.height)
+        contents += canvas.yAxis
+        contents += VStrut(16) // XXX TODO --- TimelineCanvasImpl should offer `scroll` access
+      }
+
       val pane = new BorderPanel {
         import BorderPanel.Position._
         layoutManager.setVgap(2)
         add(transportPane, North )
         add(pane2        , Center)
         // add(ggTrackPos   , East  )
-        // add(globalView.component, West  )
+        add(boxWest      , West  )
       }
 
       component = pane

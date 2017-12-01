@@ -93,7 +93,7 @@ object TrackTool {
   }
 
   sealed trait Update[+A]
-  case object DragBegin  extends Update[Nothing]
+  case object DragBegin extends Update[Nothing]
   final case class DragAdjust[A](value: A) extends Update[A]
 
   final case class DragRubber(trackIndex: Int, trackHeight: Int, span: Span)
