@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.20.0"
+lazy val projectVersion             = "2.20.1-SNAPSHOT"
 lazy val mimaVersion                = "2.20.0"
 
 lazy val loggingEnabled             = true
@@ -18,7 +18,7 @@ lazy val desktopVersion             = "0.8.0"
 lazy val equalVersion               = "0.1.2"
 lazy val fileUtilVersion            = "1.1.3"
 lazy val freesoundVersion           = "1.6.0"
-lazy val fscapeVersion              = "2.11.0"
+lazy val fscapeVersion              = "2.11.1"
 lazy val interpreterPaneVersion     = "1.8.1"
 lazy val jlineVersion               = "2.14.5"
 lazy val lucreVersion               = "3.5.0"
@@ -99,9 +99,9 @@ lazy val pkgUniversalSettings = Seq(
   // provide manual file `MELLITE_config.txt` instead!
   javaOptions in Universal ++= Seq(
     // -J params will be added as jvm parameters
-    "-J-Xmx1024m"
+    "-J-Xmx1024m",
     // others will be added as app parameters
-    // "-Dproperty=true",
+    "-Djavax.accessibility.assistive_technologies=",
   ),
   // Since our class path is very very long,
   // we use instead the wild-card, supported
