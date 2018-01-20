@@ -65,6 +65,7 @@ This documents aids to avoid accidental re-use
 | `proc.Output`                 | `raphael.Shapes.Export`                  |
 | `FScape.Output`               | `raphael.Shapes.Export`                  |
 | `EnvSegment`                  | `raphael.Shapes.Connect`                 |
+| `Pattern`                     | `mellite.gui.Shapes.Pattern`             |
 
 # SysSon
 

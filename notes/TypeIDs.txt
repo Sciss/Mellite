@@ -39,6 +39,7 @@
 200 freesound.lucre.TextSearchObj
 201 freesound.lucre.SoundObj
 202 freesound.lucre.Retrieval
+300 patterns.GraphObj
 
 :: non-expr elements (mutables) ::
 
@@ -58,6 +59,7 @@
 0x1000B     fscape.FScape
 0x1000C     Cursors
 0x1000D     fscape.FScape.Output
+0x1000E     patterns.lucre.Pattern
 
 :: indeterminus ::
 
@@ -122,6 +124,8 @@ Code ids
 2: Action
 
 4: fscape.Graph
+
+5: patterns.Graph
 
 :: sysson ::
 

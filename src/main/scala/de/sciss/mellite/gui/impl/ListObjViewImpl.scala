@@ -27,6 +27,7 @@ import de.sciss.mellite.gui.impl.artifact.{ArtifactLocationObjView, ArtifactObjV
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
+import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 
 import scala.language.higherKinds
@@ -79,6 +80,7 @@ object ListObjViewImpl {
     ObjViewImpl.Timeline      .tpe.typeID -> ObjViewImpl.Timeline,
     OutputObjView             .tpe.typeID -> OutputObjView,
     ParamSpecObjView          .tpe.typeID -> ParamSpecObjView,
+    PatternObjView            .tpe.typeID -> PatternObjView,
     ProcObjView               .tpe.typeID -> ProcObjView
   )
 
