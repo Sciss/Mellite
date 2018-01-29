@@ -125,7 +125,8 @@ object PatternObjView extends ListObjView.Factory {
           val obj = objH()
           val g   = obj.graph().value
           deferTx {
-            implicit val ctx: patterns.Context = patterns.Context()
+            implicit val ctx: patterns.Context.Plain = patterns.Context()
+            import ctx.{tx => txp}
             val n     = 60
             val res0  = g.iterator.take(n).toList
             val abbr  = res0.lengthCompare(n) == 0

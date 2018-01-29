@@ -31,6 +31,7 @@ import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}
+import de.sciss.topology
 import de.sciss.topology.Topology
 
 import scala.swing.Action
@@ -119,7 +120,7 @@ trait TimelineActions[S <: Sys[S]] {
 
     def apply(): Unit = {
       type V = TimelineObjView[S]
-      case class E(sourceVertex: V, targetVertex: V) extends Topology.Edge[V]
+      case class E(sourceVertex: V, targetVertex: V) extends topology.Edge[V]
       case class Placed(view: TimelineObjView[S], y: Int) {
         def nextY         : Int     = view.trackHeight + y + 1
         def deltaY        : Int     = y - view.trackIndex

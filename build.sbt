@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.20.1-SNAPSHOT"
+lazy val projectVersion             = "2.21.0-SNAPSHOT"
 lazy val mimaVersion                = "2.20.0"
 
 lazy val loggingEnabled             = true
@@ -16,11 +16,11 @@ lazy val authorEMail                = "contact@sciss.de"
 lazy val deps = new {
   val main = new {
     val audioWidgets        = "1.11.2"
-    val desktop             = "0.8.0"
+    val desktop             = "0.8.1"
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
-    val freesound           = "1.6.0"
-    val fscape              = "2.11.1"
+    val freesound           = "1.7.0-SNAPSHOT"
+    val fscape              = "2.12.0-SNAPSHOT"
     val interpreterPane     = "1.8.1"
     val jline               = "2.14.5"
     val lucre               = "3.5.0"
@@ -34,12 +34,13 @@ lazy val deps = new {
     val scalaColliderSwing  = "1.35.0"
     val scalaColliderUGen   = "1.17.1"
     val sonogram            = "1.9.1"
-    val soundProcesses      = "3.16.1"
+    val soundProcesses      = "3.17.0-SNAPSHOT"
     val span                = "1.3.3"
     val submin              = "0.2.2"
     val swingPlus           = "0.2.4"
+    val topology            = "1.1.0"
     val webLaF              = "2.1.3"
-    val wolkenpumpe         = "2.21.2"
+    val wolkenpumpe         = "2.22.0-SNAPSHOT"
     val patterns            = "0.1.0-SNAPSHOT"
   }
 }
@@ -207,6 +208,7 @@ lazy val root = Project(id = baseName, base = file("."))
       "de.sciss"    %% "fscape"                         % deps.main.fscape,              // offline audio rendering
       "de.sciss"    %% "patterns-lucre"                 % deps.main.patterns,            // pattern sequences
       "de.sciss"    %% "scalafreesound"                 % deps.main.freesound,           // Freesound support
+      "de.sciss"    %% "topology"                       % deps.main.topology,            // (sbt bug)
       "org.pegdown" %  "pegdown"                        % deps.main.pegDown,             // Markdown renderer
       "de.sciss"    %% "pdflitz"                        % deps.main.pdflitz,             // PDF export
       "de.sciss"    %  "weblaf"                         % deps.main.webLaF,              // look and feel
