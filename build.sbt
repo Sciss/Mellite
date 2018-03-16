@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.21.0-SNAPSHOT"
-lazy val mimaVersion                = "2.20.0"
+lazy val projectVersion             = "2.21.0"
+lazy val mimaVersion                = "2.21.0"
 
 lazy val loggingEnabled             = true
 
@@ -20,12 +20,13 @@ lazy val deps = new {
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
     val freesound           = "1.7.0"
-    val fscape              = "2.12.0"
+    val fscape              = "2.12.1"
     val interpreterPane     = "1.8.1"
     val jline               = "2.14.5"
     val lucre               = "3.5.0"
     val lucreSwing          = "1.7.0"
     val model               = "0.3.4"
+    val numbers             = "0.1.5"
     val pdflitz             = "1.2.2"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -41,7 +42,7 @@ lazy val deps = new {
     val topology            = "1.1.0"
     val webLaF              = "2.1.3"
     val wolkenpumpe         = "2.22.0"
-    val patterns            = "0.1.0-SNAPSHOT"
+    val patterns            = "0.1.0"
   }
 }
 
@@ -192,6 +193,7 @@ lazy val root = Project(id = baseName, base = file("."))
       "de.sciss"    %% s"lucre-$bdb"                    % deps.main.lucre,               // database backend
       "de.sciss"    %% "lucre-expr"                     % deps.main.lucre,
       "de.sciss"    %% "equal"                          % deps.main.equal,               // type-safe equals
+      "de.sciss"    %% "numbers"                        % deps.main.numbers,             // (sbt bug)
       "de.sciss"    %% "span"                           % deps.main.span,                // (sbt bug)
       "de.sciss"    %% "fileutil"                       % deps.main.fileUtil,            // (sbt bug)
       "de.sciss"    %% "wolkenpumpe"                    % deps.main.wolkenpumpe,         // live improv

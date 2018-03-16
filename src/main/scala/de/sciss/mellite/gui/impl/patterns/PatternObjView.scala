@@ -16,7 +16,6 @@ package gui.impl.patterns
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.{desktop, patterns}
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
@@ -28,6 +27,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, Shapes}
+import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Workspace}
@@ -41,8 +41,13 @@ object PatternObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categComposition
   def hasMakeDialog : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ListObjView[S] =
-    new Impl(tx.newHandle(obj)).initAttrs(obj)
+  def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ListObjView[S] = {
+    val vr = Pattern.Var.unapply(obj).getOrElse {
+      val _vr = Pattern.newVar[S](obj)
+      _vr
+    }
+    new Impl(tx.newHandle(vr)).initAttrs(obj)
+  }
 
   type Config[S <: stm.Sys[S]] = String
 
@@ -57,12 +62,12 @@ object PatternObjView extends ListObjView.Factory {
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = Pattern[S]
+    val obj  = Pattern.newVar[S](Pattern.empty[S])
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Pattern[S]])
+  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Pattern.Var[S]])
     extends PatternObjView[S]
       with ListObjView /* .Int */[S]
       with ObjViewImpl.Impl[S]
@@ -70,7 +75,7 @@ object PatternObjView extends ListObjView.Factory {
       with NonEditable[S]
       /* with NonViewable[S] */ {
 
-    override def obj(implicit tx: S#Tx): Pattern[S] = objH()
+    override def obj(implicit tx: S#Tx): Pattern.Var[S] = objH()
 
     type E[~ <: stm.Sys[~]] = Pattern[~]
 
@@ -90,11 +95,11 @@ object PatternObjView extends ListObjView.Factory {
     // ---- adapter for editing an Pattern's source ----
   }
 
-  private def codeFrame[S <: Sys[S]](obj: Pattern[S])
+  private def codeFrame[S <: Sys[S]](obj: Pattern.Var[S])
                                     (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
-    val codeObj = mkSource(obj = obj, codeID = Pattern.Code.id, key = Pattern.attrSource,
+    val codeObj = mkSource(obj = obj, codeID = Pattern.Code.id, key = "graph-source" /* Pattern.attrSource */,
       init = "// Pattern graph function source code\n\n")
 
     val codeEx0 = codeObj
@@ -104,15 +109,12 @@ object PatternObjView extends ListObjView.Factory {
       case other => sys.error(s"Pattern source code does not produce patterns.Graph: ${other.contextName}")
     }
 
-    import de.sciss.patterns.Graph
-    import de.sciss.patterns.lucre.GraphObj
-
-    val handler = new CodeView.Handler[S, Unit, Graph[_]] {
+    val handler = new CodeView.Handler[S, Unit, Pat[_]] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: Graph[_])(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: Pat[_])(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        EditVar.Expr[S, Graph[_], GraphObj]("Change Pattern Graph", obj.graph, GraphObj.newConst[S](out))
+        EditVar.Expr[S, Pat[_], Pattern]("Change Pattern Graph", obj, Pattern.newConst[S](out))
       }
 
       def dispose()(implicit tx: S#Tx): Unit = ()
@@ -123,12 +125,12 @@ object PatternObjView extends ListObjView.Factory {
       val actionEval = new swing.Action("Evaluate") { self =>
         def apply(): Unit = cursor.step { implicit tx =>
           val obj = objH()
-          val g   = obj.graph().value
+          val g   = obj.value // .graph().value
           deferTx {
             implicit val ctx: patterns.Context.Plain = patterns.Context()
             import ctx.{tx => txp}
             val n     = 60
-            val res0  = g.iterator.take(n).toList
+            val res0  = g.expand.take(n).toList
             val abbr  = res0.lengthCompare(n) == 0
             val res   = if (abbr) res0.init else res0
             println(res.mkString("[", ", ", " ...]"))
