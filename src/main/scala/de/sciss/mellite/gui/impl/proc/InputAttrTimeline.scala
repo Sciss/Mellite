@@ -2,7 +2,7 @@
  *  InputAttrTimeline.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -21,7 +21,7 @@ import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.synth.proc
 
 final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], val key: String,
-                                                   tl: proc.Timeline[S], tx0: S#Tx)
+                                           tl: proc.Timeline[S], tx0: S#Tx)
   extends InputAttrImpl[S] {
 
   override def toString: String = s"InputAttrTimeline(parent = $parent, key = $key)"

@@ -2,7 +2,7 @@
  *  AttrCellViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -39,10 +39,10 @@ object AttrCellViewImpl {
 
     implicit protected def classTag: ClassTag[E[S]]
 
-    type Repr = Option[E[S]] // Expr[S, A]]
+    final type Repr = Option[E[S]] // Expr[S, A]]
 
     def react(fun: S#Tx => Option[A] => Unit)(implicit tx: S#Tx): Disposable[S#Tx] =
-      new ExprMapLikeObs(map = h(), key = key, fun = fun, tx0 = tx)
+      new ExprMapLikeObs[S, A, E](map = h(), key = key, fun = fun, tx0 = tx)
 
     def repr(implicit tx: S#Tx): Repr = {
       val opt = h().$[E](key)
@@ -145,7 +145,8 @@ object AttrCellViewImpl {
       }
     }
 
-    def lift(value: Option[A])(implicit tx: S#Tx): Repr = value.map(tpe.newConst[S](_))
+    def lift(value: Option[A])(implicit tx: S#Tx): Repr =
+      value.map(v => tpe.newConst[S](v))  // IntelliJ highlight bug
 
     def update(v: Option[A])(implicit tx: S#Tx): Unit = repr_=(lift(v))
   }

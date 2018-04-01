@@ -2,7 +2,7 @@
  *  CodeFrameImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -140,11 +140,13 @@ object CodeFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          compiler: Code.Compiler): CodeFrame[S] = {
     val _codeEx = obj
-    val _code   = _codeEx.value
+
+    val _code: CodeT[_, _] = _codeEx.value    // IntelliJ highlight bug
     implicit val undo: UndoManager = UndoManager()
     val objH    = tx.newHandle(obj)
-    make[S, _code.In, _code.Out](obj, objH, obj, _code, None, bottom = bottom, rightViewOpt = None,
-      canBounce = canBounce)
+
+    make[S, _code.In, _code.Out](pObj = obj, pObjH = objH, obj = obj, code0 = _code, handler = None,
+      bottom = bottom, rightViewOpt = None, canBounce = canBounce)
   }
 
   private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[View[S]])
@@ -180,8 +182,11 @@ object CodeFrameImpl {
     object actionBounce extends ActionBounceTimeline[S](this, objH)
   }
 
+  // trying to minimize IntelliJ false error highlights
+  private final type CodeT[In0, Out0] = Code { type In = In0; type Out = Out0 }
+
   def make[S <: Sys[S], In0, Out0](pObj: Obj[S], pObjH: stm.Source[S#Tx, Obj[S]], obj: Code.Obj[S],
-                                   code0: Code { type In = In0; type Out = Out0 },
+                                   code0: CodeT[In0, Out0],
                                    handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
                                    rightViewOpt: Option[View[S]], canBounce: Boolean)
                                   (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],

@@ -2,7 +2,7 @@
  *  LinkTargetTimeline.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -24,8 +24,8 @@ import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 
 final class LinkTargetTimeline[S <: Sys[S]](val attr: InputAttrTimeline[S],
-                                                    spanH: stm.Source[S#Tx, SpanLikeObj[S]],
-                                                    objH : stm.Source[S#Tx, Obj[S]])
+                                            spanH: stm.Source[S#Tx, SpanLikeObj[S]],
+                                            objH : stm.Source[S#Tx, Obj[S]])
   extends LinkTarget[S] {
 
   override def toString: String = s"LinkTargetTimeline($attr)@${hashCode.toHexString}"

@@ -2,7 +2,7 @@
  *  ActionBounceTimeline.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -18,8 +18,8 @@ import java.awt
 import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEvent}
 import java.io.{EOFException, File, IOException}
 import java.text.ParseException
-import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 
+import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 import de.sciss.audiowidgets.TimeField
 import de.sciss.desktop.{Desktop, DialogSource, FileDialog, OptionPane, PathField, Window}
 import de.sciss.file._
@@ -402,7 +402,9 @@ object ActionBounceTimeline {
                          init: QuerySettings[S], selectionType: Selection,
                          spanPresets: ISeq[SpanPreset])(callback: (QuerySettings[S], Boolean) => Unit): Unit = {
 
-    import view.{cursor, undoManager, workspace => document}
+    val viewWS: ViewHasWorkspace[S] = view
+    import view.undoManager
+    import viewWS.{cursor, workspace}
     val window          = Window.find(view.component)
     import equal.Implicits._
 
@@ -748,7 +750,7 @@ object ActionBounceTimeline {
               ok
 
             case _ => // either no location was set, or it's not parent of the file
-              ActionArtifactLocation.query[S](document.rootH, f) match {
+              ActionArtifactLocation.query[S](workspace.rootH, f) match {
                 case Some(either) =>
                   either match {
                     case Left(source) =>
@@ -758,9 +760,9 @@ object ActionBounceTimeline {
                     case Right((name, directory)) =>
                       val (edit0, source) = cursor.step { implicit tx =>
                         val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
-                        val folder  = document.rootH()
+                        val folder  = workspace.rootH()
                         val index   = folder.size
-                        val _edit   = EditFolderInsertObj("Location", folder, index, locObj)
+                        val _edit   = EditFolderInsertObj[S]("Location", folder, index, locObj)
                         (_edit, tx.newHandle(locObj))
                       }
                       undoManager.add(edit0)
@@ -828,11 +830,11 @@ object ActionBounceTimeline {
                               settings: QuerySettings[S],
                               group: IIterable[stm.Source[S#Tx, Obj[S]]], file: File, span: Span): Unit = {
 
-    import view.{cursor, workspace => document}
+    import view.{cursor, workspace}
     val window      = Window.find(view.component)
     val bounceFile  = file
     val pSet        = settings.prepare(group, bounceFile)(span)
-    val process: ProcessorLike[Any, Any] = perform(document, pSet)
+    val process: ProcessorLike[Any, Any] = perform(workspace, pSet)
 
     var processCompleted = false
 
@@ -884,7 +886,7 @@ object ActionBounceTimeline {
             val depGain   = DoubleObj.newVar[S](1.0)
             val deployed  = AudioCue.Obj[S](depArtif, spec, depOffset, depGain)
             deployed.name = file.base
-            document.rootH().addLast(deployed)
+            workspace.rootH().addLast(deployed)
           }
 
         case _ =>
@@ -1131,7 +1133,6 @@ abstract class ActionBounceTimeline[S <: Sys[S]](view: ViewHasWorkspace[S] with 
   extends scala.swing.Action(ActionBounceTimeline.title) {
 
   import ActionBounceTimeline.{storeSettings => _, _}
-  import view.cursor
 
   private[this] var settings = QuerySettings[S]()
 
@@ -1146,6 +1147,8 @@ abstract class ActionBounceTimeline[S <: Sys[S]](view: ViewHasWorkspace[S] with 
   protected def defaultRealtime(implicit tx: S#Tx): Boolean               = false
   protected def defaultFile    (implicit tx: S#Tx): File                  = file("")
   protected def defaultChannels(implicit tx: S#Tx): Vec[Range.Inclusive]  = Vector(0 to 1)
+
+  import view.cursor
 
   def apply(): Unit = {
     if (storeSettings) {

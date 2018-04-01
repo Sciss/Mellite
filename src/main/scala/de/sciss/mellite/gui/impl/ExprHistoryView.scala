@@ -2,7 +2,7 @@
  *  ExprHistoryView.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -43,7 +43,7 @@ object ExprHistoryView {
               (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, Ex[S]]): ViewHasWorkspace[S] = {
     val sys       = workspace.system
     val cursor    = Cursor[S, D](tx.inputAccess)(tx.durable, sys)
-    val exprH     = tx.newHandle(expr)
+    val exprH: stm.Source[S#Tx, Expr[S, A]] = tx.newHandle(expr)  // IntelliJ highlight bug
     val pos0      = tx.inputAccess
     val time0     = pos0.info.timeStamp
     val val0      = expr.value

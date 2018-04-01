@@ -2,7 +2,7 @@
  *  InputElem.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -24,7 +24,7 @@ import de.sciss.span.SpanLike
  * Source views are updated by calling `copy` as they appear and disappear
  */
 final class InputElem[S <: stm.Sys[S]](val span: SpanLike, val source: Option[ProcObjView.Timeline[S]],
-                                               val target: LinkTarget[S], obs: Disposable[S#Tx], tx0: S#Tx)
+                                       val target: LinkTarget[S], obs: Disposable[S#Tx], tx0: S#Tx)
   extends Disposable[S#Tx] {
 
   source.foreach(_.addTarget(target)(tx0))

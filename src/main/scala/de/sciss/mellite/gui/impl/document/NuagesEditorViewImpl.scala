@@ -2,7 +2,7 @@
  *  NuagesEditorViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -45,7 +45,7 @@ object NuagesEditorViewImpl {
     val folder  = FolderView(obj.folder)
     val folder1 = new FolderFrameImpl.ViewImpl[S](folder)
     folder1.init()
-    val res     = new Impl(tx.newHandle(obj), folder1)
+    val res     = new Impl[S](tx.newHandle(obj), folder1)
     deferTx {
       res.guiInit()
     }

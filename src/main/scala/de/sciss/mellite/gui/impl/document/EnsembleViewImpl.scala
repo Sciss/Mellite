@@ -2,7 +2,7 @@
  *  EnsembleViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -35,7 +35,7 @@ object EnsembleViewImpl {
     val folder1   = new FolderFrameImpl.ViewImpl[S](folder).init()
     val playing   = BooleanCheckBoxView(ens.playing, "Playing State")
     val viewPower = PlayToggleButton(ensObj)
-    new Impl(tx.newHandle(ensObj), viewPower, folder1, playing).init()
+    new Impl[S](tx.newHandle(ensObj), viewPower, folder1, playing).init()
   }
 
   final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: PlayToggleButton[S],

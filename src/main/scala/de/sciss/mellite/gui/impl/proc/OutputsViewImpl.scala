@@ -2,7 +2,7 @@
  *  OutputsViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -37,7 +37,7 @@ import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation,
 
 object OutputsViewImpl {
   def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                           workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] = {
+                                       workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>
       (out.key, ListObjView(out))
     }  .toIndexedSeq

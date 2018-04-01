@@ -2,7 +2,7 @@
  *  PlayToggleButton.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -28,13 +28,13 @@ import scala.swing.event.ButtonClicked
 
 object PlayToggleButton {
   def apply[S <: Sys[S]](transport: Transport[S])(implicit tx: S#Tx): PlayToggleButton[S] =
-    new Impl(transport, objH = None, disposeTransport = false).init()
+    new Impl[S](transport, objH = None, disposeTransport = false).init()
 
   def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
                                       workspace: WorkspaceHandle[S]): PlayToggleButton[S] = {
     val t = Transport[S](Mellite.auralSystem)
 //    t.addObject(obj)
-    new Impl(t, objH = Some(tx.newHandle(obj)), disposeTransport = true).init()
+    new Impl[S](t, objH = Some(tx.newHandle(obj)), disposeTransport = true).init()
   }
 
   private final class Impl[S <: Sys[S]](val transport: Transport[S], objH: Option[stm.Source[S#Tx, Obj[S]]],

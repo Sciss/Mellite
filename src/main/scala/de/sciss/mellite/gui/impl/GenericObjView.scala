@@ -2,7 +2,7 @@
  *  GenericObjView.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -48,13 +48,13 @@ object GenericObjView extends ObjView.Factory with ListObjView.Factory with Grap
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 
   def mkTimelineView[S <: Sys[S]](id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): TimelineObjView[S] = {
-    val res = new TimelineImpl(tx.newHandle(obj)).initAttrs(id, span, obj)
+    val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
     res
   }
 
   def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], value: Obj[S], mode: Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
-    val res = new GraphemeImpl(tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
+    val res = new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
     res
   }
 

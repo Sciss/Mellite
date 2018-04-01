@@ -2,7 +2,7 @@
  *  CodeViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -67,18 +67,15 @@ object CodeViewImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[S] = {
-    // val source0 = sourceCode.value
-    // val objH        = tx.newHandle(obj)
+
     val codeEx      = obj
     val codeVarHOpt = codeEx match {
       case Code.Obj.Var(vr) =>
         Some(tx.newHandle(vr))
       case _            => None
     }
-    // val code0   = codeEx.value
-    // val source0 = code0.source
-    // val sourceH = tx.newHandle(sourceCode)(StringObj.varSerializer[S])
-    val res     = new Impl[S, code0.In, code0.Out](codeVarHOpt, code0, handlerOpt, bottom = bottom)
+    val res     = new Impl[S, code0.In, code0.Out](codeVarHOpt,
+      code0, handlerOpt, bottom = bottom) // IntelliJ highlight bug
     res.init()
   }
 

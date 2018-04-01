@@ -2,7 +2,7 @@
  *  LinkTargetFolder.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -23,7 +23,7 @@ import de.sciss.mellite.gui.edit.EditFolderRemoveObj
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 
 final class LinkTargetFolder[S <: Sys[S]](val attr: InputAttrFolder[S],
-                                                  objH : stm.Source[S#Tx, Obj[S]])
+                                          objH : stm.Source[S#Tx, Obj[S]])
   extends LinkTarget[S] {
 
   override def toString: String = s"LinkTargetFolder($attr)@${hashCode.toHexString}"

@@ -2,7 +2,7 @@
  *  ListObjViewImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -124,7 +124,8 @@ object ListObjViewImpl {
             vr() match {
               case Expr.Const(x) if x === newValue => None
               case _ =>
-                val ed = EditVar.Expr[S, A, Ex](s"Change $humanName Value", vr, tpe.newConst[S](newValue))
+                val ed = EditVar.Expr[S, A, Ex](s"Change $humanName Value", vr,
+                  tpe.newConst[S](newValue))  // IntelliJ highlight bug
                 Some(ed)
             }
 

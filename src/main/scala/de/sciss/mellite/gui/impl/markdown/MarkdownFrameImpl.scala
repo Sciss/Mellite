@@ -2,7 +2,7 @@
  *  MarkdownFrameImpl.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -32,7 +32,7 @@ object MarkdownFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val view  = MarkdownEditorView(obj, bottom = bottom)
-    val res   = new EditorFrameImpl(view).init()
+    val res   = new EditorFrameImpl[S](view).init()
     trackTitle(res, view.renderer)
     res
   }
@@ -40,7 +40,7 @@ object MarkdownFrameImpl {
   def render[S <: Sys[S]](obj: Markdown[S])
                          (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownRenderFrame[S] = {
     val view  = MarkdownRenderView(obj)
-    val res   = new RenderFrameImpl(view).init()
+    val res   = new RenderFrameImpl[S](view).init()
     trackTitle(res, view)
     res
   }

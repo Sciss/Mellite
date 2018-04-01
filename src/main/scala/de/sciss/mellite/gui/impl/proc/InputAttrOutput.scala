@@ -2,7 +2,7 @@
  *  InputAttrOutput.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2017 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU General Public License v3+
  *
@@ -21,7 +21,7 @@ import de.sciss.span.Span
 import de.sciss.synth.proc
 
 final class InputAttrOutput[S <: Sys[S]](val parent: ProcObjView.Timeline[S], val key: String,
-                                                 out: proc.Output[S], tx0: S#Tx)
+                                         out: proc.Output[S], tx0: S#Tx)
   extends InputAttrImpl[S] {
 
   override def toString: String = s"InputAttrOutput(parent = $parent, key = $key)"
