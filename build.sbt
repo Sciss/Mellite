@@ -23,10 +23,12 @@ lazy val deps = new {
     val fscape              = "2.12.1"
     val interpreterPane     = "1.8.1"
     val jline               = "2.14.6"
+    val kollFlitz           = "0.2.2"
     val lucre               = "3.5.0"
     val lucreSwing          = "1.7.0"
     val model               = "0.3.4"
     val numbers             = "0.1.5"
+    val patterns            = "0.1.1-SNAPSHOT"
     val pdflitz             = "1.2.2"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -42,7 +44,6 @@ lazy val deps = new {
     val topology            = "1.1.0"
     val webLaF              = "2.1.3"
     val wolkenpumpe         = "2.22.0"
-    val patterns            = "0.1.0"
   }
 }
 
@@ -193,6 +194,7 @@ lazy val root = Project(id = baseName, base = file("."))
       "de.sciss"    %% s"lucre-$bdb"                    % deps.main.lucre,               // database backend
       "de.sciss"    %% "lucre-expr"                     % deps.main.lucre,
       "de.sciss"    %% "equal"                          % deps.main.equal,               // type-safe equals
+      "de.sciss"    %% "kollflitz"                      % deps.main.kollFlitz,
       "de.sciss"    %% "numbers"                        % deps.main.numbers,             // (sbt bug)
       "de.sciss"    %% "span"                           % deps.main.span,                // (sbt bug)
       "de.sciss"    %% "fileutil"                       % deps.main.fileUtil,            // (sbt bug)
