@@ -50,7 +50,7 @@ object FolderView {
   final case class SelectionDnDData[S <: Sys[S]](workspace: Workspace[S], cursor: stm.Cursor[S], selection: Selection[S]) {
     type S1 = S
 
-    lazy val types: Set[Int] = selection.map(_.renderData.factory.tpe.typeID)(breakOut)
+    lazy val types: Set[Int] = selection.map(_.renderData.factory.tpe.typeId)(breakOut)
   }
 
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344

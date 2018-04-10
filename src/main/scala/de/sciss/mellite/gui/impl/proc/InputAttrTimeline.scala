@@ -35,7 +35,7 @@ final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], 
 
   def timeline(implicit tx: S#Tx): proc.Timeline[S] = tlH()
 
-  protected val viewMap: IdentifierMap[S#ID, S#Tx, Elem] = tx0.newInMemoryIDMap
+  protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
 
   // EDT
   private[this] var edtRange = RangedSeq.empty[Elem, Long](_.point, Ordering.Long)
@@ -50,9 +50,9 @@ final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], 
     tl.changed.react { implicit tx => upd => upd.changes.foreach {
       case proc.Timeline.Added  (span  , entry) =>
         addAttrIn(span, entry = entry, value = entry.value, fire = true)
-      case proc.Timeline.Removed(_ /* span */, entry) => removeAttrIn(/* span, */ entryID = entry.id)
+      case proc.Timeline.Removed(_ /* span */, entry) => removeAttrIn(/* span, */ entryId = entry.id)
       case proc.Timeline.Moved  (spanCh, entry) =>
-        removeAttrIn(/* spanCh.before, */ entryID = entry.id)
+        removeAttrIn(/* spanCh.before, */ entryId = entry.id)
         addAttrIn   (spanCh.now, entry = entry, value = entry.value, fire = true)
     }} (tx0)
 

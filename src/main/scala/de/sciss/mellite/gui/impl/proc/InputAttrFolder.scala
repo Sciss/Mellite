@@ -35,7 +35,7 @@ final class InputAttrFolder[S <: Sys[S]](val parent: ProcObjView.Timeline[S], va
 
   def folder(implicit tx: S#Tx): proc.Folder[S] = fH()
 
-  protected val viewMap: IdentifierMap[S#ID, S#Tx, Elem] = tx0.newInMemoryIDMap
+  protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
 
   // EDT
   private[this] var edtSet = Set.empty[Elem]  // XXX TODO --- do we need a multi-set in theory?
@@ -49,7 +49,7 @@ final class InputAttrFolder[S <: Sys[S]](val parent: ProcObjView.Timeline[S], va
     f.changed.react { implicit tx => upd => upd.changes.foreach {
       case proc.Folder.Added  (_ /* index */, child) =>
         addAttrIn(Span.From(0L), entry = child, value = child, fire = true)
-      case proc.Folder.Removed(_ /* index */, child) => removeAttrIn(entryID = child.id)
+      case proc.Folder.Removed(_ /* index */, child) => removeAttrIn(entryId = child.id)
     }} (tx0)
 
   override def dispose()(implicit tx: S#Tx): Unit = {

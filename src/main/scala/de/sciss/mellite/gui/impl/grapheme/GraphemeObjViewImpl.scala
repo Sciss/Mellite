@@ -28,7 +28,7 @@ object GraphemeObjViewImpl {
   private val sync = new AnyRef
 
   def addFactory(f: Factory): Unit = sync.synchronized {
-    val tid = f.tpe.typeID
+    val tid = f.tpe.typeId
     if (map.contains(tid)) throw new IllegalArgumentException(s"View factory for type $tid already installed")
     map += tid -> f
   }
@@ -37,18 +37,18 @@ object GraphemeObjViewImpl {
 
   def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
                         (implicit tx: S#Tx): GraphemeObjView[S] = {
-    val tid = entry.value.tpe.typeID
+    val tid = entry.value.tpe.typeId
     map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, value = entry.value, mode = mode)) { f =>
       f.mkGraphemeView(entry = entry, value = entry.value.asInstanceOf[f.E[S]], mode = mode)
     }
   }
 
   private var map = Map[Int, Factory](
-    DoubleObjView       .tpe.typeID -> DoubleObjView,
-    DoubleVectorObjView .tpe.typeID -> DoubleVectorObjView,
-    EnvSegmentObjView   .tpe.typeID -> EnvSegmentObjView
-//    ProcObjView .tpe.typeID -> ProcObjView,
-//    ActionView  .tpe.typeID -> ActionView
+    DoubleObjView       .tpe.typeId -> DoubleObjView,
+    DoubleVectorObjView .tpe.typeId -> DoubleVectorObjView,
+    EnvSegmentObjView   .tpe.typeId -> EnvSegmentObjView
+//    ProcObjView .tpe.typeId -> ProcObjView,
+//    ActionView  .tpe.typeId -> ActionView
   )
 
   trait BasicImpl[S <: stm.Sys[S]] extends GraphemeObjView[S] with ObjViewImpl.Impl[S] {

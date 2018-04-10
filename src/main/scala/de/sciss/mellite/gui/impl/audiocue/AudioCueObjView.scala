@@ -39,7 +39,7 @@ object AudioCueObjView extends ListObjView.Factory {
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Music)
   val prefix        : String    = "AudioCue"
   def humanName     : String    = "Audio File"
-  def tpe           : Obj.Type  = AudioCue.Obj // ElemImpl.AudioGrapheme.typeID
+  def tpe           : Obj.Type  = AudioCue.Obj // ElemImpl.AudioGrapheme.typeId
   def category      : String    = ObjView.categResources
   def hasMakeDialog : Boolean   = true
 

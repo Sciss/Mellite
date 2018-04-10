@@ -20,7 +20,7 @@ import de.sciss.{desktop, patterns}
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.stm.{Obj, Plain}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
@@ -99,7 +99,7 @@ object PatternObjView extends ListObjView.Factory {
                                     (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
-    val codeObj = mkSource(obj = obj, codeID = Pattern.Code.id, key = "graph-source" /* Pattern.attrSource */,
+    val codeObj = mkSource(obj = obj, codeId = Pattern.Code.id, key = "graph-source" /* Pattern.attrSource */,
       init = "// Pattern graph function source code\n\n")
 
     val codeEx0 = codeObj
@@ -127,10 +127,9 @@ object PatternObjView extends ListObjView.Factory {
           val obj = objH()
           val g   = obj.value // .graph().value
           deferTx {
-            implicit val ctx: patterns.Context.Plain = patterns.Context()
-            import ctx.{tx => txp}
+            implicit val ctx: patterns.Context[Plain] = patterns.Context()
             val n     = 60
-            val res0  = g.expand.take(n).toList
+            val res0  = g.expand.toIterator.take(n).toList
             val abbr  = res0.lengthCompare(n) == 0
             val res   = if (abbr) res0.init else res0
             println(res.mkString("[", ", ", " ...]"))

@@ -32,12 +32,12 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
   var spanValue   : SpanLike = _
   var spanH       : stm.Source[S#Tx, SpanLikeObj[S]] = _
 
-  protected var idH  : stm.Source[S#Tx, S#ID] = _
+  protected var idH  : stm.Source[S#Tx, S#Id] = _
 
   def span(implicit tx: S#Tx): SpanLikeObj[S] = spanH()
-  def id  (implicit tx: S#Tx): S#ID           = idH()
+  def id  (implicit tx: S#Tx): S#Id           = idH()
 
-  def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
+  def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
     val attr      = obj.attr
 
     val trackIdxView = AttrCellView[S, Int, IntObj](attr, TimelineObjView.attrTrackIndex)

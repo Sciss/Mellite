@@ -28,7 +28,7 @@ import scala.swing.Graphics2D
 object GraphemeObjView {
   type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, GraphemeObjView[S]]
 
-  type Map[S <: stm.Sys[S]] = IdentifierMap[S#ID, S#Tx, GraphemeObjView[S]]
+  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, GraphemeObjView[S]]
 
   trait Factory extends ObjView.Factory {
     /** Creates a new grapheme view
@@ -57,7 +57,7 @@ trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
 
   def entry(implicit tx: S#Tx): Grapheme.Entry[S]
 
-  // def id(implicit tx: S#Tx): S#ID
+  // def id(implicit tx: S#Tx): S#Id
 
   var timeValue: Long
 

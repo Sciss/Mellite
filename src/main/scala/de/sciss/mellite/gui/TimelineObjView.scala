@@ -41,7 +41,7 @@ object TimelineObjView {
     case Span.Void          => (Long.MinValue, Long.MinValue)
   }
 
-  type Map[S <: stm.Sys[S]] = IdentifierMap[S#ID, S#Tx, TimelineObjView[S]]
+  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, TimelineObjView[S]]
 
   trait Context[S <: stm.Sys[S]] extends AuxContext[S] {
     /** A map from `TimedProc` ids to their views. This is used to establish scan links. */
@@ -55,7 +55,7 @@ object TimelineObjView {
       * @param span     the span on the timeline
       * @param obj      the object placed on the timeline
       */
-    def mkTimelineView[S <: Sys[S]](id: S#ID, span: SpanLikeObj[S], obj: E[S],
+    def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: E[S],
                                     context: TimelineObjView.Context[S])(implicit tx: S#Tx): TimelineObjView[S]
   }
 
@@ -90,7 +90,7 @@ trait TimelineObjView[S <: stm.Sys[S]] extends ObjView[S] {
 
   def span(implicit tx: S#Tx): SpanLikeObj[S]
 
-  def id(implicit tx: S#Tx): S#ID // Timeline.Timed[S]
+  def id(implicit tx: S#Tx): S#Id // Timeline.Timed[S]
 
   var spanValue: SpanLike
 

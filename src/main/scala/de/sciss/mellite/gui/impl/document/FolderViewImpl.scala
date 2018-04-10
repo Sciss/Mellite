@@ -52,7 +52,7 @@ object FolderViewImpl {
     implicit val folderSer: Serializer[S#Tx, S#Acc, Folder[S]] = Folder.serializer[S]
 
     new Impl[S] {
-//      val mapViews: IdentifierMap[S#ID, S#Tx, ObjView[S]]               = tx.newInMemoryIDMap  // folder IDs to renderers
+//      val mapViews: IdentifierMap[S#Id, S#Tx, ObjView[S]]               = tx.newInMemoryIdMap  // folder Ids to renderers
       val treeView: TreeTableView[S, Obj[S], Folder[S], ListObjView[S]] = TreeTableView(root0, TTHandler)
 
       deferTx {

@@ -68,7 +68,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
 
   def fireRepaint()(implicit tx: S#Tx): Unit = fire(ObjView.Repaint(this))
 
-  def init(id: S#ID, span: SpanLikeObj[S], obj: Proc[S])(implicit tx: S#Tx): this.type = {
+  def init(id: S#Id, span: SpanLikeObj[S], obj: Proc[S])(implicit tx: S#Tx): this.type = {
     initAttrs(id, span, obj)
 
     val attr    = obj.attr

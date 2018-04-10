@@ -1,21 +1,14 @@
 language: scala
 
 scala:
-  - 2.12.4
+  - 2.12.5
   - 2.11.12
 
 env:
   - JDK=oraclejdk8
-  - JDK=openjdk7
 
 before_script:
   - jdk_switcher use $JDK
-
-matrix:
-  # scala 2.12 requires java 8.
-  exclude:
-    - scala: 2.12.4
-      env: JDK=openjdk7
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test assembly

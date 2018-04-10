@@ -253,8 +253,8 @@ object ActionBounceTimeline {
     def recallSpanLike(key: String, default: SpanLike = Span.Void): SpanLike =
       attr.$[SpanLikeObj](key).fold(default)(_.value)
 
-    val tpeID = recallString(attrFileType, AudioFileType.AIFF.id)
-    val fileFormat = if (tpeID === FileFormat.mp3id) {
+    val tpeId = recallString(attrFileType, AudioFileType.AIFF.id)
+    val fileFormat = if (tpeId === FileFormat.mp3id) {
       val kbps    = recallInt(attrBitRate, 256)
       val vbr     = recallBoolean(attrMP3VBR)
       val title   = recallString(attrMP3Title)
@@ -263,9 +263,9 @@ object ActionBounceTimeline {
       FileFormat.MP3(kbps = kbps, vbr = vbr, title = title, artist = artist, comment = comment)
 
     } else {
-      val tpe   = AudioFileType.writable.find(_.id === tpeID).getOrElse(AudioFileType.AIFF)
-      val smpID = recallString(attrSampleFormat, SampleFormat.Int24.id)
-      val smp   = SampleFormat.fromInt16.find(_.id === smpID).getOrElse(SampleFormat.Int24)
+      val tpe   = AudioFileType.writable.find(_.id === tpeId).getOrElse(AudioFileType.AIFF)
+      val smpId = recallString(attrSampleFormat, SampleFormat.Int24.id)
+      val smp   = SampleFormat.fromInt16.find(_.id === smpId).getOrElse(SampleFormat.Int24)
       FileFormat.PCM(tpe, smp)
     }
 

@@ -261,7 +261,7 @@ object GlobalProcsViewImpl {
           val selRows         = table.selection.rows
           //          if (selRows.isEmpty) null else {
           //            val sel   = selRows.map(procSeq.apply)
-          //            val types = Set(Proc.typeID)
+          //            val types = Set(Proc.typeId)
           //            val tSel  = DragAndDrop.Transferable(FolderView.selectionFlavor) {
           //              new FolderView.SelectionDnDData(document, sel, types)
           //            }

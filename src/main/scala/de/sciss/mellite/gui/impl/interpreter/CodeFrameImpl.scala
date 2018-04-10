@@ -22,7 +22,7 @@ import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{IDPeek, Obj}
+import de.sciss.lucre.stm.{IdPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{CellView, View, deferTx}
 import de.sciss.lucre.synth.Sys
@@ -42,7 +42,7 @@ object CodeFrameImpl {
   def proc[S <: Sys[S]](obj: Proc[S])
                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                         compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = mkSource(obj = obj, codeID = Code.SynthGraph.id, key = Proc.attrSource,
+    val codeObj = mkSource(obj = obj, codeId = Code.SynthGraph.id, key = Proc.attrSource,
       init = {
         val txt     = ProcActions.extractSource(obj.graph.value)
         val comment = if (txt.isEmpty)
@@ -51,7 +51,7 @@ object CodeFrameImpl {
             "source code automatically extracted"
         s"// $comment\n\n$txt"
       })
-    
+
     val codeEx0 = codeObj
     val objH    = tx.newHandle(obj)
     val code0   = codeEx0.value match {
@@ -83,7 +83,7 @@ object CodeFrameImpl {
   def action[S <: Sys[S]](obj: Action[S])
                          (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                           compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = mkSource(obj = obj, codeID = Code.Action.id, key = Action.attrSource,
+    val codeObj = mkSource(obj = obj, codeId = Code.Action.id, key = Action.attrSource,
       init = "// Action source code\n\n")
 
     val codeEx0 = codeObj
@@ -109,8 +109,8 @@ object CodeFrameImpl {
         val varH  = tx.newHandle(vr)
         val handler = new CodeView.Handler[S, String, Array[Byte]] {
           def in(): String = cursor.step { implicit tx =>
-            val id = tx.newID()
-            val cnt = IDPeek(id)
+            val id = tx.newId()
+            val cnt = IdPeek(id)
             s"Action$cnt"
           }
 
@@ -207,7 +207,7 @@ object CodeFrameImpl {
 
   // ---- util ----
 
-  def mkSource[S <: Sys[S]](obj: Obj[S], codeID: Int, key: String, init: => String)
+  def mkSource[S <: Sys[S]](obj: Obj[S], codeId: Int, key: String, init: => String)
                                    (implicit tx: S#Tx): Code.Obj[S] = {
     // if there is no source code attached,
     // create a new code object and add it to the attribute map.
@@ -216,7 +216,7 @@ object CodeFrameImpl {
       case Some(c: Code.Obj[S]) => c
       case _ =>
         val source  = init
-        val code    = Code(codeID, source)
+        val code    = Code(codeId, source)
         val c       = Code.Obj.newVar(Code.Obj.newConst[S](code))
         obj.attr.put(key, c)
         c

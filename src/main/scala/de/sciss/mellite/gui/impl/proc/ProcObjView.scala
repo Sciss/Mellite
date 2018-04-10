@@ -61,20 +61,20 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
   }
 
 //  type LinkMap[S <: stm.Sys[S]] = Map[String, Vec[ProcObjView.Link[S]]]
-//  type ProcMap[S <: stm.Sys[S]] = IdentifierMap[S#ID, S#Tx, ProcObjView[S]]
-//  type ScanMap[S <: stm.Sys[S]] = IdentifierMap[S#ID, S#Tx, (String, stm.Source[S#Tx, S#ID])]
+//  type ProcMap[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, ProcObjView[S]]
+//  type ScanMap[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, (String, stm.Source[S#Tx, S#Id])]
 
   type SelectionModel[S <: Sys[S]] = gui.SelectionModel[S, ProcObjView[S]]
 
   /** Constructs a new proc view from a given proc, and a map with the known proc (views).
     * This will automatically add the new view to the map!
     */
-  def mkTimelineView[S <: Sys[S]](timedID: S#ID, span: SpanLikeObj[S], obj: Proc[S],
+  def mkTimelineView[S <: Sys[S]](timedId: S#Id, span: SpanLikeObj[S], obj: Proc[S],
                                   context: TimelineObjView.Context[S])(implicit tx: S#Tx): ProcObjView.Timeline[S] = {
     val attr = obj.attr
     val bus  = attr.$[IntObj](ObjKeys.attrBus    ).map(_.value)
     new ProcObjTimelineViewImpl[S](tx.newHandle(obj), busOption = bus, context = context)
-      .init(timedID, span, obj)
+      .init(timedId, span, obj)
   }
 
   // -------- Proc --------

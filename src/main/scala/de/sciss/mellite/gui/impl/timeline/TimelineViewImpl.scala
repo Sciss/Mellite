@@ -83,8 +83,8 @@ object TimelineViewImpl {
 
     // XXX TODO --- should use TransportView now!
 
-    val viewMap = tx.newInMemoryIDMap[TimelineObjView[S]]
-//    val scanMap = tx.newInMemoryIDMap[(String, stm.Source[S#Tx, S#ID])]
+    val viewMap = tx.newInMemoryIdMap[TimelineObjView[S]]
+//    val scanMap = tx.newInMemoryIdMap[(String, stm.Source[S#Tx, S#Id])]
 
     // ugly: the view dispose method cannot iterate over the procs
     // (other than through a GUI driven data structure). thus, it
@@ -162,8 +162,8 @@ object TimelineViewImpl {
     var canvas: TimelineTrackCanvasImpl[S] = _
     val disposables = Ref(List.empty[Disposable[S#Tx]])
 
-    protected val auxMap: IdentifierMap[S#ID, S#Tx, Any]                      = tx0.newInMemoryIDMap
-    protected val auxObservers: IdentifierMap[S#ID, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIDMap
+    protected val auxMap: IdentifierMap[S#Id, S#Tx, Any]                      = tx0.newInMemoryIdMap
+    protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
 
     private lazy val toolCursor   = TrackTool.cursor  [S](canvas)
     private lazy val toolMove     = TrackTool.move    [S](canvas)

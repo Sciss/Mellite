@@ -126,7 +126,7 @@ object CodeViewImpl {
       b.build
     }
 
-    // import code.{id => codeID}
+    // import code.{id => codeId}
 
     private[this] var codePane: CodePane = _
     private[this] val futCompile = Ref(Option.empty[Future[Any]])

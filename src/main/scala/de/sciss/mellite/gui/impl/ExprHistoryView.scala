@@ -52,12 +52,12 @@ object ExprHistoryView {
       case hid: Identifiable[_] =>
         val id    = hid.id // .asInstanceOf[confluent.Identifier[S]]
         val head  = id.path.head.toInt
-        if (DEBUG) println(s"ID = $id, head = $head")
+        if (DEBUG) println(s"Id = $id, head = $head")
         head
       case _ => 0
     }
 
-    val res       = new Impl[A](workspace, cursor, exprH, pos0, time0, val0, stop = stop)
+    val res = new Impl[A](workspace, cursor, exprH, pos0, time0, val0, stop = stop)
     deferTx(res.guiInit())
     res
   }

@@ -30,7 +30,7 @@ import scala.swing.Graphics2D
 trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
   // ---- abstract ----
 
-  protected def viewMap: IdentifierMap[S#ID, S#Tx, Elem]
+  protected def viewMap: IdentifierMap[S#Id, S#Tx, Elem]
 
   protected def elemOverlappingEDT(start: Long, stop: Long): Iterator[Elem]
   protected def elemAddedEDT  (elem: Elem): Unit
@@ -358,7 +358,7 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
     viewSet.clear()
   }
 
-  type Entry <: Identifiable[S#ID]
+  type Entry <: Identifiable[S#Id]
 
   protected def mkTarget(entry: Entry)(implicit tx: S#Tx): LinkTarget[S]
 
@@ -367,8 +367,8 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
     value match {
       case out: proc.Output[S] =>
         import TxnLike.peer
-        val entryID   = entry.id
-        val idH       = tx.newHandle(entryID)
+        val entryId   = entry.id
+        val idH       = tx.newHandle(entryId)
         val viewInit  = parent.context.getAux    [ProcObjView.Timeline[S]](out.id)
         val obs       = parent.context.observeAux[ProcObjView.Timeline[S]](out.id) { implicit tx => upd =>
           val id = idH()
@@ -394,7 +394,7 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
           }
         }
         val elem0 = new Elem(span, viewInit, mkTarget(entry), obs, tx)
-        viewMap.put(entryID, elem0)
+        viewMap.put(entryId, elem0)
         viewSet.add(elem0)
         deferTx {
           elemAddedEDT(elem0)
@@ -405,10 +405,10 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
       case _ => // no others supported ATM
     }
 
-  final protected def removeAttrIn(/* span: SpanLike, */ entryID: S#ID)(implicit tx: S#Tx): Unit =
-    viewMap.get(entryID).foreach { elem0 =>
+  final protected def removeAttrIn(/* span: SpanLike, */ entryId: S#Id)(implicit tx: S#Tx): Unit =
+    viewMap.get(entryId).foreach { elem0 =>
       import TxnLike.peer
-      viewMap.remove(entryID)
+      viewMap.remove(entryId)
       viewSet.remove(elem0)
       deferTx {
         elemRemovedEDT(elem0)

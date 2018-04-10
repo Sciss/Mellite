@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.21.1-SNAPSHOT"
-lazy val mimaVersion                = "2.21.0"
+lazy val projectVersion             = "2.22.0-SNAPSHOT"
+lazy val mimaVersion                = "2.22.0"
 
 lazy val loggingEnabled             = true
 
@@ -15,35 +15,35 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
-    val audioWidgets        = "1.11.2"
-    val desktop             = "0.8.1"
+    val audioWidgets        = "1.12.0-SNAPSHOT"
+    val desktop             = "0.9.0-SNAPSHOT"
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
-    val freesound           = "1.7.0"
-    val fscape              = "2.12.1"
-    val interpreterPane     = "1.8.1"
+    val freesound           = "1.8.0-SNAPSHOT"
+    val fscape              = "2.13.0-SNAPSHOT"
+    val interpreterPane     = "1.9.0-SNAPSHOT"
     val jline               = "2.14.6"
     val kollFlitz           = "0.2.2"
-    val lucre               = "3.5.0"
-    val lucreSwing          = "1.7.0"
+    val lucre               = "3.6.0-SNAPSHOT"
+    val lucreSwing          = "1.8.0-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.1.5"
-    val patterns            = "0.1.1-SNAPSHOT"
-    val pdflitz             = "1.2.2"
+    val patterns            = "0.2.0-SNAPSHOT"
+    val pdflitz             = "1.3.0-SNAPSHOT"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val raphaelIcons        = "1.0.4"
-    val scalaCollider       = "1.23.0"
-    val scalaColliderSwing  = "1.35.0"
-    val scalaColliderUGen   = "1.17.1"
-    val sonogram            = "1.9.1"
-    val soundProcesses      = "3.17.0"
-    val span                = "1.3.3"
+    val scalaCollider       = "1.25.0-SNAPSHOT"
+    val scalaColliderSwing  = "1.37.0-SNAPSHOT"
+    val scalaColliderUGen   = "1.18.0"
+    val sonogram            = "1.10.0-SNAPSHOT"
+    val soundProcesses      = "3.18.0-SNAPSHOT"
+    val span                = "1.4.0-SNAPSHOT"
     val submin              = "0.2.2"
-    val swingPlus           = "0.2.4"
+    val swingPlus           = "0.3.0-SNAPSHOT"
     val topology            = "1.1.0"
     val webLaF              = "2.1.3"
-    val wolkenpumpe         = "2.22.0"
+    val wolkenpumpe         = "2.23.0-SNAPSHOT"
   }
 }
 
@@ -62,8 +62,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.github.io/$baseName")),
   licenses           := Seq("GNU General Public License v3+" -> url("http://www.gnu.org/licenses/gpl-3.0.txt")),
-  scalaVersion       := "2.12.4",
-  crossScalaVersions := Seq("2.12.4", "2.11.12"),
+  scalaVersion       := "2.12.5",
+  crossScalaVersions := Seq("2.12.5", "2.11.12"),
   scalacOptions ++= {
     val xs = Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_")
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
@@ -171,7 +171,7 @@ lazy val assemblySettings = Seq(
     }
   )
 
-lazy val root = Project(id = baseName, base = file("."))
+lazy val root = project.withId(baseNameL).in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(JavaAppPackaging, DebianPlugin)
   .settings(commonSettings)

@@ -88,7 +88,7 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
   private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Action[S]])
     extends Impl[S]
 
-  def mkTimelineView[S <: Sys[S]](id: S#ID, span: SpanLikeObj[S], obj: Action[S],
+  def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Action[S],
                                   context: TimelineObjView.Context[S])(implicit tx: S#Tx): TimelineObjView[S] = {
     val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
     res

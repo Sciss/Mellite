@@ -35,7 +35,7 @@ final class InputAttrOutput[S <: Sys[S]](val parent: ProcObjView.Timeline[S], va
 
   def output(implicit tx: S#Tx): proc.Output[S] = outH()
 
-  protected val viewMap: IdentifierMap[S#ID, S#Tx, Elem] = tx0.newInMemoryIDMap
+  protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
 
   // EDT
   private[this] var edtElem: Elem = _

@@ -29,7 +29,7 @@ object TimelineObjViewImpl {
   private val sync = new AnyRef
 
   def addFactory(f: Factory): Unit = sync.synchronized {
-    val tid = f.tpe.typeID
+    val tid = f.tpe.typeId
     if (map.contains(tid)) throw new IllegalArgumentException(s"View factory for type $tid already installed")
     map += tid -> f
   }
@@ -40,7 +40,7 @@ object TimelineObjViewImpl {
                         (implicit tx: S#Tx): TimelineObjView[S] = {
     val span  = timed.span
     val obj   = timed.value
-    val tid   = obj.tpe.typeID
+    val tid   = obj.tpe.typeId
     // getOrElse(sys.error(s"No view for type $tid"))
     map.get(tid).fold(GenericObjView.mkTimelineView(timed.id, span, obj)) { f =>
       f.mkTimelineView(timed.id, span, obj.asInstanceOf[f.E[S]], context)
@@ -48,8 +48,8 @@ object TimelineObjViewImpl {
   }
 
   private var map = Map[Int, Factory](
-    ProcObjView .tpe.typeID -> ProcObjView,
-    ActionView  .tpe.typeID -> ActionView
+    ProcObjView .tpe.typeId -> ProcObjView,
+    ActionView  .tpe.typeId -> ActionView
   )
 
   // -------- Generic --------
@@ -57,7 +57,7 @@ object TimelineObjViewImpl {
   trait HasGainImpl[S <: stm.Sys[S]] extends TimelineObjViewBasicImpl[S] with TimelineObjView.HasGain {
     var gain: Double = _
 
-    override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
+    override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
       val gainView = AttrCellView[S, Double, DoubleObj](obj.attr, ObjKeys.attrGain)
@@ -75,7 +75,7 @@ object TimelineObjViewImpl {
   trait HasMuteImpl[S <: stm.Sys[S]] extends TimelineObjViewBasicImpl[S] with TimelineObjView.HasMute {
     var muted: Boolean = _
 
-    override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
+    override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
       val muteView = AttrCellView[S, Boolean, BooleanObj](obj.attr, ObjKeys.attrMute)
@@ -94,7 +94,7 @@ object TimelineObjViewImpl {
     var fadeIn : FadeSpec = _
     var fadeOut: FadeSpec = _
 
-    override def initAttrs(id: S#ID, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
+    override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
       val fadeInView = AttrCellView[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)

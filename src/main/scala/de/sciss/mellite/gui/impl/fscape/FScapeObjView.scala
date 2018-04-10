@@ -102,7 +102,7 @@ object FScapeObjView extends ListObjView.Factory {
                                     (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
-    val codeObj = mkSource(obj = obj, codeID = FScape.Code.id, key = FScape.attrSource,
+    val codeObj = mkSource(obj = obj, codeId = FScape.Code.id, key = FScape.attrSource,
       init = "// FScape graph function source code\n\n")
 
     val codeEx0 = codeObj

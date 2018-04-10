@@ -38,7 +38,7 @@ object ListObjViewImpl {
   private val sync = new AnyRef
 
   def addFactory(f: ListObjView.Factory): Unit = sync.synchronized {
-    val tid = f.tpe.typeID
+    val tid = f.tpe.typeId
     if (map.contains(tid)) throw new IllegalArgumentException(s"View factory for type $tid already installed")
     map += tid -> f
   }
@@ -46,7 +46,7 @@ object ListObjViewImpl {
   def factories: Iterable[ListObjView.Factory] = map.values
 
   def apply[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
-    val tid = obj.tpe.typeID
+    val tid = obj.tpe.typeId
     // getOrElse(sys.error(s"No view for type $tid"))
     map.get(tid).fold[ListObjView[S]](GenericObjView.mkListView(obj)) { f =>
       f.mkListView(obj.asInstanceOf[f.E[S]])
@@ -54,34 +54,34 @@ object ListObjViewImpl {
   }
 
   private var map = scala.Predef.Map[Int, ListObjView.Factory](
-    ActionView                .tpe.typeID -> ActionView,
-    ArtifactLocationObjView   .tpe.typeID -> ArtifactLocationObjView,
-    ArtifactObjView           .tpe.typeID -> ArtifactObjView,
-    AudioCueObjView           .tpe.typeID -> AudioCueObjView,
-    CodeObjView               .tpe.typeID -> CodeObjView,
-    DoubleObjView             .tpe.typeID -> DoubleObjView,
-    DoubleVectorObjView       .tpe.typeID -> DoubleVectorObjView,
-    EnvSegmentObjView         .tpe.typeID -> EnvSegmentObjView,
-    FreesoundRetrievalObjView .tpe.typeID -> FreesoundRetrievalObjView,
-    FScapeObjView             .tpe.typeID -> FScapeObjView,
-    FScapeOutputObjView       .tpe.typeID -> FScapeOutputObjView,
-    IntObjView                .tpe.typeID -> IntObjView,
-    MarkdownObjView           .tpe.typeID -> MarkdownObjView,
-    ObjViewImpl.Boolean       .tpe.typeID -> ObjViewImpl.Boolean,
-    ObjViewImpl.Color         .tpe.typeID -> ObjViewImpl.Color,
-    ObjViewImpl.Ensemble      .tpe.typeID -> ObjViewImpl.Ensemble,
-    ObjViewImpl.FadeSpec      .tpe.typeID -> ObjViewImpl.FadeSpec,
-    ObjViewImpl.Folder        .tpe.typeID -> ObjViewImpl.Folder,
-    ObjViewImpl.Grapheme      .tpe.typeID -> ObjViewImpl.Grapheme,
-    ObjViewImpl.IntVector     .tpe.typeID -> ObjViewImpl.IntVector,
-    ObjViewImpl.Long          .tpe.typeID -> ObjViewImpl.Long,
-    ObjViewImpl.Nuages        .tpe.typeID -> ObjViewImpl.Nuages,
-    ObjViewImpl.String        .tpe.typeID -> ObjViewImpl.String,
-    ObjViewImpl.Timeline      .tpe.typeID -> ObjViewImpl.Timeline,
-    OutputObjView             .tpe.typeID -> OutputObjView,
-    ParamSpecObjView          .tpe.typeID -> ParamSpecObjView,
-    PatternObjView            .tpe.typeID -> PatternObjView,
-    ProcObjView               .tpe.typeID -> ProcObjView
+    ActionView                .tpe.typeId -> ActionView,
+    ArtifactLocationObjView   .tpe.typeId -> ArtifactLocationObjView,
+    ArtifactObjView           .tpe.typeId -> ArtifactObjView,
+    AudioCueObjView           .tpe.typeId -> AudioCueObjView,
+    CodeObjView               .tpe.typeId -> CodeObjView,
+    DoubleObjView             .tpe.typeId -> DoubleObjView,
+    DoubleVectorObjView       .tpe.typeId -> DoubleVectorObjView,
+    EnvSegmentObjView         .tpe.typeId -> EnvSegmentObjView,
+    FreesoundRetrievalObjView .tpe.typeId -> FreesoundRetrievalObjView,
+    FScapeObjView             .tpe.typeId -> FScapeObjView,
+    FScapeOutputObjView       .tpe.typeId -> FScapeOutputObjView,
+    IntObjView                .tpe.typeId -> IntObjView,
+    MarkdownObjView           .tpe.typeId -> MarkdownObjView,
+    ObjViewImpl.Boolean       .tpe.typeId -> ObjViewImpl.Boolean,
+    ObjViewImpl.Color         .tpe.typeId -> ObjViewImpl.Color,
+    ObjViewImpl.Ensemble      .tpe.typeId -> ObjViewImpl.Ensemble,
+    ObjViewImpl.FadeSpec      .tpe.typeId -> ObjViewImpl.FadeSpec,
+    ObjViewImpl.Folder        .tpe.typeId -> ObjViewImpl.Folder,
+    ObjViewImpl.Grapheme      .tpe.typeId -> ObjViewImpl.Grapheme,
+    ObjViewImpl.IntVector     .tpe.typeId -> ObjViewImpl.IntVector,
+    ObjViewImpl.Long          .tpe.typeId -> ObjViewImpl.Long,
+    ObjViewImpl.Nuages        .tpe.typeId -> ObjViewImpl.Nuages,
+    ObjViewImpl.String        .tpe.typeId -> ObjViewImpl.String,
+    ObjViewImpl.Timeline      .tpe.typeId -> ObjViewImpl.Timeline,
+    OutputObjView             .tpe.typeId -> OutputObjView,
+    ParamSpecObjView          .tpe.typeId -> ParamSpecObjView,
+    PatternObjView            .tpe.typeId -> PatternObjView,
+    ProcObjView               .tpe.typeId -> ProcObjView
   )
 
   /** A trait that when mixed in provides `isEditable` and `tryEdit` as non-op methods. */
