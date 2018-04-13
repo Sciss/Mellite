@@ -17,9 +17,9 @@ package impl
 
 import java.awt.geom.Path2D
 import java.awt.{Color => AWTColor}
+
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel, UIManager}
-
 import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
@@ -36,7 +36,7 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.serial.Serializer
-import de.sciss.swingplus.{ColorChooser, GroupPanel, Spinner}
+import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Color}
 
@@ -44,7 +44,7 @@ import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
-import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
+import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, ColorChooser, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
 import scala.util.Try
 
 object ObjViewImpl {

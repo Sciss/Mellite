@@ -197,8 +197,7 @@ object GUI {
       def actionPerformed(e: ActionEvent): Unit = {
         if (!res.isCompleted) {
           opt = OptionPane.message(message = s"$message…")
-          opt.modal = false
-          opt.show(window, title)
+          opt.showNonModal(window, title)
         }
       }
     })

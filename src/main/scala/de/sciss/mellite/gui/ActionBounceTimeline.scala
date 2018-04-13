@@ -807,8 +807,7 @@ object ActionBounceTimeline {
     val opt = OptionPane(message = box, optionType = OptionPane.Options.OkCancel,
       messageType = OptionPane.Message.Plain, entries = optEntries)
     opt.title = title
-    opt.modal = false
-    opt.show(window)
+    opt.showNonModal(window)
 
     // XXX TODO --- the price for non-modality
     findWindow().foreach { w =>
