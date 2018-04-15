@@ -19,8 +19,6 @@ import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.net.URI
 import java.util.Date
-import javax.swing.undo.UndoableEdit
-import javax.swing.{Icon, KeyStroke}
 
 import de.sciss.desktop.{Desktop, FileDialog, OptionPane, PathField, Preferences, UndoManager, Util}
 import de.sciss.equal.Implicits._
@@ -36,13 +34,14 @@ import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.document.FolderFrameImpl
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{AudioCue, Ensemble, Folder, Markdown, Timeline, Workspace}
 import de.sciss.{desktop, freesound}
+import javax.swing.undo.UndoableEdit
+import javax.swing.{Icon, KeyStroke}
 
 import scala.collection.{breakOut, mutable}
 import scala.concurrent.stm.Ref
@@ -208,8 +207,9 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
       import Mellite.auralSystem
       val rv            = RetrievalView[S](searchInit = tsInit, soundInit = Nil)
       implicit val undo: UndoManager = UndoManager()
-      val fv            = FolderView[S](r.downloads)
-      val downloadsView = new FolderFrameImpl.ViewImpl[S](fv).init()
+//      val fv            = FolderView[S](r.downloads)
+      val downloadsView = FolderEditorView[S](r.downloads)
+      val fv = downloadsView.peer
 
       def viewInfo(): Unit = {
         val sounds = cursor.step { implicit tx =>

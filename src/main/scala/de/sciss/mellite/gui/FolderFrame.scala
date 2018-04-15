@@ -42,6 +42,8 @@ object FolderFrame {
 }
 
 trait FolderFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
+  override def view: FolderEditorView[S]
+
   def folderView: FolderView[S]
 
   def bottomComponent: Component with SequentialContainer

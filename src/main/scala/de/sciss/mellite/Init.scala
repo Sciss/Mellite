@@ -44,7 +44,17 @@ trait Init {
 //    val ctlConf = Control.Config()
 //    ctlConf.terminateActors = false
     // we have sane default config now!
-    val fscapeF = FScape.genViewFactory()
-    GenView.tryAddFactory(fscapeF)
+
+    // akka looks for stuff it can't find in IntelliJ plugin.
+    // see https://github.com/Sciss/FScape-next/issues/23
+    // for testing purposes, simply give up, so we
+    // should be able to work with Mellite minus FScape.
+    try {
+      val fscapeF = FScape.genViewFactory()
+      GenView.tryAddFactory(fscapeF)
+    } catch {
+      case _: com.typesafe.config.ConfigException =>
+        Console.err.println(s"Mellite.init: Failed to initialize Akka.")
+    }
   }
 }

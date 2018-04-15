@@ -42,10 +42,8 @@ import scala.swing.{Action, BoxPanel, Button, Component, Dialog, Label, Orientat
 object NuagesEditorViewImpl {
   def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, workspace: Workspace[S],
                                          cursor: stm.Cursor[S], undoManager: UndoManager): NuagesEditorView[S] = {
-    val folder  = FolderView(obj.folder)
-    val folder1 = new FolderFrameImpl.ViewImpl[S](folder)
-    folder1.init()
-    val res     = new Impl[S](tx.newHandle(obj), folder1)
+    val folder  = FolderEditorView[S](obj.folder)
+    val res     = new Impl[S](tx.newHandle(obj), folder)
     deferTx {
       res.guiInit()
     }
@@ -53,7 +51,7 @@ object NuagesEditorViewImpl {
   }
 
   private final class Impl[S <: Sys[S]](nuagesH: stm.Source[S#Tx, Nuages[S]],
-                                        folderView: FolderFrameImpl.ViewImpl[S])
+                                        folderView: FolderEditorView[S])
                                        (implicit val undoManager: UndoManager, val workspace: Workspace[S],
                                         val cursor: stm.Cursor[S])
     extends NuagesEditorView[S] with ComponentHolder[Component] {

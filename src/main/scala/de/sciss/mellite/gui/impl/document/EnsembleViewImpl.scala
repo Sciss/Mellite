@@ -31,15 +31,14 @@ object EnsembleViewImpl {
   def apply[S <: Sys[S]](ensObj: Ensemble[S])(implicit tx: S#Tx, workspace: Workspace[S],
                                               cursor: stm.Cursor[S], undoManager: UndoManager): Impl[S] = {
     val ens       = ensObj
-    val folder    = FolderView(ens.folder)
-    val folder1   = new FolderFrameImpl.ViewImpl[S](folder).init()
+    val folder1   = FolderEditorView[S](ens.folder)
     val playing   = BooleanCheckBoxView(ens.playing, "Playing State")
     val viewPower = PlayToggleButton(ensObj)
     new Impl[S](tx.newHandle(ensObj), viewPower, folder1, playing).init()
   }
 
   final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: PlayToggleButton[S],
-                                        val view: FolderFrameImpl.ViewImpl[S], playing: View[S])
+                                        val view: FolderEditorView[S], playing: View[S])
                                        (implicit val undoManager: UndoManager, val workspace: Workspace[S],
                                         val cursor: stm.Cursor[S])
     extends ComponentHolder[Component] with EnsembleView[S] { impl =>
