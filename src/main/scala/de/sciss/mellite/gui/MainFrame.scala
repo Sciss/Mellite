@@ -155,7 +155,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
          |<font size=+1><b>${Application.name}</b></font><p>
          |Version ${Mellite.version}<p>
          |<p>
-         |Copyright (c) 2012&ndash;2017 Hanns Holger Rutz. All rights reserved.<p>
+         |Copyright (c) 2012&ndash;2018 Hanns Holger Rutz. All rights reserved.<p>
          |This software is published under the ${Mellite.license}
          |<p>&nbsp;<p><i>
          |Scala v${de.sciss.mellite.BuildInfo.scalaVersion}<br>
