@@ -222,7 +222,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     synOpt.get(tx.peer).foreach { syn => syn.set("amp" -> linear) }
     deferTx {
       ggMainVolumeOpt.foreach { slid =>
-        val db      = math.min(18, math.max(-72, (linear.ampdb + 0.5).toInt))
+        val db      = math.min(18, math.max(-72, (linear.ampDb + 0.5).toInt))
         slid.value  = db
       }
     }
@@ -243,7 +243,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       val in        = In.ar(0, numOuts)
       val mainAmp   = Lag.ar("amp".kr(0f))
       val mainIn    = in * mainAmp
-      val ceil      = -0.2.dbamp
+      val ceil      = -0.2.dbAmp
       val mainLim   = Limiter.ar(mainIn, level = ceil)
       val lim       = Lag.ar("limiter".kr(0f) * 2 - 1)
       // we fade between plain signal and limited signal
@@ -252,8 +252,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       val hpBusL    = "hp-bus".kr(0f)
       val hpBusR    = hpBusL + 1
       val hpAmp     = Lag.ar("hp-amp".kr(0f))
-      val hpInL     = Mix.tabulate((numOuts + 1) / 2)(i => in \ (i * 2))
-      val hpInR     = Mix.tabulate( numOuts      / 2)(i => in \ (i * 2 + 1))
+      val hpInL     = Mix.tabulate((numOuts + 1) / 2)(i => in.out(i * 2))
+      val hpInR     = Mix.tabulate( numOuts      / 2)(i => in.out(i * 2 + 1))
       val hpLimL    = Limiter.ar(hpInL * hpAmp, level = ceil)
       val hpLimR    = Limiter.ar(hpInR * hpAmp, level = ceil)
 
@@ -262,7 +262,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
         val isL   = hpActive & (hpBusL sig_== i)
         val isR   = hpActive & (hpBusR sig_== i)
         val isHP  = isL | isR
-        (mainOut \ i) * (1 - isHP) + hpLimL * isL + hpLimR * isR
+        (mainOut out i) * (1 - isHP) + hpLimL * isL + hpLimR * isR
       }
 
       ReplaceOut.ar(0, out)
@@ -301,7 +301,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
     def mkAmpFader(ctl: String, prefs: Preferences.Entry[Int]): Slider = mkFader(prefs, 0) { db =>
       import de.sciss.synth._
-      val amp = if (db == -72) 0f else db.dbamp
+      val amp = if (db == -72) 0f else db.dbAmp
       step { implicit tx => syn.set(ctl -> amp) }
     }
 
@@ -385,7 +385,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     } (breakOut)
     val lbZero = lbMap(0)
 
-    val sl    = new Slider {
+    val sl: Slider = new Slider {
       orientation       = Orientation.Vertical
       min               = -72
       max               =  18
@@ -482,7 +482,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     val b = Vec.newBuilder[Float]
     b.sizeHint(32)
     value.foreach { peak =>
-      b += peak.pow(0.65f).linexp(0f, 1f, 0.99e-3f, 1f) // XXX TODO roughly linearized
+      b += peak.pow(0.65f).linExp(0f, 1f, 0.99e-3f, 1f) // XXX TODO roughly linearized
       b += 0f
     }
     ggSensors.clearMeter()    // XXX TODO: should have option to switch off ballistics

@@ -38,7 +38,7 @@ object Gain {
 final case class Gain(decibels: Float, normalized: Boolean) extends Writable {
   def linear: Float = {
     import synth._
-    decibels.dbamp
+    decibels.dbAmp
   }
 
   def write(out: DataOutput): Unit = {

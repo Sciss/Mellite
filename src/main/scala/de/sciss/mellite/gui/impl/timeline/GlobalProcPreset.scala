@@ -118,7 +118,7 @@ object GlobalProcPreset {
         val bus   = "bus" .kr(0f)
         val amp   = gain * (1 - mute)
         val mul   = in * amp
-        val sig   = if (numInChannels == numOutChannels) mul else Seq.tabulate(numOutChannels)(i => mul \ (i % numOutChannels)): GE
+        val sig   = if (numInChannels == numOutChannels) mul else Seq.tabulate(numOutChannels)(i => mul.out(i % numOutChannels)): GE
         Out.ar(bus, sig)
       }
       g

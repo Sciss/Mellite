@@ -966,7 +966,7 @@ object ActionBounceTimeline {
         import ugen._
         val sigIn   = In.ar(0, numInChans)
         val sigOut: GE = inChans.map { in =>
-          val chIn = sigIn \ in
+          val chIn = sigIn.out(in)
           chIn * bncGainFactor
         }
         ReplaceOut.ar(0, sigOut)
@@ -1049,7 +1049,7 @@ object ActionBounceTimeline {
               ch += 1
             }
             rem -= chunk
-            progress = (rem.toDouble / numFrames0).linlin(0, 1, 0.9, 0.8)
+            progress = (rem.toDouble / numFrames0).linLin(0, 1, 0.9, 0.8)
             checkAborted()
           }
           afIn.seek(0L)
@@ -1078,7 +1078,7 @@ object ActionBounceTimeline {
               }
               afOut.write(buf, 0, chunk)
               rem -= chunk
-              progress = (rem.toDouble / numFrames0).linlin(0, 1, progStop, 0.9)
+              progress = (rem.toDouble / numFrames0).linLin(0, 1, progStop, 0.9)
               checkAborted()
             }
             afOut.close()

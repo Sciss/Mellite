@@ -175,7 +175,7 @@ object GUI {
       reactions += {
         case ValueChanged(_) =>
           import numbers.Implicits._
-          val scaled = value.linexp(0, 64, lo, hi)
+          val scaled = value.linExp(0, 64, lo, hi)
           fun(scaled)
       }
       preferredSize = new Dimension(33, 28)

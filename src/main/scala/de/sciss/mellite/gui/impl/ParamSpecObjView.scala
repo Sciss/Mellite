@@ -149,7 +149,7 @@ object ParamSpecObjView extends ListObjView.Factory {
       val spc     = spec
       val in      = ggRotIn.value * 0.001
       val out     = spc.map(in)
-      ggRotOut.value = out.linlin(spc.lo, spc.hi, 0, 1000).toInt
+      ggRotOut.value = out.linLin(spc.lo, spc.hi, 0, 1000).toInt
       val inS     = fmtDec.format(in)
       val fmt     = if (spc.warp == IntWarp) fmtInt else fmtDec
       val outS    = fmt.format(out)
@@ -162,7 +162,7 @@ object ParamSpecObjView extends ListObjView.Factory {
     private def updateExampleFromOut(fire: Boolean): ParamSpec = {
       import numbers.Implicits._
       val spc     = spec
-      val out     = ggRotOut.value.linlin(0, 1000, spc.lo, spc.hi)
+      val out     = ggRotOut.value.linLin(0, 1000, spc.lo, spc.hi)
       val in      = spc.inverseMap(out)
       ggRotIn.value = (in * 1000).toInt
       val inS     = fmtDec.format(in)

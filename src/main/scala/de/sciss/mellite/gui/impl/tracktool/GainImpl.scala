@@ -46,7 +46,7 @@ final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     val dy = d.firstEvent.getY - d.currentEvent.getY
     // use 0.1 dB per pixel. eventually we could use modifier keys...
     import synth._
-    val factor = (dy.toFloat / 10).dbamp
+    val factor = (dy.toFloat / 10).dbAmp
     Gain(factor)
   }
 
