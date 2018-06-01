@@ -16,10 +16,10 @@ package gui.impl.fscape
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.fscape.lucre.FScape
+import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -171,22 +171,28 @@ object FScapeObjView extends ListObjView.Factory {
             }
 
             implicit val context: GenContext[S] = GenContext[S]
-            val rendering = obj.run(config)
-            deferTx {
-              actionCancel.enabled = true
-              self        .enabled = false
+            try {
+              val rendering = obj.run(config)
+              deferTx {
+                actionCancel.enabled = true
+                self        .enabled = false
+              }
+              /* val obs = */ rendering.reactNow { implicit tx => {
+                case FScape.Rendering.Completed =>
+                  finished()
+                  rendering.result.foreach {
+                    case Failure(ex) =>
+                      deferTx(ex.printStackTrace())
+                    case _ =>
+                  }
+                case _ =>
+              }}
+              renderRef.set(Some(rendering))(tx.peer)
+            } catch {
+              case MissingIn(key) =>
+                println(s"Attribute input '$key' is missing.")
+//                throw ex
             }
-            /* val obs = */ rendering.reactNow { implicit tx => {
-              case FScape.Rendering.Completed =>
-                finished()
-                rendering.result.foreach {
-                  case Failure(ex) =>
-                    deferTx(ex.printStackTrace())
-                  case _ =>
-                }
-              case _ =>
-            }}
-            renderRef.set(Some(rendering))(tx.peer)
           }
         }
       }

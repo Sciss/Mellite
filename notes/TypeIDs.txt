@@ -81,6 +81,10 @@
 0x40001     SVMModel
 0x40002     SOM
 
+:: sphere-GNG ::
+
+0x50000     SphereGNG
+
 :: higher-order ::
 
 0x1000 | A.typeID   Option[A]
