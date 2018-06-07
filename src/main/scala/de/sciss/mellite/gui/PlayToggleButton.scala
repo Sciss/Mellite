@@ -34,6 +34,7 @@ object PlayToggleButton {
                                       workspace: WorkspaceHandle[S]): PlayToggleButton[S] = {
     val t = Transport[S](Mellite.auralSystem)
 //    t.addObject(obj)
+    t.addObject(obj)  // XXX TODO --- what was the reason we had this commented out?
     new Impl[S](t, objH = Some(tx.newHandle(obj)), disposeTransport = true).init()
   }
 
@@ -42,7 +43,7 @@ object PlayToggleButton {
     extends PlayToggleButton[S] with ComponentHolder[ToggleButton] {
 
     private[this] var obs: Disposable[S#Tx] = _
-    private[this] val added = Ref(false)
+//    private[this] val added = Ref(false)
 
     def dispose()(implicit tx: S#Tx): Unit = {
       obs.dispose()
@@ -72,13 +73,13 @@ object PlayToggleButton {
             val sel = selected
             SoundProcesses.atomic[S, Unit] { implicit tx =>
               transport.stop()
-              if (added.swap(false)(tx.peer)) objH.foreach(h => transport.removeObject(h()))
+//              if (added.swap(false)(tx.peer)) objH.foreach(h => transport.removeObject(h()))
               transport.seek(0L)
               if (sel) {
-                objH.foreach { h =>
-                  transport.addObject(h())
-                  added.set(true)(tx.peer)
-                }
+//                objH.foreach { h =>
+//                  transport.addObject(h())
+//                  added.set(true)(tx.peer)
+//                }
                 transport.play()
               }
             } (transport.scheduler.cursor)
