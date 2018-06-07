@@ -84,6 +84,8 @@
 :: sphere-GNG ::
 
 0x50000     SphereGNG
+0x50001     Eye
+0x50002     OscNode
 
 :: higher-order ::
 

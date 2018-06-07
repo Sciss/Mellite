@@ -28,7 +28,7 @@ import de.sciss.osc
 import de.sciss.synth.proc.gui.AudioBusMeter
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
-import de.sciss.synth.{SynthGraph, addAfter, addToHead, addToTail, proc}
+import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -205,7 +205,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       }
   }
 
-  private[this] val meter       = Ref(Option.empty[AudioBusMeter])
+  private[this] val metersRef   = Ref(List.empty[AudioBusMeter])
   private[this] var onlinePane  = Option.empty[Component]
 
   private[this] val smallFont   = new Font("SansSerif", Font.PLAIN, 9)
@@ -231,6 +231,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   private def auralSystemStarted(s: Server)(implicit tx: Txn): Unit = {
     log("MainFrame: AuralSystem started")
 
+    val numIns  = s.peer.config.inputBusChannels
     val numOuts = s.peer.config.outputBusChannels
 
     val group   = Group.play(s.defaultGroup, addAfter)
@@ -274,27 +275,29 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       addAction = addToTail, args = List("hp-bus" -> hpBus), dependencies = Nil)
     synOpt.set(Some(syn))(tx.peer)
 
-    val meterOption = if (!Prefs.useAudioMeters) None else {
-      val outBus  = Bus.soundOut(s, numOuts)
-      val m       = AudioBusMeter(AudioBusMeter.Strip(outBus, mGroup, addToHead) :: Nil)
-      Some(m)
+    val meters = if (!Prefs.useAudioMeters) List.empty else {
+      val inBus   = Bus.soundIn (s, numIns  )
+      val mIn     = AudioBusMeter(AudioBusMeter.Strip(inBus, s.defaultGroup , addBefore) :: Nil)
+      val outBus  = Bus.soundOut(s, numOuts )
+      val mOut    = AudioBusMeter(AudioBusMeter.Strip(outBus, mGroup        , addToHead) :: Nil)
+      mIn :: mOut :: Nil
     }
-    meter.set(meterOption)(tx.peer)
+    metersRef.set(meters)(tx.peer)
 
     deferTx {
-      mkAuralGUI(s = s, syn = syn, meterOption = meterOption, group = group, mGroup = mGroup)
+      mkAuralGUI(s = s, syn = syn, meters = meters, group = group, mGroup = mGroup)
     }
   }
 
   // group -- master group; mGroup -- metering group
-  private def mkAuralGUI(s: Server, syn: Synth, meterOption: Option[AudioBusMeter], group: Group, mGroup: Group): Unit = {
+  private def mkAuralGUI(s: Server, syn: Synth, meters: List[AudioBusMeter], group: Group, mGroup: Group): Unit = {
     ActionShowTree.server = Some(s)
 
     audioServerPane.server = Some(s.peer)
 
     val p = new FlowPanel() // new BoxPanel(Orientation.Horizontal)
 
-    meterOption.foreach { m =>
+    meters.foreach { m =>
       p.contents += m.component
       p.contents += HStrut(8)
     }
@@ -432,7 +435,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   private def auralSystemStopped()(implicit tx: Txn): Unit = {
     log("MainFrame: AuralSystem stopped")
-    meter .swap(None)(tx.peer).foreach(_.dispose())
+    metersRef .swap(Nil)(tx.peer).foreach(_.dispose())
     synOpt.swap(None)(tx.peer)
     deferTx {
       audioServerPane.server = None
