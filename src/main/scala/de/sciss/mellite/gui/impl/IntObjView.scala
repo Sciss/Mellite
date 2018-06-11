@@ -45,7 +45,7 @@ object IntObjView extends ListObjView.Factory {
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new ListImpl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).initAttrs(obj)
+    new ListImpl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Int]
