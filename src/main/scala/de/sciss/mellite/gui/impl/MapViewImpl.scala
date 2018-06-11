@@ -41,7 +41,7 @@ import scala.swing.Swing._
 import scala.swing.event.TableRowsSelected
 import scala.swing.{Component, Label, ScrollPane, TextField}
 
-abstract class MapViewImpl[S <: Sys[S], Repr](list0: Vec[(String, ListObjView[S])])
+abstract class MapViewImpl[S <: Sys[S], Repr]
                               (implicit val cursor: stm.Cursor[S],
                                         val workspace: Workspace[S], val undoManager: UndoManager)
   extends MapView[S, Repr] with ComponentHolder[Component] with ModelImpl[MapView.Update[S, Repr]] {
@@ -62,12 +62,12 @@ abstract class MapViewImpl[S <: Sys[S], Repr](list0: Vec[(String, ListObjView[S]
   protected def showKeyOnly: Boolean = false
   protected def keyEditable: Boolean = true
 
-  private[this] var modelEDT = list0
+  private[this] var modelEDT: Vec[(String, ListObjView[S])] = _ // = list0
 
   private[this] var _table: Table = _
   private[this] var _scroll: ScrollPane = _
 
-  private[this] val viewMap = TMap(list0: _*)
+  private[this] val viewMap = TMap.empty[String, ListObjView[S]] // TMap(list0: _*)
 
   final protected def table : Table      = _table
   final protected def scroll: ScrollPane = _scroll
@@ -98,14 +98,17 @@ abstract class MapViewImpl[S <: Sys[S], Repr](list0: Vec[(String, ListObjView[S]
   private[this] def mkValueView(key: String, value: Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
     val view = ListObjView(value)
     viewMap.put(key, view)(tx.peer).foreach(_.dispose())
+    observeView(key, view)
+    view
+  }
+
+  private def observeView(key: String, view: ListObjView[S])(implicit tx: S#Tx): Unit =
     view.react { implicit tx => {
       case ObjView.Repaint(_) =>
         withRow(key) { row =>
           tableModel.fireTableRowsUpdated(row, row)
         }
     }}
-    view
-  }
 
   final protected def attrAdded(key: String, value: Obj[S])(implicit tx: S#Tx): Unit = {
     val view = mkValueView(key, value)
@@ -187,7 +190,18 @@ abstract class MapViewImpl[S <: Sys[S], Repr](list0: Vec[(String, ListObjView[S]
     }
   }
 
-  final protected def guiInit(): Unit = {
+  final protected def init(list0: Vec[(String, ListObjView[S])])(implicit tx: S#Tx): this.type = {
+    import TxnLike.peer
+    modelEDT  = list0
+    viewMap ++= list0
+    list0.foreach(tup => observeView(tup._1, tup._2))
+    deferTx {
+      guiInit()
+    }
+    this
+  }
+
+  private[this] def guiInit(): Unit = {
     _table = new Table(tableModel) {
       // Table default has bad renderer/editor handling
       override lazy val peer: JTable = new JTable /* with Table.JTableMixin */ with SuperMixin

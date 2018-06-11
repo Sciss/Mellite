@@ -22,7 +22,6 @@ import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.Mellite
 import de.sciss.synth.proc.{SoundProcesses, Transport, WorkspaceHandle}
 
-import scala.concurrent.stm.Ref
 import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
 

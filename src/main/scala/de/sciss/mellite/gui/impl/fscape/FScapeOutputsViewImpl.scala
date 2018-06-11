@@ -15,8 +15,6 @@ package de.sciss.mellite
 package gui.impl.fscape
 
 import java.awt.datatransfer.Transferable
-import javax.swing.undo.UndoableEdit
-import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.equal.Implicits._
@@ -24,7 +22,6 @@ import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
-import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
@@ -33,9 +30,10 @@ import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.{DragAndDrop, FScapeOutputsView, GUI, ListObjView, MapView}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.synth.proc.Workspace
+import javax.swing.undo.UndoableEdit
+import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 
 import scala.collection.breakOut
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, TextField}
 
@@ -46,7 +44,7 @@ object FScapeOutputsViewImpl {
       (out.key, ListObjView(out))
     }  .toIndexedSeq
 
-    new Impl(list0, tx.newHandle(obj)) {
+    new Impl(tx.newHandle(obj)) {
       protected val observer: Disposable[S#Tx] = obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case FScape.OutputAdded  (out) => attrAdded(out.key, out)
@@ -55,15 +53,14 @@ object FScapeOutputsViewImpl {
         }
       }
 
-      deferTx(guiInit())
+      init(list0)
     }
   }
 
-  private abstract class Impl[S <: Sys[S]](list0: Vec[(String, ListObjView[S])],
-                                           objH: stm.Source[S#Tx, FScape[S]])
+  private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, FScape[S]])
                                           (implicit cursor: stm.Cursor[S], workspace: Workspace[S],
                                            undoManager: UndoManager)
-    extends MapViewImpl[S, FScapeOutputsView[S]](list0) with FScapeOutputsView[S] with ComponentHolder[Component] { impl =>
+    extends MapViewImpl[S, FScapeOutputsView[S]] with FScapeOutputsView[S] with ComponentHolder[Component] { impl =>
 
     protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
     protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None

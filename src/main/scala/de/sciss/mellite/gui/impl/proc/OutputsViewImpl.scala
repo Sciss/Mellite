@@ -15,23 +15,21 @@ package de.sciss.mellite
 package gui.impl.proc
 
 import java.awt.datatransfer.Transferable
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
-import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{DragAndDrop, GUI, ListObjView, MapView, ProcOutputsView}
 import de.sciss.mellite.gui.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
+import de.sciss.mellite.gui.{DragAndDrop, GUI, ListObjView, MapView, ProcOutputsView}
 import de.sciss.synth.proc.{Proc, Workspace}
+import javax.swing.undo.UndoableEdit
 
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
@@ -42,7 +40,7 @@ object OutputsViewImpl {
       (out.key, ListObjView(out))
     }  .toIndexedSeq
 
-    new Impl(list0, tx.newHandle(obj)) {
+    new Impl(tx.newHandle(obj)) {
       protected val observer: Disposable[S#Tx] = obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case Proc.OutputAdded  (out) => attrAdded(out.key, out)
@@ -51,15 +49,14 @@ object OutputsViewImpl {
         }
       }
 
-      deferTx(guiInit())
+      init(list0)
     }
   }
 
-  private abstract class Impl[S <: Sys[S]](list0: Vec[(String, ListObjView[S])],
-                                            objH: stm.Source[S#Tx, Proc[S]])
+  private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, Proc[S]])
                                        (implicit cursor: stm.Cursor[S], workspace: Workspace[S],
                                         undoManager: UndoManager)
-    extends MapViewImpl[S, ProcOutputsView[S]](list0) with ProcOutputsView[S] with ComponentHolder[Component] { impl =>
+    extends MapViewImpl[S, ProcOutputsView[S]] with ProcOutputsView[S] with ComponentHolder[Component] { impl =>
 
     protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
     protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None
