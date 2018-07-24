@@ -124,6 +124,8 @@ object GraphemeViewImpl {
 
     impl =>
 
+    type C = Component
+
     import cursor.step
 
     // GUI-thread map of views; always reflects viewMapT

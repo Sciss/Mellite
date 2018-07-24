@@ -95,6 +95,8 @@ object FolderViewImpl {
 
     view =>
 
+    type C = Component
+
     private type Data     = ListObjView[S]
     private type NodeView = FolderView.NodeView[S]
 

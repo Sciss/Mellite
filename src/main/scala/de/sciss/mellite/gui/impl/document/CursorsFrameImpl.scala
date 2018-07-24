@@ -115,6 +115,7 @@ object CursorsFrameImpl {
     extends ComponentHolder[Component] with DocumentCursorsView {
 
     type Node = CursorView
+    type C    = Component
 
     protected def observer: Disposable[D#Tx]
 

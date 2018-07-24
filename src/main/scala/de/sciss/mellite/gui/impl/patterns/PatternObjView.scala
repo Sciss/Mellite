@@ -32,6 +32,8 @@ import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Workspace}
 
+import scala.swing.Button
+
 object PatternObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Pattern[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Pattern)
@@ -121,7 +123,7 @@ object PatternObjView extends ListObjView.Factory {
     }
 
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
-    val viewEval = View.wrap[S] {
+    val viewEval = View.wrap[S, Button] {
       val actionEval = new swing.Action("Evaluate") { self =>
         def apply(): Unit = cursor.step { implicit tx =>
           val obj = objH()

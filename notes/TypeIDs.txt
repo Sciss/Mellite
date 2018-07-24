@@ -40,6 +40,7 @@
 201 freesound.lucre.SoundObj
 202 freesound.lucre.Retrieval
 300 patterns.lucre.Pattern
+400 Widget.Graph
 
 :: non-expr elements (mutables) ::
 
@@ -59,6 +60,8 @@
 0x1000B     fscape.FScape
 0x1000C     Cursors
 0x1000D     fscape.FScape.Output
+
+0x1000E     Widget
 
 :: indeterminus ::
 
@@ -131,6 +134,8 @@ Code ids
 4: fscape.Graph
 
 5: patterns.lucre.Pattern.Code
+
+6: Widget.Code
 
 :: sysson ::
 

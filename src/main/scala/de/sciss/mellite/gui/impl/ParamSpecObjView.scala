@@ -279,6 +279,8 @@ object ParamSpecObjView extends ListObjView.Factory {
                                             val undoManager: UndoManager)
     extends ViewHasWorkspace[S] with View.Editable[S] with ComponentHolder[Component] {
 
+    type C = Component
+
     private[this] var specValue   : ParamSpec         = _
     private[this] var panel       : PanelImpl         = _
     private[this] val _dirty      : Ref[Boolean]      = Ref(false)

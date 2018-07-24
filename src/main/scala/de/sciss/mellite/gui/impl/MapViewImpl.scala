@@ -47,6 +47,8 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
   extends MapView[S, Repr] with ComponentHolder[Component] with ModelImpl[MapView.Update[S, Repr]] {
   impl: Repr =>
 
+  type C = Component
+
   // ---- abstract ----
 
   protected def observer: Disposable[S#Tx]

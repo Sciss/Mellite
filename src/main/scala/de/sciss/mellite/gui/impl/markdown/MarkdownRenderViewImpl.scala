@@ -52,6 +52,8 @@ object MarkdownRenderViewImpl {
       with ComponentHolder[Component]
       with ObservableImpl[S, MarkdownRenderView.Update[S]] { impl =>
 
+    type C = Component
+
     private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]
     private[this] var _editor: EditorPane = _
     private[this] val nav   = NavigationHistory.empty[S, stm.Source[S#Tx, Markdown[S]]]

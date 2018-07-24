@@ -87,6 +87,8 @@ object CodeViewImpl {
                                         val cursor: stm.Cursor[S], compiler: Code.Compiler)
     extends ComponentHolder[Component] with CodeView[S] with ModelImpl[CodeView.Update] {
 
+    type C = Component
+
     private[this] val _dirty = Ref(false)
 
     def dirty(implicit tx: TxnLike): Boolean = _dirty.get(tx.peer)

@@ -93,5 +93,7 @@ object PlayToggleButton {
   }
 }
 trait PlayToggleButton[S <: Sys[S]] extends View[S] {
+  type C = ToggleButton
+
   def transport: Transport[S]
 }

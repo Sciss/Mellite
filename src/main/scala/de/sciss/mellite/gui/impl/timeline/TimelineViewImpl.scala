@@ -154,6 +154,8 @@ object TimelineViewImpl {
 
     impl =>
 
+    type C = Component
+
     import cursor.step
 
     private[this] var viewRange = RangedSeq.empty[TimelineObjView[S], Long]

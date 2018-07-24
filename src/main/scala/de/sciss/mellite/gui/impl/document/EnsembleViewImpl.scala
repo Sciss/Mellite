@@ -43,6 +43,8 @@ object EnsembleViewImpl {
                                         val cursor: stm.Cursor[S])
     extends ComponentHolder[Component] with EnsembleView[S] { impl =>
 
+    type C = Component
+
     def ensemble(implicit tx: S#Tx): Ensemble[S] = ensembleH()
 
     def folderView: FolderView[S] = view.peer

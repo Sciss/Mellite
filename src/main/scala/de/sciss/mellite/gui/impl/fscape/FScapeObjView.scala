@@ -132,7 +132,7 @@ object FScapeObjView extends ListObjView.Factory {
       max = 160
     }
 
-    val viewProgress = View.wrap[S](ggProgress)
+    val viewProgress = View.wrap[S, ProgressBar](ggProgress)
 
     lazy val actionCancel: swing.Action = new swing.Action(null) {
       def apply(): Unit = cursor.step { implicit tx =>
@@ -141,12 +141,12 @@ object FScapeObjView extends ListObjView.Factory {
       enabled = false
     }
 
-    val viewCancel = View.wrap[S] {
+    val viewCancel = View.wrap[S, Button] {
       GUI.toolButton(actionCancel, raphael.Shapes.Cross, tooltip = "Abort Rendering")
     }
 
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
-    val viewRender = View.wrap[S] {
+    val viewRender = View.wrap[S, Button] {
       val actionRender = new swing.Action("Render") { self =>
         def apply(): Unit = cursor.step { implicit tx =>
           if (renderRef.get(tx.peer).isEmpty) {
@@ -199,7 +199,7 @@ object FScapeObjView extends ListObjView.Factory {
       GUI.toolButton(actionRender, Shapes.Sparks)
     }
 
-    val viewDebug = View.wrap[S] {
+    val viewDebug = View.wrap[S, Button] {
       Button("Debug") {
         renderRef.single.get.foreach { r =>
           val ctrl = r.control

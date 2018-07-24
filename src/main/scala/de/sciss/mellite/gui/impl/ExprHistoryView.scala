@@ -67,6 +67,8 @@ object ExprHistoryView {
                               pos0: S#Acc, time0: Long, value0: A, stop: Int)
     extends ViewHasWorkspace[S] with ComponentHolder[Component] {
 
+    type C = Component
+
     private val mod     = ListView.Model.empty[String]
     private val format  = new SimpleDateFormat("yyyy MM dd MM | HH:mm:ss", Locale.US) // don't bother user with alpha characters
 

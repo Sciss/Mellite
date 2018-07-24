@@ -18,7 +18,6 @@ package interpreter
 
 import javax.swing.event.{AncestorEvent, AncestorListener}
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -34,7 +33,7 @@ import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
-import scala.swing.{Component, Orientation, SplitPane}
+import scala.swing.{Button, Component, Orientation, SplitPane}
 
 object CodeFrameImpl {
   // ---- adapter for editing a Proc's source ----
@@ -93,7 +92,7 @@ object CodeFrameImpl {
     }
 
     val objH  = tx.newHandle(obj)
-    val viewExecute = View.wrap[S] {
+    val viewExecute = View.wrap[S, Button] {
       val actionExecute = swing.Action(null) {
         cursor.step { implicit tx =>
           val obj = objH()
@@ -154,7 +153,9 @@ object CodeFrameImpl {
                                        val undoManager: UndoManager)
     extends View.Editable[S] with ViewHasWorkspace[S] {
 
-    lazy val component: Component = rightViewOpt.fold(codeView.component) { rightView =>
+    type C = Component
+
+    lazy val component: Component = rightViewOpt.fold[C](codeView.component) { rightView =>
       val res = new SplitPane(Orientation.Vertical, codeView.component, rightView.component)
       res.oneTouchExpandable  = true
       res.resizeWeight        = 1.0

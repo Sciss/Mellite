@@ -77,6 +77,8 @@ object MarkdownEditorViewImpl {
                                          val cursor: stm.Cursor[S])
     extends ComponentHolder[Component] with MarkdownEditorView[S] with ModelImpl[MarkdownEditorView.Update] { impl =>
 
+    type C = Component
+
     private[this] val _dirty = Ref(false)
 
     def dirty(implicit tx: TxnLike): Boolean = _dirty.get(tx.peer)

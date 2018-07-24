@@ -391,6 +391,8 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
     private[this] var ggProgressDL: ProgressBar = _
     private[this] var actionDL    : Action      = _
 
+    type C = Component
+
     def component: Component = peer.component
 
     def init()(implicit tx: S#Tx): this.type = {

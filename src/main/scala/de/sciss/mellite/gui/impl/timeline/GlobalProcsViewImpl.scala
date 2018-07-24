@@ -66,11 +66,13 @@ object GlobalProcsViewImpl {
                                         val undoManager: UndoManager)
     extends GlobalProcsView[S] with ComponentHolder[Component] {
 
-    private var procSeq = Vec.empty[ProcObjView.Timeline[S]]
+    type C = Component
+
+    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[S]]
 
     private def atomic[A](block: S#Tx => A): A = cursor.step(block)
 
-    private var table: Table = _
+    private[this] var table: Table = _
 
     def tableComponent: Table = table
 

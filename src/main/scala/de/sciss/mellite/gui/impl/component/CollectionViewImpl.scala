@@ -34,6 +34,8 @@ trait CollectionViewImpl[S <: Sys[S]]
 
   impl =>
 
+  type C = Component
+
   // ---- abstract ----
 
   protected def peer: View.Editable[S]

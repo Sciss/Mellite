@@ -57,6 +57,8 @@ object NuagesEditorViewImpl {
     extends NuagesEditorView[S] with ComponentHolder[Component] {
     impl =>
 
+    type C = Component
+
     def actionDuplicate: Action = folderView.actionDuplicate
 
     private def buildConfiguration()(implicit tx: S#Tx): Nuages.ConfigBuilder = {

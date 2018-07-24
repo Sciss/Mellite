@@ -108,6 +108,8 @@ object ViewImpl {
   private abstract class Impl[S <: Sys[S], I <: Sys[I]](gainView: View[S])(implicit inMemoryBridge: S#Tx => I#Tx)
     extends AudioFileView[S] with ComponentHolder[Component] { impl =>
 
+    type C = Component
+
     protected def holder       : stm.Source[S#Tx, AudioCue.Obj[S]]
     protected def transportView: TransportView[I]
     protected def timelineModel: TimelineModel
