@@ -18,10 +18,10 @@ package interpreter
 
 import java.awt.Color
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
+
 import javax.swing.Icon
 import javax.swing.event.{UndoableEditEvent, UndoableEditListener}
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager}
 import de.sciss.icons.raphael
@@ -39,7 +39,7 @@ import de.sciss.synth.proc.{Code, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.{Future, Promise}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
 import scala.swing.event.Key
@@ -66,7 +66,7 @@ object CodeViewImpl {
                         (handlerOpt: Option[CodeView.Handler[S, code0.In, code0.Out]])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          compiler: Code.Compiler,
-                         undoManager: UndoManager): CodeView[S] = {
+                         undoManager: UndoManager): CodeView[S, code0.Out] = {
 
     val codeEx      = obj
     val codeVarHOpt = codeEx match {
@@ -85,7 +85,7 @@ object CodeViewImpl {
                                         bottom: ISeq[View[S]])
                                        (implicit undoManager: UndoManager, val workspace: Workspace[S],
                                         val cursor: stm.Cursor[S], compiler: Code.Compiler)
-    extends ComponentHolder[Component] with CodeView[S] with ModelImpl[CodeView.Update] {
+    extends ComponentHolder[Component] with CodeView[S, Out0] with ModelImpl[CodeView.Update] {
 
     type C = Component
 
@@ -136,7 +136,7 @@ object CodeViewImpl {
 
     def isCompiling(implicit tx: TxnLike): Boolean = futCompile.get(tx.peer).isDefined
 
-    protected def currentText: String = codePane.editor.text
+    def currentText: String = codePane.editor.text
 
     def dispose()(implicit tx: S#Tx): Unit = ()
 
@@ -160,14 +160,14 @@ object CodeViewImpl {
       // component.setDirty(value = false) // do not erase undo history
 
       // so let's clear the undo history now...
-      codePane.editor.peer.getDocument.asInstanceOf[SyntaxDocument].clearUndos()
+//      codePane.editor.peer.getDocument.asInstanceOf[SyntaxDocument].clearUndos()
     }
 
     def save(): Future[Unit] = {
       requireEDT()
       val newCode = currentText
       if (handlerOpt.isDefined) {
-        compileSource(newCode, save = true)
+        compileSource(newCode, save = true, andThen = None)
       } else {
         val editOpt = cursor.step { implicit tx =>
           saveSource(newCode)
@@ -187,9 +187,21 @@ object CodeViewImpl {
       CompoundEdit(edits, "Save and Apply Code")
     }
 
-    private def compile(): Unit = compileSource(currentText, save = false)
+    private def compile(): Unit = compileSource(currentText, save = false, andThen = None)
 
-    private def compileSource(newCode: String, save: Boolean): Future[Unit] = {
+    def preview(): Future[Out0] = {
+      requireEDT()
+      val p = Promise[Out0]()
+      val newCode = currentText
+      if (handlerOpt.isDefined) {
+        compileSource(newCode, save = true, andThen = Some(p.success))
+      } else {
+        p.failure(new Exception("No handler defined"))
+      }
+      p.future
+    }
+
+    private def compileSource(newCode: String, save: Boolean, andThen: Option[Out0 => Unit]): Future[Unit] = {
       requireEDT()
       val saveObject = handlerOpt.isDefined && save
       if (futCompile.single.get.isDefined && !saveObject) return Future.successful[Unit] {}

@@ -39,19 +39,23 @@ object CodeView {
                         (handler: Option[Handler[S, code0.In, code0.Out]])
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          compiler: Code.Compiler,
-                         undoManager: UndoManager): CodeView[S] =
+                         undoManager: UndoManager): CodeView[S, code0.Out] =
     Impl[S](obj, code0, bottom = bottom)(handler)
 
   sealed trait Update
   case class DirtyChange(value: Boolean) extends Update
 }
-trait CodeView[S <: Sys[S]] extends ViewHasWorkspace[S] with Model[CodeView.Update] {
+trait CodeView[S <: Sys[S], Out] extends ViewHasWorkspace[S] with Model[CodeView.Update] {
   def isCompiling(implicit tx: TxnLike): Boolean
 
   def dirty(implicit tx: TxnLike): Boolean
 
   /** Call on EDT outside Txn */
   def save(): Future[Unit]
+
+  def preview(): Future[Out]
+
+  def currentText: String
 
   // def updateSource(text: String)(implicit tx: S#Tx): Unit
 

@@ -46,5 +46,5 @@ object CodeFrame {
 }
 
 trait CodeFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-  def codeView: CodeView[S]
+  def codeView: CodeView[S, _]
 }

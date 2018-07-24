@@ -20,7 +20,7 @@ import de.sciss.freesound.lucre.Retrieval
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
-import de.sciss.synth.proc.{GenView, SoundProcesses}
+import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}
 
 trait Init {
   def cacheDir: File = _cacheDir
@@ -37,6 +37,7 @@ trait Init {
     FScape        .init()
     Pattern       .init()
     Retrieval     .init()
+    Widget        .init()
 
     val cacheLim = Limit(count = 8192, space = 2L << 10 << 100)  // 2 GB; XXX TODO --- through user preferences
     FScCache.init(folder = cacheDir, capacity = cacheLim)

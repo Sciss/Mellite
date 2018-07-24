@@ -16,7 +16,6 @@ package gui
 package impl
 
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.lucre.expr.{BooleanObj, Expr, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -29,6 +28,7 @@ import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
 import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
+import de.sciss.mellite.gui.impl.widget.WidgetObjView
 
 import scala.language.higherKinds
 import scala.swing.{CheckBox, Component, Label}
@@ -81,7 +81,8 @@ object ListObjViewImpl {
     OutputObjView             .tpe.typeId -> OutputObjView,
     ParamSpecObjView          .tpe.typeId -> ParamSpecObjView,
     PatternObjView            .tpe.typeId -> PatternObjView,
-    ProcObjView               .tpe.typeId -> ProcObjView
+    ProcObjView               .tpe.typeId -> ProcObjView,
+    WidgetObjView             .tpe.typeId -> WidgetObjView,
   )
 
   /** A trait that when mixed in provides `isEditable` and `tryEdit` as non-op methods. */

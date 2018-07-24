@@ -227,7 +227,7 @@ object CodeFrameImpl {
 
   // ---- frame impl ----
 
-  private final class FrameImpl[S <: Sys[S]](val codeView: CodeView[S], val view: View[S],
+  private final class FrameImpl[S <: Sys[S]](val codeView: CodeView[S, _], val view: View[S],
                                              name: CellView[S#Tx, String], contextName: String)
     extends WindowImpl[S](name.map(n => s"$n : $contextName Code")) with CodeFrame[S] with Veto[S#Tx] {
 

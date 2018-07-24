@@ -31,6 +31,7 @@ import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Workspace}
+import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
 
 import scala.swing.Button
 
@@ -100,8 +101,7 @@ object PatternObjView extends ListObjView.Factory {
   private def codeFrame[S <: Sys[S]](obj: Pattern.Var[S])
                                     (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
-    import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
-    val codeObj = mkSource(obj = obj, codeId = Pattern.Code.id, key = "graph-source" /* Pattern.attrSource */,
+    val codeObj = CodeFrameImpl.mkSource(obj = obj, codeId = Pattern.Code.id, key = Pattern.attrSource,
       init = "// Pattern graph function source code\n\n")
 
     val codeEx0 = codeObj
@@ -144,7 +144,7 @@ object PatternObjView extends ListObjView.Factory {
     val bottom = viewEval :: Nil
 
     implicit val undo: UndoManager = UndoManager()
-    make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = None,
+    CodeFrameImpl.make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = None,
       canBounce = false)
   }
 }
