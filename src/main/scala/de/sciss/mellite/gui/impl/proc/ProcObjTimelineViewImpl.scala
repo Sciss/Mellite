@@ -15,14 +15,14 @@ package de.sciss.mellite
 package gui.impl.proc
 
 import de.sciss.file._
-import de.sciss.lucre.expr.SpanLikeObj
+import de.sciss.lucre.expr.{CellView, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, TxnLike}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.mellite.gui.{AttrCellView, ObjView, SonogramManager, TimelineObjView, TimelineRendering, TimelineView}
+import de.sciss.mellite.gui.{ObjView, SonogramManager, TimelineObjView, TimelineRendering, TimelineView}
 import de.sciss.sonogram.{Overview => SonoOverview}
 import de.sciss.span.Span
 import de.sciss.synth.proc
@@ -72,7 +72,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     initAttrs(id, span, obj)
 
     val attr    = obj.attr
-    val cueView = AttrCellView[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
+    val cueView = CellView.attr[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
     disposables ::= cueView.react { implicit tx => newAudio =>
       deferAndRepaint {
         val newSonogram = audio.map(_.artifact) != newAudio.map(_.artifact)

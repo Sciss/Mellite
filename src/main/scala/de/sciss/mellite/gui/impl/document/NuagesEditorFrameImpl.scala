@@ -17,8 +17,8 @@ package impl
 package document
 
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Workspace
@@ -28,7 +28,7 @@ object NuagesEditorFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): NuagesEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val view          = NuagesEditorView(obj)
-    val name          = AttrCellView.name(obj)
+    val name          = CellView.name(obj)
     val res           = new FrameImpl[S](view, name)
     res.init()
     res

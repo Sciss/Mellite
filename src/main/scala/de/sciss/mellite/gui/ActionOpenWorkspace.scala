@@ -15,14 +15,15 @@ package de.sciss.mellite
 package gui
 
 import java.util.concurrent.TimeUnit
-import javax.swing.SwingUtilities
 
+import javax.swing.SwingUtilities
 import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.store.BerkeleyDB
-import de.sciss.lucre.swing.{CellView, defer}
+import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Durable, SoundProcesses, Workspace, WorkspaceLike}

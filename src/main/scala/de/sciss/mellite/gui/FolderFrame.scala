@@ -15,8 +15,8 @@ package de.sciss
 package mellite
 package gui
 
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.{FolderFrameImpl => Impl}
 import de.sciss.synth.proc.{Folder, Workspace}

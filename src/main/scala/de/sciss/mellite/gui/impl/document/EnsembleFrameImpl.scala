@@ -17,8 +17,9 @@ package impl
 package document
 
 import de.sciss.desktop.UndoManager
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.{CellView, View}
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc.{Ensemble, Workspace}
 
@@ -27,7 +28,7 @@ object EnsembleFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): EnsembleFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val ensembleView      = EnsembleViewImpl(obj)
-    val name  = AttrCellView.name(obj)
+    val name  = CellView.name(obj)
     val res   = new FrameImpl[S](ensembleView, name)
     res.init()
     res

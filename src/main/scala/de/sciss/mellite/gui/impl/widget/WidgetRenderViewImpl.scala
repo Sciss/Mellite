@@ -93,7 +93,7 @@ object WidgetRenderViewImpl {
     def setGraph(g: Graph)(implicit tx: S#Tx): Unit = {
       val old = graphRef.swap(g)
       if (g != old) {
-        val v = g.expand[S]
+        val v = g.expand[S](self = Some(widget))
         deferTx {
           paneBorder.add(v.component, BorderPanel.Position.Center)
           paneBorder.revalidate()

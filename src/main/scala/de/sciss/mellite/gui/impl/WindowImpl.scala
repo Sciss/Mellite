@@ -18,10 +18,11 @@ package impl
 import de.sciss.desktop
 import de.sciss.desktop.WindowHandler
 import de.sciss.file._
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.swing.{CellView, View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.mellite.util.Veto
 
 import scala.concurrent.Future

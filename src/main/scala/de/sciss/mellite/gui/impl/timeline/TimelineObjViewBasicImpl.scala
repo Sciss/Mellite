@@ -16,7 +16,7 @@ package gui
 package impl
 package timeline
 
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
+import de.sciss.lucre.expr.{CellView, IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
@@ -40,7 +40,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
   def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
     val attr      = obj.attr
 
-    val trackIdxView = AttrCellView[S, Int, IntObj](attr, TimelineObjView.attrTrackIndex)
+    val trackIdxView = CellView.attr[S, Int, IntObj](attr, TimelineObjView.attrTrackIndex)
     disposables ::= trackIdxView.react { implicit tx => opt =>
       deferTx {
         trackIndex = opt.getOrElse(0)
@@ -49,7 +49,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
     }
     trackIndex   = trackIdxView().getOrElse(0)
 
-    val trackHView = AttrCellView[S, Int, IntObj](attr, TimelineObjView.attrTrackHeight)
+    val trackHView = CellView.attr[S, Int, IntObj](attr, TimelineObjView.attrTrackHeight)
     disposables ::= trackHView.react { implicit tx => opt =>
       deferTx {
         trackHeight = opt.getOrElse(TimelineView.DefaultTrackHeight)

@@ -17,8 +17,8 @@ package impl
 package document
 
 import de.sciss.desktop.{Menu, UndoManager}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc.{Folder, Workspace}
 

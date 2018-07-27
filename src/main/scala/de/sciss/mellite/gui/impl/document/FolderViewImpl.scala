@@ -17,13 +17,13 @@ package impl
 package document
 
 import java.io.File
+
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{CellEditor, DropMode}
-
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.expr.StringObj
+import de.sciss.lucre.expr.{CellView, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
@@ -141,7 +141,7 @@ object FolderViewImpl {
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)
         }
         val attr      = obj.attr
-        val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
+        val nameView  = CellView.attr[S, String, StringObj](attr, ObjKeys.attrName)
         val attrReact = nameView.react { implicit tx => nameOpt =>
           val isDirty = updateObjectName(obj, nameOpt)
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)

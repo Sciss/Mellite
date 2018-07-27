@@ -17,18 +17,18 @@ package impl
 
 import java.text.NumberFormat
 import java.util.Locale
-import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 
+import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import de.sciss.audiowidgets.RotaryKnob
 import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.Type
+import de.sciss.lucre.expr.{CellView, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{CellView, View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
@@ -421,7 +421,7 @@ object ParamSpecObjView extends ListObjView.Factory {
       implicit val undo: UndoManager = new UndoManagerImpl  // XXX TODO --- actually not used
       val _obj  = obj
       val view  = new ViewImpl[S](objH, editable = isEditable).init(_obj)
-      val nameView = AttrCellView.name(_obj)
+      val nameView = CellView.name(_obj)
       val fr    = new FrameImpl[S](view, nameView).init()
       Some(fr)
     }

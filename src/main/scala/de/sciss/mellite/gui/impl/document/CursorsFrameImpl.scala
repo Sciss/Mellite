@@ -22,9 +22,10 @@ import java.util.{Date, Locale}
 import de.sciss.desktop
 import de.sciss.desktop.Window
 import de.sciss.icons.raphael
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{CellView, deferTx}
+import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.{confluent, stm}
 import de.sciss.model.Change
 import de.sciss.synth.proc

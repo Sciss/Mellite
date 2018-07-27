@@ -15,11 +15,12 @@ package de.sciss.mellite
 package gui.impl.widget
 
 import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{AttrCellView, WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
+import de.sciss.mellite.gui.{WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.{Widget, Workspace}
@@ -46,7 +47,7 @@ object WidgetFrameImpl {
   }
 
   private def setTitle[S <: Sys[S]](win: WindowImpl[S], md: Widget[S])(implicit tx: S#Tx): Unit =
-    win.setTitleExpr(Some(AttrCellView.name(md)))
+    win.setTitleExpr(Some(CellView.name(md)))
 
   private def trackTitle[S <: Sys[S]](win: WindowImpl[S], renderer: WidgetRenderView[S])(implicit tx: S#Tx): Unit = {
     setTitle(win, renderer.widget)

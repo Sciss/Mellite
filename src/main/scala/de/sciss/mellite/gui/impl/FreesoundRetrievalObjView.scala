@@ -27,7 +27,7 @@ import de.sciss.freesound.lucre.{PreviewsCache, Retrieval, RetrievalView, SoundO
 import de.sciss.freesound.swing.SoundTableView
 import de.sciss.freesound.{Auth, Client, Codec, Freesound, License, Sound, TextSearch}
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.expr.{DoubleObj, LongObj}
+import de.sciss.lucre.expr.{CellView, DoubleObj, LongObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, TxnLike}
 import de.sciss.lucre.swing._
@@ -226,7 +226,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
         }
       }
 
-      val name    = AttrCellView.name[S](r)
+      val name    = CellView.name[S](r)
       val locH    = tx.newHandle(r.downloadLocation)
       val folderH = tx.newHandle(r.downloads)
 

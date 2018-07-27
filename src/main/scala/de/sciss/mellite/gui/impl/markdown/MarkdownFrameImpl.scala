@@ -15,11 +15,12 @@ package de.sciss.mellite
 package gui.impl.markdown
 
 import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{AttrCellView, MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
+import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.{Markdown, Workspace}
@@ -46,7 +47,7 @@ object MarkdownFrameImpl {
   }
 
   private def setTitle[S <: Sys[S]](win: WindowImpl[S], md: Markdown[S])(implicit tx: S#Tx): Unit =
-    win.setTitleExpr(Some(AttrCellView.name(md)))
+    win.setTitleExpr(Some(CellView.name(md)))
 
   private def trackTitle[S <: Sys[S]](win: WindowImpl[S], renderer: MarkdownRenderView[S])(implicit tx: S#Tx): Unit = {
     setTitle(win, renderer.markdown)

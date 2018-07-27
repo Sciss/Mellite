@@ -18,8 +18,8 @@ package timeline
 
 import de.sciss.desktop.{Menu, OptionPane, UndoManager, Window}
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.synth.proc.{Timeline, Workspace}
@@ -31,7 +31,7 @@ object TimelineFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): TimelineFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = TimelineView[S](group)
-    val name    = AttrCellView.name(group)
+    val name    = CellView.name(group)
     import Timeline.serializer
     val groupH  = tx.newHandle(group)
     val res     = new Impl(tlv, name, groupH)

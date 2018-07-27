@@ -17,11 +17,10 @@ package impl
 package document
 
 import javax.swing.SpinnerNumberModel
-
 import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{BooleanObj, IntVector}
+import de.sciss.lucre.expr.{BooleanObj, CellView, IntVector}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{Window, deferTx}
@@ -125,7 +124,7 @@ object NuagesEditorViewImpl {
             case Nuages.Surface.Timeline(tl) =>
               TimelineFrame(tl)
             case Nuages.Surface.Folder(f) =>
-              val nameView = AttrCellView.name(nuages)
+              val nameView = CellView.name(nuages)
               FolderFrame(nameView, f)
           }
         }

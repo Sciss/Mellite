@@ -26,7 +26,7 @@ import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
 import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.expr.{BooleanObj, Expr, LongObj, StringObj, Type}
+import de.sciss.lucre.expr.{BooleanObj, CellView, Expr, LongObj, StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -411,7 +411,7 @@ object ObjViewImpl {
 //        val opt = OptionPane.confirmation(message = component, optionType = OptionPane.Options.OkCancel,
 //          messageType = OptionPane.Message.Plain)
 //        opt.show(parent) === OptionPane.Result.Ok
-        val title = AttrCellView.name(obj)
+        val title = CellView.name(obj)
         val w = new WindowImpl[S](title) { self =>
           val view: View[S] = View.wrap {
             val (compColor, chooser) = Color.mkColorEditor()
@@ -511,7 +511,7 @@ object ObjViewImpl {
       def openView(parent: Option[Window[S]])
                   (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
         val folderObj = objH()
-        val nameView  = AttrCellView.name(folderObj)
+        val nameView  = CellView.name(folderObj)
         Some(FolderFrame(nameView, folderObj))
       }
     }
@@ -920,7 +920,7 @@ object ObjViewImpl {
     def initAttrs(obj: Obj[S])(implicit tx: S#Tx): this.type = {
       val attr      = obj.attr
 
-      val nameView  = AttrCellView[S, String, StringObj](attr, ObjKeys.attrName)
+      val nameView  = CellView.attr[S, String, StringObj](attr, ObjKeys.attrName)
       disposables ::= nameView.react { implicit tx => opt =>
         deferAndRepaint {
           nameOption = opt
@@ -928,7 +928,7 @@ object ObjViewImpl {
       }
       nameOption   = nameView()
 
-      val colorView = AttrCellView[S, _Color, _Color.Obj](attr, ObjView.attrColor)
+      val colorView = CellView.attr[S, _Color, _Color.Obj](attr, ObjView.attrColor)
       disposables ::= colorView.react { implicit tx => opt =>
         deferAndRepaint {
           colorOption = opt
@@ -952,7 +952,7 @@ object ObjViewImpl {
           // XXX TODO - all this casting is horrible
           implicit val ctx: Confluent#Tx = tx.asInstanceOf[Confluent#Tx]
           implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
-          val name = AttrCellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
+          val name = CellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
             .map(n => s"History for '$n'")
           val w = new WindowImpl[Confluent](name) {
             val view: ViewHasWorkspace[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])

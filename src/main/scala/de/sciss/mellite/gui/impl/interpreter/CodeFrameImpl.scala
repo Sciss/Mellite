@@ -20,10 +20,11 @@ import javax.swing.event.{AncestorEvent, AncestorListener}
 import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IdPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.{CellView, View, deferTx}
+import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
@@ -200,7 +201,7 @@ object CodeFrameImpl {
     else
       new PlainView(codeView, rightViewOpt)
 
-    val _name = AttrCellView.name(pObj)
+    val _name = CellView.name(pObj)
     val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.contextName)
     res.init()
     res

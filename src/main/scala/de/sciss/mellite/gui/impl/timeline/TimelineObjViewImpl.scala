@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui
 package impl.timeline
 
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, SpanLikeObj}
+import de.sciss.lucre.expr.{BooleanObj, CellView, DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
@@ -60,7 +60,7 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      val gainView = AttrCellView[S, Double, DoubleObj](obj.attr, ObjKeys.attrGain)
+      val gainView = CellView.attr[S, Double, DoubleObj](obj.attr, ObjKeys.attrGain)
       disposables ::= gainView.react { implicit tx => opt =>
         deferTx {
           gain = opt.getOrElse(1.0)
@@ -78,7 +78,7 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      val muteView = AttrCellView[S, Boolean, BooleanObj](obj.attr, ObjKeys.attrMute)
+      val muteView = CellView.attr[S, Boolean, BooleanObj](obj.attr, ObjKeys.attrMute)
       disposables ::= muteView.react { implicit tx => opt =>
         deferTx {
           muted = opt.getOrElse(false)
@@ -97,14 +97,14 @@ object TimelineObjViewImpl {
     override def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
       super.initAttrs(id, span, obj)
 
-      val fadeInView = AttrCellView[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)
+      val fadeInView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)
       disposables ::= fadeInView.react { implicit tx => opt =>
         deferTx {
           fadeIn = opt.getOrElse(TrackTool.EmptyFade)
         }
         fire(ObjView.Repaint(this))
       }
-      val fadeOutView = AttrCellView[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeOut)
+      val fadeOutView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeOut)
       disposables ::= fadeOutView.react { implicit tx => opt =>
         deferTx {
           fadeOut = opt.getOrElse(TrackTool.EmptyFade)

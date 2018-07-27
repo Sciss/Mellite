@@ -17,14 +17,13 @@ package document
 
 import javax.swing.JComponent
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop
 import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
@@ -40,7 +39,7 @@ object AttrMapFrameImpl {
     val contents  = AttrMapView[S](obj)
     val view      = new ViewImpl[S](contents)
     view.init()
-    val name      = AttrCellView.name(obj)
+    val name      = CellView.name(obj)
     val res       = new FrameImpl[S](tx.newHandle(obj), view, name = name)
     res.init()
     res

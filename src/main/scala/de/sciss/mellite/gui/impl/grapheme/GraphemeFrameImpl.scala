@@ -18,8 +18,8 @@ package impl
 package grapheme
 
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc.{Grapheme, Workspace}
 
@@ -30,7 +30,7 @@ object GraphemeFrameImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): GraphemeFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = GraphemeView[S](group)
-    val name    = AttrCellView.name(group)
+    val name    = CellView.name(group)
     import Grapheme.serializer
     val groupH  = tx.newHandle(group)
     val res     = new Impl(tlv, name, groupH)
