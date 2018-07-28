@@ -160,7 +160,9 @@ object CodeViewImpl {
       // component.setDirty(value = false) // do not erase undo history
 
       // so let's clear the undo history now...
-//      codePane.editor.peer.getDocument.asInstanceOf[SyntaxDocument].clearUndos()
+      // (note that if we don't do this, the user will see
+      // a warning dialog when closing the window)
+      codePane.editor.peer.getDocument.asInstanceOf[SyntaxDocument].clearUndos()
     }
 
     def save(): Future[Unit] = {
