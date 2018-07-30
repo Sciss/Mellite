@@ -68,7 +68,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   protected def menuFactory: Menu.Root = MenuBar.instance
 
-  private lazy val _aural     = AuralSystem ()
+  private lazy val _aural     = AuralSystem(global = true)
   private lazy val _sensor    = SensorSystem()
   private lazy val _compiler  = proc.Compiler()
 

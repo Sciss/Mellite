@@ -61,8 +61,10 @@ object WidgetEditorViewImpl {
     private[this] var actionRender: Action      = _
     private[this] var tabs        : TabbedPane  = _
 
-    def dispose()(implicit tx: S#Tx): Unit =
+    def dispose()(implicit tx: S#Tx): Unit = {
       codeView.dispose()
+      renderer.dispose()
+    }
 
     def widget(implicit tx: S#Tx): Widget[S] = widgetH()
 
