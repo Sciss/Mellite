@@ -13,11 +13,9 @@
 
 package de.sciss.mellite.gui.edit
 
-import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException, UndoableEdit}
-
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Sys, Obj}
-import de.sciss.synth.proc.Folder
+import de.sciss.lucre.stm.{Folder, Obj, Sys}
+import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException, UndoableEdit}
 
 // direction: true = insert, false = remove
 private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, nodeType: String,

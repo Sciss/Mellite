@@ -17,9 +17,10 @@ package gui
 
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.{FolderFrameImpl => Impl}
-import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.synth.proc.Workspace
 
 import scala.swing.{Component, SequentialContainer}
 

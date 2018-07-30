@@ -16,12 +16,12 @@ package gui
 package impl
 package document
 
-import javax.swing.SpinnerNumberModel
 import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{BooleanObj, CellView, IntVector}
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
@@ -31,8 +31,9 @@ import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}
 import de.sciss.synth.UGenSource.Vec
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.synth.proc.Workspace
 import de.sciss.{desktop, equal}
+import javax.swing.SpinnerNumberModel
 
 import scala.concurrent.Future
 import scala.swing.Swing._

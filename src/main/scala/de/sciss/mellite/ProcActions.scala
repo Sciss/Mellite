@@ -16,7 +16,7 @@ package de.sciss.mellite
 import de.sciss.equal
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.{BooleanObj, DoubleObj, IntObj, LongObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.{Copy, Obj, Sys}
+import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys}
 import de.sciss.span.Span
 import de.sciss.synth.proc.impl.MkSynthGraphSource
 import de.sciss.synth.proc.{AudioCue, ObjKeys, Proc, SynthGraphObj, Timeline}
@@ -146,8 +146,8 @@ object ProcActions {
       } else if (connectInput) {
         val valueOpt = attrIn.get(Proc.mainIn).collect {
           case op: proc.Output[S] => op
-          case fIn: proc.Folder[S] =>
-            val fOut = proc.Folder[S]
+          case fIn: Folder[S] =>
+            val fOut = Folder[S]
             fIn.iterator.foreach { op => fOut.addLast(op) }
             fOut
         }

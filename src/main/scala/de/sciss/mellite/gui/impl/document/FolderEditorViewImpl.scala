@@ -19,13 +19,13 @@ import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.expr.StringObj
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
 import de.sciss.swingplus.{GroupPanel, Spinner}
-import de.sciss.synth.proc.{Folder, ObjKeys, Workspace}
+import de.sciss.synth.proc.{ObjKeys, Workspace}
 import javax.swing.SpinnerNumberModel
 import javax.swing.undo.UndoableEdit
 

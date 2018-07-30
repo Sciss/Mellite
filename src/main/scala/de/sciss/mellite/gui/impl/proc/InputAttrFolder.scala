@@ -14,14 +14,13 @@
 package de.sciss.mellite
 package gui.impl.proc
 
-import de.sciss.lucre.stm.{Disposable, IdentifierMap, Obj}
+import de.sciss.lucre.stm.{Disposable, Folder, IdentifierMap, Obj}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.Span
-import de.sciss.synth.proc
 
 final class InputAttrFolder[S <: Sys[S]](val parent: ProcObjView.Timeline[S], val key: String,
-                                         f: proc.Folder[S], tx0: S#Tx)
+                                         f: Folder[S], tx0: S#Tx)
   extends InputAttrImpl[S] {
 
   override def toString: String = s"InputAttrFolder(parent = $parent, key = $key)"
@@ -33,7 +32,7 @@ final class InputAttrFolder[S <: Sys[S]](val parent: ProcObjView.Timeline[S], va
 
   private[this] val fH = tx0.newHandle(f)
 
-  def folder(implicit tx: S#Tx): proc.Folder[S] = fH()
+  def folder(implicit tx: S#Tx): Folder[S] = fH()
 
   protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
 
@@ -47,9 +46,9 @@ final class InputAttrFolder[S <: Sys[S]](val parent: ProcObjView.Timeline[S], va
 
   private[this] val observer: Disposable[S#Tx] =
     f.changed.react { implicit tx => upd => upd.changes.foreach {
-      case proc.Folder.Added  (_ /* index */, child) =>
+      case Folder.Added  (_ /* index */, child) =>
         addAttrIn(Span.From(0L), entry = child, value = child, fire = true)
-      case proc.Folder.Removed(_ /* index */, child) => removeAttrIn(entryId = child.id)
+      case Folder.Removed(_ /* index */, child) => removeAttrIn(entryId = child.id)
     }} (tx0)
 
   override def dispose()(implicit tx: S#Tx): Unit = {

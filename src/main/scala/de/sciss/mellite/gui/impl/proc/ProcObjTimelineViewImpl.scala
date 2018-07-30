@@ -17,7 +17,7 @@ package gui.impl.proc
 import de.sciss.file._
 import de.sciss.lucre.expr.{CellView, SpanLikeObj}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, TxnLike}
+import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
@@ -137,7 +137,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
         println("addAttrIn: Grapheme")
         ???!
 
-      case f: proc.Folder[S] =>
+      case f: Folder[S] =>
         val tlView  = new InputAttrFolder(this, key, f, tx)
         Some(tlView)
 

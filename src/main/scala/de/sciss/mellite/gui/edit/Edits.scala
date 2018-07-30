@@ -15,17 +15,16 @@ package de.sciss.mellite
 package gui
 package edit
 
-import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.{IntObj, LongObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, Folder, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, Code, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
+import javax.swing.undo.UndoableEdit
 
 import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}

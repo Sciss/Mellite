@@ -16,10 +16,10 @@ package de.sciss.mellite
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.expr.{DoubleObj, LongObj}
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{Folder, Sys}
 import de.sciss.synth.io.AudioFileSpec
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{AudioCue, Folder}
+import de.sciss.synth.proc.AudioCue
 
 object ObjectActions {
   def mkAudioFile[S <: Sys[S]](loc: ArtifactLocation[S], f: File, spec: AudioFileSpec)

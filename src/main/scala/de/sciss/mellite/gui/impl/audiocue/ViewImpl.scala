@@ -33,7 +33,7 @@ import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.AudioCue.Obj
 import de.sciss.synth.proc.graph.ScanIn
 import de.sciss.synth.proc.gui.TransportView
-import de.sciss.synth.proc.{AudioCue, AuralSystem, Proc, TimeRef, Timeline, Transport, Workspace, WorkspaceHandle}
+import de.sciss.synth.proc.{AudioCue, AuralSystem, Proc, TimeRef, Timeline, Transport, Workspace}
 import de.sciss.{sonogram, synth}
 
 import scala.swing.Swing._
@@ -83,7 +83,7 @@ object ViewImpl {
 
     import _workspace.inMemoryCursor
     // val transport     = Transport[I, I](group, sampleRate = sampleRate)
-    import WorkspaceHandle.Implicits._
+    import de.sciss.lucre.stm.WorkspaceHandle.Implicits._
     val transport = Transport[I](aural)
     transport.addObject(timeline) // Obj(Timeline(timeline)))
     transport.addObject(diff)

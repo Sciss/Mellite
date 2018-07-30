@@ -54,7 +54,7 @@ object ListObjViewImpl {
   }
 
   private var map = scala.Predef.Map[Int, ListObjView.Factory](
-    ActionView                .tpe.typeId -> ActionView,
+    ActionObjView                .tpe.typeId -> ActionObjView,
     ArtifactLocationObjView   .tpe.typeId -> ArtifactLocationObjView,
     ArtifactObjView           .tpe.typeId -> ArtifactObjView,
     AudioCueObjView           .tpe.typeId -> AudioCueObjView,

@@ -18,8 +18,6 @@ package impl
 import java.awt.geom.Path2D
 import java.awt.{Color => AWTColor}
 
-import javax.swing.undo.UndoableEdit
-import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
@@ -39,6 +37,8 @@ import de.sciss.serial.Serializer
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Color}
+import javax.swing.undo.UndoableEdit
+import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -52,7 +52,8 @@ object ObjViewImpl {
 
   import de.sciss.lucre.expr.{IntVector => _IntVector}
   import de.sciss.nuages.{Nuages => _Nuages}
-  import de.sciss.synth.proc.{Ensemble => _Ensemble, FadeSpec => _FadeSpec, Folder => _Folder, Grapheme => _Grapheme, Timeline => _Timeline}
+  import de.sciss.synth.proc.{Ensemble => _Ensemble, FadeSpec => _FadeSpec, Grapheme => _Grapheme, Timeline => _Timeline}
+  import de.sciss.lucre.stm.{Folder => _Folder}
 
   import scala.{Boolean => _Boolean, Long => _Long}
 

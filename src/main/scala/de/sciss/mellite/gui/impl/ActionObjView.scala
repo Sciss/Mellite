@@ -1,5 +1,5 @@
 /*
- *  ActionView.scala
+ *  ActionObjView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -29,7 +29,7 @@ import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
 import de.sciss.synth.proc.{Action, Workspace}
 import de.sciss.synth.proc.Implicits._
 
-object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
+object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]
   val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
   val prefix    : String    = "Action"
@@ -65,7 +65,7 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
     with ObjViewImpl.Impl[S]
     with ListObjViewImpl.NonEditable[S]
     with ListObjViewImpl.EmptyRenderer[S]
-    with ActionView[S] {
+    with ActionObjView[S] {
 
     override def objH: stm.Source[S#Tx, Action[S]]
 
@@ -73,7 +73,7 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
 
     final type E[~ <: stm.Sys[~]] = Action[~] // .Elem[~]
 
-    final def factory: ObjView.Factory = ActionView
+    final def factory: ObjView.Factory = ActionObjView
 
     final def isViewable = true
 
@@ -97,6 +97,6 @@ object ActionView extends ListObjView.Factory with TimelineObjView.Factory {
   private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Action[S]])
     extends Impl[S] with TimelineObjViewImpl.HasMuteImpl[S]
 }
-trait ActionView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ActionObjView[S <: stm.Sys[S]] extends ObjView[S] {
   override def obj(implicit tx: S#Tx): Action[S]
 }

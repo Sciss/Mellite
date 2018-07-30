@@ -17,18 +17,18 @@ package impl.document
 
 import java.awt.datatransfer.{DataFlavor, Transferable}
 import java.io.File
-import javax.swing.TransferHandler.TransferSupport
-import javax.swing.undo.UndoableEdit
-import javax.swing.{JComponent, TransferHandler}
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Copy, Obj, Sys, Txn}
+import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
-import de.sciss.synth.proc.{Workspace, _}
+import de.sciss.synth.proc.Workspace
+import javax.swing.TransferHandler.TransferSupport
+import javax.swing.undo.UndoableEdit
+import javax.swing.{JComponent, TransferHandler}
 
 import scala.language.existentials
 import scala.util.Try

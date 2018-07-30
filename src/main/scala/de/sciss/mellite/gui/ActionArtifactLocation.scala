@@ -19,15 +19,13 @@ import de.sciss.desktop.{FileDialog, OptionPane, Window}
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.swingplus.Labeled
 import de.sciss.synth.proc
-import de.sciss.synth.proc.Folder
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Dialog
 import scala.util.Try
-
 import proc.Implicits._
 
 object ActionArtifactLocation {

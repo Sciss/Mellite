@@ -18,14 +18,11 @@ package document
 
 import java.io.File
 
-import javax.swing.event.{CellEditorListener, ChangeEvent}
-import javax.swing.undo.UndoableEdit
-import javax.swing.{CellEditor, DropMode}
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.expr.{CellView, StringObj}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
+import de.sciss.lucre.stm.{Disposable, Folder, Obj}
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{TreeTableView, deferTx}
@@ -35,9 +32,12 @@ import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.artifact.ArtifactLocationObjView
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
-import de.sciss.synth.proc.{Folder, ObjKeys, Workspace}
+import de.sciss.synth.proc.{ObjKeys, Workspace}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
+import javax.swing.event.{CellEditorListener, ChangeEvent}
+import javax.swing.undo.UndoableEdit
+import javax.swing.{CellEditor, DropMode}
 
 import scala.annotation.tailrec
 import scala.collection.breakOut

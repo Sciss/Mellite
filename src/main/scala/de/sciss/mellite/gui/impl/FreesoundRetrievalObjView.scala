@@ -29,7 +29,7 @@ import de.sciss.freesound.{Auth, Client, Codec, Freesound, License, Sound, TextS
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.expr.{CellView, DoubleObj, LongObj}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, TxnLike}
+import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
@@ -38,7 +38,7 @@ import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{AudioCue, Ensemble, Folder, Markdown, Timeline, Workspace}
+import de.sciss.synth.proc.{AudioCue, Ensemble, Markdown, Timeline, Workspace}
 import de.sciss.{desktop, freesound}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, KeyStroke}

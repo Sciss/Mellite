@@ -18,14 +18,14 @@ import java.io.File
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.{TreeTableView, View}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.artifact.ArtifactLocationObjView
 import de.sciss.mellite.gui.impl.document.{FolderViewImpl => Impl}
 import de.sciss.model.Model
-import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.synth.proc.Workspace
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}

@@ -19,8 +19,9 @@ package document
 import de.sciss.desktop.{Menu, UndoManager}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.synth.proc.Workspace
 
 import scala.concurrent.Future
 import scala.swing.{Action, Component, SequentialContainer}

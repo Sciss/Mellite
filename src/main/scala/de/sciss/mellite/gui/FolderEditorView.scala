@@ -16,10 +16,11 @@ package gui
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.FolderEditorViewImpl
-import de.sciss.synth.proc.{Folder, Workspace}
+import de.sciss.synth.proc.Workspace
 
 import scala.swing.{Action, Component, SequentialContainer}
 

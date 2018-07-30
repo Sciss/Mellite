@@ -15,12 +15,12 @@ package de.sciss.mellite.gui
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj, Sys}
+import de.sciss.lucre.stm.{Disposable, Obj, Sys, WorkspaceHandle}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.Mellite
-import de.sciss.synth.proc.{SoundProcesses, Transport, WorkspaceHandle}
+import de.sciss.synth.proc.{SoundProcesses, Transport}
 
 import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
