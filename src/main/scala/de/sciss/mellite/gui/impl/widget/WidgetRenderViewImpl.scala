@@ -24,6 +24,7 @@ import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
+import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
 import de.sciss.synth.proc.{Widget, Workspace}
 
@@ -31,7 +32,9 @@ import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.{Action, BorderPanel, Component, FlowPanel}
+import scala.swing.{Action, BorderPanel, Component, FlowPanel, Swing}
+import scala.util.control.NonFatal
+import scala.util.{Failure, Success}
 
 object WidgetRenderViewImpl {
   def apply[S <: SSys[S]](init: Widget[S], bottom: ISeq[View[S]], embedded: Boolean)
@@ -93,12 +96,26 @@ object WidgetRenderViewImpl {
     def setGraph(g: Graph)(implicit tx: S#Tx): Unit = {
       val old = graphRef.swap(g)
       if (g != old) {
-        val v = g.expand[S](self = Some(widget))
+        // N.B. we have to use `try` instead of `Try` because
+        // `MissingIn` is a `ControlThrowable` which would not be caught.
+        val vTry = try {
+          val res = g.expand[S](self = Some(widget))
+          Success(res)
+        } catch {
+          case ex @ MissingIn(_)  => Failure(ex)
+          case NonFatal(ex)       => Failure(ex)
+        }
         deferTx {
-          paneBorder.add(v.component, BorderPanel.Position.Center)
+          val comp = vTry match {
+            case Success(v)   => v.component
+            case Failure(ex)  =>
+              ex.printStackTrace()
+              Swing.HGlue
+          }
+          paneBorder.add(comp, BorderPanel.Position.Center)
           paneBorder.revalidate()
         }
-        viewRef.swap(Some(v)).foreach(_.dispose())
+        viewRef.swap(vTry.toOption).foreach(_.dispose())
       }
     }
 
