@@ -82,7 +82,7 @@ object ListObjViewImpl {
     ParamSpecObjView          .tpe.typeId -> ParamSpecObjView,
     PatternObjView            .tpe.typeId -> PatternObjView,
     ProcObjView               .tpe.typeId -> ProcObjView,
-    WidgetObjView             .tpe.typeId -> WidgetObjView,
+    WidgetObjView             .tpe.typeId -> WidgetObjView
   )
 
   /** A trait that when mixed in provides `isEditable` and `tryEdit` as non-op methods. */
