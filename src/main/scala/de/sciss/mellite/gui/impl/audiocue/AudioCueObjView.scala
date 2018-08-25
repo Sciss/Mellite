@@ -14,7 +14,6 @@
 package de.sciss.mellite.gui.impl.audiocue
 
 import javax.swing.Icon
-
 import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
@@ -25,7 +24,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjectActions
+import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, ListObjView, ObjView}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec, SampleFormat}
@@ -43,6 +42,8 @@ object AudioCueObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categResources
   def hasMakeDialog : Boolean   = true
 
+  private lazy val dirCache = WorkspaceCache[File]()
+
   def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])
                              (implicit tx: S#Tx): AudioCueObjView[S] with ListObjView[S] = {
     val value = obj.value
@@ -57,15 +58,27 @@ object AudioCueObjView extends ListObjView.Factory {
   def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
                                  (implicit cursor: stm.Cursor[S]): Unit = {
-    val dlg = FileDialog.open(init = None /* locViews.headOption.map(_.directory) */, title = "Add Audio Files")
+    implicit val _workspace: Workspace[S] = workspace
+    val dirIn = cursor.step { implicit tx =>
+      dirCache.get()
+    }
+    val dlg = FileDialog.open(init = dirIn, title = "Add Audio Files")
     dlg.setFilter(f => Try(AudioFile.identify(f).isDefined).getOrElse(false))
     dlg.multiple = true
     val dlgOk = dlg.show(window).isDefined
 
-    val list = if (!dlgOk) Nil else dlg.files.flatMap { f =>
-      ActionArtifactLocation.query[S](workspace.rootH, file = f, window = window).map { location =>
-        val spec = AudioFile.readSpec(f)
-        Config1(file = f, spec = spec, location = location)
+    val list = if (!dlgOk) Nil else {
+      val dirOutOpt = dlg.file.flatMap(_.parentOption)
+      dirOutOpt.foreach { dirOut =>
+        cursor.step { implicit tx =>
+          dirCache.set(dirOut)
+        }
+      }
+      dlg.files.flatMap { f =>
+        ActionArtifactLocation.query[S](workspace.rootH, file = f, window = window).map { location =>
+          val spec = AudioFile.readSpec(f)
+          Config1(file = f, spec = spec, location = location)
+        }
       }
     }
     if (list.nonEmpty) ok(list)

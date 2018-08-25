@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.25.1"
+lazy val projectVersion             = "2.25.2-SNAPSHOT"
 lazy val mimaVersion                = "2.25.0"
 
 lazy val loggingEnabled             = true
@@ -20,7 +20,7 @@ lazy val deps = new {
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
     val freesound           = "1.11.0"
-    val fscape              = "2.16.0"
+    val fscape              = "2.16.1-SNAPSHOT"
     val interpreterPane     = "1.9.0"
     val jline               = "2.14.6"
     val kollFlitz           = "0.2.2"
@@ -37,7 +37,7 @@ lazy val deps = new {
     val scalaColliderSwing  = "1.39.0"
     val scalaColliderUGen   = "1.19.1"
     val sonogram            = "1.10.0"
-    val soundProcesses      = "3.21.0"
+    val soundProcesses      = "3.21.1-SNAPSHOT"
     val span                = "1.4.1"
     val submin              = "0.2.2"
     val swingPlus           = "0.3.1"
@@ -71,6 +71,7 @@ lazy val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
   resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271
+  updateOptions := updateOptions.value.withLatestSnapshots(false),
   aggregate in assembly := false,
   // ---- publishing ----
   publishMavenStyle := true,
