@@ -17,14 +17,9 @@ package impl
 package timeline
 
 import java.awt.datatransfer.Transferable
-import javax.swing.TransferHandler.TransferSupport
-import javax.swing.table.{AbstractTableModel, TableColumnModel}
-import javax.swing.undo.UndoableEdit
-import javax.swing.{DropMode, JComponent, SwingUtilities, TransferHandler}
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{Menu, OptionPane, UndoManager}
-import de.sciss.{desktop, equal}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.IntObj
 import de.sciss.lucre.stm
@@ -38,6 +33,11 @@ import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel, Table}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Proc, Timeline, Workspace}
+import de.sciss.{desktop, equal}
+import javax.swing.TransferHandler.TransferSupport
+import javax.swing.table.{AbstractTableModel, TableColumnModel}
+import javax.swing.undo.UndoableEdit
+import javax.swing.{DropMode, JComponent, SwingUtilities, TransferHandler}
 
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -53,7 +53,7 @@ object GlobalProcsViewImpl {
                          undo: UndoManager): GlobalProcsView[S] = {
 
     // import ProcGroup.Modifiable.serializer
-    val groupHOpt = group.modifiableOption.map(tx.newHandle(_))
+    val groupHOpt = group.modifiableOption.map(gm => tx.newHandle(gm))
     val view      = new Impl[S](/* tx.newHandle(group), */ groupHOpt, selectionModel)
     deferTx(view.guiInit())
     view
@@ -316,7 +316,7 @@ object GlobalProcsViewImpl {
       scroll.border = null
 
       val actionAdd = Action(null)(addItemWithDialog())
-      val ggAdd: Button = GUI.toolButton(actionAdd, raphael.Shapes.Plus, "Add Global Process")
+      val ggAdd: Button = GUI.addButton(actionAdd, "Add Global Process")
       // ggAdd.peer.putClientProperty("JButton.buttonType", "roundRect")
 
       val actionDelete = Action(null) {

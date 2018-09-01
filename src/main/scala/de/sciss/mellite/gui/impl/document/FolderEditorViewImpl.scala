@@ -96,22 +96,6 @@ object FolderEditorViewImpl {
       }
     }
 
-    //    lazy val actionImportJSON: Action = new Action("Import Mellite v0.3.x JSON...") {
-    //      def apply(): Unit = {
-    //        FileDialog.open(title = title.substring(0, title.length - 3)).show(None).foreach { f =>
-    ////          val fi = new FileInputStream(f)
-    ////          try {
-    ////            val bytes = new Array[Byte](fi.available())
-    ////            fi.read(bytes)
-    ////            val json  = Json.parse(bytes)
-    //            cursor.step { implicit tx => ImportJSON[S](impl.peer.root(), f /* json */) }
-    ////          } finally {
-    ////            fi.close()
-    ////          }
-    //        }
-    //      }
-    //    }
-
     lazy val actionDuplicate: Action = new Action("Duplicate...") {
       accelerator = Some(KeyStrokes.menu1 + Key.D)
       enabled     = impl.peer.selection.nonEmpty

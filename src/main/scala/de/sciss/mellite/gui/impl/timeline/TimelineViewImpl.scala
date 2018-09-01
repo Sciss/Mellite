@@ -18,8 +18,6 @@ package timeline
 
 import java.awt.{BasicStroke, Font, Graphics2D, RenderingHints, Color => JColor}
 import java.util.Locale
-import javax.swing.UIManager
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineModelImpl
@@ -27,7 +25,6 @@ import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{UndoManager, Window}
 import de.sciss.fingertree.RangedSeq
-import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
@@ -46,6 +43,8 @@ import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.impl.AuxContextImpl
 import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Workspace}
+import javax.swing.UIManager
+import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.{Ref, TSet}
 import scala.swing.Swing._
@@ -222,7 +221,7 @@ object TimelineViewImpl {
       }
 
       actionAttr.enabled = false
-      val ggAttr = GUI.toolButton(actionAttr, raphael.Shapes.Wrench, "Attributes Editor")
+      val ggAttr = GUI.attrButton(actionAttr, "Attributes Editor")
       ggAttr.focusable = false
 
       val transportPane = new BoxPanel(Orientation.Horizontal) {

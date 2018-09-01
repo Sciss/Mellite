@@ -68,7 +68,6 @@ object MarkdownRenderViewImpl {
     protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = {
       val listView = ListObjView(obj)
       if (listView.isViewable) {
-        import impl.{cursor => txCursor}
         listView.openView(Window.find(impl))
       } else {
         None
