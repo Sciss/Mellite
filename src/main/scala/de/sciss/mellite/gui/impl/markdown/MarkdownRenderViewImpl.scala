@@ -15,13 +15,12 @@ package de.sciss.mellite
 package gui.impl.markdown
 
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
-
 import de.sciss.desktop
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
@@ -46,13 +45,61 @@ object MarkdownRenderViewImpl {
                                              cursor: stm.Cursor[S]): MarkdownRenderView[S] =
     new Impl[S](bottom, embedded = embedded).init(init)
 
+  def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownRenderView.Basic[S] =
+    new BasicImpl[S](bottom, embedded = embedded).init(init)
+
   private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S])
-    extends MarkdownRenderView[S]
+                                        (implicit val workspace: Workspace[S], cursor: stm.Cursor[S])
+    extends Base[S](bottom, embedded) with MarkdownRenderView[S] { impl =>
+
+    protected def mkEditButton(): Option[Component] = {
+      if (embedded) None else {
+        val actionEdit = Action(null) {
+          cursor.step { implicit tx =>
+            MarkdownEditorFrame(markdown)
+          }
+        }
+        val ggEdit = GUI.toolButton(actionEdit, raphael.Shapes.Edit)
+        Some(ggEdit)
+      }
+    }
+
+    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = {
+      val listView = ListObjView(obj)
+      if (listView.isViewable) {
+        import impl.{cursor => txCursor}
+        listView.openView(Window.find(impl))
+      } else {
+        None
+      }
+    }
+  }
+
+  private final class BasicImpl[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
+                                             (implicit cursor: stm.Cursor[S])
+    extends Base[S](bottom, embedded) {
+
+    protected def mkEditButton(): Option[Component] = None
+
+    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = None
+  }
+
+  private abstract class Base[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
+                                           (implicit val cursor: stm.Cursor[S])
+    extends MarkdownRenderView.Basic[S]
       with ComponentHolder[Component]
       with ObservableImpl[S, MarkdownRenderView.Update[S]] { impl =>
 
     type C = Component
+
+    // ---- abstract ----
+
+    protected def mkEditButton(): Option[Component]
+
+    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]]
+
+    // ---- impl ----
 
     private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]
     private[this] var _editor: EditorPane = _
@@ -135,7 +182,7 @@ object MarkdownRenderViewImpl {
                 Desktop.browseURI(url.toURI)
               } else {
                 val key = e.getDescription
-                val either = impl.cursor.step { implicit tx =>
+                val either: Either[String, Unit] = impl.cursor.step { implicit tx =>
                   val obj = markdown
                   obj.attr.get(key).fold[Either[String, Unit]] {
                     import proc.Implicits._
@@ -148,14 +195,12 @@ object MarkdownRenderViewImpl {
                       Right(())
 
                     case other =>
-                      val listView = ListObjView(other)
-                      if (listView.isViewable) {
-                        import impl.{cursor => txCursor}
-                        listView.openView(Window.find(impl))
-                        Right(())
-                      } else {
-                        import proc.Implicits._
-                        Left(s"Object '${other.name}' in attribute '$key' is not viewable")
+                      val opt = viewAttr(other)
+                      opt match {
+                        case Some(_) => Right(())
+                        case None =>
+                          import proc.Implicits._
+                          Left(s"Object '${other.name}' in attribute '$key' is not viewable")
                       }
                   }
                 }
@@ -199,15 +244,7 @@ object MarkdownRenderViewImpl {
       }
 
       val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.map(_.component)(breakOut)
-      val bot2 = if (embedded) bot1 else {
-        val actionEdit = Action(null) {
-          cursor.step { implicit tx =>
-            MarkdownEditorFrame(markdown)
-          }
-        }
-        val ggEdit = GUI.toolButton(actionEdit, raphael.Shapes.Edit)
-        ggEdit :: bot1
-      }
+      val bot2 = mkEditButton().fold(bot1)(_ :: bot1)
       val bot3 = HGlue :: ggBwd :: ggFwd :: bot2
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)
 

@@ -46,10 +46,19 @@ object MarkdownFrameImpl {
     res
   }
 
-  private def setTitle[S <: Sys[S]](win: WindowImpl[S], md: Markdown[S])(implicit tx: S#Tx): Unit =
+  def basic[S <: stm.Sys[S]](obj: Markdown[S])
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownRenderFrame.Basic[S] = {
+    val view  = MarkdownRenderView.basic(obj)
+    val res   = new BasicImpl[S](view).init()
+    trackTitle(res, view)
+    res
+  }
+
+  private def setTitle[S <: stm.Sys[S]](win: WindowImpl[S], md: Markdown[S])(implicit tx: S#Tx): Unit =
     win.setTitleExpr(Some(CellView.name(md)))
 
-  private def trackTitle[S <: Sys[S]](win: WindowImpl[S], renderer: MarkdownRenderView[S])(implicit tx: S#Tx): Unit = {
+  private def trackTitle[S <: stm.Sys[S]](win: WindowImpl[S], renderer: MarkdownRenderView.Basic[S])
+                                     (implicit tx: S#Tx): Unit = {
     setTitle(win, renderer.markdown)
     renderer.react { implicit tx => {
       case MarkdownRenderView.FollowedLink(_, now) => setTitle(win, now)
@@ -60,8 +69,9 @@ object MarkdownFrameImpl {
 
   private final class RenderFrameImpl[S <: Sys[S]](val view: MarkdownRenderView[S])
     extends WindowImpl[S] with MarkdownRenderFrame[S] {
-
   }
+  private final class BasicImpl[S <: stm.Sys[S]](val view: MarkdownRenderView.Basic[S])
+    extends WindowImpl[S] with MarkdownRenderFrame.Basic[S]
 
   private final class EditorFrameImpl[S <: Sys[S]](val view: MarkdownEditorView[S])
     extends WindowImpl[S] with MarkdownEditorFrame[S] with Veto[S#Tx] {

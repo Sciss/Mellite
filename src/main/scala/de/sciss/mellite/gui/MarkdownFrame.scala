@@ -37,8 +37,15 @@ object MarkdownRenderFrame {
   def apply[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, workspace: Workspace[S],
                                            cursor: stm.Cursor[S]): MarkdownRenderFrame[S] =
     MarkdownFrameImpl.render(obj)
+
+  def basic[S <: stm.Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S] =
+    MarkdownFrameImpl.basic(obj)
+
+  trait Basic[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
+    override def view: MarkdownRenderView.Basic[S]
+  }
 }
 
-trait MarkdownRenderFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
+trait MarkdownRenderFrame[S <: stm.Sys[S]] extends MarkdownRenderFrame.Basic[S] {
   override def view: MarkdownRenderView[S]
 }

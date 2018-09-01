@@ -135,6 +135,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
         Desktop.browseURI(new URI(Mellite.homepage))))
       .add(Item("issues")("Report a Bug")(
         Desktop.browseURI(new URI("https://github.com/Sciss/Mellite/issues"))))
+      .add(Item("shortcuts")("Keyboard Shortcuts")(
+        Help.shortcuts()))
 
     mf.get("actions").foreach {
       case g: Menu.Group =>
