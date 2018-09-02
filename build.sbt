@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.27.0-SNAPSHOT"
+lazy val projectVersion             = "2.27.0"
 lazy val mimaVersion                = "2.27.0"
 
 lazy val loggingEnabled             = true
@@ -60,8 +60,8 @@ def appNameL                        = baseNameL
 lazy val commonSettings = Seq(
   version            := projectVersion,
   organization       := "de.sciss",
-  homepage           := Some(url(s"https://sciss.github.io/$baseName")),
-  licenses           := Seq("GNU General Public License v3+" -> url("http://www.gnu.org/licenses/gpl-3.0.txt")),
+  homepage           := Some(url(s"https://sciss.de/$baseNameL")),
+  licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.12.6",
   crossScalaVersions := Seq("2.12.6", "2.11.12"),
   scalacOptions ++= {

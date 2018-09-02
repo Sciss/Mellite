@@ -12,7 +12,7 @@ We'd love for you to contribute to our source code and to improve this project!
 ## <a name="issue"></a> Found an Issue?
 
 If you find a bug in the source code or a mistake in the documentation, you can help us by
-submitting an issue to the project's GitHub Repository. Even better you can submit a Pull Request
+submitting an issue to the project's git Repository. Even better you can submit a Pull Request
 with a fix.
 
 __Please see the Submission Guidelines below__.
@@ -43,7 +43,7 @@ __If you get help, help others. That way everyone benefits!__
 
 Before you submit your pull request consider the following guidelines:
 
-- Search the GitHub repository for an open or closed Pull Request
+- Search the git repository for an open or closed Pull Request
   that relates to your submission. You don't want to duplicate effort.
 - Please sign our [Contributor License Agreement (CLA)](#cla) before sending pull
   requests. We cannot accept code without this.
@@ -66,20 +66,21 @@ Before you submit your pull request consider the following guidelines:
 
 - Build your changes locally to ensure all the tests pass (typically `sbt clean test`).
 
-- Push your branch to GitHub:
+- Push your branch to the git hosting service (e.g. framagit):
 
     ```shell
     git push origin issue-descriptive-name-branch
     ```
 
-- In GitHub, send a pull request to the upstream `work` branch, or to `master` branch if no `work` branch exists.
+- In the git hosting service (e.g. framagit), send a pull request to the upstream `work` branch, 
+  or to `master` branch if no `work` branch exists.
   If you are unsure about which branch to use as reference,
   consult with us first (through the issue tracker) to determine the best point of merge.
 - If we suggest changes then:
     - Please make the required updates.
     - Re-run the test suite to ensure tests are still passing.
     - Commit your changes to your branch (e.g. `issue-descriptive-name-branch`).
-    - Push the changes to your GitHub repository (this will update your Pull Request).
+    - Push the changes to your git repository on the hosting service (this will update your Pull Request).
 
 If the PR gets too outdated we may ask you to rebase and force push to update the PR:
 
@@ -88,8 +89,8 @@ If the PR gets too outdated we may ask you to rebase and force push to update th
     git push origin issue-descriptive-name-branch -f
     ```
 
-_WARNING. Squashing or reverting commits and forced push thereafter may remove GitHub comments
-on code that were previously made by you and others in your commits._
+_WARNING. Squashing or reverting commits and forced push thereafter may remove comments
+on code on the git hosting service that were previously made by you and others in your commits._
 
 That's it! Thank you for your contribution!
 
@@ -98,7 +99,7 @@ That's it! Thank you for your contribution!
 After your pull request is merged, you can safely delete your branch and pull the changes
 from the main (upstream) repository:
 
-- Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
+- Delete the remote branch on the git hosting service (e.g. framagit) either through its web UI or your local shell as follows:
 
     ```shell
     git push origin --delete issue-descriptive-name-branch
@@ -160,7 +161,8 @@ changes to be accepted, the CLA must be signed. It's a quick process, we promise
   [github.com/Sciss/Contributing](https://github.com/Sciss/Contributing).
 - In particular read the document [sign-cla.md](https://github.com/Sciss/Contributing/blob/master/sign-cla.md).
 
-This CLA covers all projects at [github.com/Sciss](https://github.com/Sciss), so you should have to go through
+This CLA covers all projects at [framagit.org/sciss](https://framagit.org/sciss) 
+or [github.com/Sciss](https://github.com/Sciss), so you should have to go through
 this process only once. Thanks for your understanding.
 
 ## <a name="info"></a> Further Information
