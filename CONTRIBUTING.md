@@ -66,13 +66,13 @@ Before you submit your pull request consider the following guidelines:
 
 - Build your changes locally to ensure all the tests pass (typically `sbt clean test`).
 
-- Push your branch to the git hosting service (e.g. framagit):
+- Push your branch to the git hosting service (e.g. GitLab):
 
     ```shell
     git push origin issue-descriptive-name-branch
     ```
 
-- In the git hosting service (e.g. framagit), send a pull request to the upstream `work` branch, 
+- In the git hosting service (e.g. GitLab), send a pull request to the upstream `work` branch, 
   or to `master` branch if no `work` branch exists.
   If you are unsure about which branch to use as reference,
   consult with us first (through the issue tracker) to determine the best point of merge.
@@ -99,7 +99,7 @@ That's it! Thank you for your contribution!
 After your pull request is merged, you can safely delete your branch and pull the changes
 from the main (upstream) repository:
 
-- Delete the remote branch on the git hosting service (e.g. framagit) either through its web UI or your local shell as follows:
+- Delete the remote branch on the git hosting service (e.g. GitLab) either through its web UI or your local shell as follows:
 
     ```shell
     git push origin --delete issue-descriptive-name-branch
@@ -161,7 +161,7 @@ changes to be accepted, the CLA must be signed. It's a quick process, we promise
   [github.com/Sciss/Contributing](https://github.com/Sciss/Contributing).
 - In particular read the document [sign-cla.md](https://github.com/Sciss/Contributing/blob/master/sign-cla.md).
 
-This CLA covers all projects at [framagit.org/sciss](https://framagit.org/sciss) 
+This CLA covers all projects at [git.iem.at/sciss](https://git.iem.at/sciss) 
 or [github.com/Sciss](https://github.com/Sciss), so you should have to go through
 this process only once. Thanks for your understanding.
 
