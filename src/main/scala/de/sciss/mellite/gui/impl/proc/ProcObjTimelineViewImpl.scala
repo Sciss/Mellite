@@ -191,8 +191,12 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
         // println(s"${pv.name}; audio.offset = ${audio.offset}, segm.span.start = ${segm.span.start}, dStart = $dStart, px1C = $px1C, startC = $startC, startP = $startP")
         // println(f"spanStart = $startP%1.2f, spanStop = $stopP%1.2f, tx = $px1c, ty = $pyi, width = $w1, height = $phi, boost = ${r.sonogramBoost}%1.2f")
 
-        sonogram.paint(spanStart = startP, spanStop = stopP, g2 = g,
-          tx = px1c, ty = pyi, width = w1, height = phi, ctrl = r)
+        try {
+          sonogram.paint(spanStart = startP, spanStop = stopP, g2 = g,
+            tx = px1c, ty = pyi, width = w1, height = phi, ctrl = r)
+        } catch {
+          case NonFatal(_) => // XXX TODO
+        }
       }
     }
 
