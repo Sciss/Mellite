@@ -16,6 +16,7 @@ package gui
 package impl
 package timeline
 
+import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.lucre.expr.{CellView, IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -115,18 +116,19 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
       if (selected) {
         val dt0 = moveState.deltaTime + resizeState.deltaStart
         if (dt0 >= 0) dt0 else {
-          val total = tlv.timelineModel.bounds
-          math.max(-(start - total.start), dt0)
+          val minStart = TimelineNavigation.minStart(canvas.timelineModel)
+          math.max(minStart - start, dt0)
         }
       } else 0L
 
     def adjustStop(stop: Long): Long =
       if (selected) {
         val dt0 = moveState.deltaTime + resizeState.deltaStop
-        if (dt0 >= 0) dt0 else {
-          val total = tlv.timelineModel.bounds
-          math.max(-(stop - total.start + TimelineView.MinDur), dt0)
-        }
+        dt0
+//        if (dt0 >= 0) dt0 else {
+//          val minStart = TimelineNavigation.minStart(canvas.timelineModel)
+//          dt0 // math.max(-(stop - total.start + TimelineView.MinDur), dt0)
+//        }
       } else 0L
 
 //    def adjustMove(start: Long): Long =

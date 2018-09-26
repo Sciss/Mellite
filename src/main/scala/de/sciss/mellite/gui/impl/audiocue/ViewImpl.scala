@@ -19,7 +19,6 @@ package audiocue
 import java.awt.datatransfer.Transferable
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.audiowidgets.impl.TimelineModelImpl
 import de.sciss.desktop.{UndoManager, Util}
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
@@ -92,7 +91,7 @@ object ViewImpl {
     // val offsetView  = LongSpinnerView  (grapheme.offset, "Offset")
     val gainView    = DoubleSpinnerView[S](audioCue.value.gain /* RRR */, "Gain", width = 90)
     val res: Impl[S, I] = new Impl[S, I](gainView = gainView) {
-      val timelineModel = new TimelineModelImpl(fullSpanTL, TimeRef.SampleRate)
+      val timelineModel = TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, sampleRate = TimeRef.SampleRate)
       val workspace: Workspace[S]           = _workspace
       val cursor: stm.Cursor[S]             = _cursor
       val holder: stm.Source[S#Tx, Obj[S]]  = tx.newHandle(obj0)
@@ -140,13 +139,18 @@ object ViewImpl {
       // val ggDragRegion = new DnD.Button(holder, snapshot, timelineModel)
       val ggDragRegion = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
-          val sp    = timelineModel.selection match {
-            case sp0: Span if sp0.nonEmpty =>  sp0
-            case _ => timelineModel.bounds
+          val spOpt = timelineModel.selection match {
+            case sp0: Span if sp0.nonEmpty => Some(sp0)
+            case _ => timelineModel.bounds match {
+              case sp0: Span => Some(sp0)
+              case _ => None
+            }
           }
-          val drag  = timeline.DnD.AudioDrag(workspace, holder, selection = sp)
-          val t     = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
-          Some(t)
+          spOpt.map { sp =>
+            val drag  = timeline.DnD.AudioDrag(workspace, holder, selection = sp)
+            val t     = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
+            t
+          }
         }
         tooltip = "Drag Selected Region"
       }

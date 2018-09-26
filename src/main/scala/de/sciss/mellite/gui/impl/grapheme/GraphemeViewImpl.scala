@@ -18,10 +18,8 @@ package grapheme
 
 import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
-import javax.swing.{JComponent, UIManager}
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.audiowidgets.impl.TimelineModelImpl
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.icons.raphael
@@ -37,6 +35,7 @@ import de.sciss.model.Change
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
 import de.sciss.synth.proc.{Grapheme, TimeRef, Workspace}
+import javax.swing.{JComponent, UIManager}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
@@ -57,8 +56,13 @@ object GraphemeViewImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          undo: UndoManager): GraphemeView[S] = {
     val sampleRate      = TimeRef.SampleRate
-    val tlm             = new TimelineModelImpl(Span(0L, (sampleRate * 60 * 60).toLong), sampleRate)
-    tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
+    val visStart        = 0L // obj.firstEvent.getOrElse(0L)
+    val visStop         = obj.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
+    val vis0            = Span(visStart, visStop)
+    val bounds0         = Span(0L, (sampleRate * 60 * 60).toLong) // XXX TODO --- dynamically adjust
+    val tlm             = TimelineModel(bounds = bounds0, visible = vis0, clipStop = false,
+      sampleRate = sampleRate)
+    // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
     val _grapheme       = obj
     val graphemeH       = tx.newHandle(obj)
     var disposables     = List.empty[Disposable[S#Tx]]

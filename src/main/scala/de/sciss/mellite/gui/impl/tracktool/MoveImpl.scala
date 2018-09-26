@@ -18,9 +18,10 @@ package tracktool
 
 import java.awt.Cursor
 import java.awt.event.MouseEvent
+
+import de.sciss.audiowidgets.impl.TimelineNavigation
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
@@ -60,8 +61,10 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     mkRubber(e, hitTrack = hitTrack, pos = pos)
 
   protected def commitObj(drag: Move)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
-    Edits.moveOrCopy(span, obj, timeline, drag, minStart = canvas.timelineModel.bounds.start)
+                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+    val minStart = TimelineNavigation.minStart(canvas.timelineModel)
+    Edits.moveOrCopy(span, obj, timeline, drag, minStart = minStart)
+  }
 
   protected def dialog(): Option[Move] = {
     println("Not yet implemented - movement dialog")

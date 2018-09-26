@@ -15,8 +15,8 @@ package de.sciss.mellite
 package gui
 package impl.timeline
 
+import de.sciss.audiowidgets.impl.TimelineNavigation
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
@@ -223,7 +223,7 @@ trait TimelineActions[S <: Sys[S]] {
 
     def apply(): Unit = {
       timelineModel.selection.nonEmptyOption.foreach { selSpan =>
-        val minStart = timelineModel.bounds.start
+        val minStart = TimelineNavigation.minStart(timelineModel)
         val editOpt = cursor.step { implicit tx =>
           timelineMod.flatMap { groupMod =>
             // ---- remove ----
@@ -405,7 +405,7 @@ trait TimelineActions[S <: Sys[S]] {
       case Span.HasStart(leftStart) =>
         val _rightSpan  = SpanLikeObj.newVar(oldSpan())
         val resize      = ProcActions.Resize(time - leftStart, 0L)
-        val minStart    = timelineModel.bounds.start
+        val minStart    = TimelineNavigation.minStart(timelineModel)
         // println("----BEFORE RIGHT----")
         // debugPrintAudioGrapheme(rightObj)
         ProcActions.resize(_rightSpan, rightObj, resize, minStart = minStart)
@@ -421,7 +421,7 @@ trait TimelineActions[S <: Sys[S]] {
 
     val editLeftSpan: Option[UndoableEdit] = oldVal match {
       case Span.HasStop(rightStop) =>
-        val minStart  = timelineModel.bounds.start
+        val minStart  = TimelineNavigation.minStart(timelineModel)
         val resize    = ProcActions.Resize(0L, time - rightStop)
         Edits.resize(oldSpan, leftObj, resize, minStart = minStart)
 

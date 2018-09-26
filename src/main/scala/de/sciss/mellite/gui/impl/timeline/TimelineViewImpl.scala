@@ -20,7 +20,6 @@ import java.awt.{BasicStroke, Font, Graphics2D, RenderingHints, Color => JColor}
 import java.util.Locale
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.audiowidgets.impl.TimelineModelImpl
 import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{UndoManager, Window}
@@ -73,8 +72,13 @@ object TimelineViewImpl {
                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
                          undo: UndoManager): TimelineView[S] = {
     val sampleRate  = TimeRef.SampleRate
-    val tlm         = new TimelineModelImpl(Span(0L, (sampleRate * 60 * 60).toLong), sampleRate)
-    tlm.visible     = Span(0L, (sampleRate * 60 * 2).toLong)
+    val visStart    = 0L // obj.firstEvent.getOrElse(0L)
+    val visStop     = obj.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
+    val vis0        = Span(visStart, visStop)
+    val bounds0     = Span(0L, (sampleRate * 60 * 60).toLong) // XXX TODO --- dynamically adjust
+    val tlm         = TimelineModel(bounds = bounds0, visible = vis0, clipStop = false,
+      sampleRate = sampleRate)
+    // tlm.visible     = Span(0L, (sampleRate * 60 * 2).toLong)
     val timeline    = obj
     val timelineH   = tx.newHandle(obj)
 

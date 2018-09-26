@@ -82,7 +82,11 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
 //        (/* tlv.globalView.iterator ++ */ selMod.iterator).foreach { view =>
 //          auralTimeline.addObject(view.id, view.span, view.obj)
 //        }
-        auralTimeline.run(TimeRef(tlv.timelineModel.bounds, offset = playPos), ())
+        val span = tlv.timelineModel.bounds match {
+          case hs: Span.HasStart => hs
+          case _ => Span.from(0L)
+        }
+        auralTimeline.run(TimeRef(span, offset = playPos), ())
         auralTimeline
       }
     }

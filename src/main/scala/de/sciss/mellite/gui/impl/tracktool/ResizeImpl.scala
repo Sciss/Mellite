@@ -17,9 +17,10 @@ package impl
 package tracktool
 
 import java.awt.Cursor
+
+import de.sciss.audiowidgets.impl.TimelineNavigation
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -61,6 +62,8 @@ final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S]
   // ProcActions.resize(span, obj, drag, minStart = minStart)
 
   protected def commitObj(drag: Resize)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
-    Edits.resize(span, obj, drag, minStart = canvas.timelineModel.bounds.start)
+                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+    val minStart = TimelineNavigation.minStart(canvas.timelineModel)
+    Edits.resize(span, obj, drag, minStart = minStart)
+  }
 }
