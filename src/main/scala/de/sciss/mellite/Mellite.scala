@@ -14,23 +14,29 @@
 package de.sciss.mellite
 
 import javax.swing.UIManager
-
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
+import de.sciss.file.File
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.requireEDT
-import de.sciss.lucre.synth.{Server, Txn}
+import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
-import de.sciss.mellite.gui.{DocumentViewHandler, LogFrame, MainFrame, MenuBar}
+import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame, MainFrame, MenuBar}
 import de.sciss.osc
-import de.sciss.synth.proc.{AuralSystem, Code, SensorSystem}
+import de.sciss.synth.proc.{AuralSystem, Code, Runner, SensorSystem, TimeRef, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.{TxnExecutor, atomic}
+import scala.language.existentials
 import scala.swing.Label
 import scala.util.control.NonFatal
 
 object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") with Application with Init {
+  @volatile
+  private[this] var _config: Config = _
+
+  def config: Config = _config
 
   import de.sciss.synth.proc
 //  proc.showLog            = true
@@ -44,8 +50,28 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
 
-  def version : String = buildInfString("version")
-  def license : String = buildInfString("license")
+  override def main(args: Array[String]): Unit = {
+    val default = Config()
+
+    val p = new scopt.OptionParser[Config]("mellite") {
+      opt[Seq[String]]('r', "auto-run")
+        .text("Run object with given name from root folder's top level. Comma separated list for multiple objects.")
+        .action { (v, c) => c.copy(autoRun = v.toList) }
+
+      arg[File]("<workspaces>")
+        .unbounded()
+        .optional()
+        .text("Workspaces (.mllt directories) to open")
+        .action { (v, c) => c.copy(open = c.open :+ v) }
+    }
+    p.parse(args, default).fold(sys.exit(1)) { config =>
+      _config = config
+      super.main(args)
+    }
+  }
+
+  def version : String = buildInfString("version" )
+  def license : String = buildInfString("license" )
   def homepage: String = buildInfString("homepage")
 
   private def buildInfString(key: String): String = try {
@@ -192,6 +218,36 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     DocumentViewHandler.instance    // init
 
     new MainFrame
+
+    config.open.foreach { fIn =>
+      val fut = ActionOpenWorkspace.perform(fIn)
+      if (config.autoRun.nonEmpty) fut.foreach { ws =>
+        val ws1 = ws.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
+        autoRun(ws1)
+      }
+    }
+  }
+
+  private def autoRun[S <: Sys[S]](w: Workspace[S]): Unit = {
+    implicit val cursor: stm.Cursor [S] = w.cursor
+    implicit val ws    : Workspace  [S] = w
+    cursor.step { implicit tx =>
+      val f = w.root
+      config.autoRun.foreach { name =>
+        import proc.Implicits._
+        (f / name).fold[Unit] {
+          tx.afterCommit(println(s"Warning: auto-run object '$name' does not exist."))
+        } { obj =>
+          implicit val h: Runner.Handler[S] = Runner.Handler()
+          Runner[S](obj).fold[Unit] {
+            tx.afterCommit(println(s"Warning: no runner for object '$name' of type ${obj.tpe}."))
+          } { r =>
+            val timeRef = TimeRef.undefined
+            r.run(timeRef, ())
+          }
+        }
+      }
+    }
   }
 
   /** We are bridging between the transactional and non-EDT `mellite.DocumentHandler` and

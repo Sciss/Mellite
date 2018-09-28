@@ -84,16 +84,17 @@ object ActionOpenWorkspace extends Action("Open...") {
 //      case dcv: DocumentCursorsView => dcv.window
 //    } .foreach(_.front())
 
-  def perform(folder: File): Unit = {
+  def perform(folder: File): Future[WorkspaceLike] = {
     import de.sciss.equal.Implicits._
     val fOpt = Some(folder)
     dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
       val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
       openView(doc1)
+      Future.successful(doc1)
     }
   }
 
-  private def doOpen(folder: File): Unit = {
+  private def doOpen(folder: File): Future[WorkspaceLike] = {
     import SoundProcesses.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
@@ -128,5 +129,6 @@ object ActionOpenWorkspace extends Action("Open...") {
         }
       }
     }
+    fut
   }
 }
