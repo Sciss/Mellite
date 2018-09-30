@@ -16,7 +16,6 @@ package gui.impl.proc
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
@@ -27,7 +26,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.ObjViewImpl
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{ObjKeys, Proc, Workspace}
+import de.sciss.synth.proc.{ObjKeys, Proc, Universe}
 
 object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Proc[~]
@@ -44,9 +43,9 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = String
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"

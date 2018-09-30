@@ -27,15 +27,15 @@ import de.sciss.mellite.gui.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.{DragAndDrop, GUI, ListObjView, MapView, ProcOutputsView}
-import de.sciss.synth.proc.{Proc, Workspace}
+import de.sciss.synth.proc.{Proc, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
 object OutputsViewImpl {
-  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                       workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] = {
+  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, universe: Universe[S],
+                                       undoManager: UndoManager): ProcOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>
       (out.key, ListObjView(out))
     }  .toIndexedSeq
@@ -54,7 +54,7 @@ object OutputsViewImpl {
   }
 
   private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, Proc[S]])
-                                       (implicit cursor: stm.Cursor[S], workspace: Workspace[S],
+                                       (implicit universe: Universe[S],
                                         undoManager: UndoManager)
     extends MapViewImpl[S, ProcOutputsView[S]] with ProcOutputsView[S] with ComponentHolder[Component] { impl =>
 
@@ -117,7 +117,7 @@ object OutputsViewImpl {
         protected def createTransferable(): Option[Transferable] =
           selection.headOption.map { case (key, _ /* view */) =>
             DragAndDrop.Transferable(ProcOutputsView.flavor)(ProcOutputsView.Drag[S](
-              workspace, objH, key))
+              universe, objH, key))
           }
       }
 

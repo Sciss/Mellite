@@ -42,7 +42,7 @@ class DocumentHandlerImpl
 
   def addDocument(doc: Document): Unit = add(doc.asInstanceOf[Workspace[~] forSome {type ~ <: Sys[~]}])
 
-  def removeDocument(doc: Document): Unit = doc.close() // throw new UnsupportedOperationException()
+  def removeDocument(doc: Document): Unit = ??? // UUU doc.close() // throw new UnsupportedOperationException()
 
   def documents: Iterator[Document] = peer.allDocuments
 

@@ -20,15 +20,16 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.proc.OutputsViewImpl
-import de.sciss.synth.proc.{Proc, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Proc, Universe}
 
 object ProcOutputsView {
-  final case class Drag[S <: Sys[S]](workspace: Workspace[S], proc: stm.Source[S#Tx, Proc[S]], key: String)
+  final case class Drag[S <: Sys[S]](universe: Universe[S], proc: stm.Source[S#Tx, Proc[S]], key: String)
 
   final val flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 
-  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                           workspace: Workspace[S], undoManager: UndoManager): ProcOutputsView[S] =
+  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, universe: Universe[S],
+                                       undoManager: UndoManager): ProcOutputsView[S] =
     OutputsViewImpl(obj)
 }
-trait ProcOutputsView[S <: Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S]
+trait ProcOutputsView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S]

@@ -25,14 +25,15 @@ import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.artifact.ArtifactLocationObjView
 import de.sciss.mellite.gui.impl.document.{FolderViewImpl => Impl}
 import de.sciss.model.Model
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
+import de.sciss.synth.proc.gui.UniverseView
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object FolderView {
   def apply[S <: SSys[S]](root: Folder[S])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                         (implicit tx: S#Tx, universe: Universe[S],
                           undoManager: UndoManager): FolderView[S] = Impl(root)
 
   type NodeView[S <: Sys[S]] = TreeTableView.NodeView[S, Obj[S], Folder[S], ListObjView[S]]
@@ -47,7 +48,7 @@ object FolderView {
   /** Removes children from the selection whose parents are already included. */
   def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S] = Impl.cleanSelection(in)
 
-  final case class SelectionDnDData[S <: Sys[S]](workspace: Workspace[S], cursor: stm.Cursor[S], selection: Selection[S]) {
+  final case class SelectionDnDData[S <: Sys[S]](universe: Universe[S], selection: Selection[S]) {
     type S1 = S
 
     lazy val types: Set[Int] = selection.map(_.renderData.factory.tpe.typeId)(breakOut)
@@ -60,7 +61,7 @@ object FolderView {
   final case class SelectionChanged[S <: Sys[S]](view: FolderView[S], selection: Selection[S])
     extends Update[S]
 }
-trait FolderView[S <: Sys[S]] extends Model[FolderView.Update[S]] with View.Editable[S] with ViewHasWorkspace[S] {
+trait FolderView[S <: Sys[S]] extends Model[FolderView.Update[S]] with View.Editable[S] with UniverseView[S] {
   def selection: FolderView.Selection[S]
 
   def locations: Vec[ArtifactLocationObjView[S]]

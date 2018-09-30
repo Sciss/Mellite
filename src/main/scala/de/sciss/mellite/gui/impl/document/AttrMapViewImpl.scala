@@ -22,14 +22,14 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.ScrollPane
 
 object AttrMapViewImpl {
-  def apply[S <: Sys[S]](_obj: Obj[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                      workspace: Workspace[S], undoManager: UndoManager): AttrMapView[S] = {
+  def apply[S <: Sys[S]](_obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S],
+                                       undoManager: UndoManager): AttrMapView[S] = {
     val map = _obj.attr
 
     val list0 = map.iterator.map {

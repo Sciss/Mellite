@@ -29,7 +29,7 @@ import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRend
 import de.sciss.mellite.gui.impl.component.NavigationHistory
 import de.sciss.swingplus.EditorPane
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.{Markdown, Universe}
 import org.pegdown.PegDownProcessor
 
 import scala.collection.breakOut
@@ -41,8 +41,7 @@ import scala.swing.{Action, BorderPanel, Component, FlowPanel, ScrollPane, Swing
 
 object MarkdownRenderViewImpl {
   def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
-                         (implicit tx: S#Tx, workspace: Workspace[S],
-                                             cursor: stm.Cursor[S]): MarkdownRenderView[S] =
+                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
     new Impl[S](bottom, embedded = embedded).init(init)
 
   def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
@@ -50,7 +49,7 @@ object MarkdownRenderViewImpl {
     new BasicImpl[S](bottom, embedded = embedded).init(init)
 
   private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val workspace: Workspace[S], cursor: stm.Cursor[S])
+                                        (implicit val universe: Universe[S])
     extends Base[S](bottom, embedded) with MarkdownRenderView[S] { impl =>
 
     protected def mkEditButton(): Option[Component] = {
@@ -76,7 +75,7 @@ object MarkdownRenderViewImpl {
   }
 
   private final class BasicImpl[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                             (implicit cursor: stm.Cursor[S])
+                                             (implicit val cursor: stm.Cursor[S])
     extends Base[S](bottom, embedded) {
 
     protected def mkEditButton(): Option[Component] = None
@@ -85,7 +84,6 @@ object MarkdownRenderViewImpl {
   }
 
   private abstract class Base[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                           (implicit val cursor: stm.Cursor[S])
     extends MarkdownRenderView.Basic[S]
       with ComponentHolder[Component]
       with ObservableImpl[S, MarkdownRenderView.Update[S]] { impl =>
@@ -93,6 +91,8 @@ object MarkdownRenderViewImpl {
     type C = Component
 
     // ---- abstract ----
+
+    def cursor: stm.Cursor[S]
 
     protected def mkEditButton(): Option[Component]
 

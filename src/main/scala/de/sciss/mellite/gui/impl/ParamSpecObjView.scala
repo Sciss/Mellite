@@ -18,14 +18,12 @@ package impl
 import java.text.NumberFormat
 import java.util.Locale
 
-import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import de.sciss.audiowidgets.RotaryKnob
-import de.sciss.desktop.impl.UndoManagerImpl
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{CellView, Type}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Cursor, Disposable, Obj}
+import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
@@ -33,11 +31,13 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
-import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.Universe
+import de.sciss.{desktop, numbers}
+import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
@@ -250,9 +250,9 @@ object ParamSpecObjView extends ListObjView.Factory {
     def component: Component = box
   }
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val panel = new PanelImpl(nameIn = Some(prefix), editable = true)
 
     val pane = desktop.OptionPane.confirmation(panel.component, optionType = Dialog.Options.OkCancel,
@@ -275,9 +275,9 @@ object ParamSpecObjView extends ListObjView.Factory {
   }
 
   private final class ViewImpl[S <: Sys[S]](objH: stm.Source[S#Tx, ParamSpec.Obj[S]], val editable: Boolean)
-                                           (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S],
+                                           (implicit val universe: Universe[S],
                                             val undoManager: UndoManager)
-    extends ViewHasWorkspace[S] with View.Editable[S] with ComponentHolder[Component] {
+    extends UniverseView[S] with View.Editable[S] with ComponentHolder[Component] {
 
     type C = Component
 
@@ -416,9 +416,8 @@ object ParamSpecObjView extends ListObjView.Factory {
 
     def convertEditValue(v: Any): Option[ParamSpec] = None
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, workspace: Workspace[S],
-                                                     cursor: Cursor[S]): Option[Window[S]] = {
-      implicit val undo: UndoManager = new UndoManagerImpl  // XXX TODO --- actually not used
+    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+      implicit val undo: UndoManager = UndoManager()
       val _obj  = obj
       val view  = new ViewImpl[S](objH, editable = isEditable).init(_obj)
       val nameView = CellView.name(_obj)

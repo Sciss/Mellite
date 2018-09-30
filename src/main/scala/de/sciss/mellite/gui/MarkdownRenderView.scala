@@ -20,13 +20,14 @@ import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.impl.markdown.MarkdownRenderViewImpl
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object MarkdownRenderView {
   def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownRenderView[S] =
+                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
     MarkdownRenderViewImpl[S](init, bottom, embedded = embedded)
 
   def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
@@ -45,4 +46,4 @@ object MarkdownRenderView {
   }
 }
 trait MarkdownRenderView[S <: Sys[S]]
-  extends MarkdownRenderView.Basic[S] with ViewHasWorkspace[S]
+  extends MarkdownRenderView.Basic[S] with UniverseView[S]

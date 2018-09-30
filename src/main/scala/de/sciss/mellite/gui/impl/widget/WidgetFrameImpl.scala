@@ -16,21 +16,20 @@ package gui.impl.widget
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc.{Widget, Workspace}
+import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
 
 object WidgetFrameImpl {
   def editor[S <: Sys[S]](obj: Widget[S], bottom: ISeq[View[S]])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): WidgetEditorFrame[S] = {
+                         (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val view  = WidgetEditorView(obj, bottom = bottom)
     val res   = new EditorFrameImpl[S](view).init()
@@ -39,7 +38,7 @@ object WidgetFrameImpl {
   }
 
   def render[S <: Sys[S]](obj: Widget[S])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): WidgetRenderFrame[S] = {
+                         (implicit tx: S#Tx, universe: Universe[S]): WidgetRenderFrame[S] = {
     val view  = WidgetRenderView(obj)
     val res   = new RenderFrameImpl[S](view).init()
     trackTitle(res, view)

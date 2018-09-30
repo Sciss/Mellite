@@ -20,14 +20,14 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.timeline.{TimelineViewImpl => Impl}
-import de.sciss.synth.proc.{Timeline, Workspace}
-import de.sciss.synth.proc.gui.TransportView
+import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.synth.proc.gui.{TransportView, UniverseView}
 
 import scala.swing.Action
 
 object TimelineView {
   def apply[S <: Sys[S]](group: Timeline[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): TimelineView[S] =
     Impl[S](group)
 
@@ -38,7 +38,7 @@ object TimelineView {
 
   final val DefaultTrackHeight = 8
 }
-trait TimelineView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S] with CanBounce {
+trait TimelineView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] with CanBounce {
   def timelineModel   : TimelineModel
   def selectionModel  : TimelineObjView.SelectionModel[S]
 

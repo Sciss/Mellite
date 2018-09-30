@@ -36,7 +36,8 @@ import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.serial.Serializer
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Workspace, Color => _Color}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Universe, Workspace, Color => _Color}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 
@@ -84,9 +85,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_String]
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val ggValue   = new TextField(20)
       ggValue.text  = "Value"
       val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Some(ggValue.text))
@@ -144,9 +145,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Long]
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val model     = new SpinnerNumberModel(0L, _Long.MinValue, _Long.MaxValue, 1L)
       val ggValue   = new Spinner(model)
       val res = primitiveConfig[S, _Long](window, tpe = prefix, ggValue = ggValue, prepare =
@@ -208,9 +209,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Boolean]
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val ggValue = new CheckBox()
       val res = primitiveConfig[S, _Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Some(ggValue.selected))
       res.foreach(ok(_))
@@ -266,9 +267,9 @@ object ObjViewImpl {
     private def parseString(s: String): Option[Vec[Int]] =
       Try(s.split(" ").map(x => x.trim().toInt)(breakOut): Vec[Int]).toOption
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val ggValue = new TextField("0 0")
       val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
       res.foreach(ok(_))
@@ -333,9 +334,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Color]
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val (ggValue, ggChooser) = mkColorEditor()
       val res = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
         Some(fromAWT(ggChooser.color)))
@@ -408,7 +409,7 @@ object ObjViewImpl {
       def isViewable: _Boolean = isEditable0
 
       override def openView(parent: Option[Window[S]])
-                           (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                           (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
 //        val opt = OptionPane.confirmation(message = component, optionType = OptionPane.Options.OkCancel,
 //          messageType = OptionPane.Message.Plain)
 //        opt.show(parent) === OptionPane.Result.Ok
@@ -423,6 +424,7 @@ object ObjViewImpl {
 
             def apply(): Unit = {
               val colr = Color.fromAWT(chooser.color)
+              import universe.cursor
               val editOpt = cursor.step { implicit tx =>
                 objH() match {
                   case _Color.Obj.Var(vr) =>
@@ -453,7 +455,10 @@ object ObjViewImpl {
             pane
           }
 
-          def closeMe(): Unit = cursor.step { implicit tx => self.dispose() }
+          def closeMe(): Unit = {
+            import universe.cursor
+            cursor.step { implicit tx => self.dispose() }
+          }
 
           init()
         }
@@ -480,9 +485,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = _String
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S],window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = "New Folder"
@@ -510,7 +515,7 @@ object ObjViewImpl {
       def isViewable = true
 
       def openView(parent: Option[Window[S]])
-                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                  (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
         val folderObj = objH()
         val nameView  = CellView.name(folderObj)
         Some(FolderFrame(nameView, folderObj))
@@ -534,9 +539,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = _String
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
@@ -563,7 +568,7 @@ object ObjViewImpl {
       def isViewable = true
 
       def openView(parent: Option[Window[S]])
-                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                  (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
         val frame = TimelineFrame[S](objH())
         Some(frame)
       }
@@ -586,9 +591,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = _String
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
@@ -615,7 +620,7 @@ object ObjViewImpl {
       def isViewable = true
 
       def openView(parent: Option[Window[S]])
-                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                  (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
         val frame = GraphemeFrame[S](objH())
         Some(frame)
       }
@@ -640,9 +645,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = Unit
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       None // XXX TODO
 //      val ggShape = new ComboBox()
 //      Curve.cubed
@@ -712,9 +717,9 @@ object ObjViewImpl {
 
     final case class Config[S <: stm.Sys[S]](name: String, offset: Long, playing: Boolean)
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val ggName    = new TextField(10)
       ggName.text   = prefix
       val offModel  = new SpinnerNumberModel(0.0, 0.0, 1.0e6 /* _Double.MaxValue */, 0.1)
@@ -795,7 +800,7 @@ object ObjViewImpl {
       }
 
       override def openView(parent: Option[Window[S]])
-                           (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                           (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
         val ens   = objH()
         val w     = EnsembleFrame(ens)
         Some(w)
@@ -819,9 +824,9 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = _String
 
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit = {
+                                   (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
@@ -849,7 +854,7 @@ object ObjViewImpl {
       def isViewable = true
 
       def openView(parent: Option[Window[S]])
-                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                  (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
         val frame = NuagesEditorFrameImpl(objH())
         Some(frame)
       }
@@ -947,16 +952,17 @@ object ObjViewImpl {
 
     // XXX TODO - this is a quick hack for demo
     def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
-      workspace match {
+                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+      universe.workspace match {
         case cf: Workspace.Confluent =>
           // XXX TODO - all this casting is horrible
+          implicit val uni: Universe[Confluent] = universe.asInstanceOf[Universe[Confluent]]
           implicit val ctx: Confluent#Tx = tx.asInstanceOf[Confluent#Tx]
           implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
           val name = CellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
             .map(n => s"History for '$n'")
           val w = new WindowImpl[Confluent](name) {
-            val view: ViewHasWorkspace[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])
+            val view: UniverseView[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])
             init()
           }
           Some(w.asInstanceOf[Window[S]])
@@ -971,6 +977,6 @@ object ObjViewImpl {
     def isViewable: _Boolean = false
 
     def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = None
+                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = None
   }
 }

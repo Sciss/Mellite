@@ -15,12 +15,11 @@ package de.sciss.mellite.gui
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj, Sys, WorkspaceHandle}
+import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.Mellite
-import de.sciss.synth.proc.{SoundProcesses, Transport}
+import de.sciss.synth.proc.{SoundProcesses, Transport, Universe}
 
 import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
@@ -29,9 +28,8 @@ object PlayToggleButton {
   def apply[S <: Sys[S]](transport: Transport[S])(implicit tx: S#Tx): PlayToggleButton[S] =
     new Impl[S](transport, objH = None, disposeTransport = false).init()
 
-  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                      workspace: WorkspaceHandle[S]): PlayToggleButton[S] = {
-    val t = Transport[S](Mellite.auralSystem)
+  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S]): PlayToggleButton[S] = {
+    val t = Transport[S](universe)
 //    t.addObject(obj)
     t.addObject(obj)  // XXX TODO --- what was the reason we had this commented out?
     new Impl[S](t, objH = Some(tx.newHandle(obj)), disposeTransport = true).init()

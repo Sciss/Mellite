@@ -14,13 +14,14 @@
 package de.sciss.mellite
 
 import de.sciss.file.File
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{Sys, WorkspaceHandle}
 import de.sciss.mellite.impl.{DocumentHandlerImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.synth.proc.Workspace
 
 object DocumentHandler {
-  type Document = Workspace[_ <: Sys[_]]
+//  type Document = Workspace[_ <: Sys[_]]
+  type Document = WorkspaceHandle[_ <: Sys[_]]
 
   lazy val instance: DocumentHandler = Impl()
 

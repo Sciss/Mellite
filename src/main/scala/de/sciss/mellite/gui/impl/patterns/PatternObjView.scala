@@ -30,7 +30,7 @@ import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, Sha
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Code, Workspace}
+import de.sciss.synth.proc.{Code, Universe}
 import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
 
 import scala.swing.Button
@@ -54,9 +54,9 @@ object PatternObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = String
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
@@ -89,7 +89,7 @@ object PatternObjView extends ListObjView.Factory {
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
     def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = codeFrame(obj)
       Some(frame)
@@ -99,7 +99,7 @@ object PatternObjView extends ListObjView.Factory {
   }
 
   private def codeFrame[S <: Sys[S]](obj: Pattern.Var[S])
-                                    (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                                    (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     val codeObj = CodeFrameImpl.mkSource(obj = obj, codeId = Pattern.Code.id, key = Pattern.attrSource,
       init = "// Pattern graph function source code\n\n")
@@ -116,6 +116,7 @@ object PatternObjView extends ListObjView.Factory {
 
       def save(in: Unit, out: Pat[_])(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
+        import universe.cursor
         EditVar.Expr[S, Pat[_], Pattern]("Change Pattern Graph", obj, Pattern.newConst[S](out))
       }
 
@@ -125,6 +126,7 @@ object PatternObjView extends ListObjView.Factory {
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
     val viewEval = View.wrap[S, Button] {
       val actionEval = new swing.Action("Evaluate") { self =>
+        import universe.cursor
         def apply(): Unit = cursor.step { implicit tx =>
           val obj = objH()
           val g   = obj.value // .graph().value

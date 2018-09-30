@@ -19,13 +19,13 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.markdown.MarkdownFrameImpl
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object MarkdownEditorFrame {
   def apply[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]] = Nil)
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownEditorFrame[S] =
+                        (implicit tx: S#Tx, universe: Universe[S]): MarkdownEditorFrame[S] =
     MarkdownFrameImpl.editor(obj, bottom = bottom)
 }
 
@@ -34,8 +34,7 @@ trait MarkdownEditorFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
 }
 
 object MarkdownRenderFrame {
-  def apply[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                           cursor: stm.Cursor[S]): MarkdownRenderFrame[S] =
+  def apply[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderFrame[S] =
     MarkdownFrameImpl.render(obj)
 
   def basic[S <: stm.Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S] =

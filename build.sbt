@@ -4,7 +4,7 @@ lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val projectVersion             = "2.28.0-SNAPSHOT"
-lazy val mimaVersion                = "2.27.0"
+lazy val mimaVersion                = "2.28.0"
 
 lazy val loggingEnabled             = true
 
@@ -15,7 +15,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
-    val audioWidgets        = "1.13.0-SNAPSHOT"
+    val audioWidgets        = "1.13.0"
     val desktop             = "0.9.2"
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
@@ -25,7 +25,7 @@ lazy val deps = new {
     val jline               = "2.14.6"
     val kollFlitz           = "0.2.2"
     val lucre               = "3.9.1"
-    val lucreSwing          = "1.12.0-SNAPSHOT"
+    val lucreSwing          = "1.12.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val patterns            = "0.5.0-SNAPSHOT"
@@ -34,7 +34,7 @@ lazy val deps = new {
     val playJSON            = "0.4.0"
     val raphaelIcons        = "1.0.4"
     val scalaCollider       = "1.27.0"
-    val scalaColliderSwing  = "1.40.0-SNAPSHOT"
+    val scalaColliderSwing  = "1.40.0"
     val scalaColliderUGen   = "1.19.1"
     val scopt               = "3.7.0"
     val sonogram            = "1.10.0"
@@ -63,10 +63,12 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.12.6",
-  crossScalaVersions := Seq("2.12.6", "2.11.12"),
+  scalaVersion       := "2.12.7",
+  crossScalaVersions := Seq("2.12.7", "2.11.12"),
   scalacOptions ++= {
-    val xs = Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_")
+    val xs = Seq(
+      "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_", "-Xsource:2.13"
+    )
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
   },
   javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),

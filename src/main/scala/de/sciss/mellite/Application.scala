@@ -14,15 +14,15 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.{SwingApplication, SwingApplicationProxy}
-import de.sciss.lucre.stm.Sys
-import de.sciss.synth.proc.Workspace
+import de.sciss.lucre.stm.{Sys, WorkspaceHandle}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 /** A proxy for a swing application. */
-object Application extends SwingApplicationProxy[Workspace[_ <: Sys[_]], Application] { me =>
+object Application extends SwingApplicationProxy[WorkspaceHandle[_ <: Sys[_]], Application] { me =>
 
-  type Document = Workspace[_ <: Sys[_]]
+//  type Document = Workspace[_ <: Sys[_]]
+  type Document = WorkspaceHandle[_ <: Sys[_]]
 
   def topLevelObjects : ISeq[String]      = peer.topLevelObjects
   def objectFilter    : String => Boolean = peer.objectFilter

@@ -31,7 +31,7 @@ import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}
 import de.sciss.synth.UGenSource.Vec
 import de.sciss.synth.proc
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 import de.sciss.{desktop, equal}
 import javax.swing.SpinnerNumberModel
 
@@ -40,8 +40,7 @@ import scala.swing.Swing._
 import scala.swing.{Action, BoxPanel, Button, Component, Dialog, Label, Orientation}
 
 object NuagesEditorViewImpl {
-  def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                         cursor: stm.Cursor[S], undoManager: UndoManager): NuagesEditorView[S] = {
+  def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): NuagesEditorView[S] = {
     val folder  = FolderEditorView[S](obj.folder)
     val res     = new Impl[S](tx.newHandle(obj), folder)
     deferTx {
@@ -52,12 +51,14 @@ object NuagesEditorViewImpl {
 
   private final class Impl[S <: Sys[S]](nuagesH: stm.Source[S#Tx, Nuages[S]],
                                         folderView: FolderEditorView[S])
-                                       (implicit val undoManager: UndoManager, val workspace: Workspace[S],
-                                        val cursor: stm.Cursor[S])
     extends NuagesEditorView[S] with ComponentHolder[Component] {
     impl =>
 
     type C = Component
+
+    implicit val universe: Universe[S] = folderView.universe
+
+    def undoManager: UndoManager = folderView.undoManager
 
     def actionDuplicate: Action = folderView.actionDuplicate
 
@@ -225,7 +226,6 @@ object NuagesEditorViewImpl {
     }
 
     private def openLive()(implicit tx: S#Tx): Option[Window[S]] = {
-      import Mellite.auralSystem
       val n     = nuagesH()
       val nCfg  = buildConfiguration()
       val frame: WindowImpl[S] = new WindowImpl[S] with Veto[S#Tx] {

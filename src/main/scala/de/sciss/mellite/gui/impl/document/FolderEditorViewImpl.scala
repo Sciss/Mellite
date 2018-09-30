@@ -21,11 +21,11 @@ import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
-import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.expr
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
 import de.sciss.swingplus.{GroupPanel, Spinner}
-import de.sciss.synth.proc.{ObjKeys, Workspace}
+import de.sciss.synth.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel
 import javax.swing.undo.UndoableEdit
 
@@ -35,7 +35,7 @@ import scala.swing.event.Key
 import scala.swing.{Action, Alignment, CheckBox, Dialog, Label, Swing, TextField}
 
 object FolderEditorViewImpl {
-  def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+  def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
                                             undoManager: UndoManager): FolderEditorView[S] = {
     val peer  = FolderView(folder)
     val view  = new Impl[S](peer)
@@ -43,8 +43,7 @@ object FolderEditorViewImpl {
   }
 
   private final class Impl[S <: Sys[S]](val peer: FolderView[S])
-                                       (implicit val workspace: Workspace[S],
-                                        val cursor: stm.Cursor[S], val undoManager: UndoManager)
+                                       (implicit val universe: Universe[S], val undoManager: UndoManager)
     extends CollectionViewImpl[S] with FolderEditorView[S]
   {
 

@@ -17,6 +17,7 @@ package gui
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.model.Model
+import de.sciss.synth.proc.gui.UniverseView
 
 object MapView {
   type Selection[S <: stm.Sys[S]] = List[(String, ObjView[S])]
@@ -26,7 +27,7 @@ object MapView {
     extends Update[S, Repr]
 }
 trait MapView[S <: stm.Sys[S], Repr]
-  extends ViewHasWorkspace[S] with View.Editable[S] with Model[MapView.Update[S, Repr]] {
+  extends UniverseView[S] with View.Editable[S] with Model[MapView.Update[S, Repr]] {
 
   def selection: MapView.Selection[S]
 

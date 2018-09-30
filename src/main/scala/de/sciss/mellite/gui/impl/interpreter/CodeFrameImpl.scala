@@ -29,8 +29,9 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.SynthGraph
+import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.impl.ActionImpl
-import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Workspace}
+import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
@@ -40,7 +41,7 @@ object CodeFrameImpl {
   // ---- adapter for editing a Proc's source ----
 
   def proc[S <: Sys[S]](obj: Proc[S])
-                       (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                       (implicit tx: S#Tx, universe: Universe[S],
                         compiler: Code.Compiler): CodeFrame[S] = {
     val codeObj = mkSource(obj = obj, codeId = Code.SynthGraph.id, key = Proc.attrSource,
       init = {
@@ -64,6 +65,7 @@ object CodeFrameImpl {
 
       def save(in: Unit, out: SynthGraph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
+        import universe.cursor
         EditVar.Expr[S, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[S](out))
       }
 
@@ -81,7 +83,7 @@ object CodeFrameImpl {
   // ---- adapter for editing a Action's source ----
 
   def action[S <: Sys[S]](obj: Action[S])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                         (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S] = {
     val codeObj = mkSource(obj = obj, codeId = Code.Action.id, key = Action.attrSource,
       init = "// Action source code\n\n")
@@ -95,10 +97,11 @@ object CodeFrameImpl {
     val objH  = tx.newHandle(obj)
     val viewExecute = View.wrap[S, Button] {
       val actionExecute = swing.Action(null) {
+        import universe.cursor
         cursor.step { implicit tx =>
           val obj = objH()
-          val universe = Action.Universe(obj, workspace)
-          obj.execute(universe)
+          val au = Action.Universe(obj)
+          obj.execute(au)
         }
       }
       GUI.toolButton(actionExecute, raphael.Shapes.Bolt, tooltip = "Run body")
@@ -108,15 +111,19 @@ object CodeFrameImpl {
       case Action.Var(vr) =>
         val varH  = tx.newHandle(vr)
         val handler = new CodeView.Handler[S, String, Array[Byte]] {
-          def in(): String = cursor.step { implicit tx =>
-            val id = tx.newId()
-            val cnt = IdPeek(id)
-            s"Action$cnt"
+          def in(): String = {
+            import universe.cursor
+            cursor.step { implicit tx =>
+              val id = tx.newId()
+              val cnt = IdPeek(id)
+              s"Action$cnt"
+            }
           }
 
           def save(in: String, out: Array[Byte])(implicit tx: S#Tx): UndoableEdit = {
             val obj = varH()
             val value = ActionImpl.newConst[S](name = in, jar = out)
+            import universe.cursor
             EditVar[S, Action[S], Action.Var[S]](name = "Change Action Body", expr = obj, value = value)
           }
 
@@ -137,7 +144,7 @@ object CodeFrameImpl {
   // ---- general constructor ----
 
   def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]], canBounce: Boolean = false)
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] = {
     val _codeEx = obj
 
@@ -150,9 +157,9 @@ object CodeFrameImpl {
   }
 
   private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[View[S]])
-                                      (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S],
+                                      (implicit val universe: Universe[S],
                                        val undoManager: UndoManager)
-    extends View.Editable[S] with ViewHasWorkspace[S] {
+    extends View.Editable[S] with UniverseView[S] {
 
     type C = Component
 
@@ -177,7 +184,7 @@ object CodeFrameImpl {
 
   private final class CanBounceView[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], codeView: View[S],
                                                  rightViewOpt: Option[View[S]])
-                                                (implicit workspace: Workspace[S], cursor: stm.Cursor[S],
+                                                (implicit universe: Universe[S],
                                                  undoManager: UndoManager)
     extends PlainView[S](codeView, rightViewOpt) with CanBounce {
 
@@ -191,7 +198,7 @@ object CodeFrameImpl {
                                    code0: CodeT[In0, Out0],
                                    handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
                                    rightViewOpt: Option[View[S]], canBounce: Boolean)
-                                  (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                                  (implicit tx: S#Tx, universe: Universe[S],
                                    undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
     // val _name   = /* title getOrElse */ obj.attr.name
     val codeView  = CodeView(obj, code0, bottom = bottom)(handler)

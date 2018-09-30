@@ -19,7 +19,6 @@ import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEv
 import java.io.{EOFException, File, IOException}
 import java.text.ParseException
 
-import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 import de.sciss.audiowidgets.TimeField
 import de.sciss.desktop.{Desktop, DialogSource, FileDialog, OptionPane, PathField, Window}
 import de.sciss.file._
@@ -38,13 +37,14 @@ import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
 import de.sciss.synth.io.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
 import de.sciss.synth.{SynthGraph, addToTail}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}
+import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 
 import scala.collection.immutable.{IndexedSeq => Vec, Iterable => IIterable, Seq => ISeq}
 import scala.concurrent.blocking
-import scala.language.implicitConversions
 import scala.swing.Swing._
 import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
 import scala.swing.{Button, ButtonGroup, CheckBox, Component, Dialog, Label, ProgressBar, TextField, ToggleButton}
@@ -398,13 +398,13 @@ object ActionBounceTimeline {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def query[S <: Sys[S]](view: ViewHasWorkspace[S] with View.Editable[S],
+  def query[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
                          init: QuerySettings[S], selectionType: Selection,
                          spanPresets: ISeq[SpanPreset])(callback: (QuerySettings[S], Boolean) => Unit): Unit = {
 
-    val viewWS: ViewHasWorkspace[S] = view
+    val viewU: UniverseView[S] = view
     import view.undoManager
-    import viewWS.{cursor, workspace}
+    import viewU.{cursor, universe}
     val window          = Window.find(view.component)
     import equal.Implicits._
 
@@ -520,7 +520,7 @@ object ActionBounceTimeline {
     val ggFineControl = new CheckBox()
     ggFineControl.selected = init.fineControl
 
-    val fmtRanges = new JFormattedTextField.AbstractFormatter {
+    object fmtRanges extends JFormattedTextField.AbstractFormatter {
       def stringToValue(text: String): Vec[Range.Inclusive] = try {
         stringToChannels(text)
       } catch {
@@ -750,7 +750,7 @@ object ActionBounceTimeline {
               ok
 
             case _ => // either no location was set, or it's not parent of the file
-              ActionArtifactLocation.query[S](workspace.rootH, f) match {
+              ActionArtifactLocation.query[S](f)(implicit tx => universe.workspace.root) match {
                 case Some(either) =>
                   either match {
                     case Left(source) =>
@@ -760,7 +760,7 @@ object ActionBounceTimeline {
                     case Right((name, directory)) =>
                       val (edit0, source) = cursor.step { implicit tx =>
                         val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
-                        val folder  = workspace.rootH()
+                        val folder  = universe.workspace.root
                         val index   = folder.size
                         val _edit   = EditFolderInsertObj[S]("Location", folder, index, locObj)
                         (_edit, tx.newHandle(locObj))
@@ -825,15 +825,16 @@ object ActionBounceTimeline {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def performGUI[S <: Sys[S]](view: ViewHasWorkspace[S],
+  def performGUI[S <: Sys[S]](view: UniverseView[S],
                               settings: QuerySettings[S],
                               group: IIterable[stm.Source[S#Tx, Obj[S]]], file: File, span: Span): Unit = {
 
-    import view.{cursor, workspace}
+    import view.{cursor, universe}
+    import universe.workspace
     val window      = Window.find(view.component)
     val bounceFile  = file
     val pSet        = settings.prepare(group, bounceFile)(span)
-    val process: ProcessorLike[Any, Any] = perform(workspace, pSet)
+    val process: ProcessorLike[Any, Any] = perform(pSet)
 
     var processCompleted = false
 
@@ -885,7 +886,7 @@ object ActionBounceTimeline {
             val depGain   = DoubleObj.newVar[S](1.0)
             val deployed  = AudioCue.Obj[S](depArtif, spec, depOffset, depGain)
             deployed.name = file.base
-            workspace.rootH().addLast(deployed)
+            workspace.root.addLast(deployed)
           }
 
         case _ =>
@@ -907,9 +908,8 @@ object ActionBounceTimeline {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def perform[S <: Sys[S]](document: Workspace[S], settings: PerformSettings[S])
-                          (implicit cursor: stm.Cursor[S]): Processor[File] = {
-    implicit val workspace: Workspace[S] = document
+  def perform[S <: Sys[S]](settings: PerformSettings[S])
+                          (implicit universe: Universe[S]): Processor[File] = {
 
     // for real-time, we generally have to overshoot because in SC 3.6, DiskOut's
     // buffer is not flushed after synth is stopped.
@@ -936,8 +936,8 @@ object ActionBounceTimeline {
       settings.copy(server = sConfig)
     }
 
-    val bounce    = Bounce[S, document.I]
-    val bnc       = Bounce.Config[S]
+    val bounce    = Bounce[S]() // workspace.I]
+    val bnc       = Bounce.Config[S]()
     bnc.group     = settings1.group
     bnc.realtime  = realtime
     bnc.server.read(settings1.server)
@@ -1127,7 +1127,7 @@ object ActionBounceTimeline {
     }
   }
 }
-abstract class ActionBounceTimeline[S <: Sys[S]](view: ViewHasWorkspace[S] with View.Editable[S],
+abstract class ActionBounceTimeline[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
                                                  objH: stm.Source[S#Tx, Obj[S]], storeSettings: Boolean = true)
   extends scala.swing.Action(ActionBounceTimeline.title) {
 

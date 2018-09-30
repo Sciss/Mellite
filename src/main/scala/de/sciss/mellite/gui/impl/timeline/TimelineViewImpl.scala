@@ -28,7 +28,7 @@ import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Cursor, Disposable, IdentifierMap, Obj}
+import de.sciss.lucre.stm.{Disposable, IdentifierMap, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
@@ -41,11 +41,12 @@ import de.sciss.swingplus.ScrollBar
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.impl.AuxContextImpl
-import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Workspace}
+import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
 import javax.swing.UIManager
 import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.{Ref, TSet}
+import scala.math.{max, min}
 import scala.swing.Swing._
 import scala.swing.event.ValueChanged
 import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation, SplitPane}
@@ -69,14 +70,17 @@ object TimelineViewImpl {
 //  private type TimedProc[S <: Sys[S]] = BiGroup.Entry[S, Proc[S]]
 
   def apply[S <: Sys[S]](obj: Timeline[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): TimelineView[S] = {
     val sampleRate  = TimeRef.SampleRate
     val visStart    = 0L // obj.firstEvent.getOrElse(0L)
-    val visStop     = obj.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
+    val lastOpt     = obj.lastEvent
+    val visStop     = lastOpt.fold((sampleRate * 60 * 2).toLong)(f => f + f/2)
     val vis0        = Span(visStart, visStop)
-    val bounds0     = Span(0L, (sampleRate * 60 * 60).toLong) // XXX TODO --- dynamically adjust
-    val tlm         = TimelineModel(bounds = bounds0, visible = vis0, clipStop = false,
+    val vir0        = vis0
+    val lastOrZero  = lastOpt.getOrElse(0L)
+    val bounds0     = Span(min(0L, lastOrZero), lastOrZero)
+    val tlm         = TimelineModel(bounds = bounds0, visible = vis0, virtual = vir0, clipStop = false,
       sampleRate = sampleRate)
     // tlm.visible     = Span(0L, (sampleRate * 60 * 2).toLong)
     val timeline    = obj
@@ -95,7 +99,7 @@ object TimelineViewImpl {
     // freed directly...
     disposables ::= viewMap
 //    disposables ::= scanMap
-    val transport = Transport[S](Mellite.auralSystem) // = proc.Transport [S, workspace.I](group, sampleRate = sampleRate)
+    val transport = Transport[S](universe) // = proc.Transport [S, workspace.I](group, sampleRate = sampleRate)
     disposables ::= transport
     // val auralView = proc.AuralPresentation.run[S](transport, Mellite.auralSystem, Some(Mellite.sensorSystem))
     // disposables ::= auralView
@@ -106,6 +110,7 @@ object TimelineViewImpl {
     val global = GlobalProcsView(timeline, selectionModel)
     disposables ::= global
 
+    import universe.cursor
     val transportView = TransportView(transport, tlm, hasMillis = true, hasLoop = true)
     val tlView = new Impl[S](timelineH, viewMap, /* scanMap, */ tlm, selectionModel, global, transportView, tx)
 
@@ -143,12 +148,10 @@ object TimelineViewImpl {
   private final class Impl[S <: Sys[S]](val timelineH: stm.Source[S#Tx, Timeline[S]],
                                         val viewMap: TimelineObjView.Map[S],
 //                                        val scanMap: ProcObjView.ScanMap[S],
-                                        val timelineModel: TimelineModel,
+                                        val timelineModel: TimelineModel.Modifiable,
                                         val selectionModel: SelectionModel[S, TimelineObjView[S]],
                                         val globalView: GlobalProcsView[S],
                                         val transportView: TransportView[S], tx0: S#Tx)
-                                       (implicit val workspace: Workspace[S], val cursor: Cursor[S],
-                                        val undoManager: UndoManager)
     extends TimelineActions[S]
       with TimelineView[S]
       with ComponentHolder[Component]
@@ -159,7 +162,9 @@ object TimelineViewImpl {
 
     type C = Component
 
-    import cursor.step
+    implicit val universe: Universe[S] = globalView.universe
+
+    def undoManager: UndoManager = globalView.undoManager
 
     private[this] var viewRange = RangedSeq.empty[TimelineObjView[S], Long]
     private[this] val viewSet   = TSet     .empty[TimelineObjView[S]]
@@ -316,7 +321,27 @@ object TimelineViewImpl {
             globalView.add(pv)
           case _ =>
             viewRange += view
-            if (repaint) repaintAll() // XXX TODO: optimize dirty rectangle
+            if (repaint) {
+              val oldBounds = timelineModel.bounds
+              val newBounds = span match {
+                case sp: Span             => oldBounds union sp
+                case Span.From(start)     => oldBounds match {
+                  case sp: Span           => Span(min(start, sp.start), sp.stop)
+                  case Span.From(start1)  => Span.From(min(start, start1))
+                  case _                  => oldBounds
+                }
+                case Span.Until(stop)     => oldBounds match {
+                  case sp: Span           => Span(sp.start, max(stop, sp.stop))
+                  case Span.Until(stop1)  => Span.Until(max(stop, stop1))
+                  case _                  => oldBounds
+                }
+                case _ => oldBounds
+              }
+              if (newBounds != oldBounds) {
+                timelineModel.setBoundsExtendVirtual(newBounds)
+              }
+              repaintAll()  // XXX TODO: optimize dirty rectangle
+            }
         }
       }
 
@@ -429,7 +454,7 @@ object TimelineViewImpl {
       def withRegions[A](fun: S#Tx => List[TimelineObjView[S]] => Option[A]): Option[A] =
         canvas.findRegion(drop.frame, canvas.screenToTrack(drop.y)).flatMap { hitRegion =>
           val regions = if (selectionModel.contains(hitRegion)) selectionModel.iterator.toList else hitRegion :: Nil
-          step { implicit tx =>
+          cursor.step { implicit tx =>
             fun(tx)(regions)
           }
         }
@@ -443,7 +468,7 @@ object TimelineViewImpl {
               }.toList
             } else hitRegion :: Nil
 
-            step { implicit tx =>
+            cursor.step { implicit tx =>
               fun(tx)(regions)
             }
           case _ => None
@@ -453,14 +478,14 @@ object TimelineViewImpl {
 
       val editOpt: Option[UndoableEdit] = drop.drag match {
         case ad: DnD.AudioDrag[S] =>
-          step { implicit tx =>
+          cursor.step { implicit tx =>
             insertAudioRegion(drop, ad, ad.source())
           }
 
         case ed: DnD.ExtAudioRegionDrag[S] =>
           val file = ed.file
-          val resOpt = step { implicit tx =>
-            val ex = ObjectActions.findAudioFile(workspace.rootH(), file)
+          val resOpt = cursor.step { implicit tx =>
+            val ex = ObjectActions.findAudioFile(universe.workspace.root, file)
             ex.flatMap { grapheme =>
               insertAudioRegion(drop, ed, grapheme)
             }
@@ -469,10 +494,10 @@ object TimelineViewImpl {
           resOpt.orElse[UndoableEdit] {
             val tr = Try(AudioFile.readSpec(file)).toOption
             tr.flatMap { spec =>
-              ActionArtifactLocation.query[S](workspace.rootH, file).flatMap { either =>
-                step { implicit tx =>
+              ActionArtifactLocation.query[S](file)(implicit tx => universe.workspace.root).flatMap { either =>
+                cursor.step { implicit tx =>
                   ActionArtifactLocation.merge(either).flatMap { case (list0, locM) =>
-                    val folder = workspace.rootH()
+                    val folder = universe.workspace.root
                     // val obj   = ObjectActions.addAudioFile(elems, elems.size, loc, file, spec)
                     val obj = ObjectActions.mkAudioFile(locM, file, spec)
                     val edits0 = list0.map(obj => EditFolderInsertObj("Location", folder, folder.size, obj)).toList
@@ -500,11 +525,11 @@ object TimelineViewImpl {
           val length  = defaultDropLength(view, inProgress = false)
           val span    = Span(0L, length)
           val ad      = DnD.AudioDrag(ws, view.objH, span)
-          step { implicit tx =>
+          cursor.step { implicit tx =>
             insertAudioRegion(drop, ad, ad.source())
           }
 
-        case DnD.ObjectDrag(_, view /* : ObjView.Proc[S] */) => step { implicit tx =>
+        case DnD.ObjectDrag(_, view /* : ObjView.Proc[S] */) => cursor.step { implicit tx =>
           plainGroup.modifiableOption.map { group =>
             val length  = defaultDropLength(view, inProgress = false)
             val span    = Span(drop.frame, drop.frame + length)
@@ -565,7 +590,7 @@ object TimelineViewImpl {
 
       protected def commitToolChanges(value: Any): Unit = {
         logT(s"Commit tool changes $value")
-        val editOpt = step { implicit tx =>
+        val editOpt = cursor.step { implicit tx =>
           value match {
             case t: TrackTool.Cursor => toolCursor commit t
             case t: TrackTool.Move =>
@@ -623,7 +648,7 @@ object TimelineViewImpl {
 
       object canvasComponent extends Component with DnD[S] {
         protected def timelineModel : TimelineModel = impl.timelineModel
-        protected def workspace     : Workspace[S]  = impl.workspace
+        protected def universe      : Universe[S]   = impl.universe
 
         private[this] var currentDrop = Option.empty[DnD.Drop[S]]
 

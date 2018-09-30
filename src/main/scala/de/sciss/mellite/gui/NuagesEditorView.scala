@@ -15,19 +15,19 @@ package de.sciss.mellite
 package gui
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.nuages.Nuages
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
+import de.sciss.synth.proc.gui.UniverseView
 import impl.document.{NuagesEditorViewImpl => Impl}
 
 import scala.swing.Action
 
 object NuagesEditorView {
-  def apply[S <: SSys[S]](obj: Nuages[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                          cursor: stm.Cursor[S], undoManager: UndoManager): NuagesEditorView[S] =
+  def apply[S <: SSys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S],
+                                          undoManager: UndoManager): NuagesEditorView[S] =
     Impl(obj)
 
   /** Key convention for a `BooleanObj` in the `Nuages` object
@@ -66,6 +66,6 @@ object NuagesEditorView {
     */
   final val attrLineOutputs = "line-outputs"
 }
-trait NuagesEditorView[S <: Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S] with CanBounce {
+trait NuagesEditorView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S] with CanBounce {
   def actionDuplicate: Action
 }

@@ -29,7 +29,7 @@ import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.{DragAndDrop, FScapeOutputsView, GUI, ListObjView, MapView}
 import de.sciss.swingplus.{ComboBox, ListView}
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 
@@ -38,8 +38,8 @@ import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, TextField}
 
 object FScapeOutputsViewImpl {
-  def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, cursor: stm.Cursor[S],
-                                       workspace: Workspace[S], undoManager: UndoManager): FScapeOutputsView[S] = {
+  def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, universe: Universe[S],
+                                         undoManager: UndoManager): FScapeOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>
       (out.key, ListObjView(out))
     }  .toIndexedSeq
@@ -58,7 +58,7 @@ object FScapeOutputsViewImpl {
   }
 
   private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, FScape[S]])
-                                          (implicit cursor: stm.Cursor[S], workspace: Workspace[S],
+                                          (implicit universe: Universe[S],
                                            undoManager: UndoManager)
     extends MapViewImpl[S, FScapeOutputsView[S]] with FScapeOutputsView[S] with ComponentHolder[Component] { impl =>
 
@@ -153,7 +153,7 @@ object FScapeOutputsViewImpl {
         protected def createTransferable(): Option[Transferable] =
           selection.headOption.map { case (key, _ /* view */) =>
             DragAndDrop.Transferable(FScapeOutputsView.flavor)(FScapeOutputsView.Drag[S](
-              workspace, objH, key))
+              universe, objH, key))
           }
       }
 

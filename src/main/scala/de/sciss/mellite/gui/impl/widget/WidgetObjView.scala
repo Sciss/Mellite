@@ -21,7 +21,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes, WidgetEditorFrame}
-import de.sciss.synth.proc.{Widget, Workspace}
+import de.sciss.synth.proc.{Universe, Widget}
 import de.sciss.synth.proc.Implicits._
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -42,9 +42,9 @@ object WidgetObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = String
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
     val res = pane.show(window)
@@ -75,8 +75,7 @@ object WidgetObjView extends ListObjView.Factory {
 
     def isViewable: Boolean = true
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, workspace: Workspace[S],
-                                                     cursor: Cursor[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       val frame = WidgetEditorFrame(obj)
       Some(frame)
     }

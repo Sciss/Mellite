@@ -15,7 +15,6 @@ package de.sciss.mellite
 package gui.impl
 
 import javax.swing.{Icon, SpinnerNumberModel}
-
 import de.sciss.desktop
 import de.sciss.lucre.expr.{DoubleObj, Type}
 import de.sciss.lucre.stm
@@ -27,7 +26,7 @@ import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, I
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, Workspace}
+import de.sciss.synth.proc.{Confluent, Universe}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Component, Graphics2D, Label}
@@ -56,9 +55,9 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val model     = new SpinnerNumberModel(0.0, Double.NegativeInfinity, Double.PositiveInfinity, 1.0)
     val ggValue   = new Spinner(model)
     val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Some(model.getNumber.doubleValue))

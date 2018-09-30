@@ -18,14 +18,12 @@ package audiocue
 
 import de.sciss.file._
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{AudioCue, AuralSystem, Workspace}
+import de.sciss.synth.proc.{AudioCue, Universe}
 
 object FrameImpl {
   def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): AudioFileFrame[S] = {
-    implicit val aural: AuralSystem = Mellite.auralSystem
+                        (implicit tx: S#Tx, universe: Universe[S]): AudioFileFrame[S] = {
     val afv       = AudioFileView(obj)
     val name0     = CellView.name(obj)
     val file      = obj.value.artifact

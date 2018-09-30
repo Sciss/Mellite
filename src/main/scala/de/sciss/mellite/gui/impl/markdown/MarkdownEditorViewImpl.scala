@@ -15,8 +15,8 @@ package de.sciss.mellite
 package gui.impl.markdown
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -32,7 +32,7 @@ import de.sciss.scalainterpreter.impl.CodePaneImpl
 import de.sciss.swingplus.Implicits._
 import de.sciss.syntaxpane.SyntaxDocument
 import de.sciss.syntaxpane.syntaxkits.MarkdownSyntaxKit
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
@@ -43,7 +43,7 @@ import scala.swing.{Action, BorderPanel, Button, Component, EditorPane, FlowPane
 
 object MarkdownEditorViewImpl {
   def apply[S <: SSys[S]](obj: Markdown[S], showEditor: Boolean, bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): MarkdownEditorView[S] = {
     val editable = obj match {
       case Markdown.Var(_) => true
@@ -73,11 +73,12 @@ object MarkdownEditorViewImpl {
                                          markdownH: stm.Source[S#Tx, Markdown[S]],
                                          editable: Boolean,
                                          bottom: ISeq[View[S]])
-                                        (implicit undoManager: UndoManager, val workspace: Workspace[S],
-                                         val cursor: stm.Cursor[S])
+                                        (implicit undoManager: UndoManager)
     extends ComponentHolder[Component] with MarkdownEditorView[S] with ModelImpl[MarkdownEditorView.Update] { impl =>
 
     type C = Component
+
+    implicit val universe: Universe[S] = renderer.universe
 
     private[this] val _dirty = Ref(false)
 

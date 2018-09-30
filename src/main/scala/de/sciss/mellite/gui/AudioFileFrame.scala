@@ -15,14 +15,12 @@ package de.sciss
 package mellite
 package gui
 
-import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.audiocue.{FrameImpl => Impl}
-import de.sciss.synth.proc.{AudioCue, Workspace}
+import de.sciss.synth.proc.{AudioCue, Universe}
 
 object AudioFileFrame {
-  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): AudioFileFrame[S] =
+  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioFileFrame[S] =
     Impl(obj)
 }
 

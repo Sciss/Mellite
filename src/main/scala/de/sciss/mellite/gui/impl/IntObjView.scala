@@ -15,7 +15,6 @@ package de.sciss.mellite
 package gui.impl
 
 import javax.swing.{Icon, SpinnerNumberModel}
-
 import de.sciss.desktop
 import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
@@ -23,7 +22,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
-import de.sciss.synth.proc.{Confluent, Workspace}
+import de.sciss.synth.proc.{Confluent, Universe}
 import de.sciss.synth.proc.Implicits._
 
 import scala.util.Try
@@ -50,9 +49,9 @@ object IntObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Int]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val model     = new SpinnerNumberModel(0, Int.MinValue, Int.MaxValue, 1)
     val ggValue   = new Spinner(model)
     val res = ObjViewImpl.primitiveConfig[S, Int](window, tpe = prefix, ggValue = ggValue,

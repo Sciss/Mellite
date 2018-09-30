@@ -19,23 +19,23 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.interpreter.{CodeFrameImpl => Impl}
-import de.sciss.synth.proc.{Action, Code, Proc, Workspace}
+import de.sciss.synth.proc.{Action, Code, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object CodeFrame {
   def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] =
     Impl(obj, bottom = bottom)
 
   def proc[S <: Sys[S]](proc: Proc[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] =
     Impl.proc(proc)
 
   def action[S <: Sys[S]](action: Action[S])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                         (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S] =
     Impl.action(action)
 

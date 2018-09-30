@@ -14,15 +14,14 @@
 package de.sciss.mellite
 package gui
 
-import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{Color, Workspace}
+import de.sciss.synth.proc.{Color, Universe}
+import javax.swing.Icon
 
 import scala.language.higherKinds
 
@@ -51,9 +50,8 @@ object ObjView {
     def hasMakeDialog: Boolean
 
     /** Provides an optional initial configuration for the make-new-instance dialog. */
-    def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
-                                   (implicit cursor: stm.Cursor[S]): Unit
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
+                                   (implicit universe: Universe[S]): Unit
 
     def category: String
 
@@ -104,6 +102,5 @@ trait ObjView[S <: stm.Sys[S]]
     * The method should return an appropriate view for this object, or `None` if no editor or viewer window
     * can be produced.
     */
-  def openView(parent: Option[Window[S]])
-              (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]]
+  def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]]
 }

@@ -73,9 +73,9 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
       case _ => pos
     })
 
-    import tlv.{cursor, workspace}
+    import tlv.{cursor, universe}
     val playOpt = cursor.step { implicit tx =>
-      Mellite.auralSystem.serverOption.map { server =>
+      universe.auralSystem.serverOption.map { server =>
         implicit val aural: AuralContext[S] = AuralContext(server)
         val auralTimeline = AuralObj.Timeline /* .empty */(tlv.timeline)
 

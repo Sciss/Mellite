@@ -15,8 +15,8 @@ package de.sciss.mellite
 package gui.impl
 
 import java.awt.geom.Area
-import javax.swing.Icon
 
+import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.lucre.expr.{DoubleVector, Type}
 import de.sciss.lucre.stm
@@ -27,7 +27,7 @@ import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, Shapes}
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, Workspace}
+import de.sciss.synth.proc.{Confluent, Universe}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -60,9 +60,9 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   private def parseString(s: String): Option[V] =
     Try(s.split(" ").map(x => x.trim().toDouble)(breakOut): V).toOption
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val ggValue = new TextField("0.0 0.0")
     val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
     res.foreach(ok(_))

@@ -16,7 +16,6 @@ package gui
 package impl
 
 import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -25,7 +24,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Code, Workspace}
+import de.sciss.synth.proc.{Code, Universe}
 
 import scala.swing.{Component, Label}
 
@@ -47,9 +46,9 @@ object CodeObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Code]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val ggValue = new ComboBox(Seq(Code.FileTransform.name, Code.SynthGraph.name))
     val res = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
       ggValue.selection.index match {
@@ -109,7 +108,7 @@ object CodeObjView extends ListObjView.Factory {
     def isViewable = true
 
     def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = CodeFrame(obj, bottom = Nil)
       Some(frame)

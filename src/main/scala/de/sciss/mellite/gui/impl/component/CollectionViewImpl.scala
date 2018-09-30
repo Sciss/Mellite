@@ -17,18 +17,18 @@ package impl
 package component
 
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.Window
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.swingplus.PopupMenu
+import de.sciss.synth.proc.gui.UniverseView
 
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, SequentialContainer, Swing}
 
 trait CollectionViewImpl[S <: Sys[S]]
-  extends ViewHasWorkspace[S]
+  extends UniverseView[S]
   with View.Editable[S]
   with ComponentHolder[Component] {
 
@@ -107,7 +107,7 @@ trait CollectionViewImpl[S <: Sys[S]]
 
     def apply(): Unit = {
       val winOpt    = Window.find(component)
-      f.initMakeDialog[S](workspace, /* parentH, */ winOpt) { conf =>
+      f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) { conf =>
         val confOpt2  = prepareInsert(f)
         confOpt2.foreach { insConf =>
           val editOpt = cursor.step { implicit tx =>

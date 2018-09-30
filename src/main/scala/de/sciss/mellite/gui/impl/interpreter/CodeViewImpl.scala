@@ -35,7 +35,7 @@ import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import de.sciss.swingplus.Implicits._
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.syntaxpane.SyntaxDocument
-import de.sciss.synth.proc.{Code, Workspace}
+import de.sciss.synth.proc.{Code, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.collection.mutable
@@ -64,7 +64,7 @@ object CodeViewImpl {
 
   def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
                         (handlerOpt: Option[CodeView.Handler[S, code0.In, code0.Out]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[S, code0.Out] = {
 
@@ -83,8 +83,8 @@ object CodeViewImpl {
                                         private var code: Code { type In = In0; type Out = Out0 },
                                         handlerOpt: Option[CodeView.Handler[S, In0, Out0]],
                                         bottom: ISeq[View[S]])
-                                       (implicit undoManager: UndoManager, val workspace: Workspace[S],
-                                        val cursor: stm.Cursor[S], compiler: Code.Compiler)
+                                       (implicit undoManager: UndoManager, val universe: Universe[S],
+                                        compiler: Code.Compiler)
     extends ComponentHolder[Component] with CodeView[S, Out0] with ModelImpl[CodeView.Update] {
 
     type C = Component

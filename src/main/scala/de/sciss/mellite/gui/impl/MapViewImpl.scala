@@ -18,20 +18,19 @@ package impl
 import java.awt.datatransfer.Transferable
 import java.awt.event.MouseEvent
 import java.util.EventObject
+
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, DefaultTableCellRenderer, TableCellEditor}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{AbstractCellEditor, JComponent, JLabel, JTable, TransferHandler}
-
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.{DropMode, Table}
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 import scala.annotation.switch
 import scala.collection.breakOut
@@ -42,8 +41,7 @@ import scala.swing.event.TableRowsSelected
 import scala.swing.{Component, Label, ScrollPane, TextField}
 
 abstract class MapViewImpl[S <: Sys[S], Repr]
-                              (implicit val cursor: stm.Cursor[S],
-                                        val workspace: Workspace[S], val undoManager: UndoManager)
+                              (implicit val universe: Universe[S], val undoManager: UndoManager)
   extends MapView[S, Repr] with ComponentHolder[Component] with ModelImpl[MapView.Update[S, Repr]] {
   impl: Repr =>
 
@@ -280,7 +278,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
         val sel     = selection
         val trans1 = if (sel.size == 1) {
           val _res = DragAndDrop.Transferable(ListObjView.Flavor) {
-            ListObjView.Drag(workspace, cursor, sel.head._2)
+            ListObjView.Drag(universe, sel.head._2)
           }
           _res
         } else null
@@ -309,7 +307,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
           val dl        = support.getDropLocation.asInstanceOf[JTable.DropLocation]
           val isInsert  = dl.isInsertRow
           val data      = support.getTransferable.getTransferData(ListObjView.Flavor).asInstanceOf[ListObjView.Drag[_]]
-          require(data.workspace == workspace, "Cross-session list copy not yet implemented")
+          require(data.universe == universe, "Cross-session list copy not yet implemented")
           val view      = data.view.asInstanceOf[ObjView[S]]
 
           val keyOpt = if (isInsert) { // ---- create new entry with key via dialog ----

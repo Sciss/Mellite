@@ -15,17 +15,16 @@ package de.sciss.mellite
 package gui.impl.markdown
 
 import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Cursor, Obj}
+import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.{Markdown, Universe}
 
 object MarkdownObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Markdown[~]
@@ -44,9 +43,9 @@ object MarkdownObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = String
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
     val res = pane.show(window)
@@ -89,8 +88,7 @@ object MarkdownObjView extends ListObjView.Factory {
 
     def convertEditValue(v: Any): Option[String] = None
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, workspace: Workspace[S],
-                                                     cursor: Cursor[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       val frame = MarkdownEditorFrame(obj)
       Some(frame)
     }

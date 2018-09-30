@@ -20,16 +20,17 @@ import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.FolderEditorViewImpl
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
+import de.sciss.synth.proc.gui.UniverseView
 
 import scala.swing.{Action, Component, SequentialContainer}
 
 object FolderEditorView {
-  def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+  def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
                                             undoManager: UndoManager = UndoManager()): FolderEditorView[S] =
     FolderEditorViewImpl(folder)
 }
-trait FolderEditorView[S <: stm.Sys[S]] extends View.Editable[S] with ViewHasWorkspace[S] {
+trait FolderEditorView[S <: stm.Sys[S]] extends View.Editable[S] with UniverseView[S] {
   def peer: FolderView[S]
 
   def bottomComponent: Component with SequentialContainer

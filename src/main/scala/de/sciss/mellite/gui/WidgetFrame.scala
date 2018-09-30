@@ -19,13 +19,13 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.widget.WidgetFrameImpl
-import de.sciss.synth.proc.{Widget, Workspace}
+import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object WidgetEditorFrame {
   def apply[S <: Sys[S]](obj: Widget[S], bottom: ISeq[View[S]] = Nil)
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): WidgetEditorFrame[S] =
+                        (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] =
     WidgetFrameImpl.editor(obj, bottom = bottom)
 }
 
@@ -34,8 +34,7 @@ trait WidgetEditorFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
 }
 
 object WidgetRenderFrame {
-  def apply[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                           cursor: stm.Cursor[S]): WidgetRenderFrame[S] =
+  def apply[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx, universe: Universe[S]): WidgetRenderFrame[S] =
     WidgetFrameImpl.render(obj)
 }
 

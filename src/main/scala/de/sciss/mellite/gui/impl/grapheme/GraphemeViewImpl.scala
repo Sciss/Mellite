@@ -26,7 +26,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.stm.{Cursor, Disposable, Obj}
+import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
@@ -34,7 +34,7 @@ import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.model.Change
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
-import de.sciss.synth.proc.{Grapheme, TimeRef, Workspace}
+import de.sciss.synth.proc.{Grapheme, TimeRef, Universe}
 import javax.swing.{JComponent, UIManager}
 
 import scala.annotation.tailrec
@@ -53,14 +53,14 @@ object GraphemeViewImpl {
 //  private type EntryProc[S <: Sys[S]] = BiGroup.Entry[S, Proc[S]]
 
   def apply[S <: Sys[S]](obj: Grapheme[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): GraphemeView[S] = {
     val sampleRate      = TimeRef.SampleRate
     val visStart        = 0L // obj.firstEvent.getOrElse(0L)
     val visStop         = obj.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
     val vis0            = Span(visStart, visStop)
     val bounds0         = Span(0L, (sampleRate * 60 * 60).toLong) // XXX TODO --- dynamically adjust
-    val tlm             = TimelineModel(bounds = bounds0, visible = vis0, clipStop = false,
+    val tlm             = TimelineModel(bounds = bounds0, visible = vis0, virtual = bounds0, clipStop = false,
       sampleRate = sampleRate)
     // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
     val _grapheme       = obj
@@ -120,7 +120,7 @@ object GraphemeViewImpl {
   private final class Impl[S <: Sys[S]](val graphemeH     : stm.Source[S#Tx, Grapheme[S]],
                                         val timelineModel : TimelineModel,
                                         val selectionModel: SelectionModel[S, GraphemeObjView[S]])
-                                       (implicit val workspace: Workspace[S], val cursor: Cursor[S],
+                                       (implicit val universe: Universe[S],
                                         val undoManager: UndoManager)
     extends GraphemeActions[S]
       with GraphemeView[S]
@@ -129,8 +129,6 @@ object GraphemeViewImpl {
     impl =>
 
     type C = Component
-
-    import cursor.step
 
     // GUI-thread map of views; always reflects viewMapT
     private[this] var viewMapG      = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
@@ -397,7 +395,7 @@ object GraphemeViewImpl {
 
       protected def commitToolChanges(value: Any): Unit = {
         logT(s"Commit tool changes $value")
-        val editOpt = step { implicit tx =>
+        val editOpt = cursor.step { implicit tx =>
           value match {
 //            case t: TrackTool.Cursor    => toolCursor commit t
 //            case t: TrackTool.Move      =>
@@ -425,7 +423,7 @@ object GraphemeViewImpl {
 
       object canvasComponent extends Component /* with DnD[S] */ /* with sonogram.PaintController */ {
         protected def graphemeModel: TimelineModel  = impl.timelineModel
-        protected def workspace: Workspace[S]       = impl.workspace
+//        protected def workspace: Workspace[S]       = impl.workspace
 
         // private var currentDrop = Option.empty[DnD.Drop[S]]
 

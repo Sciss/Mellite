@@ -15,7 +15,6 @@ package de.sciss.mellite
 package gui.impl
 
 import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
@@ -26,7 +25,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.synth.proc.{Action, Workspace}
+import de.sciss.synth.proc.{Action, Universe}
 import de.sciss.synth.proc.Implicits._
 
 object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
@@ -44,9 +43,9 @@ object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
 
   def hasMakeDialog   = true
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
@@ -78,7 +77,7 @@ object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
     final def isViewable = true
 
     final def openView(parent: Option[Window[S]])
-                      (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                      (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       import Mellite.compiler
       val frame = CodeFrame.action(obj)
       Some(frame)

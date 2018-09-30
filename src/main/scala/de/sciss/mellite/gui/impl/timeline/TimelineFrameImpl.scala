@@ -22,13 +22,13 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.synth.proc.{Timeline, Workspace}
+import de.sciss.synth.proc.{Timeline, Universe}
 
 import scala.swing.Action
 
 object TimelineFrameImpl {
   def apply[S <: Sys[S]](group: Timeline[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): TimelineFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): TimelineFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = TimelineView[S](group)
     val name    = CellView.name(group)
@@ -41,9 +41,10 @@ object TimelineFrameImpl {
 
   private final class Impl[S <: Sys[S]](val view: TimelineView[S], name: CellView[S#Tx, String],
                                         groupH: stm.Source[S#Tx, Timeline[S]])
-                                       (implicit _cursor: stm.Cursor[S])
     extends WindowImpl[S](name.map(n => s"$n : Timeline"))
     with TimelineFrame[S] {
+
+    import view.{cursor => _cursor}
 
     override protected def initGUI(): Unit = {
       val mf = Application.windowHandler.menuFactory

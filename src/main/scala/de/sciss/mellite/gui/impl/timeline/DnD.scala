@@ -19,8 +19,8 @@ package timeline
 import java.awt.Point
 import java.awt.datatransfer.{DataFlavor, Transferable}
 import java.awt.dnd.{DropTarget, DropTargetAdapter, DropTargetDragEvent, DropTargetDropEvent, DropTargetEvent}
-import javax.swing.TransferHandler._
 
+import javax.swing.TransferHandler._
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.Desktop
 import de.sciss.equal.Implicits._
@@ -31,20 +31,20 @@ import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.span.Span
 import de.sciss.synth.io.AudioFile
-import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Workspace}
+import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}
 
 import scala.swing.Component
 import scala.util.Try
 
 object DnD {
   sealed trait Drag[S <: Sys[S]] {
-    def workspace: Workspace[S]
+    def universe: Universe[S]
     // def source: stm.Source[S#Tx, Element[S]]
   }
   sealed trait AudioDragLike[S <: Sys[S]] extends Drag[S] {
     def selection: Span
   }
-  final case class AudioDrag[S <: Sys[S]](workspace: Workspace[S], source: stm.Source[S#Tx, AudioCue.Obj[S]],
+  final case class AudioDrag[S <: Sys[S]](universe: Universe[S], source: stm.Source[S#Tx, AudioCue.Obj[S]],
                                           selection: Span)
     extends AudioDragLike[S]
 
@@ -52,13 +52,13 @@ object DnD {
   //  final case class CodeDrag[S <: Sys[S]](document: File, source: stm.Source[S#Tx, Code.Obj[S]]) extends Drag[S]
   //  final case class ProcDrag[S <: Sys[S]](document: File, source: stm.Source[S#Tx, Proc[S]]) extends Drag[S]
 
-  final case class GlobalProcDrag[S <: Sys[S]](workspace: Workspace[S], source: stm.Source[S#Tx, Proc[S]])
+  final case class GlobalProcDrag[S <: Sys[S]](universe: Universe[S], source: stm.Source[S#Tx, Proc[S]])
     extends Drag[S]
 
-  final case class ObjectDrag[S <: SSys[S]](workspace: Workspace[S], view: ObjView[S]) extends Drag[S]
+  final case class ObjectDrag[S <: SSys[S]](universe: Universe[S], view: ObjView[S]) extends Drag[S]
 
   /** Drag and Drop from Eisenkraut */
-  final case class ExtAudioRegionDrag[S <: Sys[S]](workspace: Workspace[S], file: File, selection: Span)
+  final case class ExtAudioRegionDrag[S <: Sys[S]](universe: Universe[S], file: File, selection: Span)
     extends AudioDragLike[S]
 
   final case class Drop[S <: Sys[S]](frame: Long, y: Int, drag: Drag[S])
@@ -70,7 +70,7 @@ trait DnD[S <: SSys[S]] {
 
   import DnD._
 
-  protected def workspace: Workspace[S]
+  protected def universe: Universe[S]
   protected def timelineModel: TimelineModel
 
   protected def updateDnD(drop: Option[Drop[S]]): Unit
@@ -87,9 +87,9 @@ trait DnD[S <: SSys[S]] {
     }
 
     private def mkDrop(d: DnD.Drag[S], loc: Point): Drop[S] = {
-      val visi  = timelineModel.visible
+      val vis   = timelineModel.visible
       val w     = peer.getWidth
-      val frame = (loc.x.toDouble / w * visi.length + visi.start).toLong
+      val frame = (loc.x.toDouble / w * vis.length + vis.start).toLong
       val y     = loc.y
       Drop(frame = frame, y = y, drag = d)
     }
@@ -99,7 +99,7 @@ trait DnD[S <: SSys[S]] {
     private def mkExtStringDrag(t: Transferable, isDragging: Boolean): Option[DnD.ExtAudioRegionDrag[S]] = {
       // stupid OS X doesn't give out the string data before drop actually happens
       if (isDragging && !Desktop.isLinux) {
-        return Some(ExtAudioRegionDrag(workspace, file(""), Span(0, 0)))
+        return Some(ExtAudioRegionDrag(universe, file(""), Span(0, 0)))
       }
 
       val data  = t.getTransferData(DataFlavor.stringFlavor)
@@ -117,7 +117,7 @@ trait DnD[S <: SSys[S]] {
           val start = (arr(1).toLong * ratio + 0.5).toLong
           val stop  = (arr(2).toLong * ratio + 0.5).toLong
           val span  = Span(start, stop)
-          ExtAudioRegionDrag[S](workspace, path, span)
+          ExtAudioRegionDrag[S](universe, path, span)
         } .toOption
       } else None
     }
@@ -138,13 +138,13 @@ trait DnD[S <: SSys[S]] {
     private def mkDrag(t: Transferable, isDragging: Boolean): Option[Drag[S]] =
       if (t.isDataFlavorSupported(DnD.flavor)) {
         t.getTransferData(DnD.flavor) match {
-          case d: DnD.Drag[_] if d.workspace == workspace => Some(d.asInstanceOf[DnD.Drag[S]])
+          case d: DnD.Drag[_] if d.universe == universe => Some(d.asInstanceOf[DnD.Drag[S]])
           case _ => None
         }
       } else if (t.isDataFlavorSupported(ListObjView.Flavor)) {
         t.getTransferData(ListObjView.Flavor) match {
-          case ListObjView.Drag(ws, _, view) if ws == workspace =>
-            Some(DnD.ObjectDrag(workspace, view.asInstanceOf[ObjView[S]]))
+          case ListObjView.Drag(u, view) if u == universe =>
+            Some(DnD.ObjectDrag(universe, view.asInstanceOf[ObjView[S]]))
           case _ => None
         }
 

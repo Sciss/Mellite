@@ -38,7 +38,8 @@ import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{AudioCue, Ensemble, Markdown, Timeline, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{AudioCue, Ensemble, Markdown, Timeline, Universe}
 import de.sciss.{desktop, freesound}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, KeyStroke}
@@ -71,9 +72,9 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val ggValue   = new PathField
     ggValue.mode  = FileDialog.Folder
     ggValue.title = "Select Download Folder"
@@ -201,17 +202,16 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
     def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       val r             = obj
       val tsInit        = r.textSearch.value
-      import Mellite.auralSystem
       val rv            = RetrievalView[S](searchInit = tsInit, soundInit = Nil)
       implicit val undo: UndoManager = UndoManager()
-//      val fv            = FolderView[S](r.downloads)
       val downloadsView = FolderEditorView[S](r.downloads)
       val fv = downloadsView.peer
 
       def viewInfo(): Unit = {
+        import universe.cursor
         val sounds = cursor.step { implicit tx =>
           fv.selection.flatMap { nv =>
             val obj = nv.modelData()
@@ -235,10 +235,12 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
         val title = "Freesound Sounds" // "used in ${root.name}"
         val md    = formatLegal[S](title, map)
         MarkdownRenderFrame(md)
+        import universe.cursor
         EditFolderInsertObj(md.name, parent = f, index = f.size, child = md)
       }
 
       def mkLegal(): Unit = {
+        import universe.cursor
         val edit = cursor.step { implicit tx =>
           val root = folderH()
           mkLegalFor(root, root)
@@ -384,12 +386,13 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
   private final class EditorImpl[S <: Sys[S]](peer: RetrievalView[S], downloadsView: View[S],
                                               locH: stm.Source[S#Tx, ArtifactLocation[S]],
                                               folderH: stm.Source[S#Tx, Folder[S]])
-                                             (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S],
-                                              val undoManager: UndoManager)
-    extends ViewHasWorkspace[S] with View.Editable[S] {
+                                             (implicit val undoManager: UndoManager)
+    extends UniverseView[S] with View.Editable[S] {
 
     private[this] var ggProgressDL: ProgressBar = _
     private[this] var actionDL    : Action      = _
+
+    implicit val universe: Universe[S] = peer.universe
 
     type C = Component
 

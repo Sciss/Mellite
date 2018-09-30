@@ -16,17 +16,16 @@ package gui
 package impl
 
 import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Cursor, Obj}
+import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewBasicImpl
-import de.sciss.synth.proc.{Grapheme, Workspace}
+import de.sciss.synth.proc.{Grapheme, Universe}
 
 import scala.swing.{Component, Graphics2D, Label}
 
@@ -41,9 +40,9 @@ object GenericObjView extends ObjView.Factory with ListObjView.Factory with Grap
   type E     [S <: stm.Sys[S]]  = Obj[S]
   type Config[S <: stm.Sys[S]]  = Unit
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: Cursor[S]): Unit = ()
+                                 (implicit universe: Universe[S]): Unit = ()
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 

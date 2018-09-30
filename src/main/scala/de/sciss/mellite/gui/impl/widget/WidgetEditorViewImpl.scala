@@ -24,7 +24,7 @@ import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
 import de.sciss.mellite.gui.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.{Widget, Workspace}
+import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -33,7 +33,7 @@ import scala.swing.{Action, BorderPanel, Button, Component, TabbedPane}
 
 object WidgetEditorViewImpl {
   def apply[S <: SSys[S]](obj: Widget[S], showEditor: Boolean, bottom: ISeq[View[S]])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                         (implicit tx: S#Tx, universe: Universe[S],
                           undoManager: UndoManager): WidgetEditorView[S] = {
 //    val editable = obj match {
 //      case Widget.Var(_) => true
@@ -48,11 +48,12 @@ object WidgetEditorViewImpl {
   private final class Impl[S <: SSys[S]](val renderer: WidgetRenderView[S],
                                          widgetH: stm.Source[S#Tx, Widget[S]],
                                          bottom: ISeq[View[S]])
-                                        (implicit undoManager: UndoManager, val workspace: Workspace[S],
-                                         val cursor: stm.Cursor[S])
+                                        (implicit undoManager: UndoManager)
     extends ComponentHolder[Component] with WidgetEditorView[S] with ModelImpl[WidgetEditorView.Update] { impl =>
 
     type C = Component
+
+    implicit val universe: Universe[S] = renderer.universe
 
     private[this] var _codeView: CodeView[S, Widget.Graph] = _
 

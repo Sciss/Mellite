@@ -17,7 +17,7 @@ package impl
 package document
 
 import de.sciss.desktop.Desktop
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.stm.{Sys, WorkspaceHandle}
 import de.sciss.lucre.swing._
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.Workspace
@@ -50,7 +50,7 @@ object ViewHandlerImpl {
     }
 
     def activeDocument: Option[DocumentHandler.Document] = _active
-    def activeDocument_=[S <: Sys[S]](value: Option[Workspace[S]]): Unit = {
+    def activeDocument_=[S <: Sys[S]](value: Option[WorkspaceHandle[S]]): Unit = {
       requireEDT()
       if (_active != value) {
         _active = value

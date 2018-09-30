@@ -18,14 +18,13 @@ package document
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.nuages.Nuages
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 object NuagesEditorFrameImpl {
   def apply[S <: Sys[S]](obj: Nuages[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): NuagesEditorFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): NuagesEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val view          = NuagesEditorView(obj)
     val name          = CellView.name(obj)

@@ -15,8 +15,8 @@ package de.sciss.mellite
 package gui.impl
 
 import java.awt.geom.Area
-import javax.swing.Icon
 
+import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.Type
@@ -30,7 +30,7 @@ import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.{EnvSegment, Workspace}
+import de.sciss.synth.proc.{EnvSegment, Universe}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D
@@ -53,9 +53,9 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
   type Config[S <: stm.Sys[S]] = Unit
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = ()
+                                 (implicit universe: Universe[S]): Unit = ()
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = Nil
 

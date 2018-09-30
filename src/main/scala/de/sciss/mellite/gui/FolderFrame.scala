@@ -16,11 +16,10 @@ package mellite
 package gui
 
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.{FolderFrameImpl => Impl}
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 import scala.swing.{Component, SequentialContainer}
 
@@ -33,11 +32,11 @@ object FolderFrame {
     *                         upon closing the window
     */
   def apply[S <: Sys[S]](name: CellView[S#Tx, String], isWorkspaceRoot: Boolean)
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): FolderFrame[S] =
-    Impl(name = name, folder = workspace.rootH(), isWorkspaceRoot = isWorkspaceRoot)
+                        (implicit tx: S#Tx, universe: Universe[S]): FolderFrame[S] =
+    Impl(name = name, folder = universe.workspace.root, isWorkspaceRoot = isWorkspaceRoot)
 
   def apply[S <: Sys[S]](name: CellView[S#Tx, String], folder: Folder[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): FolderFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): FolderFrame[S] = {
     Impl(name = name, folder = folder, isWorkspaceRoot = false)
   }
 }

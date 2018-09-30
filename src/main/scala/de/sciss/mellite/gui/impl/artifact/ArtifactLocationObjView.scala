@@ -15,7 +15,6 @@ package de.sciss.mellite.gui.impl.artifact
 
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop
 import de.sciss.file._
 import de.sciss.icons.raphael
@@ -28,7 +27,7 @@ import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, ObjView}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 object ArtifactLocationObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = ArtifactLocation[~] // Elem[S]
@@ -48,9 +47,9 @@ object ArtifactLocationObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit =
+                                 (implicit universe: Universe[S]): Unit =
     ActionArtifactLocation.queryNew(window = window).foreach(ok(_))
 
   def makeObj[S <: Sys[S]](config: (String, File))(implicit tx: S#Tx): List[Obj[S]] = {

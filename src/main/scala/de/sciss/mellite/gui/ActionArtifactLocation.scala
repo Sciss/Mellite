@@ -22,6 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.swingplus.Labeled
 import de.sciss.synth.proc
+import de.sciss.synth.proc.Universe
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Dialog
@@ -58,14 +59,12 @@ object ActionArtifactLocation {
     Some(list0 -> loc) // loc.modifiableOption.map(list0 -> _)
   }
 
-  def query[S <: Sys[S]](
-                          root: stm.Source[S#Tx, Folder[S]], file: File,
-                          window: Option[desktop.Window] = None)
-                        (implicit cursor: stm.Cursor[S]): Option[QueryResult[S]] = {
+  def query[S <: Sys[S]](file: File, window: Option[desktop.Window] = None)(root: S#Tx => Folder[S])
+                        (implicit universe: Universe[S]): Option[QueryResult[S]] = {
 
     def createNew(): Option[(String, File)] = queryNew(child = Some(file), window = window)
 
-    val options = find(root = root, file = file, window = window)
+    val options = find(file = file, window = window)(root)
 
     options match {
       case Vec() => createNew().map(Right.apply)
@@ -91,11 +90,9 @@ object ActionArtifactLocation {
     }
   }
 
-  def find[S <: Sys[S]](
-         root: stm.Source[S#Tx, Folder[S]], file: File,
-         window: Option[desktop.Window] = None)
-        (implicit cursor: stm.Cursor[S]): Vec[Labeled[LocationSource[S]]] = {
-
+  def find[S <: Sys[S]](file: File, window: Option[desktop.Window] = None)(root: S#Tx => Folder[S])
+                       (implicit universe: Universe[S]): Vec[Labeled[LocationSource[S]]] = {
+    import universe.cursor
     val options: Vec[Labeled[LocationSource[S]]] = cursor.step { implicit tx =>
       /* @tailrec */ def loop(xs: List[Obj[S]], res: Vec[Labeled[LocationSource[S]]]): Vec[Labeled[LocationSource[S]]] =
         xs match {
@@ -117,7 +114,7 @@ object ActionArtifactLocation {
           case Nil => res
       }
 
-      val _options = loop(root().iterator.toList, Vector.empty)
+      val _options = loop(root(tx).iterator.toList, Vector.empty)
       _options
     }
 

@@ -28,7 +28,8 @@ import de.sciss.processor.Processor
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.serial.Serializer
 import de.sciss.swingplus.{ListView, SpinningProgressBar}
-import de.sciss.synth.proc.{Confluent, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Confluent, Universe, Workspace}
 
 import scala.language.higherKinds
 import scala.swing.{BoxPanel, Component, Orientation, ScrollPane}
@@ -40,7 +41,7 @@ object ExprHistoryView {
   var DEBUG = false
 
   def apply[A, Ex[~ <: Sys[~]] <: Expr[~, A]](workspace: Workspace.Confluent, expr: Ex[S])
-              (implicit tx: S#Tx, serializer: Serializer[S#Tx, S#Acc, Ex[S]]): ViewHasWorkspace[S] = {
+              (implicit tx: S#Tx, universe: Universe[S], serializer: Serializer[S#Tx, S#Acc, Ex[S]]): UniverseView[S] = {
     val sys       = workspace.system
     val cursor    = Cursor[S, D](tx.inputAccess)(tx.durable, sys)
     val exprH: stm.Source[S#Tx, Expr[S, A]] = tx.newHandle(expr)  // IntelliJ highlight bug
@@ -63,9 +64,9 @@ object ExprHistoryView {
   }
 
   private final class Impl[A](val workspace: Workspace[S],
-                              val cursor: Cursor[S, D], exprH: stm.Source[S#Tx, Expr[S, A]],
-                              pos0: S#Acc, time0: Long, value0: A, stop: Int)
-    extends ViewHasWorkspace[S] with ComponentHolder[Component] {
+                              override val cursor: Cursor[S, D], exprH: stm.Source[S#Tx, Expr[S, A]],
+                              pos0: S#Acc, time0: Long, value0: A, stop: Int)(implicit val universe: Universe[S])
+    extends UniverseView[S] with ComponentHolder[Component] {
 
     type C = Component
 

@@ -29,7 +29,7 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.{confluent, stm}
 import de.sciss.model.Change
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Confluent, Cursors, Durable, Workspace}
+import de.sciss.synth.proc.{Confluent, Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -105,6 +105,7 @@ object CursorsFrameImpl {
 
     override protected def performClose(): Future[Unit] = {
       log(s"Closing workspace ${workspace.folder}")
+      implicit val cursor: stm.Cursor[S] = workspace.cursor
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }
 
@@ -323,9 +324,7 @@ object CursorsFrameImpl {
           GUI.atomic[S, Unit]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
             implicit val dtxView: Confluent.Txn => Durable.Txn = workspace.system.durableTx _ // (tx)
             implicit val dtx: Durable.Txn = dtxView(tx)
-            // import StringObj.serializer
-            //            val nameD = ExprView.expr[D, String](elem.name)
-            //            val name  = nameD.map()
+            implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
             val name = CellView.const[S, String](s"${workspace.name} / ${elem.name.value}")
             FolderFrame[S](name = name, isWorkspaceRoot = false)
           }

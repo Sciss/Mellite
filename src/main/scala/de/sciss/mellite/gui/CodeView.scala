@@ -15,14 +15,13 @@ package de.sciss.mellite
 package gui
 
 import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.lucre.swing.View
 import de.sciss.mellite.gui.impl.interpreter.{CodeViewImpl => Impl}
 import de.sciss.model.Model
-import de.sciss.synth.proc.{Code, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Code, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.Future
@@ -37,7 +36,7 @@ object CodeView {
   /** If `graph` is given, the `apply` action is tied to updating the graph variable. */
   def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
                         (handler: Option[Handler[S, code0.In, code0.Out]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[S, code0.Out] =
     Impl[S](obj, code0, bottom = bottom)(handler)
@@ -45,7 +44,7 @@ object CodeView {
   sealed trait Update
   case class DirtyChange(value: Boolean) extends Update
 }
-trait CodeView[S <: Sys[S], Out] extends ViewHasWorkspace[S] with Model[CodeView.Update] {
+trait CodeView[S <: Sys[S], Out] extends UniverseView[S] with Model[CodeView.Update] {
   def isCompiling(implicit tx: TxnLike): Boolean
 
   def dirty(implicit tx: TxnLike): Boolean

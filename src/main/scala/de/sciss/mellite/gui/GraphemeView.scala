@@ -20,11 +20,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeViewImpl => Impl}
-import de.sciss.synth.proc.{Grapheme, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Grapheme, Universe}
 
 object GraphemeView {
   def apply[S <: Sys[S]](group: Grapheme[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): GraphemeView[S] =
     Impl[S](group)
 
@@ -34,7 +35,7 @@ object GraphemeView {
     case object TwoDim extends Mode
   }
 }
-trait GraphemeView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S] {
+trait GraphemeView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] {
   def timelineModel: TimelineModel
   
   def selectionModel: GraphemeObjView.SelectionModel[S]

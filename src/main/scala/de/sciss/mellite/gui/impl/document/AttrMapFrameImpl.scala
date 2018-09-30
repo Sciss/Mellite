@@ -27,14 +27,13 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 import scala.swing.event.Key
 import scala.swing.{Action, Component}
 
 object AttrMapFrameImpl {
-  def apply[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                      cursor: stm.Cursor[S]): AttrMapFrame[S] = {
+  def apply[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AttrMapFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val contents  = AttrMapView[S](obj)
     val view      = new ViewImpl[S](contents)
@@ -46,12 +45,13 @@ object AttrMapFrameImpl {
   }
 
   private final class ViewImpl[S <: Sys[S]](val peer: AttrMapView[S])
-                                           (implicit val cursor: stm.Cursor[S], val undoManager: UndoManager)
+                                           (implicit val undoManager: UndoManager)
     extends CollectionViewImpl[S] {
 
     impl =>
 
-    def workspace: Workspace[S] = peer.workspace
+//    def workspace: Workspace[S] = peer.workspace
+    val universe: Universe[S] = peer.universe
 
     def dispose()(implicit tx: S#Tx): Unit = ()
 
@@ -91,7 +91,7 @@ object AttrMapFrameImpl {
 
   private final class FrameImpl[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], val view: ViewImpl[S],
                                              name: CellView[S#Tx, String])
-                                       (implicit cursor: stm.Cursor[S], undoManager: UndoManager)
+                                       (implicit undoManager: UndoManager)
     extends WindowImpl[S](name.map(n => s"$n : Attributes"))
     with AttrMapFrame[S] {
 
@@ -125,6 +125,7 @@ object AttrMapFrameImpl {
     protected lazy val actionDelete: Action = Action(null) {
       val sel = contents.selection
       if (sel.nonEmpty) {
+        import view.universe.cursor
         val editOpt = cursor.step { implicit tx =>
           val ed1 = sel.map { case (key, _) =>
             EditAttrMap(name = s"Remove Attribute '$key'", objH(), key = key, value = None)

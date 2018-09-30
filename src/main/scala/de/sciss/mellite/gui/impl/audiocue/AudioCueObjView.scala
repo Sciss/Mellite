@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.gui.impl.audiocue
 
-import javax.swing.Icon
 import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
@@ -24,11 +23,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, ListObjView, ObjView}
+import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec, SampleFormat}
-import de.sciss.synth.proc.{AudioCue, Workspace}
+import de.sciss.synth.proc.{AudioCue, Universe}
+import javax.swing.Icon
 
 import scala.swing.{Component, Label}
 import scala.util.Try
@@ -55,10 +55,9 @@ object AudioCueObjView extends ListObjView.Factory {
   final case class Config1[S <: stm.Sys[S]](file: File, spec: AudioFileSpec, location: LocationConfig[S])
   type Config[S <: stm.Sys[S]] = List[Config1[S]]
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
-    implicit val _workspace: Workspace[S] = workspace
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit = {
+    import universe.{cursor, workspace}
     val dirIn = cursor.step { implicit tx =>
       dirCache.get()
     }
@@ -75,10 +74,11 @@ object AudioCueObjView extends ListObjView.Factory {
         }
       }
       dlg.files.flatMap { f =>
-        ActionArtifactLocation.query[S](workspace.rootH, file = f, window = window).map { location =>
-          val spec = AudioFile.readSpec(f)
-          Config1(file = f, spec = spec, location = location)
-        }
+        ActionArtifactLocation.query[S](file = f, window = window)(implicit tx => universe.workspace.root)
+          .map { location =>
+            val spec = AudioFile.readSpec(f)
+            Config1(file = f, spec = spec, location = location)
+          }
       }
     }
     if (list.nonEmpty) ok(list)
@@ -125,8 +125,7 @@ object AudioCueObjView extends ListObjView.Factory {
 
     def isViewable = true
 
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       val frame = AudioFileFrame(obj)
       Some(frame)
     }

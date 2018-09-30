@@ -13,9 +13,6 @@
 
 package de.sciss.mellite.gui.impl.artifact
 
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
-
 import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, PathField}
 import de.sciss.file._
@@ -28,7 +25,9 @@ import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.FlowPanel
 import scala.swing.event.SelectionChanged
@@ -52,9 +51,8 @@ object ArtifactObjView extends ListObjView.Factory {
   type LocationConfig[S <: stm.Sys[S]] = Either[stm.Source[S#Tx, ArtifactLocation[S]], (String, File)]
   final case class Config[S <: stm.Sys[S]](name: String, file: File, location: LocationConfig[S])
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit = {
     val ggFile  = new PathField
     ggFile.mode = FileDialog.Save
     val ggMode  = new ComboBox(Seq("New File", "Existing File", "Existing Folder")) {
@@ -72,10 +70,11 @@ object ArtifactObjView extends ListObjView.Factory {
     val res = ObjViewImpl.primitiveConfig[S, File](window, tpe = prefix, ggValue = ggValue,
       prepare = Some(ggFile.value))
     res.foreach { case (name, f) =>
-      ActionArtifactLocation.query[S](workspace.rootH, file = f, window = window).foreach { location =>
-        val res1 = Config(name = name, file = f, location = location)
-        ok(res1)
-      }
+      ActionArtifactLocation.query[S](file = f, window = window)(implicit tx => universe.workspace.root)
+        .foreach { location =>
+          val res1 = Config(name = name, file = f, location = location)
+          ok(res1)
+        }
     }
   }
 

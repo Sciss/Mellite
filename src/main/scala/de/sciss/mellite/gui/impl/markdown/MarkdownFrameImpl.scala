@@ -23,14 +23,14 @@ import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc.{Markdown, Workspace}
+import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
 
 object MarkdownFrameImpl {
   def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownEditorFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): MarkdownEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val view  = MarkdownEditorView(obj, bottom = bottom)
     val res   = new EditorFrameImpl[S](view).init()
@@ -39,7 +39,7 @@ object MarkdownFrameImpl {
   }
 
   def render[S <: Sys[S]](obj: Markdown[S])
-                         (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): MarkdownRenderFrame[S] = {
+                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderFrame[S] = {
     val view  = MarkdownRenderView(obj)
     val res   = new RenderFrameImpl[S](view).init()
     trackTitle(res, view)

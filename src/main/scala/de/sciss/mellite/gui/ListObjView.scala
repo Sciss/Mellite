@@ -14,19 +14,18 @@
 package de.sciss.mellite
 package gui
 
-import javax.swing.undo.UndoableEdit
-
-import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.ListObjViewImpl
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Component, Label}
 
 object ListObjView {
-  final case class Drag[S <: Sys[S]](workspace: Workspace[S], cursor: stm.Cursor[S], view: ObjView[S])
+  final case class Drag[S <: Sys[S]](universe: Universe[S], view: ObjView[S])
 
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
   val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor

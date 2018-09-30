@@ -15,15 +15,14 @@ package de.sciss
 package mellite
 package gui
 
-import de.sciss.synth.proc.{Ensemble, Workspace}
-import impl.document.{EnsembleFrameImpl => Impl}
-import lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.document.{EnsembleFrameImpl => Impl}
+import de.sciss.synth.proc.{Ensemble, Universe}
 
 object EnsembleFrame {
   /** Creates a new frame for an ensemble view. */
   def apply[S <: Sys[S]](ensemble: Ensemble[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): EnsembleFrame[S] =
+                        (implicit tx: S#Tx, universe: Universe[S]): EnsembleFrame[S] =
     Impl(ensemble)
 }
 

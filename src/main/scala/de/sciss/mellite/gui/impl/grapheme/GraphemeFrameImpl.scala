@@ -21,13 +21,13 @@ import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{Grapheme, Workspace}
+import de.sciss.synth.proc.{Grapheme, Universe}
 
 import scala.swing.event.Key
 
 object GraphemeFrameImpl {
   def apply[S <: Sys[S]](group: Grapheme[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): GraphemeFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): GraphemeFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = GraphemeView[S](group)
     val name    = CellView.name(group)

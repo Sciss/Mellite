@@ -26,11 +26,10 @@ import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Durable, SoundProcesses, Workspace, WorkspaceLike}
+import de.sciss.synth.proc.{Durable, GenContext, Scheduler, SoundProcesses, Universe, Workspace, WorkspaceLike}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
-import scala.language.existentials
 import scala.swing.event.Key
 import scala.swing.{Action, Dialog}
 import scala.util.{Failure, Success}
@@ -62,8 +61,9 @@ object ActionOpenWorkspace extends Action("Open...") {
         implicit val workspace: Workspace[S] = eph
         implicit val cursor: stm.Cursor[S] = eph.cursor
         val nameView = CellView.const[S, String](doc.name)
-        GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${doc.name}'") {
-          implicit tx => FolderFrame[S](name = nameView, isWorkspaceRoot = true)
+        GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${doc.name}'") { implicit tx =>
+          implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
+          FolderFrame[S](name = nameView, isWorkspaceRoot = true)
         }
     }
   }
@@ -87,11 +87,12 @@ object ActionOpenWorkspace extends Action("Open...") {
   def perform(folder: File): Future[WorkspaceLike] = {
     import de.sciss.equal.Implicits._
     val fOpt = Some(folder)
-    dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
-      val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
-      openView(doc1)
-      Future.successful(doc1)
-    }
+    ??? // UUU
+//    dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
+//      val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
+//      openView(doc1)
+//      Future.successful(doc1)
+//    }
   }
 
   private def doOpen(folder: File): Future[WorkspaceLike] = {

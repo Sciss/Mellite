@@ -18,10 +18,9 @@ package document
 
 import de.sciss.desktop.{Menu, UndoManager}
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 import scala.concurrent.Future
 import scala.swing.{Action, Component, SequentialContainer}
@@ -30,7 +29,7 @@ object FolderFrameImpl {
   def apply[S <: Sys[S]](name: CellView[S#Tx, String],
                          folder: Folder[S],
                          isWorkspaceRoot: Boolean)(implicit tx: S#Tx,
-                         workspace: Workspace[S], cursor: stm.Cursor[S]): FolderFrame[S] = {
+                                                   universe: Universe[S]): FolderFrame[S] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val view  = FolderEditorView(folder)
     val res   = new FrameImpl[S](view, name = name, isWorkspaceRoot = isWorkspaceRoot /* , interceptQuit = interceptQuit */)
@@ -58,7 +57,7 @@ object FolderFrameImpl {
                                              isWorkspaceRoot: Boolean /* , interceptQuit: Boolean */)
     extends WindowImpl[S](name) with FolderFrame[S] /* with Veto[S#Tx] */ {
 
-    def workspace : Workspace [S] = view.workspace
+//    def workspace : Workspace [S] = view.workspace
     def folderView: FolderView[S] = view.peer
 
     def bottomComponent: Component with SequentialContainer = view.bottomComponent
@@ -89,7 +88,8 @@ object FolderFrameImpl {
 //      else ... // collectVetos()
 
     override protected def performClose(): Future[Unit] = if (!isWorkspaceRoot) super.performClose() else {
-      log(s"Closing workspace ${workspace.folder}")
+      import view.universe.{workspace, cursor}
+//      log(s"Closing workspace ${workspace.folder}")
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }
 

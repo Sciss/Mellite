@@ -32,7 +32,7 @@ import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel, Table}
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Proc, Timeline, Workspace}
+import de.sciss.synth.proc.{Proc, Timeline, Universe}
 import de.sciss.{desktop, equal}
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, TableColumnModel}
@@ -49,7 +49,7 @@ import scala.util.Try
 
 object GlobalProcsViewImpl {
   def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, TimelineObjView[S]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): GlobalProcsView[S] = {
 
     // import ProcGroup.Modifiable.serializer
@@ -62,7 +62,7 @@ object GlobalProcsViewImpl {
   private final class Impl[S <: Sys[S]](// groupH: stm.Source[S#Tx, Timeline[S]],
                                         groupHOpt: Option[stm.Source[S#Tx, Timeline.Modifiable[S]]],
                                         tlSelModel: SelectionModel[S, TimelineObjView[S]])
-                                       (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S],
+                                       (implicit val universe: Universe[S],
                                         val undoManager: UndoManager)
     extends GlobalProcsView[S] with ComponentHolder[Component] {
 
@@ -271,7 +271,7 @@ object GlobalProcsViewImpl {
 
           selRows.headOption.map { row =>
             val pv = procSeq(row)
-            DragAndDrop.Transferable(timeline.DnD.flavor)(timeline.DnD.GlobalProcDrag(workspace, pv.objH))
+            DragAndDrop.Transferable(timeline.DnD.flavor)(timeline.DnD.GlobalProcDrag(universe, pv.objH))
           } .orNull
         }
 
@@ -286,7 +286,7 @@ object GlobalProcsViewImpl {
               val drag  = support.getTransferable.getTransferData(ListObjView.Flavor)
                 .asInstanceOf[ListObjView.Drag[S]]
               import de.sciss.equal.Implicits._
-              drag.workspace === workspace && {
+              drag.universe === universe && {
                 drag.view match {
                   case iv: IntObjView[S] =>
                     atomic { implicit tx =>

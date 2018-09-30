@@ -32,7 +32,7 @@ import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.artifact.ArtifactLocationObjView
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
-import de.sciss.synth.proc.{ObjKeys, Workspace}
+import de.sciss.synth.proc.{ObjKeys, Universe}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.event.{CellEditorListener, ChangeEvent}
@@ -47,8 +47,7 @@ import scala.util.control.NonFatal
 
 object FolderViewImpl {
   def apply[S <: Sys[S]](root0: Folder[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S],
-                         cursor: stm.Cursor[S], undoManager: UndoManager): FolderView[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S] = {
     implicit val folderSer: Serializer[S#Tx, S#Acc, Folder[S]] = Folder.serializer[S]
 
     new Impl[S] {
@@ -86,8 +85,7 @@ object FolderViewImpl {
     resRev.reverse
   }
 
-  private abstract class Impl[S <: Sys[S]](implicit val undoManager: UndoManager, val workspace: Workspace[S],
-                                           val cursor: stm.Cursor[S])
+  private abstract class Impl[S <: Sys[S]](implicit val undoManager: UndoManager, val universe: Universe[S])
     extends ComponentHolder[Component]
     with FolderView[S]
     with ModelImpl[FolderView.Update[S]]
@@ -311,7 +309,7 @@ object FolderViewImpl {
           //              case _ => None
           //            }
           //          } .headOption
-          ActionArtifactLocation.query[S](treeView.root, file = f /*, folder = parent */) // , window = Some(comp))
+          ActionArtifactLocation.query[S](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
       }
     }
   }

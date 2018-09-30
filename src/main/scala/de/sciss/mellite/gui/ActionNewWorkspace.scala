@@ -91,7 +91,7 @@ object ActionNewWorkspace extends Action("Workspace...") {
         folder0.parent / s"$name.${Workspace.ext}"
 
       val folderOpt = Some(folder)
-      val isOpen = Application.documentHandler.documents.exists(_.folder === folderOpt)
+      val isOpen = ??? : Boolean // UUU Application.documentHandler.documents.exists(_.folder === folderOpt)
 
       if (isOpen) {
         val optOvr = OptionPane.message(

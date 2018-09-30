@@ -30,7 +30,7 @@ import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Code, GenContext, Workspace}
+import de.sciss.synth.proc.{Code, Universe}
 
 import scala.concurrent.stm.Ref
 import scala.swing.{Button, ProgressBar}
@@ -49,14 +49,15 @@ object FScapeObjView extends ListObjView.Factory {
 //
 //  def init(): Unit = _init
 
-  def mkListView[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx): FScapeObjView[S] with ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: FScape[S])
+                             (implicit tx: S#Tx): FScapeObjView[S] with ListObjView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   type Config[S <: stm.Sys[S]] = String
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = {
+                                 (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
@@ -89,7 +90,7 @@ object FScapeObjView extends ListObjView.Factory {
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
     def openView(parent: Option[Window[S]])
-                      (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                      (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = codeFrame(obj) // CodeFrame.fscape(obj)
       Some(frame)
@@ -99,7 +100,7 @@ object FScapeObjView extends ListObjView.Factory {
   }
 
   private def codeFrame[S <: Sys[S]](obj: FScape[S])
-                                    (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                                    (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
     val codeObj = mkSource(obj = obj, codeId = FScape.Code.id, key = FScape.attrSource,
@@ -120,6 +121,7 @@ object FScapeObjView extends ListObjView.Factory {
 
       def save(in: Unit, out: Graph)(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
+        import universe.cursor
         EditVar.Expr[S, Graph, GraphObj]("Change FScape Graph", obj.graph, GraphObj.newConst[S](out))
       }
 
@@ -135,8 +137,11 @@ object FScapeObjView extends ListObjView.Factory {
     val viewProgress = View.wrap[S, ProgressBar](ggProgress)
 
     lazy val actionCancel: swing.Action = new swing.Action(null) {
-      def apply(): Unit = cursor.step { implicit tx =>
-        renderRef.swap(None)(tx.peer).foreach(_.cancel())
+      def apply(): Unit = {
+        import universe.cursor
+        cursor.step { implicit tx =>
+          renderRef.swap(None)(tx.peer).foreach(_.cancel())
+        }
       }
       enabled = false
     }
@@ -148,50 +153,52 @@ object FScapeObjView extends ListObjView.Factory {
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
     val viewRender = View.wrap[S, Button] {
       val actionRender = new swing.Action("Render") { self =>
-        def apply(): Unit = cursor.step { implicit tx =>
-          if (renderRef.get(tx.peer).isEmpty) {
-            val obj       = objH()
-            val config    = FScape.defaultConfig.toBuilder
-            config.progressReporter = { report =>
-              defer {
-                ggProgress.value = (report.total * ggProgress.max).toInt
+        def apply(): Unit = {
+          import universe.cursor
+          cursor.step { implicit tx =>
+            if (renderRef.get(tx.peer).isEmpty) {
+              val obj       = objH()
+              val config    = FScape.defaultConfig.toBuilder
+              config.progressReporter = { report =>
+                defer {
+                  ggProgress.value = (report.total * ggProgress.max).toInt
+                }
               }
-            }
-            // config.blockSize
-            // config.nodeBufferSize
-            // config.executionContext
-            // config.seed
+              // config.blockSize
+              // config.nodeBufferSize
+              // config.executionContext
+              // config.seed
 
-            def finished()(implicit tx: S#Tx): Unit = {
-              renderRef.set(None)(tx.peer)
-              deferTx {
-                actionCancel.enabled  = false
-                self.enabled          = true
+              def finished()(implicit tx: S#Tx): Unit = {
+                renderRef.set(None)(tx.peer)
+                deferTx {
+                  actionCancel.enabled  = false
+                  self.enabled          = true
+                }
               }
-            }
 
-            implicit val context: GenContext[S] = GenContext[S]
-            try {
-              val rendering = obj.run(config)
-              deferTx {
-                actionCancel.enabled = true
-                self        .enabled = false
+              try {
+                val rendering = obj.run(config)
+                deferTx {
+                  actionCancel.enabled = true
+                  self        .enabled = false
+                }
+                /* val obs = */ rendering.reactNow { implicit tx => {
+                  case FScape.Rendering.Completed =>
+                    finished()
+                    rendering.result.foreach {
+                      case Failure(ex) =>
+                        deferTx(ex.printStackTrace())
+                      case _ =>
+                    }
+                  case _ =>
+                }}
+                renderRef.set(Some(rendering))(tx.peer)
+              } catch {
+                case MissingIn(key) =>
+                  println(s"Attribute input '$key' is missing.")
+                //                throw ex
               }
-              /* val obs = */ rendering.reactNow { implicit tx => {
-                case FScape.Rendering.Completed =>
-                  finished()
-                  rendering.result.foreach {
-                    case Failure(ex) =>
-                      deferTx(ex.printStackTrace())
-                    case _ =>
-                  }
-                case _ =>
-              }}
-              renderRef.set(Some(rendering))(tx.peer)
-            } catch {
-              case MissingIn(key) =>
-                println(s"Attribute input '$key' is missing.")
-//                throw ex
             }
           }
         }

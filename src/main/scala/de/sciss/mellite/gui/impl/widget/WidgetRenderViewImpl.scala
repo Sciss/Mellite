@@ -26,7 +26,7 @@ import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
 import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
-import de.sciss.synth.proc.{Widget, Workspace}
+import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
@@ -38,12 +38,11 @@ import scala.util.{Failure, Success}
 
 object WidgetRenderViewImpl {
   def apply[S <: SSys[S]](init: Widget[S], bottom: ISeq[View[S]], embedded: Boolean)
-                         (implicit tx: S#Tx, workspace: Workspace[S],
-                          cursor: stm.Cursor[S]): WidgetRenderView[S] =
+                         (implicit tx: S#Tx, universe: Universe[S]): WidgetRenderView[S] =
     new Impl[S](bottom, embedded = embedded).init(init)
 
   private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val workspace: Workspace[S], val cursor: stm.Cursor[S])
+                                        (implicit val universe: Universe[S])
     extends WidgetRenderView[S]
       with ComponentHolder[Component]
       with ObservableImpl[S, WidgetRenderView.Update[S]] { impl =>
@@ -99,6 +98,7 @@ object WidgetRenderViewImpl {
         // N.B. we have to use `try` instead of `Try` because
         // `MissingIn` is a `ControlThrowable` which would not be caught.
         val vTry = try {
+          import universe.workspace
           val res = g.expand[S](self = Some(widget))
           Success(res)
         } catch {

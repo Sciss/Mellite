@@ -24,6 +24,7 @@ import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.mellite.util.Veto
+import de.sciss.synth.proc.gui.UniverseView
 
 import scala.concurrent.Future
 import scala.concurrent.stm.Ref
@@ -58,8 +59,8 @@ object WindowImpl {
         impl.handleClose()
       case desktop.Window.Activated(_) =>
         view match {
-          case wv: ViewHasWorkspace[S] =>
-            DocumentViewHandler.instance.activeDocument = Some(wv.workspace)
+          case uv: UniverseView[S] =>
+            DocumentViewHandler.instance.activeDocument = Some(uv.universe.workspace)
           case _ =>
         }
     }
@@ -123,7 +124,7 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
 
   final def init()(implicit tx: S#Tx): this.type = {
     view match {
-      case wv: ViewHasWorkspace[S] => wv.workspace.addDependent(impl)
+      case vu: UniverseView[S] => vu.universe.workspace.addDependent(impl)
       case _ =>
     }
 
@@ -222,7 +223,7 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
     titleObserver().dispose()
 
     view match {
-      case wv: ViewHasWorkspace[S] => wv.workspace.removeDependent(this)
+      case vu: UniverseView[S] => vu.universe.workspace.removeDependent(this)
       case _ =>
     }
 

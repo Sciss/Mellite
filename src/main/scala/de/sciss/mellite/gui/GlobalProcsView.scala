@@ -21,15 +21,16 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.{GlobalProcsViewImpl => Impl}
 import de.sciss.swingplus.Table
-import de.sciss.synth.proc.{Timeline, Workspace}
+import de.sciss.synth.proc.gui.UniverseView
+import de.sciss.synth.proc.{Timeline, Universe}
 
 object GlobalProcsView {
   def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, TimelineObjView[S]])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
+                        (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): GlobalProcsView[S] =
       Impl(group, selectionModel)
 }
-trait GlobalProcsView[S <: stm.Sys[S]] extends ViewHasWorkspace[S] with View.Editable[S] {
+trait GlobalProcsView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] {
   def tableComponent: Table
 
   def selectionModel: SelectionModel[S, ProcObjView.Timeline[S]]

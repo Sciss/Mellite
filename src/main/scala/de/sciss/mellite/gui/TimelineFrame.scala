@@ -15,14 +15,13 @@ package de.sciss.mellite
 package gui
 
 import de.sciss.lucre
-import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.timeline.{TimelineFrameImpl => Impl}
-import de.sciss.synth.proc.{Timeline, Workspace}
+import de.sciss.synth.proc.{Timeline, Universe}
 
 object TimelineFrame {
   def apply[S <: Sys[S]](group: Timeline[S])
-                        (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): TimelineFrame[S] =
+                        (implicit tx: S#Tx, universe: Universe[S]): TimelineFrame[S] =
     Impl(group)
 }
 trait TimelineFrame[S <: Sys[S]] extends lucre.swing.Window[S] {

@@ -22,16 +22,17 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{BooleanCheckBoxView, View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.swingplus.Separator
-import de.sciss.synth.proc.{Ensemble, Transport, Workspace}
+import de.sciss.synth.proc.{Ensemble, Transport, Universe}
 
 import scala.swing.Swing._
 import scala.swing.{BoxPanel, Component, Label, Orientation}
 
 object EnsembleViewImpl {
-  def apply[S <: Sys[S]](ensObj: Ensemble[S])(implicit tx: S#Tx, workspace: Workspace[S],
-                                              cursor: stm.Cursor[S], undoManager: UndoManager): Impl[S] = {
+  def apply[S <: Sys[S]](ensObj: Ensemble[S])(implicit tx: S#Tx, universe: Universe[S],
+                                              undoManager: UndoManager): Impl[S] = {
     val ens       = ensObj
     val folder1   = FolderEditorView[S](ens.folder)
+    import universe.cursor
     val playing   = BooleanCheckBoxView(ens.playing, "Playing State")
     val viewPower = PlayToggleButton(ensObj)
     new Impl[S](tx.newHandle(ensObj), viewPower, folder1, playing).init()
@@ -39,11 +40,13 @@ object EnsembleViewImpl {
 
   final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: PlayToggleButton[S],
                                         val view: FolderEditorView[S], playing: View[S])
-                                       (implicit val undoManager: UndoManager, val workspace: Workspace[S],
-                                        val cursor: stm.Cursor[S])
     extends ComponentHolder[Component] with EnsembleView[S] { impl =>
 
     type C = Component
+
+    implicit val universe: Universe[S] = view.universe
+
+    def undoManager: UndoManager = view.undoManager
 
     def ensemble(implicit tx: S#Tx): Ensemble[S] = ensembleH()
 

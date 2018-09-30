@@ -14,12 +14,11 @@
 package de.sciss.mellite
 package gui.impl.proc
 
-import de.sciss.lucre.stm
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.synth.proc.{Proc, Workspace}
+import de.sciss.synth.proc.{Proc, Universe}
 
 trait ProcObjViewImpl[S <: Sys[S]]
   extends ListObjView[S]
@@ -36,7 +35,7 @@ trait ProcObjViewImpl[S <: Sys[S]]
   // currently this just opens a code editor. in the future we should
   // add a scans map editor, and a convenience button for the attributes
   final def openView(parent: Option[Window[S]])
-                    (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S]): Option[Window[S]] = {
+                    (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
     import de.sciss.mellite.Mellite.compiler
     val frame = CodeFrame.proc(obj)
     Some(frame)

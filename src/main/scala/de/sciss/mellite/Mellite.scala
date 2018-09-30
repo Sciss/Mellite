@@ -24,7 +24,7 @@ import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
 import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame, MainFrame, MenuBar}
 import de.sciss.osc
-import de.sciss.synth.proc.{AuralSystem, Code, Runner, SensorSystem, TimeRef, Workspace}
+import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Runner, Scheduler, SensorSystem, TimeRef, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.{TxnExecutor, atomic}
@@ -238,7 +238,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         (f / name).fold[Unit] {
           tx.afterCommit(println(s"Warning: auto-run object '$name' does not exist."))
         } { obj =>
-          implicit val h: Runner.Handler[S] = Runner.Handler()
+          val gen: GenContext[S] = GenContext[S]
+          val sch: Scheduler [S] = Scheduler[S]
+          implicit val universe: Runner.Universe[S] = Runner.Universe(gen, sch, auralSystem)
           Runner[S](obj).fold[Unit] {
             tx.afterCommit(println(s"Warning: no runner for object '$name' of type ${obj.tpe}."))
           } { r =>

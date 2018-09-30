@@ -15,7 +15,6 @@ package de.sciss.mellite
 package gui.impl.fscape
 
 import javax.swing.Icon
-
 import de.sciss.desktop
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
@@ -24,7 +23,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.Universe
 
 object FScapeOutputObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = FScape.Output[~]
@@ -47,9 +46,9 @@ object FScapeOutputObjView extends ListObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = Unit
 
-  def initMakeDialog[S <: Sys[S]](workspace: Workspace[S], window: Option[desktop.Window])
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
-                                 (implicit cursor: stm.Cursor[S]): Unit = ()
+                                 (implicit universe: Universe[S]): Unit = ()
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 
