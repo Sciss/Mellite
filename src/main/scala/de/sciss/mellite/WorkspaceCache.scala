@@ -14,8 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.stm.{Disposable, NoSys, Sys, TxnLike, WorkspaceHandle}
-import de.sciss.synth.proc.Workspace
+import de.sciss.lucre.stm.{Disposable, NoSys, Sys, TxnLike, Workspace}
 
 import scala.concurrent.stm.TMap
 
@@ -23,7 +22,7 @@ object WorkspaceCache {
   def apply[A](): WorkspaceCache[A] = new Impl
 
   private final class Value[S <: Sys[S], A](impl: Impl[A], val value: A)
-                                           (implicit workspace: WorkspaceHandle[S], tx: S#Tx)
+                                           (implicit workspace: Workspace[S], tx: S#Tx)
     extends Disposable[S#Tx] {
 
     workspace.addDependent(this)
@@ -33,9 +32,9 @@ object WorkspaceCache {
 
   private final class Impl[A] extends WorkspaceCache[A] {
 
-    private[this] val map = TMap.empty[WorkspaceHandle[_], Value[_, A]]
+    private[this] val map = TMap.empty[Workspace[_], Value[_, A]]
 
-    def apply[S <: Sys[S]](value: => A)(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): A = {
+    def apply[S <: Sys[S]](value: => A)(implicit tx: S#Tx, workspace: Workspace[S]): A = {
       val res = map.get(workspace).getOrElse {
         val res0 = new Value(this, value)
         map.put(workspace, res0)
@@ -44,10 +43,10 @@ object WorkspaceCache {
       res.value
     }
 
-    def get[S <: Sys[S]]()(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Option[A] =
+    def get[S <: Sys[S]]()(implicit tx: S#Tx, workspace: Workspace[S]): Option[A] =
       map.get(workspace).map(_.value)
 
-    def set[S <: Sys[S]](value: A)(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Option[A] = {
+    def set[S <: Sys[S]](value: A)(implicit tx: S#Tx, workspace: Workspace[S]): Option[A] = {
       val vNew = new Value(this, value)
       map.put(workspace, vNew).map { vOld =>
         removeValue(workspace, vOld)
@@ -55,7 +54,7 @@ object WorkspaceCache {
       }
     }
 
-    def remove[S <: Sys[S]]()(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Boolean = {
+    def remove[S <: Sys[S]]()(implicit tx: S#Tx, workspace: Workspace[S]): Boolean = {
       val opt = map.remove(workspace)
       opt.foreach { v0 =>
         val v = v0.asInstanceOf[Disposable[S#Tx]]
@@ -64,7 +63,7 @@ object WorkspaceCache {
       opt.isDefined
     }
 
-    private def removeValue(workspace0: WorkspaceHandle[_], v0: Value[_, A])(implicit tx: TxnLike): Unit = {
+    private def removeValue(workspace0: Workspace[_], v0: Value[_, A])(implicit tx: TxnLike): Unit = {
       val workspace = workspace0.asInstanceOf[Workspace[NoSys]]
       val v         = v0.asInstanceOf[Disposable[NoSys#Tx]]
       workspace.removeDependent(v)
@@ -79,11 +78,11 @@ object WorkspaceCache {
   }
 }
 trait WorkspaceCache[A] extends Disposable[TxnLike] {
-  def apply[S <: Sys[S]](value: => A)(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): A
+  def apply[S <: Sys[S]](value: => A)(implicit tx: S#Tx, workspace: Workspace[S]): A
 
-  def set[S <: Sys[S]](value: A)(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Option[A]
+  def set[S <: Sys[S]](value: A)(implicit tx: S#Tx, workspace: Workspace[S]): Option[A]
 
-  def get[S <: Sys[S]]()(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Option[A]
+  def get[S <: Sys[S]]()(implicit tx: S#Tx, workspace: Workspace[S]): Option[A]
 
-  def remove[S <: Sys[S]]()(implicit tx: S#Tx, workspace: WorkspaceHandle[S]): Boolean
+  def remove[S <: Sys[S]]()(implicit tx: S#Tx, workspace: Workspace[S]): Boolean
 }

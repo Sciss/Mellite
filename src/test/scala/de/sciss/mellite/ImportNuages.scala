@@ -24,7 +24,7 @@ object ImportNuages extends App {
 
   val sysIn   = Durable(factIn)
   try {
-    val nInH    = sysIn.root[Nuages[In]] { implicit tx => sys.error("Expecting existing Nuages file") }
+    val nInH    = sysIn.root[Nuages[In]] { _ => sys.error("Expecting existing Nuages file") }
     val dsc     = BerkeleyDB.Config()
     dsc.allowCreate = true
     val ds      = BerkeleyDB.factory(fOut, dsc)
@@ -51,7 +51,9 @@ object ImportNuages extends App {
       } (sysIn, wOut.cursor)
 
     } finally {
-      wOut.close()
+      wOut.cursor.step { implicit tx =>
+        wOut.dispose()
+      }
     }
 
   } finally {

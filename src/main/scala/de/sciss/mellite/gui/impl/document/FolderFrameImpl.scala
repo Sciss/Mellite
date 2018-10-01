@@ -88,7 +88,7 @@ object FolderFrameImpl {
 //      else ... // collectVetos()
 
     override protected def performClose(): Future[Unit] = if (!isWorkspaceRoot) super.performClose() else {
-      import view.universe.{workspace, cursor}
+      import view.universe.workspace
 //      log(s"Closing workspace ${workspace.folder}")
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }

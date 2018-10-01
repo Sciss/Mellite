@@ -26,10 +26,11 @@ import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Durable, GenContext, Scheduler, SoundProcesses, Universe, Workspace, WorkspaceLike}
+import de.sciss.synth.proc.{Durable, GenContext, Scheduler, SoundProcesses, Universe, Workspace}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
+import scala.language.existentials
 import scala.swing.event.Key
 import scala.swing.{Action, Dialog}
 import scala.util.{Failure, Success}
@@ -84,24 +85,23 @@ object ActionOpenWorkspace extends Action("Open...") {
 //      case dcv: DocumentCursorsView => dcv.window
 //    } .foreach(_.front())
 
-  def perform(folder: File): Future[WorkspaceLike] = {
+  def perform(folder: File): Future[Workspace[_]] = {
     import de.sciss.equal.Implicits._
     val fOpt = Some(folder)
-    ??? // UUU
-//    dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
-//      val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
-//      openView(doc1)
-//      Future.successful(doc1)
-//    }
+    dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
+      val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
+      openView(doc1)
+      Future.successful(doc1)
+    }
   }
 
-  private def doOpen(folder: File): Future[WorkspaceLike] = {
+  private def doOpen(folder: File): Future[Workspace[_]] = {
     import SoundProcesses.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
-    val fut: Future[WorkspaceLike] = Future(blocking(Workspace.read(folder, ds)))
+    val fut: Future[Workspace[~] forSome { type ~ <: Sys[~] }] = Future(blocking(Workspace.read(folder, ds)))
 
     var opt: OptionPane[Unit] = null
     desktop.Util.delay(1000) {
@@ -117,9 +117,10 @@ object ActionOpenWorkspace extends Action("Open...") {
           if (w != null) w.dispose()
         }
         tr match {
-          case Success(cf : Workspace.Confluent) => openGUI(cf )
-          case Success(eph: Workspace.Durable)   => openGUI(eph)
-          case Success(eph: Workspace.InMemory)  => openGUI(eph)
+          case Success(ws) => openGUI(ws)
+//          case Success(cf : Workspace.Confluent) => openGUI(cf )
+//          case Success(eph: Workspace.Durable)   => openGUI(eph)
+//          case Success(eph: Workspace.InMemory)  => openGUI(eph)
           case Failure(e) =>
             Dialog.showMessage(
               message     = s"Unable to create new workspace ${folder.path}\n\n${Util.formatException(e)}",

@@ -37,12 +37,21 @@ class DocumentHandlerImpl
 
   private def peer = DocumentHandler.instance
 
-  private def add[S <: Sys[S]](doc: Workspace[S]): Unit =
-    doc.cursor.step { implicit tx => peer.addDocument(doc) }
+  def addDocument(doc: Document): Unit = {
+    val doc1 = doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]
+    addWorkspace(doc1)
+  }
 
-  def addDocument(doc: Document): Unit = add(doc.asInstanceOf[Workspace[~] forSome {type ~ <: Sys[~]}])
+  def removeDocument(doc: Document): Unit = {
+    val doc1 = doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]
+    removeWorkspace(doc1)
+  }
 
-  def removeDocument(doc: Document): Unit = ??? // UUU doc.close() // throw new UnsupportedOperationException()
+  private def addWorkspace[S <: Sys[S]](w: Workspace[S]): Unit =
+    w.cursor.step { implicit tx => peer.addDocument(w) }
+
+  private def removeWorkspace[S <: Sys[S]](w: Workspace[S]): Unit =
+    w.cursor.step { implicit tx => w.dispose() }
 
   def documents: Iterator[Document] = peer.allDocuments
 

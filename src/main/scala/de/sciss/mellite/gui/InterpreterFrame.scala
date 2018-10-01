@@ -15,9 +15,9 @@ package de.sciss.mellite
 package gui
 
 import de.sciss.desktop
-import de.sciss.lucre.stm.{Sys, WorkspaceHandle}
+import de.sciss.lucre.stm.{Sys, Workspace}
 import de.sciss.mellite.gui.impl.interpreter.{InterpreterFrameImpl => Impl}
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc
 
 import scala.swing.event.Key
 
@@ -33,11 +33,11 @@ object InterpreterFrame {
 
   /** The content of this object is imported into the REPL */
   object Bindings {
-    def document: WorkspaceHandle[_ <: Sys[_]] =
+    def document: Workspace[_ <: Sys[_]] =
       Application.documentHandler.activeDocument.getOrElse(sys.error("No document open"))
 
-    def confluentDocument: Workspace.Confluent = document match {
-      case cd: Workspace.Confluent => cd
+    def confluentDocument: proc.Workspace.Confluent = document match {
+      case cd: proc.Workspace.Confluent => cd
       case _ => sys.error("Not a confluent document")
     }
   }

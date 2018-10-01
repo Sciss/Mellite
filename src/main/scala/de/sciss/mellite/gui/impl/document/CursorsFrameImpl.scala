@@ -105,7 +105,7 @@ object CursorsFrameImpl {
 
     override protected def performClose(): Future[Unit] = {
       log(s"Closing workspace ${workspace.folder}")
-      implicit val cursor: stm.Cursor[S] = workspace.cursor
+//      implicit val cursor: stm.Cursor[S] = workspace.cursor
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }
 
