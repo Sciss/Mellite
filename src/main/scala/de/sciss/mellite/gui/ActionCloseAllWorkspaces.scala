@@ -22,10 +22,10 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc
+import de.sciss.synth.proc.Universe
 
 import scala.collection.breakOut
 import scala.concurrent.{Future, Promise}
-import scala.language.existentials
 import scala.swing.Action
 import scala.swing.event.Key
 import scala.util.Success
@@ -47,33 +47,31 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
   def apply(): Unit = tryCloseAll()
 
   def tryCloseAll(): Future[Unit] = {
-    val docs = dh.documents.toList  // iterator wil be exhausted!
+    val universes = dh.documents.toList  // iterator wil be exhausted!
 
-    def loop(in: Future[Unit], rem: List[Workspace[_ <: Sys[_]]]): Future[Unit] = rem match {
+    def loop(in: Future[Unit], rem: List[Universe[_]]): Future[Unit] = rem match {
       case Nil => in
       case head :: tail =>
-        val headT = head.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]
+        def mkFut(): Future[Unit] =
+          Mellite.withWorkspace(head.workspace)(tryClose(_, None))
+
         in.value match {
           case Some(Success(())) =>
-            val fut = tryClose(headT, None)
-            loop(fut, tail)
-
-          case _ =>
-            in.flatMap { _ =>
-              val fut = tryClose(headT, None)
-              loop(fut, tail)
+            loop(mkFut(), tail)
+          case _ => in.flatMap { _ =>
+              loop(mkFut(), tail)
             }
         }
     }
 
-    loop(Future.successful(()), docs)
+    loop(Future.successful(()), universes)
 
 //    // cf. http://stackoverflow.com/questions/20982681/existential-type-or-type-parameter-bound-failure
 //    val allOk = docs.forall(doc => check(doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }], None))
 //    if (allOk) docs.foreach(doc => close(doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]))
   }
 
-  private final class InMemoryVeto[S <: Sys[S]](workspace: Workspace[S], window: Option[Window])
+  private final class InMemoryVeto[S <: Sys[S]](/* universe: Universe[S], */ window: Option[Window])
     extends Veto[S#Tx] {
 
     def vetoMessage(implicit tx: S#Tx): String = "Closing an in-memory workspace."
@@ -104,8 +102,8 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
     * for durable and confluent workspaces. For an in-memory workspace,
     * the user is presented with a confirmation dialog.
     *
-    * @param  workspace     the workspace to check
-    * @param  window  a reference window if a dialog is presented
+    * @param  workspace  the workspace to check
+    * @param  window    a reference window if a dialog is presented
     *
     * @return `true` if it is ok to close the workspace, `false` if the request was denied
     */
@@ -113,7 +111,7 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
                                   (implicit tx: S#Tx /* , cursor: stm.Cursor[S] */): Option[Veto[S#Tx]] = {
     val vetoInMemOpt: Option[Veto[S#Tx]] =
       workspace match {
-        case _: proc.Workspace.InMemory => Some(new InMemoryVeto[S](workspace, window))
+        case _: proc.Workspace.InMemory => Some(new InMemoryVeto[S](/* universe, */ window))
         case _ => None
       }
 

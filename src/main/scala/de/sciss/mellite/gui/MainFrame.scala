@@ -110,7 +110,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   audioServerPane.bootAction = Some(() => { Mellite.startAuralSystem(); () })
 
   private[this] val boxPane = new BoxPanel(Orientation.Vertical)
-  boxPane.contents += sensorServerPane
+  if (Prefs.sensorChannels.getOrElse(0) > 0) boxPane.contents += sensorServerPane
   boxPane.contents += new BoxPanel(Orientation.Horizontal) {
     contents += HStrut(4)
     contents += lbAudio

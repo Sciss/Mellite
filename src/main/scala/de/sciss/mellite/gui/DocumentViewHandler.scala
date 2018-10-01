@@ -14,10 +14,11 @@
 package de.sciss.mellite
 package gui
 
-import de.sciss.lucre.stm.{Sys, Workspace}
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing._
 import de.sciss.mellite.gui.impl.document.{ViewHandlerImpl => Impl}
 import de.sciss.model.Model
+import de.sciss.synth.proc.Universe
 
 //object DocumentViewHandler {
 //  lazy val instance: DocumentViewHandler = new DocumentViewHandler {
@@ -60,11 +61,11 @@ object DocumentViewHandler {
   lazy val instance: DocumentViewHandler = Impl.instance
 
   sealed trait Update
-  case class Activated[S <: Sys[S]](doc: Workspace[S]) extends Update
+  case class Activated[S <: Sys[S]](u: Universe[S]) extends Update
 }
 trait DocumentViewHandler extends Model[DocumentViewHandler.Update] {
-  def getWindow[S <: Sys[S]](doc: Workspace[S]): Option[DocumentViewHandler.View[_]]
+  def getWindow[S <: Sys[S]](u: Universe[S]): Option[DocumentViewHandler.View[_]]
   // var activeDocument: Option[Document]
   def activeDocument: Option[DocumentHandler.Document]
-  def activeDocument_=[S <: Sys[S]](doc: Option[Workspace[S]]): Unit
+  def activeDocument_=[S <: Sys[S]](u: Option[Universe[S]]): Unit
 }

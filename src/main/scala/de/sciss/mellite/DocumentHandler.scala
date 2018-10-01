@@ -14,19 +14,20 @@
 package de.sciss.mellite
 
 import de.sciss.file.File
-import de.sciss.lucre.stm.{Sys, Workspace}
+import de.sciss.lucre.stm.Sys
 import de.sciss.mellite.impl.{DocumentHandlerImpl => Impl}
 import de.sciss.model.Model
+import de.sciss.synth.proc.Universe
 
 object DocumentHandler {
 //  type Document = Workspace[_ <: Sys[_]]
-  type Document = Workspace[_ <: Sys[_]]
+  type Document = Universe[_ <: Sys[_]]
 
   lazy val instance: DocumentHandler = Impl()
 
   sealed trait Update
-  final case class Opened[S <: Sys[S]](doc: Workspace[S]) extends Update
-  final case class Closed[S <: Sys[S]](doc: Workspace[S]) extends Update
+  final case class Opened[S <: Sys[S]](u: Universe[S]) extends Update
+  final case class Closed[S <: Sys[S]](u: Universe[S]) extends Update
 }
 
 /** Note: the model dispatches not on the EDT. Listeners
@@ -36,7 +37,7 @@ object DocumentHandler {
 trait DocumentHandler extends Model[DocumentHandler.Update] {
   import DocumentHandler.Document
 
-  def addDocument[S <: Sys[S]](doc: Workspace[S])(implicit tx: S#Tx): Unit
+  def addDocument[S <: Sys[S]](universe: Universe[S])(implicit tx: S#Tx): Unit
 
   // def openRead(path: String): Document
   def allDocuments: Iterator[Document]

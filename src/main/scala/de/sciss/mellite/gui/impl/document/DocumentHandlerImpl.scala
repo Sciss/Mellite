@@ -20,9 +20,7 @@ import de.sciss.desktop.{Desktop, DocumentHandler => DH}
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.Workspace
-
-import scala.language.existentials
+import de.sciss.synth.proc.Universe
 
 /** We are bridging between the transactional and non-EDT `mellite.DocumentHandler` and
   * the GUI-based `de.sciss.desktop.DocumentHandler`. This is a bit ugly. In theory it
@@ -37,21 +35,17 @@ class DocumentHandlerImpl
 
   private def peer = DocumentHandler.instance
 
-  def addDocument(doc: Document): Unit = {
-    val doc1 = doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]
-    addWorkspace(doc1)
-  }
+  def addDocument(u: Universe[_]): Unit =
+    Mellite.withUniverse(u)(addUniverse(_))
 
-  def removeDocument(doc: Document): Unit = {
-    val doc1 = doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]
-    removeWorkspace(doc1)
-  }
+  def removeDocument(u: Document): Unit =
+    Mellite.withUniverse(u)(removeUniverse(_))
 
-  private def addWorkspace[S <: Sys[S]](w: Workspace[S]): Unit =
-    w.cursor.step { implicit tx => peer.addDocument(w) }
+  private def addUniverse[S <: Sys[S]](u: Universe[S]): Unit =
+    u.cursor.step { implicit tx => peer.addDocument(u) }
 
-  private def removeWorkspace[S <: Sys[S]](w: Workspace[S]): Unit =
-    w.cursor.step { implicit tx => w.dispose() }
+  private def removeUniverse[S <: Sys[S]](u: Universe[S]): Unit =
+    u.cursor.step { implicit tx => u.workspace.dispose() }
 
   def documents: Iterator[Document] = peer.allDocuments
 
@@ -66,14 +60,12 @@ class DocumentHandlerImpl
     }
 
   peer.addListener {
-    case DocumentHandler.Opened(doc) => defer {
-      dispatch(DH.Added(doc.asInstanceOf[Workspace[~] forSome {type ~ <: Sys[~]}]))
+    case DocumentHandler.Opened(u) => defer {
+      Mellite.withUniverse(u)(u1 => dispatch(DH.Added(u1)))
     }
-    case DocumentHandler.Closed(doc) => defer {
-      import de.sciss.equal.Implicits._
-      val docC = doc.asInstanceOf[Workspace[~] forSome {type ~ <: Sys[~]}]
-      if (activeDocument === Some(docC)) activeDocument = None
-      dispatch(DH.Removed(docC))
+    case DocumentHandler.Closed(u) => defer {
+      if (activeDocument.contains(u)) activeDocument = None
+      Mellite.withUniverse(u)(u1 => dispatch(DH.Removed(u1)))
     }
   }
 

@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui
 
 import de.sciss.desktop
-import de.sciss.lucre.stm.{Sys, Workspace}
+import de.sciss.lucre.stm.Workspace
 import de.sciss.mellite.gui.impl.interpreter.{InterpreterFrameImpl => Impl}
 import de.sciss.synth.proc
 
@@ -33,8 +33,8 @@ object InterpreterFrame {
 
   /** The content of this object is imported into the REPL */
   object Bindings {
-    def document: Workspace[_ <: Sys[_]] =
-      Application.documentHandler.activeDocument.getOrElse(sys.error("No document open"))
+    def document: Workspace[_] =
+      Application.documentHandler.activeDocument.getOrElse(sys.error("No document open")).workspace
 
     def confluentDocument: proc.Workspace.Confluent = document match {
       case cd: proc.Workspace.Confluent => cd

@@ -18,12 +18,14 @@ package gui
 import impl.document.{CursorsFrameImpl => Impl}
 import synth.proc
 import de.sciss.lucre.swing.View
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.{Universe, Workspace}
 
 object DocumentCursorsFrame {
   type S = proc.Confluent
   type D = S#D
-  def apply(document: Workspace.Confluent)(implicit tx: D#Tx): DocumentCursorsFrame = Impl(document)
+
+  def apply(document: Workspace.Confluent)(implicit tx: D#Tx, universe: Universe[S]): DocumentCursorsFrame =
+    Impl(document)
 }
 trait DocumentCursorsFrame extends lucre.swing.Window[DocumentCursorsFrame.D] /* [S <: Sys[S]] */ {
 //  def window: desktop.Window
@@ -32,5 +34,6 @@ trait DocumentCursorsFrame extends lucre.swing.Window[DocumentCursorsFrame.D] /*
 }
 
 trait DocumentCursorsView extends View[DocumentCursorsFrame.D] {
-  def workspace: Workspace[DocumentCursorsFrame.S]
+  def universe  : Universe  [DocumentCursorsFrame.S]
+  def workspace : Workspace [DocumentCursorsFrame.S]
 }

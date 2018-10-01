@@ -40,10 +40,10 @@ object CursorsFrameImpl {
   type S = proc.Confluent
   type D = S#D
 
-  def apply(workspace: Workspace.Confluent)(implicit tx: D#Tx): DocumentCursorsFrame = {
+  def apply(workspace: Workspace.Confluent)(implicit tx: D#Tx, universe: Universe[S]): DocumentCursorsFrame = {
     val root      = workspace.cursors
     val rootView  = createView(workspace, parent = None, elem = root)
-    val _view     = new ViewImpl(rootView)(workspace, tx.system) {
+    val _view: ViewImpl = new ViewImpl(rootView)(workspace, tx.system, universe) {
       self =>
       val observer: Disposable[D#Tx] = root.changed.react { implicit tx =>upd =>
         log(s"DocumentCursorsFrame update $upd")
@@ -81,7 +81,9 @@ object CursorsFrameImpl {
 
     impl =>
 
-    def workspace: Workspace[S] = view.workspace
+//    def workspace: Workspace[S] = view.workspace
+
+    import view.{workspace, universe}
 
     object WorkspaceClosed extends Disposable[S#Tx] {
       def dispose()(implicit tx: S#Tx): Unit = impl.dispose()(workspace.system.durableTx(tx))
@@ -93,7 +95,7 @@ object CursorsFrameImpl {
       // missing from WindowImpl because of system mismatch
       window.reactions += {
         case desktop.Window.Activated(_) =>
-          DocumentViewHandler.instance.activeDocument = Some(workspace)
+          DocumentViewHandler.instance.activeDocument = Some(universe)
       }
     }
 
@@ -113,7 +115,8 @@ object CursorsFrameImpl {
   }
 
   private abstract class ViewImpl(val _root: CursorView)
-                                 (implicit val workspace: Workspace.Confluent, cursorD: stm.Cursor[D])
+                                 (implicit val workspace: Workspace.Confluent, cursorD: stm.Cursor[D],
+                                  val universe: Universe[S])
     extends ComponentHolder[Component] with DocumentCursorsView {
 
     type Node = CursorView
@@ -324,6 +327,7 @@ object CursorsFrameImpl {
           GUI.atomic[S, Unit]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
             implicit val dtxView: Confluent.Txn => Durable.Txn = workspace.system.durableTx _ // (tx)
             implicit val dtx: Durable.Txn = dtxView(tx)
+            // XXX TODO - every branch gets a fresh universe. Ok?
             implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
             val name = CellView.const[S, String](s"${workspace.name} / ${elem.name.value}")
             FolderFrame[S](name = name, isWorkspaceRoot = false)

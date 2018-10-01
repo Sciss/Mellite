@@ -138,7 +138,9 @@ object CodeViewImpl {
 
     def currentText: String = codePane.editor.text
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+    def dispose()(implicit tx: S#Tx): Unit = {
+      bottom.foreach(_.dispose())
+    }
 
     def undoAction: Action = Action.wrap(codePane.editor.peer.getActionMap.get("undo"))
     def redoAction: Action = Action.wrap(codePane.editor.peer.getActionMap.get("redo"))

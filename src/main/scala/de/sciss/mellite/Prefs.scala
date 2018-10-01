@@ -127,7 +127,7 @@ object Prefs {
   final val defaultSensorProtocol: osc.Transport.Net = osc.UDP
   def defaultSensorPort   : Int     = SensorSystem.defaultPort // 0x4D6C  // "Ml"
   def defaultSensorCommand: String  = SensorSystem.defaultCommand
-  final val defaultSensorChannels   = 16
+  final val defaultSensorChannels   = 0
 
   def sensorProtocol : Entry[osc.Transport.Net] = userPrefs("sensor-protocol")
   def sensorPort     : Entry[Int              ] = userPrefs("sensor-port"    )

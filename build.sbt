@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.28.0-SNAPSHOT"
+lazy val projectVersion             = "2.28.0"
 lazy val mimaVersion                = "2.28.0"
 
 lazy val loggingEnabled             = true
@@ -19,16 +19,16 @@ lazy val deps = new {
     val desktop             = "0.9.2"
     val equal               = "0.1.2"
     val fileUtil            = "1.1.3"
-    val freesound           = "1.12.0-SNAPSHOT"
-    val fscape              = "2.18.0-SNAPSHOT"
+    val freesound           = "1.12.0"
+    val fscape              = "2.18.0"
     val interpreterPane     = "1.9.0"
     val jline               = "2.14.6"
     val kollFlitz           = "0.2.2"
-    val lucre               = "3.10.0-SNAPSHOT"
-    val lucreSwing          = "1.13.0-SNAPSHOT"
+    val lucre               = "3.10.0"
+    val lucreSwing          = "1.13.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.5.0-SNAPSHOT"
+    val patterns            = "0.5.0"
     val pdflitz             = "1.3.0"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -38,13 +38,13 @@ lazy val deps = new {
     val scalaColliderUGen   = "1.19.1"
     val scopt               = "3.7.0"
     val sonogram            = "1.10.0"
-    val soundProcesses      = "3.22.0-SNAPSHOT"
-    val span                = "1.4.1"
+    val soundProcesses      = "3.22.0"
+    val span                = "1.4.2"
     val submin              = "0.2.2"
     val swingPlus           = "0.3.1"
     val topology            = "1.1.0"
     val webLaF              = "2.1.3"
-    val wolkenpumpe         = "2.27.0-SNAPSHOT"
+    val wolkenpumpe         = "2.27.0"
   }
 }
 

@@ -60,7 +60,7 @@ object WindowImpl {
       case desktop.Window.Activated(_) =>
         view match {
           case uv: UniverseView[S] =>
-            DocumentViewHandler.instance.activeDocument = Some(uv.universe.workspace)
+            DocumentViewHandler.instance.activeDocument = Some(uv.universe)
           case _ =>
         }
     }

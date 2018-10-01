@@ -17,9 +17,10 @@ package impl
 package document
 
 import de.sciss.desktop.Desktop
-import de.sciss.lucre.stm.{Sys, Workspace}
+import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing._
 import de.sciss.model.impl.ModelImpl
+import de.sciss.synth.proc.Universe
 
 import scala.concurrent.stm.TMap
 
@@ -49,19 +50,19 @@ object ViewHandlerImpl {
     }
 
     def activeDocument: Option[DocumentHandler.Document] = _active
-    def activeDocument_=[S <: Sys[S]](value: Option[Workspace[S]]): Unit = {
+    def activeDocument_=[S <: Sys[S]](value: Option[Universe[S]]): Unit = {
       requireEDT()
       if (_active != value) {
         _active = value
-        value.foreach { doc =>
-          dispatch(DocumentViewHandler.Activated(doc))
+        value.foreach { u =>
+          dispatch(DocumentViewHandler.Activated(u))
         }
       }
     }
 
-    def getWindow[S <: Sys[S]](doc: Workspace[S]): Option[WorkspaceWindow[S]] = {
+    def getWindow[S <: Sys[S]](u: Universe[S]): Option[WorkspaceWindow[S]] = {
       requireEDT()
-      map.single.get(doc).asInstanceOf[Option[WorkspaceWindow[S]]]
+      map.single.get(u).asInstanceOf[Option[WorkspaceWindow[S]]]
     }
 
     // MMM

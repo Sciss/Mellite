@@ -26,7 +26,7 @@ import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Durable, GenContext, Scheduler, SoundProcesses, Universe, Workspace}
+import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
@@ -48,22 +48,23 @@ object ActionOpenWorkspace extends Action("Open...") {
   private def fullTitle = "Open Workspace"
 
   // XXX TODO: should be in another place
-  def openGUI[S <: Sys[S]](doc: Workspace[S]): Unit = {
-    doc.folder.foreach(recentFiles.add)
-    dh.addDocument(doc)
-    doc match {
+  def openGUI[S <: Sys[S]](universe: Universe[S]): Unit = {
+    universe.workspace.folder.foreach(recentFiles.add)
+    dh.addDocument(universe)
+    universe.workspace match {
       case cf: Workspace.Confluent =>
         implicit val workspace: Workspace.Confluent  = cf
         implicit val cursor: stm.Cursor[Durable] = workspace.system.durable
-        GUI.atomic[proc.Durable, Unit](fullTitle, s"Opening cursor window for '${doc.name}'") {
-          implicit tx => DocumentCursorsFrame(cf)
+        GUI.atomic[proc.Durable, Unit](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
+          implicit val u: Universe[Confluent] = universe.asInstanceOf[Universe[Confluent]]
+          DocumentCursorsFrame(cf)
         }
       case eph =>
-        implicit val workspace: Workspace[S] = eph
         implicit val cursor: stm.Cursor[S] = eph.cursor
-        val nameView = CellView.const[S, String](doc.name)
-        GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${doc.name}'") { implicit tx =>
-          implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
+        val nameView = CellView.const[S, String](eph.name)
+        GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${eph.name}'") { implicit tx =>
+//          implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
+          implicit val u: Universe[S] = universe
           FolderFrame[S](name = nameView, isWorkspaceRoot = true)
         }
     }
@@ -79,29 +80,31 @@ object ActionOpenWorkspace extends Action("Open...") {
     dlg.show(None).foreach(perform)
   }
 
-  private def openView[S <: Sys[S]](doc: Workspace[S]): Unit = ()
-// MMM
-//    DocumentViewHandler.instance(doc).collectFirst {
-//      case dcv: DocumentCursorsView => dcv.window
-//    } .foreach(_.front())
+//  private def openView[S <: Sys[S]](universe: Universe[S]): Unit = ()
+//// MMM
+////    DocumentViewHandler.instance(doc).collectFirst {
+////      case dcv: DocumentCursorsView => dcv.window
+////    } .foreach(_.front())
 
-  def perform(folder: File): Future[Workspace[_]] = {
-    import de.sciss.equal.Implicits._
-    val fOpt = Some(folder)
-    dh.documents.find(_.folder === fOpt).fold(doOpen(folder)) { doc =>
-      val doc1 = doc.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
-      openView(doc1)
-      Future.successful(doc1)
+  def perform(folder: File): Future[Universe[_]] = {
+//    val fOpt = Some(folder)
+    dh.documents.find(_.workspace.folder.contains(folder)).fold(doOpen(folder)) { u =>
+//      val u1 = u.asInstanceOf[Universe[S] forSome { type S <: Sys[S] }]
+      // openView(u1)
+      Mellite.withUniverse(u)(Future.successful)
     }
   }
 
-  private def doOpen(folder: File): Future[Workspace[_]] = {
+  private def doOpen(folder: File): Future[Universe[_]] = {
     import SoundProcesses.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
-    val fut: Future[Workspace[~] forSome { type ~ <: Sys[~] }] = Future(blocking(Workspace.read(folder, ds)))
+    val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {
+      val w = blocking(Workspace.read(folder, ds))
+      Mellite.mkUniverse(w)
+    }
 
     var opt: OptionPane[Unit] = null
     desktop.Util.delay(1000) {

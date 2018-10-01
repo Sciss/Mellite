@@ -21,8 +21,9 @@ import de.sciss.equal.Implicits._
 import de.sciss.file._
 import de.sciss.lucre.stm.DataStore
 import de.sciss.lucre.stm.store.BerkeleyDB
+import de.sciss.lucre.synth.{InMemory, Sys}
 import de.sciss.synth.proc
-import de.sciss.synth.proc.Workspace
+import de.sciss.synth.proc.{Confluent, Durable, Universe, Workspace}
 
 import scala.concurrent.duration.Duration
 import scala.swing.event.Key
@@ -67,19 +68,22 @@ object ActionNewWorkspace extends Action("Workspace...") {
     else                performDurable()
   }
 
-  def performInMemory(): Workspace.InMemory = {
-    val doc = Workspace.InMemory()
-    ActionOpenWorkspace.openGUI(doc)
-    doc
+  def performInMemory(): (Workspace.InMemory, Universe[InMemory]) = {
+    val w   = Workspace.InMemory()
+    val u   = Mellite.mkUniverse(w)
+    ActionOpenWorkspace.openGUI(u)
+    (w, u)
   }
 
-  def performDurable(): Option[Workspace.Durable] = create[proc.Durable, Workspace.Durable] { (folder, config) =>
-    Workspace.Durable.empty(folder, config)
-  }
+  def performDurable(): Option[(Workspace.Durable, Universe[Durable])] =
+    create[proc.Durable, Workspace.Durable] { (folder, config) =>
+      Workspace.Durable.empty(folder, config)
+    }
 
-  def performConfluent(): Option[Workspace.Confluent] = create[proc.Confluent, Workspace.Confluent] { (folder, config) =>
-    Workspace.Confluent.empty(folder, config)
-  }
+  def performConfluent(): Option[(Workspace.Confluent, Universe[Confluent])] =
+    create[proc.Confluent, Workspace.Confluent] { (folder, config) =>
+      Workspace.Confluent.empty(folder, config)
+    }
 
   private def selectFile(): Option[File] = {
     val fileDlg = FileDialog.save(title = "Location for New Workspace")
@@ -91,7 +95,7 @@ object ActionNewWorkspace extends Action("Workspace...") {
         folder0.parent / s"$name.${Workspace.ext}"
 
       val folderOpt = Some(folder)
-      val isOpen = Application.documentHandler.documents.exists(_.folder === folderOpt)
+      val isOpen = Application.documentHandler.documents.exists(_.workspace.folder === folderOpt)
 
       if (isOpen) {
         val optOvr = OptionPane.message(
@@ -125,16 +129,17 @@ object ActionNewWorkspace extends Action("Workspace...") {
     }
   }
 
-  private def create[S <: de.sciss.lucre.synth.Sys[S], A <: Workspace[S]](fun: (File, DataStore.Factory) => A): Option[A] =
+  private def create[S <: Sys[S], A <: Workspace[S]](fun: (File, DataStore.Factory) => A): Option[(A, Universe[S])] =
     selectFile().flatMap { folder =>
       try {
         val config          = BerkeleyDB.Config()
         config.allowCreate  = true
         val ds              = BerkeleyDB.factory(folder, config)
         config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
-        val doc             = fun(folder, ds)
-        ActionOpenWorkspace.openGUI(doc)
-        Some(doc)
+        val w               = fun(folder, ds)
+        val u               = Mellite.mkUniverse(w)
+        ActionOpenWorkspace.openGUI(u)
+        Some((w, u))
 
       } catch {
         case NonFatal(e) =>
