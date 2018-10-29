@@ -24,6 +24,7 @@ import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
 import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame, MainFrame, MenuBar}
 import de.sciss.osc
+import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -63,6 +64,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         .optional()
         .text("Workspaces (.mllt directories) to open")
         .action { (v, c) => c.copy(open = c.open :+ v) }
+
+      help("help").text("Prints this usage text")
     }
     p.parse(args, default).fold(sys.exit(1)) { config =>
       _config = config
@@ -120,17 +123,18 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     */
   def startAuralSystem(): Boolean = {
     requireEDT()
-    val config        = Server.Config()
-    applyAudioPrefs(config, useDevice = true, pickPort = true)
+    val serverCfg = Server.Config()
+    val clientCfg = Client.Config()
+    applyAudioPreferences(serverCfg, clientCfg, useDevice = true, pickPort = true)
     import de.sciss.file._
 
-    val f = file(config.program)
+    val f = file(serverCfg.program)
     if (!f.isFile && (f.parentOption.nonEmpty || {
-      sys.env.getOrElse("PATH", "").split(File.pathSep).forall(p => !(file(p) / config.program).isFile)
+      sys.env.getOrElse("PATH", "").split(File.pathSep).forall(p => !(file(p) / serverCfg.program).isFile)
     })) {
       val msg = new Label(
         s"""<HTML><BODY><B>The SuperCollider server program 'scsynth'<BR>
-           |is not found at this location:</B><P>&nbsp;<BR>${config.program}<P>&nbsp;<BR>
+           |is not found at this location:</B><P>&nbsp;<BR>${serverCfg.program}<P>&nbsp;<BR>
            |Please adjust the path in the preferences.</BODY>""".stripMargin
       )
       val opt = OptionPane.message(msg, OptionPane.Message.Error)
@@ -140,36 +144,40 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     TxnExecutor.defaultAtomic { implicit itx =>
       implicit val tx: Txn = Txn.wrap(itx)
-      auralSystem.start(config)
+      auralSystem.start(serverCfg, clientCfg)
     }
     true
   }
 
-  def applyAudioPrefs(config: Server.ConfigBuilder, useDevice: Boolean, pickPort: Boolean): Unit = {
+  def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
+                            useDevice: Boolean, pickPort: Boolean): Unit = {
     requireEDT()
     import de.sciss.file._
-    val programPath   = Prefs.superCollider.getOrElse(Prefs.defaultSuperCollider)
-    if (programPath != Prefs.defaultSuperCollider) config.program = programPath.path
+    val programPath         = Prefs.superCollider.getOrElse(Prefs.defaultSuperCollider)
+    if (programPath != Prefs.defaultSuperCollider) serverCfg.program = programPath.path
 
     if (useDevice) {
-      val audioDevice     = Prefs.audioDevice     .getOrElse(Prefs.defaultAudioDevice)
-      if (audioDevice != Prefs.defaultAudioDevice) config.deviceName = Some(audioDevice)
+      val audioDevice       = Prefs.audioDevice     .getOrElse(Prefs.defaultAudioDevice)
+      if (audioDevice != Prefs.defaultAudioDevice) serverCfg.deviceName = Some(audioDevice)
     }
-    val numOutputs      = Prefs.audioNumOutputs .getOrElse(Prefs.defaultAudioNumOutputs)
-    config.outputBusChannels = numOutputs
-    val numInputs       = Prefs.audioNumInputs  .getOrElse(Prefs.defaultAudioNumInputs)
-    config.inputBusChannels  = numInputs
-    val numPrivate      = Prefs.audioNumPrivate .getOrElse(Prefs.defaultAudioNumPrivate)
-    config.audioBusChannels = numInputs + numOutputs + numPrivate
-    config.wireBuffers  = Prefs.audioNumWireBufs.getOrElse(Prefs.defaultAudioNumWireBufs)
-    config.sampleRate   = Prefs.audioSampleRate .getOrElse(Prefs.defaultAudioSampleRate)
-    config.blockSize    = Prefs.audioBlockSize  .getOrElse(Prefs.defaultAudioBlockSize)
-    config.memorySize   = Prefs.audioMemorySize .getOrElse(Prefs.defaultAudioMemorySize) * 1024
+    val numOutputs          = Prefs.audioNumOutputs   .getOrElse(Prefs.defaultAudioNumOutputs)
+    serverCfg.outputBusChannels = numOutputs
+    val numInputs           = Prefs.audioNumInputs    .getOrElse(Prefs.defaultAudioNumInputs)
+    serverCfg.inputBusChannels  = numInputs
+    val numPrivate          = Prefs.audioNumPrivate   .getOrElse(Prefs.defaultAudioNumPrivate)
+    serverCfg.audioBusChannels = numInputs + numOutputs + numPrivate
+    serverCfg.audioBuffers  = Prefs.audioNumAudioBufs .getOrElse(Prefs.defaultAudioNumAudioBufs)
+    serverCfg.wireBuffers   = Prefs.audioNumWireBufs  .getOrElse(Prefs.defaultAudioNumWireBufs)
+    serverCfg.sampleRate    = Prefs.audioSampleRate   .getOrElse(Prefs.defaultAudioSampleRate)
+    serverCfg.blockSize     = Prefs.audioBlockSize    .getOrElse(Prefs.defaultAudioBlockSize)
+    serverCfg.memorySize    = Prefs.audioMemorySize   .getOrElse(Prefs.defaultAudioMemorySize) * 1024
 
     if (pickPort) {
-      config.transport = osc.TCP
-      config.pickPort()
+      serverCfg.transport = osc.TCP
+      serverCfg.pickPort()
     }
+
+    clientCfg.latency = Prefs.audioLatency.getOrElse(Prefs.defaultAudioLatency) * 0.001
   }
 
   def startSensorSystem(): Unit = {

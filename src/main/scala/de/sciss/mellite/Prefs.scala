@@ -104,23 +104,31 @@ object Prefs {
   final val defaultAudioNumOutputs      = 2
   final val defaultAudioNumPrivate      = 512
   final val defaultAudioNumWireBufs     = 256
+  final val defaultAudioNumAudioBufs    = 1024
   final val defaultAudioMemorySize      = 64
 
   final val defaultHeadphonesBus        = 0
+  final val defaultAudioLatency         = 200
 
-  def superCollider   : Entry[File   ] = userPrefs("supercollider"      )
-  def audioDevice     : Entry[String ] = userPrefs("audio-device"       )
-  def audioNumInputs  : Entry[Int    ] = userPrefs("audio-num-inputs"   )
-  def audioNumOutputs : Entry[Int    ] = userPrefs("audio-num-outputs"  )
-  def audioSampleRate : Entry[Int    ] = userPrefs("audio-sample-rate"  )
+  def superCollider     : Entry[File   ] = userPrefs("supercollider"        )
+  def audioDevice       : Entry[String ] = userPrefs("audio-device"         )
+  def audioNumInputs    : Entry[Int    ] = userPrefs("audio-num-inputs"     )
+  def audioNumOutputs   : Entry[Int    ] = userPrefs("audio-num-outputs"    )
+  def audioSampleRate   : Entry[Int    ] = userPrefs("audio-sample-rate"    )
 
-  def audioBlockSize  : Entry[Int    ] = userPrefs("audio-block-size"   )
-  def audioNumPrivate : Entry[Int    ] = userPrefs("audio-num-private"  )
-  def audioNumWireBufs: Entry[Int    ] = userPrefs("audio-num-wire-bufs")
-  def audioMemorySize : Entry[Int    ] = userPrefs("audio-memory-size"  )
+  def audioBlockSize    : Entry[Int    ] = userPrefs("audio-block-size"     )
+  def audioNumPrivate   : Entry[Int    ] = userPrefs("audio-num-private"    )
+  def audioNumAudioBufs : Entry[Int    ] = userPrefs("audio-num-audio-bufs" )
+  def audioNumWireBufs  : Entry[Int    ] = userPrefs("audio-num-wire-bufs"  )
 
-  def headphonesBus   : Entry[Int    ] = userPrefs("headphones-bus"     )
-  def audioAutoBoot   : Entry[Boolean] = userPrefs("audio-auto-boot"    )
+  /** In megabytes */
+  def audioMemorySize   : Entry[Int    ] = userPrefs("audio-memory-size"    )
+
+  def headphonesBus     : Entry[Int    ] = userPrefs("headphones-bus"       )
+  def audioAutoBoot     : Entry[Boolean] = userPrefs("audio-auto-boot"      )
+
+  /** In milliseconds */
+  def audioLatency      : Entry[Int    ] = userPrefs("audio-latency"        )
 
   // ---- sensor ----
 

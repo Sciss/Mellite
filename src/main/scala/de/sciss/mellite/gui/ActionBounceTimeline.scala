@@ -39,7 +39,7 @@ import de.sciss.synth.io.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
-import de.sciss.synth.{SynthGraph, addToTail}
+import de.sciss.synth.{Client, SynthGraph, addToTail}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}
 import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 
@@ -316,7 +316,8 @@ object ActionBounceTimeline {
   ) {
     def prepare(group: IIterable[stm.Source[S#Tx, Obj[S]]], f: File)(mkSpan: => Span): PerformSettings[S] = {
       val sConfig = Server.Config()
-      Mellite.applyAudioPrefs(sConfig, useDevice = realtime, pickPort = realtime)
+      val cConfig = Client.Config()
+      Mellite.applyAudioPreferences(sConfig, cConfig, useDevice = realtime, pickPort = realtime)
       if (fineControl) sConfig.blockSize = 1
       val numChannels = mkNumChannels(channels)
       specToServerConfig(f, fileFormat, numChannels = numChannels, sampleRate = sampleRate, config = sConfig)
@@ -326,7 +327,7 @@ object ActionBounceTimeline {
       }
       PerformSettings(
         realtime = realtime, fileFormat = fileFormat,
-        group = group, server = sConfig, gain = gain, span = span1, channels = channels
+        group = group, server = sConfig, client = cConfig, gain = gain, span = span1, channels = channels
       )
     }
   }
@@ -336,6 +337,7 @@ object ActionBounceTimeline {
     fileFormat  : FileFormat,
     group       : IIterable[stm.Source[S#Tx, Obj[S]]],
     server      : Server.Config,
+    client      : Client.Config,
     gain        : Gain = Gain.normalized(-0.2f),
     span        : Span,
     channels    : Vec[Range.Inclusive]
@@ -936,11 +938,12 @@ object ActionBounceTimeline {
       settings.copy(server = sConfig)
     }
 
-    val bounce    = Bounce[S]() // workspace.I]
+    val bounce    = Bounce[S]() // workspace.I
     val bnc       = Bounce.Config[S]()
     bnc.group     = settings1.group
     bnc.realtime  = realtime
     bnc.server.read(settings1.server)
+    bnc.client.read(settings1.client)
 
     val bncGainFactor = if (settings1.gain.normalized) 1f else settings1.gain.linear
     val inChans       = settings1.channels.flatten

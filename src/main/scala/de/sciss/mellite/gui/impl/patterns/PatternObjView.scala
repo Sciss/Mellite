@@ -26,7 +26,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, PlayToggleButton, Shapes}
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
@@ -136,18 +136,20 @@ object PatternObjView extends ListObjView.Factory {
             val res0  = g.expand.toIterator.take(n).toList
             val abbr  = res0.lengthCompare(n) == 0
             val res   = if (abbr) res0.init else res0
-            println(res.mkString("[", ", ", " ...]"))
+            println(res.mkString("[", ", ", if (abbr) " ...]" else "]"))
           }
         }
       }
       GUI.toolButton(actionEval, raphael.Shapes.Quote)
     }
 
-    val bottom = viewEval :: Nil
+    val viewPower = PlayToggleButton(obj)
+
+    val bottom = viewEval :: viewPower :: Nil
 
     implicit val undo: UndoManager = UndoManager()
     CodeFrameImpl.make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = None,
-      canBounce = false)
+      canBounce = true)
   }
 }
 trait PatternObjView[S <: stm.Sys[S]] extends ObjView[S] {

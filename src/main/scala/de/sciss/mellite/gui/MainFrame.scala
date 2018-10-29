@@ -133,8 +133,10 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     gHelp
       .add(Item("index")("Online Documentation")(
         Desktop.browseURI(new URI(Mellite.homepage))))
-      .add(Item("issues")("Report a Bug")(
-        Desktop.browseURI(new URI("https://github.com/Sciss/Mellite/issues"))))
+      .add(Item("issues")("Report an Issue")(
+        Desktop.browseURI(new URI("https://git.iem.at/sciss/Mellite/issues"))))
+      .add(Item("chat")("Chat Room")(
+        Desktop.browseURI(new URI("https://gitter.im/Sciss/Mellite"))))
       .add(Item("shortcuts")("Keyboard Shortcuts")(
         Help.shortcuts()))
 
@@ -278,11 +280,22 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     synOpt.set(Some(syn))(tx.peer)
 
     val meters = if (!Prefs.useAudioMeters) List.empty else {
-      val inBus   = Bus.soundIn (s, numIns  )
-      val mIn     = AudioBusMeter(AudioBusMeter.Strip(inBus, s.defaultGroup , addBefore) :: Nil)
-      val outBus  = Bus.soundOut(s, numOuts )
-      val mOut    = AudioBusMeter(AudioBusMeter.Strip(outBus, mGroup        , addToHead) :: Nil)
-      mIn :: mOut :: Nil
+      val res0 = if (numOuts == 0) Nil else {
+        val outBus  = Bus.soundOut(s, numOuts )
+        val mOut    = AudioBusMeter(AudioBusMeter.Strip(outBus, mGroup, addToHead) :: Nil)
+        deferTx {
+          mOut.component.tooltip = "Output Levels"  // as long as we do not have an explicit label component
+        }
+        mOut :: Nil
+      }
+      if (numIns == 0) res0 else {
+        val inBus   = Bus.soundIn(s, numIns)
+        val mIn     = AudioBusMeter(AudioBusMeter.Strip(inBus, s.defaultGroup, addBefore) :: Nil)
+        deferTx {
+          mIn.component.tooltip = "Input Levels"  // as long as we do not have an explicit label component
+        }
+        mIn :: res0
+      }
     }
     metersRef.set(meters)(tx.peer)
 

@@ -134,13 +134,13 @@ object CodeViewImpl {
     private[this] val futCompile = Ref(Option.empty[Future[Any]])
     private[this] var actionApply: Action = _
 
-    def isCompiling(implicit tx: TxnLike): Boolean = futCompile.get(tx.peer).isDefined
+    def isCompiling(implicit tx: TxnLike): Boolean =
+      futCompile.get(tx.peer).isDefined
 
     def currentText: String = codePane.editor.text
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: S#Tx): Unit =
       bottom.foreach(_.dispose())
-    }
 
     def undoAction: Action = Action.wrap(codePane.editor.peer.getActionMap.get("undo"))
     def redoAction: Action = Action.wrap(codePane.editor.peer.getActionMap.get("redo"))
