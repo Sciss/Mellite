@@ -99,6 +99,7 @@ object ActionOpenWorkspace extends Action("Open...") {
     import SoundProcesses.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
+//    config.readOnly     = true
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
     val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {

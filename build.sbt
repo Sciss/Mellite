@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.29.1"
+lazy val projectVersion             = "2.29.2-SNAPSHOT"
 lazy val mimaVersion                = "2.29.0"
 
 lazy val loggingEnabled             = true
@@ -24,7 +24,7 @@ lazy val deps = new {
     val interpreterPane     = "1.9.0"
     val jline               = "2.14.6"
     val kollFlitz           = "0.2.2"
-    val lucre               = "3.10.1"
+    val lucre               = "3.10.2-SNAPSHOT"
     val lucreSwing          = "1.13.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -40,15 +40,15 @@ lazy val deps = new {
     val sonogram            = "1.10.0"
     val soundProcesses      = "3.23.1"
     val span                = "1.4.2"
-    val submin              = "0.2.2"
+    val submin              = "0.2.3"
     val swingPlus           = "0.3.1"
     val topology            = "1.1.0"
-    val webLaF              = "2.1.3"
+    val webLaF              = "2.1.4"
     val wolkenpumpe         = "2.28.0"
   }
 }
 
-lazy val bdb = "bdb" // either "bdb" or "bdb6"
+lazy val bdb = "bdb" // one of "bdb" (Java 6+, GPL 2+), "bdb6" (Java 7+, AGPL 3+), "bdb7" (Java 8+, Apache)
 
 // ---- app packaging ----
 
@@ -63,8 +63,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.12.7",
-  crossScalaVersions := Seq("2.12.7", "2.11.12"),
+  scalaVersion       := "2.12.8",
+  crossScalaVersions := Seq("2.12.8", "2.11.12"),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_", "-Xsource:2.13"

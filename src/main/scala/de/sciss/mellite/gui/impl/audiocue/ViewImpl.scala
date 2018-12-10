@@ -23,8 +23,8 @@ import de.sciss.desktop.{UndoManager, Util}
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
+import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{DoubleSpinnerView, View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.span.Span
@@ -36,7 +36,7 @@ import de.sciss.synth.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Time
 import de.sciss.{sonogram, synth}
 
 import scala.swing.Swing._
-import scala.swing.{BorderPanel, BoxPanel, Component, Label, Orientation}
+import scala.swing.{BorderPanel, BoxPanel, Component, Orientation}
 
 object ViewImpl {
   def apply[S <: Sys[S]](obj0: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioFileView[S] = {
@@ -91,9 +91,8 @@ object ViewImpl {
 
     implicit val undoManager: UndoManager = UndoManager()
     // val offsetView  = LongSpinnerView  (grapheme.offset, "Offset")
-    import universe.cursor
-    val gainView    = DoubleSpinnerView[S](audioCue.value.gain /* RRR */, "Gain", width = 90)
-    val res: Impl[S, I] = new Impl[S, I](gainView = gainView, inMemoryBridge = system.inMemoryTx) {
+    // val gainView    = DoubleSpinnerView[S](audioCue.value.gain /* RRR */, "Gain", width = 90)
+    val res: Impl[S, I] = new Impl[S, I](/* gainView = gainView, */ inMemoryBridge = system.inMemoryTx) {
       val timelineModel = TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
         sampleRate = TimeRef.SampleRate)
       val holder: stm.Source[S#Tx, Obj[S]]  = tx.newHandle(obj0)
@@ -106,7 +105,7 @@ object ViewImpl {
     res
   }
 
-  private abstract class Impl[S <: Sys[S], I <: Sys[I]](gainView: View[S], inMemoryBridge: S#Tx => I#Tx)
+  private abstract class Impl[S <: Sys[S], I <: Sys[I]](/* gainView: View[S], */ inMemoryBridge: S#Tx => I#Tx)
                                                        (implicit val universe: Universe[S])
     extends AudioFileView[S] with ComponentHolder[Component] { impl =>
 
@@ -122,7 +121,7 @@ object ViewImpl {
       val itx: I#Tx = inMemoryBridge(tx)
       transportView.transport.dispose()(itx)
       transportView.dispose()(itx)
-      gainView     .dispose()
+//      gainView     .dispose()
       deferTx {
         SonogramManager.release(_sonogram)
       }
@@ -163,9 +162,9 @@ object ViewImpl {
           HStrut(4),
           ggDragRegion,
           // new BusSinkButton[S](impl, ggDragRegion),
-          HStrut(4),
-          new Label("Gain:"),
-          gainView.component,
+//          HStrut(4),
+//          new Label("Gain:"),
+//          gainView.component,
           HStrut(8),
           ggVisualBoost,
           HGlue,

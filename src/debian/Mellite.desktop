@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Mellite
-Version=2.29.1
+Version=2.29.2-SNAPSHOT
 GenericName=Mellite
 Comment=Mellite Computer Music Environment
 Exec=/usr/share/mellite/bin/mellite %F
