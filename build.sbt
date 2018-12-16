@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.29.2-SNAPSHOT"
-lazy val mimaVersion                = "2.29.0"
+lazy val projectVersion             = "2.30.0-SNAPSHOT"
+lazy val mimaVersion                = "2.30.0"
 
 lazy val loggingEnabled             = true
 
@@ -15,34 +15,34 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
-    val audioWidgets        = "1.13.0"
-    val desktop             = "0.9.2"
-    val equal               = "0.1.2"
+    val audioWidgets        = "1.14.0-SNAPSHOT"
+    val desktop             = "0.10.0-SNAPSHOT"
+    val equal               = "0.1.3-SNAPSHOT"
     val fileUtil            = "1.1.3"
     val freesound           = "1.13.0"
     val fscape              = "2.19.0"
-    val interpreterPane     = "1.9.0"
+    val interpreterPane     = "1.10.0-SNAPSHOT"
     val jline               = "2.14.6"
-    val kollFlitz           = "0.2.2"
-    val lucre               = "3.10.2-SNAPSHOT"
-    val lucreSwing          = "1.13.0"
+    val kollFlitz           = "0.2.3-SNAPSHOT"
+    val lucre               = "3.11.0-SNAPSHOT"
+    val lucreSwing          = "1.14.0-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val patterns            = "0.6.1"
-    val pdflitz             = "1.3.0"
+    val pdflitz             = "1.4.0-SNAPSHOT"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val raphaelIcons        = "1.0.4"
-    val scalaCollider       = "1.27.1"
-    val scalaColliderSwing  = "1.40.0"
-    val scalaColliderUGen   = "1.19.1"
-    val scopt               = "3.7.0"
+    val scalaCollider       = "1.28.0-SNAPSHOT"
+    val scalaColliderSwing  = "1.41.0-SNAPSHOT"
+    val scalaColliderUGen   = "1.19.2-SNAPSHOT"
+    val scopt               = "3.7.1"
     val sonogram            = "1.10.0"
     val soundProcesses      = "3.23.1"
     val span                = "1.4.2"
     val submin              = "0.2.3"
-    val swingPlus           = "0.3.1"
-    val topology            = "1.1.0"
+    val swingPlus           = "0.4.0-SNAPSHOT"
+    val topology            = "1.1.1-SNAPSHOT"
     val webLaF              = "2.1.4"
     val wolkenpumpe         = "2.28.0"
   }
@@ -63,8 +63,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.12.8",
-  crossScalaVersions := Seq("2.12.8", "2.11.12"),
+  scalaVersion       := "2.13.0-M5",
+  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-M5"),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_", "-Xsource:2.13"
@@ -89,8 +89,8 @@ lazy val commonSettings = Seq(
   pomIncludeRepository := { _ => false },
   pomExtra := { val n = name.value
   <scm>
-    <url>git@github.com:Sciss/{n}.git</url>
-    <connection>scm:git:git@github.com:Sciss/{n}.git</connection>
+    <url>git@git.iem.at:sciss/{n}.git</url>
+    <connection>scm:git:git@git.iem.at:sciss/{n}.git</connection>
   </scm>
     <developers>
       <developer>
