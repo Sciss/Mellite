@@ -41,7 +41,6 @@ import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Universe, Workspace, Co
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
@@ -265,7 +264,7 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[Vec[Int]]
 
     private def parseString(s: String): Option[Vec[Int]] =
-      Try(s.split(" ").map(x => x.trim().toInt)(breakOut): Vec[Int]).toOption
+      Try(s.split(" ").iterator.map(x => x.trim().toInt).toIndexedSeq).toOption
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (ok: Config[S] => Unit)
@@ -297,7 +296,7 @@ object ObjViewImpl {
       def expr(implicit tx: S#Tx): _IntVector[S] = objH()
 
       def convertEditValue(v: Any): Option[Vec[Int]] = v match {
-        case num: Vec[_] => (Option(Vec.empty[Int]) /: num) {
+        case num: Vec[_] => num.foldLeft(Option(Vec.empty[Int])) {
           case (Some(prev), d: Int) => Some(prev :+ d)
           case _ => None
         }

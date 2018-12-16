@@ -26,7 +26,6 @@ import de.sciss.synth.proc.{AudioCue, Code, ObjKeys, Output, Proc, SynthGraphObj
 import de.sciss.synth.{SynthGraph, proc}
 import javax.swing.undo.UndoableEdit
 
-import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
 import scala.util.control.NonFatal
 
@@ -34,9 +33,9 @@ object Edits {
   def setBus[S <: Sys[S]](objects: Iterable[Obj[S]], intExpr: IntObj[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     val name = "Set Bus"
-    val edits: List[UndoableEdit] = objects.map { obj =>
+    val edits: List[UndoableEdit] = objects.iterator.map { obj =>
       EditAttrMap.expr[S, Int, IntObj](name, obj, ObjKeys.attrBus, Some(intExpr))
-    } (breakOut)
+    } .toList
     CompoundEdit(edits, name)
   }
 

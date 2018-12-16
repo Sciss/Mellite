@@ -30,7 +30,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.span.Span
-import de.sciss.swingplus.{ComboBox, GroupPanel, Table}
+import de.sciss.swingplus.{ComboBox, GroupPanel}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Proc, Timeline, Universe}
 import de.sciss.{desktop, equal}
@@ -44,7 +44,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TxnExecutor
 import scala.swing.Swing._
 import scala.swing.event.{MouseButtonEvent, MouseEvent, SelectionChanged, TableRowsSelected}
-import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, Swing, TextField}
+import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, Swing, Table, TextField}
 import scala.util.Try
 
 object GlobalProcsViewImpl {

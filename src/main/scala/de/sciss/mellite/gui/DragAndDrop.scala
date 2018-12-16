@@ -17,8 +17,6 @@ package gui
 
 import java.awt.datatransfer.{UnsupportedFlavorException, Transferable, DataFlavor}
 
-import collection.breakOut
-
 object DragAndDrop {
   sealed trait Flavor[A] extends DataFlavor
 
@@ -45,7 +43,7 @@ object DragAndDrop {
 
     /** Creates a transferable by wrapping a sequence of existing transferables. */
     def seq(xs: Transferable*): Transferable = new Transferable {
-      def getTransferDataFlavors: Array[DataFlavor] = xs.flatMap(_.getTransferDataFlavors)(breakOut)
+      def getTransferDataFlavors: Array[DataFlavor] = xs.iterator.flatMap(_.getTransferDataFlavors).toArray
       def isDataFlavorSupported(_flavor: DataFlavor): Boolean = xs.exists(_.isDataFlavorSupported(_flavor))
       def getTransferData(_flavor: DataFlavor): AnyRef = {
         val peer = xs.find(_.isDataFlavorSupported(_flavor)).getOrElse(throw new UnsupportedFlavorException(_flavor))

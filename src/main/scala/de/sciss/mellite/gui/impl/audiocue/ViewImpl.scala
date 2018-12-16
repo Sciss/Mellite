@@ -19,7 +19,7 @@ package audiocue
 import java.awt.datatransfer.Transferable
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.desktop.{UndoManager, Util}
+import de.sciss.desktop.Util
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
@@ -89,7 +89,7 @@ object ViewImpl {
     transport.addObject(timeline) // Obj(Timeline(timeline)))
     transport.addObject(diff)
 
-    implicit val undoManager: UndoManager = UndoManager()
+//    implicit val undoManager: UndoManager = UndoManager()
     // val offsetView  = LongSpinnerView  (grapheme.offset, "Offset")
     // val gainView    = DoubleSpinnerView[S](audioCue.value.gain /* RRR */, "Gain", width = 90)
     val res: Impl[S, I] = new Impl[S, I](/* gainView = gainView, */ inMemoryBridge = system.inMemoryTx) {

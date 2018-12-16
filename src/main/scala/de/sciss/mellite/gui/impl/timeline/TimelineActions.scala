@@ -129,13 +129,13 @@ trait TimelineActions[S <: Sys[S]] {
 
       val edits: List[UndoableEdit] = if (selectionModel.isEmpty) Nil else {
         val sel     = selectionModel.iterator
-        val top0    = (Topology.empty[V, E] /: sel)(_ addVertex _)
+        val top0    = sel.foldLeft(Topology.empty[V, E])(_ addVertex _)
         val viewSet = top0.vertices.toSet
         cursor.step { implicit tx =>
-          val top = (top0 /: top0.vertices) {
+          val top = top0.vertices.foldLeft(top0) {
             case (topIn, pv: ProcObjView.Timeline[S]) =>
               val targetIt = pv.targets.iterator.map(_.attr.parent).filter(viewSet.contains)
-              (topIn /: targetIt) { case (topIn1, target) =>
+              targetIt.foldLeft(topIn) { case (topIn1, target) =>
                 topIn1.addEdge(E(pv, target)) match {
                   case Success((topNew, _)) => topNew
                   case _                    => topIn1
@@ -147,7 +147,7 @@ trait TimelineActions[S <: Sys[S]] {
 
           val range0  = RangedSeq.empty[Placed, Long](pl => TimelineObjView.spanToPoint(pl.view.spanValue), Ordering.Long)
           val pl0     = List.empty[Placed]
-          val (_, plRes) = ((range0, pl0) /: top.vertices.indices) { case ((rangeIn, plIn), viewIdx) =>
+          val (_, plRes) = top.vertices.indices.foldLeft((range0, pl0)) { case ((rangeIn, plIn), viewIdx) =>
             val view      = top.vertices(viewIdx)
             val tup       = TimelineObjView.spanToPoint(view.spanValue)
             val it0       = rangeIn.filterOverlaps(tup).map(_.nextY)
@@ -259,7 +259,7 @@ trait TimelineActions[S <: Sys[S]] {
       val pos = timelineModel.position
       val edits = withSelection { implicit tx => views =>
         val tl    = timeline
-        val list  = views.flatMap { _view =>
+        val list  = views.toIterator.flatMap { _view =>
           val span = _view.span
           span.value match {
             case hs: Span.HasStart if hs.start != pos =>
@@ -294,7 +294,7 @@ trait TimelineActions[S <: Sys[S]] {
 
     private def dropTrack(span: Span): Int = {
       val spc = 1     // extra vertical spacing
-      val pos = (0 /: canvas.intersect(span).toList.sortBy(_.trackIndex)) { (pos0, _view) =>
+      val pos = canvas.intersect(span).toList.sortBy(_.trackIndex).foldLeft(0) { (pos0, _view) =>
         val y1 = _view.trackIndex - spc
         val y2 = _view.trackIndex + _view.trackHeight + spc
         if (y1 >= (pos0 + trackHeight) || y2 <= pos0) pos0 else y2
@@ -381,7 +381,7 @@ trait TimelineActions[S <: Sys[S]] {
 
   protected def splitObjects(time: Long)(views: TraversableOnce[TimelineObjView[S]])
                   (implicit tx: S#Tx): Option[UndoableEdit] = timelineMod.flatMap { groupMod =>
-    val edits: List[UndoableEdit] = views.flatMap { pv =>
+    val edits: List[UndoableEdit] = views.toIterator.flatMap { pv =>
       pv.span match {
         case SpanLikeObj.Var(oldSpan) =>
           val (edits, _, _) = splitObject(groupMod, time, oldSpan, pv.obj)

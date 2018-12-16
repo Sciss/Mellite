@@ -32,7 +32,6 @@ import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
 import org.pegdown.PegDownProcessor
 
-import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
@@ -242,7 +241,7 @@ object MarkdownRenderViewImpl {
         Util.addGlobalKey(ggFwd, alt + Key.Left)
       }
 
-      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.map(_.component)(breakOut)
+      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = mkEditButton().fold(bot1)(_ :: bot1)
       val bot3 = HGlue :: ggBwd :: ggFwd :: bot2
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)

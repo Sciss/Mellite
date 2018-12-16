@@ -30,7 +30,6 @@ import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
 
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{Ref, atomic}
 import scala.swing.Swing._
@@ -395,12 +394,12 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   private def mkFader(prefs: Preferences.Entry[Int], default: Int)(fun: Int => Unit): Slider = {
     val zeroMark    = "0\u25C0"
-    val lbMap: Map[Int, Label] = (-72 to 18 by 12).map { dec =>
+    val lbMap: Map[Int, Label] = (-72 to 18 by 12).iterator.map { dec =>
       val txt = if (dec == -72) "-\u221E" else if (dec == 0) zeroMark else dec.toString
       val lb  = new Label(txt)
       lb.font = smallFont
       (dec, lb)
-    } (breakOut)
+    } .toMap
     val lbZero = lbMap(0)
 
     val sl: Slider = new Slider {

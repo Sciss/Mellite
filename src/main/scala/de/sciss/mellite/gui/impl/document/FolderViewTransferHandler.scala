@@ -321,11 +321,11 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
         }
 
       // damn, this is annoying threading of state
-      val (_, edits: List[UndoableEdit]) = ((index, List.empty[UndoableEdit]) /: trip) {
+      val (_, edits: List[UndoableEdit]) = trip.foldLeft((index, List.empty[UndoableEdit])) {
         case ((idx0, list0), (f, spec, either)) =>
           ActionArtifactLocation.merge(either).fold((idx0, list0)) { case (xs, locM) =>
             import universe.cursor
-            val (idx2, list2) = ((idx0, list0) /: xs) { case ((idx1, list1), x) =>
+            val (idx2, list2) = xs.foldLeft((idx0, list0)) { case ((idx1, list1), x) =>
               val edit1 = EditFolderInsertObj[S]("Location", parent, idx1, x)
               (idx1 + 1, list1 :+ edit1)
             }

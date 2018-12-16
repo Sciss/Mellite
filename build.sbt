@@ -20,15 +20,16 @@ lazy val deps = new {
     val equal               = "0.1.3-SNAPSHOT"
     val fileUtil            = "1.1.3"
     val freesound           = "1.13.0"
-    val fscape              = "2.19.0"
+    val fscape              = "2.20.0-SNAPSHOT"
     val interpreterPane     = "1.10.0-SNAPSHOT"
     val jline               = "2.14.6"
+    val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3-SNAPSHOT"
     val lucre               = "3.11.0-SNAPSHOT"
     val lucreSwing          = "1.14.0-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.6.1"
+    val patterns            = "0.7.0-SNAPSHOT"
     val pdflitz             = "1.4.0-SNAPSHOT"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -37,14 +38,14 @@ lazy val deps = new {
     val scalaColliderSwing  = "1.41.0-SNAPSHOT"
     val scalaColliderUGen   = "1.19.2-SNAPSHOT"
     val scopt               = "3.7.1"
-    val sonogram            = "1.10.0"
-    val soundProcesses      = "3.23.1"
+    val sonogram            = "1.11.0-SNAPSHOT"
+    val soundProcesses      = "3.24.0-SNAPSHOT"
     val span                = "1.4.2"
     val submin              = "0.2.3"
     val swingPlus           = "0.4.0-SNAPSHOT"
     val topology            = "1.1.1-SNAPSHOT"
     val webLaF              = "2.1.4"
-    val wolkenpumpe         = "2.28.0"
+    val wolkenpumpe         = "2.29.0-SNAPSHOT"
   }
 }
 
@@ -215,7 +216,9 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "model"                          % deps.main.model,              // non-txn MVC
       "de.sciss"          %% "fscape"                         % deps.main.fscape,             // offline audio rendering
       "de.sciss"          %% "patterns-lucre"                 % deps.main.patterns,           // pattern sequences
-      "de.sciss"          %% "scalafreesound"                 % deps.main.freesound,          // Freesound support
+      "de.sciss"          %  "jump3r"                         % deps.main.jump3r,             // mp3 export
+// currently disabled until Scala 2.13 version is available
+ //     "de.sciss"          %% "scalafreesound"                 % deps.main.freesound,          // Freesound support
       "de.sciss"          %% "topology"                       % deps.main.topology,           // (sbt bug)
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "de.sciss"          %% "pdflitz"                        % deps.main.pdflitz,            // PDF export

@@ -33,7 +33,6 @@ import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 
-import scala.collection.breakOut
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, TextField}
 
@@ -73,9 +72,9 @@ object FScapeOutputsViewImpl {
         val key0  = "out"
         val tpe   = s"${title}put"
         // val opt   = OptionPane.textInput(message = s"$tpe Name", initial = key0)
-        val seqTpe: Seq[(Obj.Type, Icon, String)] = ListObjView.factories.map { fact =>
+        val seqTpe: Seq[(Obj.Type, Icon, String)] = ListObjView.factories.iterator.map { fact =>
           (fact.tpe, fact.icon, fact.humanName)
-        } (breakOut)
+        } .toList
         val ggTpe = new ComboBox(seqTpe.sortBy(_._3))
         // mein Gott, was fuer ein Terror
         val rDef = (new DefaultListCellRenderer).asInstanceOf[ListCellRenderer[AnyRef]]

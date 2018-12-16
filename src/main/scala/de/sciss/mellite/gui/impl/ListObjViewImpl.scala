@@ -62,7 +62,8 @@ object ListObjViewImpl {
     DoubleObjView             .tpe.typeId -> DoubleObjView,
     DoubleVectorObjView       .tpe.typeId -> DoubleVectorObjView,
     EnvSegmentObjView         .tpe.typeId -> EnvSegmentObjView,
-    FreesoundRetrievalObjView .tpe.typeId -> FreesoundRetrievalObjView,
+// XXX TODO Scala 2.13
+//    FreesoundRetrievalObjView .tpe.typeId -> FreesoundRetrievalObjView,
     FScapeObjView             .tpe.typeId -> FScapeObjView,
     FScapeOutputObjView       .tpe.typeId -> FScapeOutputObjView,
     IntObjView                .tpe.typeId -> IntObjView,

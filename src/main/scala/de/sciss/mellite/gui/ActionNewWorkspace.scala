@@ -37,8 +37,12 @@ object ActionNewWorkspace extends Action("Workspace...") {
 
   private def deleteRecursive(f: File): Boolean = {
     if (f.isDirectory) {
-      f.listFiles().foreach { f1 =>
+      val arr = f.listFiles()
+      var i = 0
+      while (i < arr.length) {
+        val f1 = arr(i)
         if (!deleteRecursive(f1)) return false
+        i += 1
       }
     }
     f.delete()

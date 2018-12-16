@@ -29,16 +29,14 @@ import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.model.impl.ModelImpl
-import de.sciss.swingplus.{DropMode, Table}
+import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe
 
 import scala.annotation.switch
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TMap
-import scala.swing.Swing._
 import scala.swing.event.TableRowsSelected
-import scala.swing.{Component, Label, ScrollPane, TextField}
+import scala.swing.{Component, Dimension, Label, ScrollPane, Table, TextField}
 
 abstract class MapViewImpl[S <: Sys[S], Repr]
                               (implicit val universe: Universe[S], val undoManager: UndoManager)
@@ -265,7 +263,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
       })
     }
 
-    jt.setPreferredScrollableViewportSize((if (showKeyOnly) 130 else 390) -> 160)
+    jt.setPreferredScrollableViewportSize(new Dimension(if (showKeyOnly) 130 else 390, 160))
 
     _table.sort(0)
 
@@ -351,7 +349,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
   }
 
   final def selection: List[(String, ObjView[S])] = {
-    val ind0: List[Int] = _table.selection.rows.map(_table.peer.convertRowIndexToModel)(breakOut)
+    val ind0: List[Int] = _table.selection.rows.iterator.map(_table.peer.convertRowIndexToModel).toList
     val indices = ind0.sorted
     indices.map(modelEDT.apply)
   }

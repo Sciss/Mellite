@@ -28,7 +28,6 @@ import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
 import de.sciss.synth.proc.{Universe, Widget}
 
-import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
@@ -120,7 +119,7 @@ object WidgetRenderViewImpl {
     }
 
     private def guiInit(): Unit = {
-      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.map(_.component)(breakOut)
+      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = if (embedded) bot1 else {
         val actionEdit = Action(null) {
           cursor.step { implicit tx =>

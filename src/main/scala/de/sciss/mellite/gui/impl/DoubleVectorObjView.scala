@@ -29,7 +29,6 @@ import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Component, Graphics2D, Label, TextField}
 import scala.util.Try
@@ -58,7 +57,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
 
   private def parseString(s: String): Option[V] =
-    Try(s.split(" ").map(x => x.trim().toDouble)(breakOut): V).toOption
+    Try(s.split(" ").iterator.map(x => x.trim().toDouble).toIndexedSeq).toOption
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (ok: Config[S] => Unit)
@@ -103,7 +102,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
       with ListObjViewImpl.SimpleExpr[S, V, E] {
 
     def convertEditValue(v: Any): Option[V] = v match {
-      case num: Vec[_] => (Option(Vector.empty[Double]) /: num) {
+      case num: Vec[_] => num.foldLeft(Option(Vector.empty[Double])) {
         case (Some(prev), d: Double) => Some(prev :+ d)
         case _ => None
       }

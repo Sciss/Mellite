@@ -40,7 +40,6 @@ import javax.swing.undo.UndoableEdit
 import javax.swing.{CellEditor, DropMode}
 
 import scala.annotation.tailrec
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Component
 import scala.util.control.NonFatal
@@ -283,12 +282,12 @@ object FolderViewImpl {
 
     def insertionPoint(implicit tx: S#Tx): (Folder[S], Int) = treeView.insertionPoint
 
-    def locations: Vec[ArtifactLocationObjView[S]] = selection.flatMap { nodeView =>
+    def locations: Vec[ArtifactLocationObjView[S]] = selection.iterator.flatMap { nodeView =>
       nodeView.renderData match {
         case view: ArtifactLocationObjView[S] => Some(view)
         case _ => None
       }
-    } (breakOut)
+    } .toIndexedSeq
 
     def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]] = {
       val locationsOk = locations.flatMap { view =>

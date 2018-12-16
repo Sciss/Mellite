@@ -28,7 +28,6 @@ import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
 import de.sciss.synth.proc.gui.UniverseView
 
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object FolderView {
@@ -51,7 +50,7 @@ object FolderView {
   final case class SelectionDnDData[S <: Sys[S]](universe: Universe[S], selection: Selection[S]) {
     type S1 = S
 
-    lazy val types: Set[Int] = selection.map(_.renderData.factory.tpe.typeId)(breakOut)
+    lazy val types: Set[Int] = selection.iterator.map(_.renderData.factory.tpe.typeId).toSet
   }
 
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344

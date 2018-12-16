@@ -24,7 +24,6 @@ import de.sciss.mellite.gui.TimelineObjView
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.synth.proc.Timeline
 
-import scala.collection.breakOut
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 /** These actions require being executed on the EDT. */
@@ -36,13 +35,13 @@ object ProcGUIActions {
                               (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     requireEDT()
     val name = "Remove Object"
-    val edits = views.flatMap { pv0 =>
+    val edits = views.toIterator.flatMap { pv0 =>
       val span  = pv0.span
       val obj   = pv0.obj
 
       val editsUnlink: Vec[UndoableEdit] = pv0 match {
         case pv: ProcObjView.Timeline[S] =>
-          val edits     = pv.targets.flatMap(_.remove())(breakOut): Vec[UndoableEdit]
+          val edits: Vec[UndoableEdit] = pv.targets.iterator.flatMap(_.remove()).toIndexedSeq
           edits
 
         case _ => Vector.empty

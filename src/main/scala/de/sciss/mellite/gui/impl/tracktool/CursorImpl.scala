@@ -57,7 +57,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends 
       canvas.timelineModel.modifiableOption.foreach { mod =>
         val it    = canvas.selectionModel.iterator
         val empty = Span.Void: Span.SpanOrVoid
-        val all   = (empty /: it) { (res, pv) =>
+        val all   = it.foldLeft(empty) { (res, pv) =>
           pv.spanValue match {
             case sp @ Span(_, _) => res.nonEmptyOption.fold(sp)(_ union sp)
             case _ => res

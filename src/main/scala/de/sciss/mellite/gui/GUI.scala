@@ -164,7 +164,7 @@ object GUI {
     pf.head.peer.putClientProperty("mellite.reaction", reaction)
   }
 
-  def boostRotary(lo: Float = 1, hi: Float = 512, tooltip: String = "Sonogram Brightness")
+  def boostRotary(lo: Float = 1f, hi: Float = 512f, tooltip: String = "Sonogram Brightness")
                  (fun: Float => Unit): Component = {
     val knob = new RotaryKnob {
       min       = 0

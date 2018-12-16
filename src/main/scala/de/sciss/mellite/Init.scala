@@ -16,7 +16,6 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.filecache.Limit
-import de.sciss.freesound.lucre.Retrieval
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
@@ -36,7 +35,8 @@ trait Init {
     Wolkenpumpe   .init()
     FScape        .init()
     Pattern       .init()
-    Retrieval     .init()
+// XXX TODO Scala 2.13
+//    de.sciss.freesound.lucre.Retrieval.init()
     Widget        .init()
 
     val cacheLim = Limit(count = 8192, space = 2L << 10 << 100)  // 2 GB; XXX TODO --- through user preferences

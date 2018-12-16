@@ -34,7 +34,6 @@ import de.sciss.syntaxpane.SyntaxDocument
 import de.sciss.syntaxpane.syntaxkits.MarkdownSyntaxKit
 import de.sciss.synth.proc.{Markdown, Universe}
 
-import scala.collection.breakOut
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
@@ -169,7 +168,7 @@ object MarkdownEditorViewImpl {
 
       Util.addGlobalKeyWhenVisible(ggRender, ksRender)
 
-      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.map(_.component)(breakOut)
+      val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = HGlue :: ggApply :: ggRender :: bot1
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot2: _*)
 

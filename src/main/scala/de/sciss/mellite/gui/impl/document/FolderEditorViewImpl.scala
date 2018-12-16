@@ -29,7 +29,6 @@ import de.sciss.synth.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel
 import javax.swing.undo.UndoableEdit
 
-import scala.collection.breakOut
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.Key
 import scala.swing.{Action, Alignment, CheckBox, Dialog, Label, Swing, TextField}
@@ -58,7 +57,7 @@ object FolderEditorViewImpl {
       val (parent, idx) = impl.peer.insertionPoint
       val edits: List[UndoableEdit] = xs.zipWithIndex.map { case (x, j) =>
         EditFolderInsertObj(f.prefix, parent, idx + j, x)
-      } (breakOut)
+      } // (breakOut)
       CompoundEdit(edits, "Create Objects")
     }
 

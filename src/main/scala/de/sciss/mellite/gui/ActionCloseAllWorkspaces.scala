@@ -24,7 +24,6 @@ import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc
 import de.sciss.synth.proc.Universe
 
-import scala.collection.breakOut
 import scala.concurrent.{Future, Promise}
 import scala.swing.Action
 import scala.swing.event.Key
@@ -145,10 +144,10 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
 
   private def collectVetos[S <: Sys[S]](workspace: Workspace[S], preOpt: Option[Veto[S#Tx]])
                                        (implicit tx: S#Tx /*, cursor: stm.Cursor[S] */): Option[Veto[S#Tx]] = {
-    val list0: List[Veto[S#Tx]] = workspace.dependents.flatMap {
+    val list0: List[Veto[S#Tx]] = workspace.dependents.iterator.flatMap {
       case mv: DependentMayVeto[S#Tx] /* if mv != self */ => mv.prepareDisposal()
       case _ => None
-    } (breakOut)
+    } .toList
 
     val list = preOpt.fold(list0)(_ :: list0)
 
