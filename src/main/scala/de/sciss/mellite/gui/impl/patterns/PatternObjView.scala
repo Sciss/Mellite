@@ -127,17 +127,18 @@ object PatternObjView extends ListObjView.Factory {
     val viewEval = View.wrap[S, Button] {
       val actionEval = new swing.Action("Evaluate") { self =>
         import universe.cursor
-        def apply(): Unit = cursor.step { implicit tx =>
-          val obj = objH()
-          val g   = obj.value // .graph().value
-          deferTx {
-            implicit val ctx: patterns.Context[Plain] = patterns.Context()
-            val n     = 60
-            val res0  = g.expand.toIterator.take(n).toList
-            val abbr  = res0.lengthCompare(n) == 0
-            val res   = if (abbr) res0.init else res0
-            println(res.mkString("[", ", ", if (abbr) " ...]" else "]"))
+        def apply(): Unit = {
+          implicit val ctx: patterns.Context[Plain] = patterns.Context()
+          val n = 60
+          val res0 = cursor.step { implicit tx =>
+            val obj = objH()
+            val g   = obj.value
+            val st  = g.expand
+            st.toIterator.take(n).toList
           }
+          val abbr  = res0.lengthCompare(n) == 0
+          val res   = if (abbr) res0.init else res0
+          println(res.mkString("[", ", ", if (abbr) " ...]" else "]"))
         }
       }
       GUI.toolButton(actionEval, raphael.Shapes.Quote)
