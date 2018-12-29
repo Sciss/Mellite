@@ -132,9 +132,9 @@ trait CollectionViewImpl[S <: Sys[S]]
       pop.add(Item(f.prefix, new AddAction(f)))
     }
     val subMap = sub.groupBy(_.category)
-    subMap.keys.toSeq.sorted.foreach { categ =>
-      val group = Group(categ.toLowerCase, categ)
-      subMap.getOrElse(categ, Nil).foreach { f =>
+    subMap.keys.toSeq.sorted.foreach { category =>
+      val group = Group(category.toLowerCase, category)
+      subMap.getOrElse(category, Nil).foreach { f =>
         group.add(Item(f.prefix, new AddAction(f)))
       }
       pop.add(group)

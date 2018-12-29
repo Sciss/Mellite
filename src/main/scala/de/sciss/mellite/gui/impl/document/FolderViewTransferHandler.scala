@@ -20,6 +20,7 @@ import java.io.File
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
@@ -116,18 +117,18 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
             copyFolderData(support)
           else if (crossSessionList) {
             copyListData(support)
-          }
-          else universe.cursor.step { implicit tx =>
-            val pOpt = parentOption
+          } else {
+            import universe.cursor
+            val pOpt = cursor.step { implicit tx => parentOption.map { case (f, fi) => (tx.newHandle(f), fi) }}
             // println(s"parentOption.isDefined? ${pOpt.isDefined}")
-            pOpt.flatMap { case (parent,idx) =>
+            pOpt.flatMap { case (parentH, idx) =>
               if (isFolder)
-                insertFolderData(support, parent, idx)
+                insertFolderData(support, parentH, idx)
               else if (isList) {
-                insertListData(support, parent, idx)
+                insertListData(support, parentH, idx)
               }
               else if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
-                importFiles(support, parent, idx)
+                importFiles(support, parentH, idx)
               else None
             }
           }
@@ -138,88 +139,93 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- folder: link ----
 
-    private def insertFolderData(support: TransferSupport, parent: Folder[S], index: Int)
-                                (implicit tx: S#Tx): Option[UndoableEdit] = {
+    private def insertFolderData(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+                                 index: Int): Option[UndoableEdit] = {
       val data = support.getTransferable.getTransferData(FolderView.SelectionFlavor)
         .asInstanceOf[FolderView.SelectionDnDData[S]]
 
-      insertFolderData1(data.selection, parent, idx = index, dropAction = support.getDropAction)
+      insertFolderData1(data.selection, parentH, idx = index, dropAction = support.getDropAction)
     }
 
     // XXX TODO: not sure whether removal should be in exportDone or something
-    private def insertFolderData1(sel0: FolderView.Selection[S], newParent: Folder[S], idx: Int, dropAction: Int)
-                          (implicit tx: S#Tx): Option[UndoableEdit] = {
+    private def insertFolderData1(sel0: FolderView.Selection[S], newParentH: stm.Source[S#Tx, Folder[S]], idx: Int,
+                                  dropAction: Int): Option[UndoableEdit] = {
       // println(s"insert into $parent at index $idx")
 
       val sel = FolderView.cleanSelection(sel0)
 
       import de.sciss.equal.Implicits._
-      def isNested(c: Obj[S]): Boolean = c match {
-        case objT: Folder[S] =>
-          objT === newParent || objT.iterator.toList.exists(isNested)
-        case _ => false
-      }
 
       val isMove = dropAction === TransferHandler.MOVE
       val isCopy = dropAction === TransferHandler.COPY
 
-      // make sure we are not moving a folder within itself (it will magically disappear :)
-      val sel1 = if (!isMove) sel else sel.filterNot(nv => isNested(nv.modelData()))
+      universe.cursor.step { implicit tx =>
+        val newParent = newParentH()
 
-      // if we move children within the same folder, adjust the insertion index by
-      // decrementing it for any child which is above the insertion index, because
-      // we will first remove all children, then re-insert them.
-      val idx0 = if (idx >= 0) idx else newParent /* .children */ .size
-      val idx1 = if (!isMove) idx0
-      else idx0 - sel1.count { nv =>
-        val isInNewParent = nv.parent === newParent
-        val child = nv.modelData()
-        isInNewParent && newParent.indexOf(child) <= idx0
-      }
+        def isNested(c: Obj[S]): Boolean = c match {
+          case objT: Folder[S] =>
+            objT === newParent || objT.iterator.toList.exists(isNested)
+          case _ => false
+        }
 
-      val editRemove: List[UndoableEdit] = if (!isMove) Nil
-      else sel1.flatMap { nv =>
-        val parent: Folder[S] = nv.parent
-        val childH = nv.modelData
-        val idx = parent.indexOf(childH())
-        if (idx < 0) {
-          println("WARNING: Parent of drag object not found")
-          None
+        // make sure we are not moving a folder within itself (it will magically disappear :)
+        val sel1 = if (!isMove) sel else sel.filterNot(nv => isNested(nv.modelData()))
+
+        // if we move children within the same folder, adjust the insertion index by
+        // decrementing it for any child which is above the insertion index, because
+        // we will first remove all children, then re-insert them.
+        val idx0 = if (idx >= 0) idx else newParent /* .children */ .size
+        val idx1 = if (!isMove) idx0
+        else idx0 - sel1.count { nv =>
+          val isInNewParent = nv.parent === newParent
+          val child = nv.modelData()
+          isInNewParent && newParent.indexOf(child) <= idx0
+        }
+
+        val editRemove: List[UndoableEdit] = if (!isMove) Nil
+        else sel1.flatMap { nv =>
+          val parent: Folder[S] = nv.parent
+          val childH = nv.modelData
+          val idx = parent.indexOf(childH())
+          if (idx < 0) {
+            println("WARNING: Parent of drag object not found")
+            None
+          } else {
+            import universe.cursor
+            val edit = EditFolderRemoveObj[S](nv.renderData.humanName, parent, idx, childH())
+            Some(edit)
+          }
+        }
+
+        val selZip = sel1.zipWithIndex
+        val editInsert = if (isCopy) {
+          val context = Copy[S, S]
+          val res = selZip.map { case (nv, off) =>
+            val in  = nv.modelData()
+            val out = context(in)
+            import universe.cursor
+            EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = out)
+          }
+          context.finish()
+          res
         } else {
-          import universe.cursor
-          val edit = EditFolderRemoveObj[S](nv.renderData.humanName, parent, idx, childH())
-          Some(edit)
+          selZip.map { case (nv, off) =>
+            import universe.cursor
+            EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = nv.modelData())
+          }
         }
-      }
 
-      val selZip = sel1.zipWithIndex
-      val editInsert = if (isCopy) {
-        val context = Copy[S, S]
-        val res = selZip.map { case (nv, off) =>
-          val in  = nv.modelData()
-          val out = context(in)
-          import universe.cursor
-          EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = out)
+        val edits: List[UndoableEdit] = editRemove ++ editInsert
+        val name = sel1 match {
+          case single :: Nil  => single.renderData.humanName
+          case _              => "Elements"
         }
-        context.finish()
-        res
-      } else {
-        selZip.map { case (nv, off) =>
-          import universe.cursor
-          EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = nv.modelData())
-        }
-      }
 
-      val edits: List[UndoableEdit] = editRemove ++ editInsert
-      val name = sel1 match {
-        case single :: Nil  => single.renderData.humanName
-        case _              => "Elements"
+        val prefix = if (isMove) "Move" else if (isCopy) "Copy" else "Link"
+        CompoundEdit(edits, s"$prefix $name")
       }
-
-      val prefix = if (isMove) "Move" else if (isCopy) "Copy" else "Link"
-      CompoundEdit(edits, s"$prefix $name")
     }
-    
+
     // ---- folder: copy ----
 
     private def copyFolderData(support: TransferSupport): Option[UndoableEdit] = {
@@ -259,12 +265,15 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- list: link ----
 
-    private def insertListData(support: TransferSupport, parent: Folder[S], index: Int)
-                              (implicit tx: S#Tx): Option[UndoableEdit] = {
+    private def insertListData(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+                               index: Int): Option[UndoableEdit] = {
       val data = support.getTransferable.getTransferData(ListObjView.Flavor)
         .asInstanceOf[ListObjView.Drag[S]]
 
-      val edit = insertListData1(data, parent, idx = index, dropAction = support.getDropAction)
+      val edit = universe.cursor.step { implicit tx =>
+        val parent = parentH()
+        insertListData1(data, parent, idx = index, dropAction = support.getDropAction)
+      }
       Some(edit)
     }
 
@@ -307,8 +316,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- files ----
 
-    private def importFiles(support: TransferSupport, parent: Folder[S], index: Int)
-                           (implicit tx: S#Tx): Option[UndoableEdit] = {
+    private def importFiles(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+                            index: Int): Option[UndoableEdit] = {
       import scala.collection.JavaConverters._
       val data: List[File] = support.getTransferable.getTransferData(DataFlavor.javaFileListFlavor)
         .asInstanceOf[java.util.List[File]].asScala.toList
@@ -323,15 +332,18 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
       // damn, this is annoying threading of state
       val (_, edits: List[UndoableEdit]) = trip.foldLeft((index, List.empty[UndoableEdit])) {
         case ((idx0, list0), (f, spec, either)) =>
-          ActionArtifactLocation.merge(either).fold((idx0, list0)) { case (xs, locM) =>
-            import universe.cursor
-            val (idx2, list2) = xs.foldLeft((idx0, list0)) { case ((idx1, list1), x) =>
-              val edit1 = EditFolderInsertObj[S]("Location", parent, idx1, x)
-              (idx1 + 1, list1 :+ edit1)
+          universe.cursor.step { implicit tx =>
+            val parent = parentH()
+            ActionArtifactLocation.merge(either).fold((idx0, list0)) { case (xs, locM) =>
+              import universe.cursor
+              val (idx2, list2) = xs.foldLeft((idx0, list0)) { case ((idx1, list1), x) =>
+                val edit1 = EditFolderInsertObj[S]("Location", parent, idx1, x)
+                (idx1 + 1, list1 :+ edit1)
+              }
+              val obj   = ObjectActions.mkAudioFile(locM, f, spec)
+              val edit2 = EditFolderInsertObj[S]("Audio File", parent, idx2, obj)
+              (idx2 + 1, list2 :+ edit2)
             }
-            val obj   = ObjectActions.mkAudioFile(locM, f, spec)
-            val edit2 = EditFolderInsertObj[S]("Audio File", parent, idx2, obj)
-            (idx2 + 1, list2 :+ edit2)
           }
       }
       CompoundEdit(edits, "Insert Audio Files")

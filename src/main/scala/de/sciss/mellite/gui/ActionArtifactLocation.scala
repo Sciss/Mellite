@@ -114,7 +114,8 @@ object ActionArtifactLocation {
           case Nil => res
       }
 
-      val _options = loop(root(tx).iterator.toList, Vector.empty)
+      val xs0 = root(tx).iterator.toList
+      val _options = loop(xs0, Vector.empty)
       _options
     }
 

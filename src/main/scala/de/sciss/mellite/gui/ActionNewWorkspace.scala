@@ -24,10 +24,11 @@ import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.synth.{InMemory, Sys}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, Universe, Workspace}
+import javax.swing.JDialog
 
 import scala.concurrent.duration.Duration
 import scala.swing.event.Key
-import scala.swing.{Action, Label}
+import scala.swing.{Action, Button, Label}
 import scala.util.control.NonFatal
 
 object ActionNewWorkspace extends Action("Workspace...") {
@@ -58,11 +59,24 @@ object ActionNewWorkspace extends Action("Workspace...") {
         |""".stripMargin
     )
 
-    val tpeEntries  = Seq("Confluent", "Durable", "In-Memory")
-    val tpeInitial  = tpeEntries.headOption
-    val tpeDlg      = OptionPane(message = tpeMessage, entries = tpeEntries, initial = tpeInitial)
-    tpeDlg.title    = fullTitle
-    val tpeRes      = tpeDlg.show().id
+    var tpeRes = -1
+
+    // XXX TODO --- we need a way to do this elegantly in Desktop
+    lazy val tpeEntries: Seq[Button] = Seq(("Confluent", Key.C), ("Durable", Key.D), ("In-Memory", Key.I)).zipWithIndex
+      .map { case ((txt, key), ti) =>
+        val b = Button(txt) {
+          tpeRes = ti
+          dlg.dispose()
+        }
+        b.mnemonic = key
+        b
+      }
+
+    lazy val tpeInitial = tpeEntries(1)
+    lazy val tpeDlg     = OptionPane(message = tpeMessage, entries = tpeEntries, initial = Some(tpeInitial))
+    tpeDlg.title        = fullTitle
+    lazy val dlg: JDialog = tpeDlg.peer.createDialog(null, tpeDlg.title)
+    dlg.setVisible(true)
     if (tpeRes < 0) return
     val confluent   = tpeRes == 0
     val inMemory    = tpeRes == 2
