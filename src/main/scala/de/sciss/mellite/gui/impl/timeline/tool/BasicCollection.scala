@@ -16,7 +16,9 @@ package de.sciss.mellite.gui.impl.timeline.tool
 import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{TimelineObjView, TimelineTool}
+import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
+import de.sciss.mellite.gui.TimelineObjView
+import de.sciss.mellite.gui.impl.DraggingTool
 
 /** Most common implementation of a timeline tool, based on region selection and
   * mouse dragging. It implements `handleSelect` by instantiating a `Drag`
@@ -24,16 +26,15 @@ import de.sciss.mellite.gui.{TimelineObjView, TimelineTool}
   * Sub-classes may choose to provide a custom dialog for double clicks by
   * and thus may return `Some` data if the dialog is positively confirmed.
   */
-trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with Dragging[S, A] {
-  import TimelineTool._
+trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Int] {
 
   protected type Initial = TimelineObjView[S]
 
-  final protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit =
+  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: TimelineObjView[S]): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {
-      new Drag(e, hitTrack, pos, region)
+      new Drag(e, modelY, pos, child)
     }
 
   protected def dialog(): Option[A]

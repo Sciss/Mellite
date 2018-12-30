@@ -19,6 +19,7 @@ package timeline
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
 import TimelineTool.EmptyRubber
+import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
 
 trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineTrackCanvas[S] {
   final val timelineTools: TimelineTools[S] = TimelineTools(this)
@@ -26,7 +27,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
   import TimelineTools._
 
   protected var toolState: Option[Any]
-  protected var rubberState: TimelineTool.DragRubber = EmptyRubber
+  protected var rubberState: DragRubber[Int] = EmptyRubber
 
   private[this] var _trackIndexOffset = 0
 
@@ -36,12 +37,14 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
     repaint()
   }
 
-  final def screenToTrack(y    : Int): Int = y / TimelineView.TrackScale + trackIndexOffset
-  final def trackToScreen(track: Int): Int = (track - trackIndexOffset) * TimelineView.TrackScale
+  final def screenToModelY(y    : Int): Int = y / TimelineView.TrackScale + trackIndexOffset
+  final def modelYToScreen(track: Int): Int = (track - trackIndexOffset) * TimelineView.TrackScale
+
+  final def modelYBox(a: Int, b: Int): (Int, Int) = if (a < b) (a, b - a + 1) else (b, a - b + 1)
 
   private[this] val toolListener: TimelineTool.Listener = {
     // case TrackTool.DragBegin =>
-    case TimelineTool.DragCancel =>
+    case DragCancel =>
       log(s"Drag cancel $toolState")
       if (toolState.isDefined) {
         toolState   = None
@@ -51,7 +54,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TimelineTool.DragEnd =>
+    case DragEnd =>
       log(s"Drag end $toolState")
       toolState.fold[Unit] {
         if (rubberState.isValid) {
@@ -65,7 +68,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TimelineTool.DragAdjust(value) =>
+    case DragAdjust(value) =>
       // log(s"Drag adjust $value")
       val some = Some(value)
       if (toolState != some) {
@@ -73,13 +76,13 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TimelineTool.Adjust(state) =>
+    case BasicTool.Adjust(state) =>
       log(s"Tool commit $state")
       toolState = None
       commitToolChanges(state)
       repaint()
 
-    case state: TimelineTool.DragRubber =>
+    case state: DragRubber[Int] =>    // XXX TODO: erased type arg, not pretty
       log(s"Tool rubber $state")
       rubberState = state
       repaint()

@@ -20,7 +20,8 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeObjView
+import de.sciss.mellite.gui.impl.CollectionToolLike
+import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeObjView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.UndoableEdit
 
@@ -30,8 +31,12 @@ import javax.swing.undo.UndoableEdit
   * It also implements `commit` by aggregating individual mark based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends CollectionLike[S, A] {
+trait CollectionImpl[S <: Sys[S], A] extends CollectionToolLike[S, A, Double, GraphemeObjView[S]]
+  with GraphemeTool[S, A] {
+
   tool =>
+
+  override protected def canvas: GraphemeCanvas[S]
 
   protected def handlePress(e: MouseEvent, modelY: Double, pos: Long, markOpt: Option[GraphemeObjView[S]]): Unit = {
     handleMouseSelection(e, markOpt)

@@ -1,12 +1,25 @@
-package de.sciss.mellite.gui.impl.grapheme.tool
+/*
+ *  DraggingTool.scala
+ *  (Mellite)
+ *
+ *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
+ *
+ *  This software is published under the GNU Affero General Public License v3+
+ *
+ *
+ *  For further information, please contact Hanns Holger Rutz at
+ *  contact@sciss.de
+ */
+
+package de.sciss.mellite.gui.impl
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
+import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
 import javax.swing.event.MouseInputAdapter
 
-/** A mixin trait for region-like grapheme tools that enables updates during mouse dragging.
+/** A mixin trait for region-like timeline tools that enables updates during mouse dragging.
   * It adds an internal class `Drag` that embodies that dragging state (initial
   * and current positions). Dragging is useful for all parameters that can
   * be continuously changed such as region position but also region gain. It does
@@ -17,8 +30,8 @@ import javax.swing.event.MouseInputAdapter
   *
   * All the sub-class must do is call `new Drag` and provide the body of method `dragToParam`.
   */
-trait Dragging[S <: Sys[S], A] {  // XXX TODO DRY with timeline.tool.Dragging
-  _: CollectionLike[S, A] =>
+trait DraggingTool[S <: Sys[S], A, Y] {
+  _: CollectionToolLike[S, A, Y, _] =>
 
   protected def dragToParam(d: Drag): A
 
@@ -66,7 +79,7 @@ trait Dragging[S <: Sys[S], A] {  // XXX TODO DRY with timeline.tool.Dragging
     *
     * A drag can be aborted by pressing the <tt>Escape</tt> key.
     */
-  protected class Drag(val firstEvent: MouseEvent, val firstModelY: Double,
+  protected class Drag(val firstEvent: MouseEvent, val firstModelY: Y,
                        val firstPos: Long, val initial: Initial)
     extends MouseInputAdapter with KeyListener {
 
@@ -76,7 +89,7 @@ trait Dragging[S <: Sys[S], A] {  // XXX TODO DRY with timeline.tool.Dragging
     private[this] var _currentPos     = firstPos
 
     def currentEvent  : MouseEvent  = _currentEvent
-    def currentModelY : Double      = _currentModelY
+    def currentModelY : Y           = _currentModelY
     def currentPos    : Long        = _currentPos
 
     // ---- constructor ----
@@ -102,7 +115,7 @@ trait Dragging[S <: Sys[S], A] {  // XXX TODO DRY with timeline.tool.Dragging
     private def calcCurrent(e: MouseEvent): Unit = {
       _currentEvent   = e
       _currentPos     = canvas.screenToFrame(e.getX).toLong
-      _currentModelY  = canvas.screenYToModel(e.getY)
+      _currentModelY  = canvas.screenToModelY(e.getY)
     }
 
     override def mouseDragged(e: MouseEvent): Unit = {

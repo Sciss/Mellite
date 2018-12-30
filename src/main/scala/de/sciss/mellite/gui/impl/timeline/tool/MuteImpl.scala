@@ -22,7 +22,8 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.TimelineTool.Mute
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.impl.RubberBandTool
+import de.sciss.mellite.gui.{BasicTool, GUI, Shapes, TimelineObjView, TimelineTrackCanvas}
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -36,7 +37,8 @@ object MuteImpl {
   }
 }
 final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends CollectionImpl[S, Mute] with RubberBand[S, Mute] {
+  extends CollectionImpl[S, Mute]
+    with RubberBandTool[S, Mute, Int, TimelineObjView[S]] {
 
   def defaultCursor: Cursor = MuteImpl.cursor
   val name                  = "Mute"
@@ -57,7 +59,7 @@ final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   }
 
   protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit = region match {
-    case hm: TimelineObjView.HasMute => dispatch(TimelineTool.Adjust(Mute(!hm.muted)))
+    case hm: TimelineObjView.HasMute => dispatch(BasicTool.Adjust(Mute(!hm.muted)))
     case _ =>
   }
 }

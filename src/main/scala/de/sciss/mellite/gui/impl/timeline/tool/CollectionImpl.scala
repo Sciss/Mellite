@@ -20,7 +20,8 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.TimelineObjView
+import de.sciss.mellite.gui.impl.CollectionToolLike
+import de.sciss.mellite.gui.{TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.undo.UndoableEdit
 
@@ -30,16 +31,20 @@ import javax.swing.undo.UndoableEdit
   * It also implements `commit` by aggregating individual region based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends CollectionLike[S, A] {
+trait CollectionImpl[S <: Sys[S], A] extends CollectionToolLike[S, A, Int, TimelineObjView[S]]
+  with TimelineTool[S, A]{
+
   tool =>
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineObjView[S]]): Unit = {
-    handleMouseSelection(e, regionOpt)
+  override protected def canvas: TimelineTrackCanvas[S]
+
+  protected def handlePress(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[TimelineObjView[S]]): Unit = {
+    handleMouseSelection(e, childOpt)
     // now go on if region is selected
-    regionOpt.fold[Unit] {
-      handleOutside(e, hitTrack, pos)
+    childOpt.fold[Unit] {
+      handleOutside(e, modelY, pos)
     } { region =>
-      if (canvas.selectionModel.contains(region)) handleSelect(e, hitTrack, pos, region)
+      if (canvas.selectionModel.contains(region)) handleSelect(e, modelY, pos, region)
     }
   }
 
@@ -58,10 +63,10 @@ trait CollectionImpl[S <: Sys[S], A] extends CollectionLike[S, A] {
     CompoundEdit(edits, name)
   }
 
-  protected def commitObj(drag: A)(span: SpanLikeObj[S], proc: Obj[S], timeline: Timeline[S])
+  protected def commitObj(drag: A)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
 
-  protected def handleSelect (e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit
+  protected def handleSelect (e: MouseEvent, modelY: Int, pos: Long, region: TimelineObjView[S]): Unit
 
-  protected def handleOutside(e: MouseEvent, hitTrack: Int, pos: Long): Unit = ()
+  protected def handleOutside(e: MouseEvent, modelY: Int, pos: Long): Unit = ()
 }

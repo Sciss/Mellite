@@ -16,7 +16,9 @@ package de.sciss.mellite.gui.impl.grapheme.tool
 import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeTool}
+import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
+import de.sciss.mellite.gui.GraphemeObjView
+import de.sciss.mellite.gui.impl.DraggingTool
 
 /** Most common implementation of a grapheme tool, based on region selection and
   * mouse dragging. It implements `handleSelect` by instantiating a `Drag`
@@ -24,9 +26,7 @@ import de.sciss.mellite.gui.{GraphemeObjView, GraphemeTool}
   * Sub-classes may choose to provide a custom dialog for double clicks by
   * and thus may return `Some` data if the dialog is positively confirmed.
   */
-trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with Dragging[S, A] {
-  import GraphemeTool._
-
+trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Double] {
   protected type Initial = GraphemeObjView[S]
 
   final protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, region: GraphemeObjView[S]): Unit =

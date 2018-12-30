@@ -24,6 +24,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
+import de.sciss.mellite.gui.impl.DraggingTool
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.{Proc, Timeline}
@@ -54,7 +55,8 @@ object PatchImpl {
     Toolkit.getDefaultToolkit.createCustomCursor(mkImage(aa = Desktop.isMac), new Point(8, 8), "patch")
 }
 final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends CollectionImpl[S, TimelineTool.Patch[S]] with Dragging[S, TimelineTool.Patch[S]] {
+  extends CollectionImpl[S, TimelineTool.Patch[S]]
+    with DraggingTool[S, TimelineTool.Patch[S], Int] {
 
   import TimelineTool.Patch
 
@@ -66,7 +68,7 @@ final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
 
   protected def dragToParam(d: Drag): Patch[S] = {
     val pos   = d.currentPos
-    val sink  = canvas.findChildView(frame = pos, hitTrack = d.currentTrack) match {
+    val sink  = canvas.findChildView(frame = pos, modelY = d.currentModelY) match {
       case Some(r: ProcObjView.Timeline[S]) if r != d.initial /* && r.inputs.nonEmpty */ =>  // region.inputs only carries linked ones!
         Patch.Linked(r)
       case _ =>

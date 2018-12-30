@@ -16,6 +16,7 @@ package gui
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.impl.ToolPaletteImpl
 import de.sciss.mellite.gui.impl.grapheme.ToolsImpl
 import de.sciss.mellite.gui.impl.grapheme.tool.{CursorImpl, MoveImpl}
@@ -46,20 +47,9 @@ object GraphemeTool {
 //    def isValid: Boolean = modelYOffset >= 0
   }
 
-  sealed trait Update[+A]
-  case object DragBegin extends Update[Nothing]
-  final case class DragAdjust[A](value: A) extends Update[A]
+  type Update[+A] = BasicTool.Update[A]
 
-  final case class DragRubber(modelYOffset: Double, modelYExtent: Double, span: Span)
-    extends Update[Nothing] with Rectangular
-
-  case object DragEnd    extends Update[Nothing] // (commit: AbstractCompoundEdit)
-  case object DragCancel extends Update[Nothing]
-
-  /** Direct adjustment without drag period. */
-  case class Adjust[A](value: A) extends Update[A]
-
-  val EmptyRubber = DragRubber(-1, -1, Span(0L, 0L))
+  val EmptyRubber: DragRubber[Double] = DragRubber(-1d, -1d, Span(0L, 0L), isValid = false)
 
   // ----
 
@@ -84,4 +74,4 @@ object GraphemeTool {
   * @tparam A   the type of element that represents an ongoing
   *             edit state (typically during mouse drag).
   */
-trait GraphemeTool[S <: stm.Sys[S], A] extends BasicTool[S, A, GraphemeTool.Update[A]]
+trait GraphemeTool[S <: stm.Sys[S], A] extends BasicTool[S, A]

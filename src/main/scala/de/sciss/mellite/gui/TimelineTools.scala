@@ -16,6 +16,7 @@ package gui
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.impl.ToolPaletteImpl
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.ToolsImpl
@@ -81,28 +82,13 @@ trait TimelineTools[S <: stm.Sys[S]] extends BasicTools[S, TimelineTool[S, _], T
 }
 
 object TimelineTool {
-  trait Rectangular {
-    def trackIndex: Int
-    def trackHeight: Int
-    def span: Span
-
-    def isValid: Boolean = trackIndex >= 0
+  trait Rectangular extends BasicTool.Rectangular[Int] {
+    final def isValid: Boolean = modelYOffset >= 0
   }
 
-  sealed trait Update[+A]
-  case object DragBegin extends Update[Nothing]
-  final case class DragAdjust[A](value: A) extends Update[A]
+  type Update[+A] = BasicTool.Update[A]
 
-  final case class DragRubber(trackIndex: Int, trackHeight: Int, span: Span)
-    extends Update[Nothing] with Rectangular
-
-  case object DragEnd    extends Update[Nothing] // (commit: AbstractCompoundEdit)
-  case object DragCancel extends Update[Nothing]
-
-  /** Direct adjustment without drag period. */
-  case class Adjust[A](value: A) extends Update[A]
-
-  val EmptyRubber = DragRubber(-1, -1, Span(0L, 0L))
+  val EmptyRubber: DragRubber[Int] = DragRubber(-1, -1, Span(0L, 0L), isValid = false)
 
   // ----
 
@@ -121,7 +107,7 @@ object TimelineTool {
   final val NoFade      = Fade(0L, 0L, 0f, 0f)
   final val NoFunction  = Function(-1, -1, Span(0L, 0L))
 
-  final case class Function(trackIndex: Int, trackHeight: Int, span: Span)
+  final case class Function(modelYOffset: Int, modelYExtent: Int, span: Span)
     extends Update[Nothing] with Rectangular
 
   final case class Cursor  (name: Option[String])
@@ -157,7 +143,7 @@ object TimelineTool {
   * @tparam A   the type of element that represents an ongoing
   *             edit state (typically during mouse drag).
   */
-trait TimelineTool[S <: stm.Sys[S], A] extends BasicTool[S, A, TimelineTool.Update[A]]
+trait TimelineTool[S <: stm.Sys[S], A] extends BasicTool[S, A]
 
 //object TrackSlideTool {
 //  case class Slide(deltaOuter: Long, deltaInner: Long)

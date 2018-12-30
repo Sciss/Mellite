@@ -14,26 +14,11 @@
 package de.sciss.mellite
 package gui
 
-import de.sciss.audiowidgets.TimelineCanvas
 import de.sciss.lucre.stm.Sys
-import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 
-trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas {
+trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Int, TimelineObjView[S]] {
   def timeline(implicit tx: S#Tx): Timeline[S]
-
-  def selectionModel: TimelineObjView.SelectionModel[S]
-
-  def iterator: Iterator[TimelineObjView[S]]
-
-  def intersect(span: Span.NonVoid): Iterator[TimelineObjView[S]]
-
-  def findChildView(frame: Long, hitTrack: Int): Option[TimelineObjView[S]]
-
-  def findChildViews(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]]
-
-  def screenToTrack(y    : Int): Int
-  def trackToScreen(track: Int): Int
 
   def timelineTools: TimelineTools[S]
 }

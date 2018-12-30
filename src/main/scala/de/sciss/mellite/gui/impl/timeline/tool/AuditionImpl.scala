@@ -18,7 +18,8 @@ import java.awt.{Cursor, Point, Toolkit}
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.gui.impl.{CollectionToolLike, RubberBandTool}
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.span.Span
 import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
 import javax.swing.Icon
@@ -49,7 +50,9 @@ object AuditionImpl {
   * TODO: update -- this is partly fixed now.
   */
 class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionLike[S, Unit] with RubberBand[S, Unit] {
+  extends CollectionToolLike[S, Unit, Int, TimelineObjView[S]]
+    with RubberBandTool[S, Unit, Int, TimelineObjView[S]]
+    with TimelineTool[S, Unit] {
 
   // import TrackTool.{Cursor => _}
 

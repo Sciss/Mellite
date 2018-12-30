@@ -170,7 +170,7 @@ object TimelineViewImpl {
     private[this] val viewSet   = TSet     .empty[TimelineObjView[S]]
 
     var canvas: TimelineTrackCanvasImpl[S] = _
-    val disposables = Ref(List.empty[Disposable[S#Tx]])
+    val disposables: Ref[List[Disposable[S#Tx]]] = Ref(List.empty)
 
     protected val auxMap: IdentifierMap[S#Id, S#Tx, Any]                      = tx0.newInMemoryIdMap
     protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
@@ -444,7 +444,7 @@ object TimelineViewImpl {
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
         val (span, obj) = ProcActions.mkAudioRegion(time = tlSpan,
           audioCue = audioCue, gOffset = drag.selection.start /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
-        val track = canvas.screenToTrack(drop.y)
+        val track = canvas.screenToModelY(drop.y)
         obj.attr.put(TimelineObjView.attrTrackIndex, IntObj.newVar(IntObj.newConst(track)))
         val edit = EditTimelineInsertObj("Insert Audio Region", groupM, span, obj)
         edit
@@ -452,7 +452,7 @@ object TimelineViewImpl {
 
     private def performDrop(drop: DnD.Drop[S]): Boolean = {
       def withRegions[A](fun: S#Tx => List[TimelineObjView[S]] => Option[A]): Option[A] =
-        canvas.findChildView(drop.frame, canvas.screenToTrack(drop.y)).flatMap { hitRegion =>
+        canvas.findChildView(drop.frame, canvas.screenToModelY(drop.y)).flatMap { hitRegion =>
           val regions = if (selectionModel.contains(hitRegion)) selectionModel.iterator.toList else hitRegion :: Nil
           cursor.step { implicit tx =>
             fun(tx)(regions)
@@ -460,7 +460,7 @@ object TimelineViewImpl {
         }
 
       def withProcRegions[A](fun: S#Tx => List[ProcObjView[S]] => Option[A]): Option[A] =
-        canvas.findChildView(drop.frame, canvas.screenToTrack(drop.y)).flatMap {
+        canvas.findChildView(drop.frame, canvas.screenToModelY(drop.y)).flatMap {
           case hitRegion: ProcObjView[S] =>
             val regions = if (selectionModel.contains(hitRegion)) {
               selectionModel.iterator.collect {
@@ -577,15 +577,15 @@ object TimelineViewImpl {
         viewRange.filterOverlaps((start, stop))
       }
 
-      def findChildView(pos: Long, hitTrack: Int): Option[TimelineObjView[S]] = {
+      def findChildView(pos: Long, modelY: Int): Option[TimelineObjView[S]] = {
         val span = Span(pos, pos + 1)
         val regions = intersect(span)
-        regions.find(pv => pv.trackIndex <= hitTrack && (pv.trackIndex + pv.trackHeight) > hitTrack)
+        regions.find(pv => pv.trackIndex <= modelY && (pv.trackIndex + pv.trackHeight) > modelY)
       }
 
-      def findChildViews(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]] = {
+      def findChildViews(r: BasicTool.Rectangular[Int]): Iterator[TimelineObjView[S]] = {
         val regions = intersect(r.span)
-        regions.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
+        regions.filter(pv => pv.trackIndex < r.modelYOffset + r.modelYExtent && (pv.trackIndex + pv.trackHeight) > r.modelYOffset)
       }
 
       protected def commitToolChanges(value: Any): Unit = {
@@ -702,12 +702,12 @@ object TimelineViewImpl {
           if (currentDrop.isDefined) currentDrop.foreach { drop =>
             drop.drag match {
               case ad: DnD.AudioDragLike[S] =>
-                val track   = screenToTrack(drop.y)
+                val track   = screenToModelY(drop.y)
                 val span    = Span(drop.frame, drop.frame + ad.selection.length)
                 drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
 
               case DnD.ObjectDrag(_, view) /* : ObjView.Proc[S] */ =>
-                val track   = screenToTrack(drop.y)
+                val track   = screenToModelY(drop.y)
                 val length  = defaultDropLength(view, inProgress = true)
                 val span    = Span(drop.frame, drop.frame + length)
                 drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
@@ -718,10 +718,10 @@ object TimelineViewImpl {
 
           val funSt = rendering.ttFunctionState
           if (funSt.isValid)
-            drawDropFrame(g, funSt.trackIndex, funSt.trackHeight, funSt.span, rubber = false)
+            drawDropFrame(g, funSt.modelYOffset, funSt.modelYExtent, funSt.span, rubber = false)
 
           if (rubberState.isValid)
-            drawDropFrame(g, rubberState.trackIndex, rubberState.trackHeight, rubberState.span, rubber = true)
+            drawDropFrame(g, rubberState.modelYOffset, rubberState.modelYExtent, rubberState.span, rubber = true)
 
           if (patchState.source != null)
             drawPatch(g, patchState)
@@ -735,9 +735,9 @@ object TimelineViewImpl {
 
         private def linkY(view: ProcObjView.Timeline[S], input: Boolean): Int =
           if (input)
-            trackToScreen(view.trackIndex) + 4
+            modelYToScreen(view.trackIndex) + 4
           else
-            trackToScreen(view.trackIndex + view.trackHeight) - 5
+            modelYToScreen(view.trackIndex + view.trackHeight) - 5
 
 //        private def drawLink(g: Graphics2D, source: ProcObjView.Timeline[S], sink: ProcObjView.Timeline[S]): Unit = {
 //          val srcFrameC = linkFrame(source)
@@ -788,10 +788,10 @@ object TimelineViewImpl {
           g.setColor(colrDropRegionBg)
           val strkOrig = g.getStroke
           g.setStroke(if (rubber) strkRubber else strkDropRegion)
-          val y = trackToScreen(trackIndex)
+          val y = modelYToScreen(trackIndex)
           val x1b = math.min(x1 + 1, x2)
           val x2b = math.max(x1b, x2 - 1)
-          g.drawRect(x1b, y + 1, x2b - x1b, trackToScreen(trackIndex + trackHeight) - y)
+          g.drawRect(x1b, y + 1, x2b - x1b, modelYToScreen(trackIndex + trackHeight) - y)
           g.setStroke(strkOrig)
         }
       }

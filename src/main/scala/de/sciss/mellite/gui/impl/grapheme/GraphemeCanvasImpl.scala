@@ -45,7 +45,7 @@ trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCa
 
   def yAxis: Axis = _yAxis
 
-  final def screenYToModel(y: Int): Double = {
+  final def screenToModelY(y: Int): Double = {
     val a   = _yAxis
     val min = a.minimum
     val max = a.maximum
@@ -53,13 +53,15 @@ trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCa
     y.linLin(0, a.peer.getHeight - 1, max, min)
   }
 
-  final def modelToScreenY(m: Double): Int = {
+  final def modelYToScreen(m: Double): Int = {
     val a   = _yAxis
     val min = a.minimum
     val max = a.maximum
     import numbers.Implicits._
     math.round(m.linLin(max, min, 0, a.peer.getHeight - 1)).toInt
   }
+
+  final def modelYBox(a: Double, b: Double): (Double, Double) = if (a < b) (a, b - a) else (b, a - b)
 
   private[this] val selectionListener: SelectionModel.Listener[S, GraphemeObjView[S]] = {
     case SelectionModel.Update(_ /* added */, _ /* removed */) =>

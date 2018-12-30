@@ -23,13 +23,15 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.{GUI, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.impl.RubberBandTool
+import de.sciss.mellite.gui.{GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicCollection[S, TimelineTool.Move] with RubberBand[S, TimelineTool.Move] {
+  extends BasicCollection[S, TimelineTool.Move]
+    with RubberBandTool[S, TimelineTool.Move, Int, TimelineObjView[S]] {
 
   import TimelineTool.Move
 
@@ -40,7 +42,7 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   protected def dragToParam(d: Drag): Move = {
     val eNow  = d.currentEvent
     val dTim0 = d.currentPos   - d.firstPos
-    val dTrk0 = d.currentTrack - d.firstTrack
+    val dTrk0 = d.currentModelY - d.firstModelY
     val (dTim, dTrk) = if (eNow.isShiftDown) { // constrain movement to either horizontal or vertical
       val eBefore = d.firstEvent
       if (math.abs(eNow.getX - eBefore.getX) > math.abs(eNow.getY - eBefore.getY)) {  // horizontal
@@ -56,7 +58,7 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   }
 
   override protected def handleOutside(e: MouseEvent, hitTrack: Int, pos: Long): Unit =
-    mkRubber(e, hitTrack = hitTrack, pos = pos)
+    mkRubber(e, modelY = hitTrack, pos = pos)
 
   protected def commitObj(drag: Move)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {

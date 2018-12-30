@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{BasicTool, GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
@@ -30,7 +30,9 @@ import javax.swing.undo.UndoableEdit
 
 import scala.swing.{FlowPanel, Label, TextField}
 
-final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends CollectionImpl[S, TimelineTool.Cursor] {
+final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
+  extends CollectionImpl[S, TimelineTool.Cursor] {
+
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
@@ -48,7 +50,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends 
       if (res == OptionPane.Result.Ok && ggText.text != region.name) {
         val text    = ggText.text
         val nameOpt = if (text == "" || text == TimelineObjView.Unnamed) None else Some(text)
-        dispatch(TimelineTool.Adjust(TimelineTool.Cursor(nameOpt)))
+        dispatch(BasicTool.Adjust(TimelineTool.Cursor(nameOpt)))
       }
 
     } else {

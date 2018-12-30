@@ -17,7 +17,7 @@ import java.awt.event.KeyEvent
 
 import de.sciss.desktop
 import de.sciss.desktop.FocusType
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.stm
 import de.sciss.mellite.gui.{BasicTool, BasicTools}
 import javax.swing.{ButtonGroup, KeyStroke}
 
@@ -25,7 +25,7 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Action, BoxPanel, Orientation, ToggleButton}
 
 // note: ToolBar looks crap in WebLookAndFeel -- has ugly borders
-final class ToolPaletteImpl[S <: Sys[S], T <: BasicTool[S, _, _]](control: BasicTools[S, T, _], tools: Vec[T])
+final class ToolPaletteImpl[S <: stm.Sys[S], T <: BasicTool[S, _]](control: BasicTools[S, T, _], tools: Vec[T])
   extends /* ToolBar */ BoxPanel(Orientation.Horizontal) {
 
   private val group = new ButtonGroup()

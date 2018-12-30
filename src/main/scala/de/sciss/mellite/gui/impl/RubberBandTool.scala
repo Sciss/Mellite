@@ -1,5 +1,5 @@
 /*
- *  RubberBand.scala
+ *  RubberBandTool.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -11,33 +11,33 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl.grapheme.tool
+package de.sciss.mellite.gui.impl
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTools
-import de.sciss.mellite.gui.GraphemeTool.{DragCancel, DragEnd, DragRubber}
+import de.sciss.mellite.gui.BasicTool.{DragCancel, DragEnd, DragRubber}
 import de.sciss.span.Span
 import javax.swing.event.MouseInputAdapter
 
-// XXX TODO --- DRY with Dragging and timeline.tool.RubberBand
-trait RubberBand[S <: Sys[S], A] {
-  _: CollectionLike[S, A] =>
+// XXX TODO --- DRY with Dragging
+trait RubberBandTool[S <: Sys[S], A, Y, Child] {
+  _: CollectionToolLike[S, A, Y, Child] =>
 
-  final protected def mkRubber(e: MouseEvent, modelY: Double, pos: Long): Unit =
+  final protected def mkRubber(e: MouseEvent, modelY: Y, pos: Long): Unit =
     new Rubber(e, firstModelY = modelY, firstPos = pos)
 
-  private[this] class Rubber(val firstEvent: MouseEvent, val firstModelY: Double, val firstPos: Long)
+  private[this] class Rubber(val firstEvent: MouseEvent, val firstModelY: Y, val firstPos: Long)
     extends MouseInputAdapter with KeyListener {
 
-    private var started         = false
-    private var _currentEvent   = firstEvent
-    private var _currentModelY  = firstModelY
-    private var _currentPos     = firstPos
+    private[this] var started         = false
+    private[this] var _currentEvent   = firstEvent
+    private[this] var _currentModelY  = firstModelY
+    private[this] var _currentPos     = firstPos
 
     def currentEvent  : MouseEvent  = _currentEvent
-    def currentModelY : Double      = _currentModelY
+    def currentModelY : Y           = _currentModelY
     def currentPos    : Long        = _currentPos
 
     // ---- constructor ----
@@ -61,9 +61,9 @@ trait RubberBand[S <: Sys[S], A] {
     }
 
     private def calcCurrent(e: MouseEvent): Unit = {
-      _currentEvent   = e
-      _currentPos     = canvas.screenToFrame(e.getX).toLong
-      _currentModelY  = canvas.screenYToModel(e.getY) // - firstEvent.getY) + canvas.screenToTrack(firstEvent.getY)
+      _currentEvent = e
+      _currentPos   = canvas.screenToFrame(e.getX).toLong
+      _currentModelY = canvas.screenToModelY(e.getY) // - firstEvent.getY) + canvas.screenToTrack(firstEvent.getY)
     }
 
     override def mouseDragged(e: MouseEvent): Unit = {
@@ -77,17 +77,17 @@ trait RubberBand[S <: Sys[S], A] {
 
       val dStart      = math.min(firstPos, currentPos)
       val dStop       = math.max(dStart + BasicTools.MinDur, math.max(firstPos, currentPos))
-      val dModelYOff  = math.min(firstModelY, currentModelY)
-      val dModelYExt  = math.max(firstModelY, currentModelY) - dModelYOff + 1
+      val (dModelYOff, dModelYExt) = canvas.modelYBox(firstModelY, currentModelY)
 
-      val rubber  = DragRubber(modelYOffset = dModelYOff, modelYExtent = dModelYExt, span = Span(dStart, dStop))
+      val rubber  = DragRubber[Y](modelYOffset = dModelYOff, modelYExtent = dModelYExt, span = Span(dStart, dStop),
+        isValid = true)
       dispatch(rubber)
 
       val regions = canvas.findChildViews(rubber).toSet
       val selMod  = canvas.selectionModel
       // XXX TODO --- not very efficient
-      val toRemove  = selMod.iterator.filter(!regions.contains(_))
-      val toAdd     = regions        .filter(!selMod .contains(_))
+      val toRemove  = selMod.iterator.filter(child => !regions.contains(child))
+      val toAdd     = regions        .filter(child => !selMod .contains(child))
       toRemove.foreach(selMod -= _)
       toAdd   .foreach(selMod += _)
     }

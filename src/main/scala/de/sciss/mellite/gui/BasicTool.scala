@@ -17,12 +17,35 @@ import java.awt.Cursor
 
 import de.sciss.lucre.stm
 import de.sciss.model.Model
+import de.sciss.span.Span
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.Component
 
-trait BasicTool[S <: stm.Sys[S], -A, +U] extends Model[U] {
+object BasicTool {
+  trait Rectangular[Y] {
+    def modelYOffset: Y
+    def modelYExtent: Y
+    def span: Span
+
+//    def isValid: Boolean = modelYOffset >= 0
+  }
+
+  trait Update[+A]
+  case object DragBegin extends Update[Nothing]
+  final case class DragAdjust[A](value: A) extends Update[A]
+
+  final case class DragRubber[Y](modelYOffset: Y, modelYExtent: Y, span: Span, isValid: Boolean)
+    extends Update[Nothing] with Rectangular[Y]
+
+  case object DragEnd    extends Update[Nothing] // (commit: AbstractCompoundEdit)
+  case object DragCancel extends Update[Nothing]
+
+  /** Direct adjustment without drag period. */
+  case class Adjust[A](value: A) extends Update[A]
+}
+trait BasicTool[S <: stm.Sys[S], A] extends Model[BasicTool.Update[A]] {
   /** The mouse cursor used when the tool is active. */
   def defaultCursor: Cursor
   /** The icon to use in a tool bar. */

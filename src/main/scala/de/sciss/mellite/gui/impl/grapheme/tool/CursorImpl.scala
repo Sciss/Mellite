@@ -26,7 +26,9 @@ import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S]) extends CollectionImpl[S, Unit] {
+final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
+  extends CollectionImpl[S, Unit] {
+
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")

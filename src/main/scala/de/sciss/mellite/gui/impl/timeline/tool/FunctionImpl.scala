@@ -21,6 +21,7 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
+import de.sciss.mellite.gui.impl.{CollectionToolLike, DraggingTool}
 import de.sciss.mellite.gui.{BasicTools, GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.log
 import de.sciss.span.Span
@@ -29,7 +30,9 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionLike[S, TimelineTool.Function] with Dragging[S, TimelineTool.Function] {
+  extends CollectionToolLike[S, TimelineTool.Function, Int, TimelineObjView[S]]
+    with DraggingTool[S, TimelineTool.Function, Int]
+    with TimelineTool[S, TimelineTool.Function] {
 
   import TimelineTool.Function
 
@@ -57,10 +60,10 @@ final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[
   protected def dragToParam(d: Drag): Function = {
     val dStart  = math.min(d.firstPos, d.currentPos)
     val dStop   = math.max(dStart + BasicTools.MinDur, math.max(d.firstPos, d.currentPos))
-    val dTrkIdx = math.min(d.firstTrack, d.currentTrack)
-    val dTrkH   = math.max(d.firstTrack, d.currentTrack) - dTrkIdx + 1
+    val dTrkIdx = math.min(d.firstModelY, d.currentModelY)
+    val dTrkH   = math.max(d.firstModelY, d.currentModelY) - dTrkIdx + 1
 
-    Function(trackIndex = dTrkIdx, trackHeight = dTrkH, span = Span(dStart, dStop))
+    Function(modelYOffset = dTrkIdx, modelYExtent = dTrkH, span = Span(dStart, dStop))
   }
 
   def commit(drag: Function)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
@@ -68,9 +71,9 @@ final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[
       val span  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[S]
       val p     = Proc[S]
       val obj   = p // Obj(Proc.Elem(p))
-      obj.attr.put(TimelineObjView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.trackIndex )))
-      obj.attr.put(TimelineObjView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.trackHeight)))
-      log(s"Add function region $p, span = ${drag.span}, trackIndex = ${drag.trackIndex}")
+      obj.attr.put(TimelineObjView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
+      obj.attr.put(TimelineObjView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))
+      log(s"Add function region $p, span = ${drag.span}, trackIndex = ${drag.modelYOffset}")
       // import SpanLikeObj.serializer
       EditTimelineInsertObj(s"Insert $name", g, span, obj)
       // g.add(span, obj)

@@ -1,5 +1,5 @@
 /*
- *  CollectionLike.scala
+ *  CollectionToolLike.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -11,22 +11,22 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl.timeline.tool
+package de.sciss.mellite.gui.impl
 
 import java.awt.event.{MouseAdapter, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{BasicTool, TimelineCanvas2D}
 import de.sciss.model.impl.ModelImpl
 
 import scala.swing.Component
 
 /** A basic implementation block for timeline tools that process selected child views. */
-trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[TimelineTool.Update[A]] {
+trait CollectionToolLike[S <: Sys[S], A, Y, Child] extends BasicTool[S, A] with ModelImpl[BasicTool.Update[A]] {
   tool =>
 
   // protected def trackList: TrackList
-  protected def canvas: TimelineTrackCanvas[S]
+  protected def canvas: TimelineCanvas2D[S, Y, Child]
 
   /** Applies standard mouse selection techniques regarding regions.
     *
@@ -36,7 +36,7 @@ trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[T
     * - Clicking on a unselected region, will clear the selection and only select the new region.
     * - Holding shift while clicking will add or remove regions to the list of selected regions.
     */
-  protected final def handleMouseSelection(e: MouseEvent, childOpt: Option[TimelineObjView[S]]): Unit = {
+  protected final def handleMouseSelection(e: MouseEvent, childOpt: Option[Child]): Unit = {
     val selMod = canvas.selectionModel
     if (e.isShiftDown) {
       childOpt.foreach { region =>
@@ -60,9 +60,9 @@ trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[T
     override def mousePressed(e: MouseEvent): Unit = {
       e.getComponent.requestFocus()
       val pos       = canvas.screenToFrame(e.getX).toLong
-      val hitTrack  = canvas.screenToTrack(e.getY)
-      val childOpt  = canvas.findChildView(pos, hitTrack)  // procs span "two tracks". ouchilah...
-      handlePress(e, hitTrack, pos, childOpt)
+      val modelY    = canvas.screenToModelY(e.getY)
+      val childOpt  = canvas.findChildView(pos, modelY)
+      handlePress(e, modelY, pos, childOpt)
     }
   }
 
@@ -84,7 +84,7 @@ trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[T
     * mouse is pressed
     *
     * @param e          the event corresponding to the press
-    * @param hitTrack   the track index corresponding to the vertical
+    * @param modelY     the model position corresponding to the vertical
     *                   mouse coordinate.
     * @param pos        the frame position corresponding to the horizontal
     *                   mouse coordinate
@@ -92,13 +92,13 @@ trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[T
     *                   position or `None` if the mouse is pressed over
     *                   an empty part of the timeline.
     */
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long,
-                            childOpt: Option[TimelineObjView[S]]): Unit
+  protected def handlePress(e: MouseEvent, modelY: Y, pos: Long,
+                            childOpt: Option[Child]): Unit
 
   //  /** Method that is called when the mouse is released. Implemented
   //    * as a no-op, so only sub-classes that want to explicitly perform
   //    * actions need to override it.
   //    */
   //  protected def handleRelease(e: MouseEvent, hitTrack: Int, pos: Long,
-  //                              regionOpt: Option[TimelineObjView[S]]): Unit = ()
+  //                              regionOpt: Option[Child]): Unit = ()
 }

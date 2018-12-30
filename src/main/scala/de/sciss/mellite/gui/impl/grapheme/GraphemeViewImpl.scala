@@ -393,6 +393,8 @@ object GraphemeViewImpl {
 //        views.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
 //      }
 
+      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = ???
+
       def iterator: Iterator[GraphemeObjView[S]] = ???
 
       def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = ???
