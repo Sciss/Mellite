@@ -18,19 +18,19 @@ package grapheme
 
 import de.sciss.audiowidgets.Axis
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.synth.Sys
 import de.sciss.numbers
 
 import scala.swing.Orientation
 
 trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCanvas[S] {
-  // def timeline(implicit tx: S#Tx): Timeline[S]
+  final val graphemeTools: GraphemeTools[S] = GraphemeTools(this)
 
   def selectionModel: GraphemeObjView.SelectionModel[S]
 
   // def intersect(span: Span): Iterator[TimelineObjView[S]]
 
-  def findView(frame: Long): Option[GraphemeObjView[S]]
+  def findChildView(frame: Long): Option[GraphemeObjView[S]]
 
   // def findViews(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]]
 

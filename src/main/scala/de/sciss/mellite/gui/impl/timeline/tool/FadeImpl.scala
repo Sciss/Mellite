@@ -11,14 +11,9 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.SpanLikeObj
@@ -26,12 +21,15 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicRegion[S, TimelineTool.Fade] {
+  extends BasicCollection[S, TimelineTool.Fade] {
 
   import TimelineTool.{EmptyFade, Fade}
 

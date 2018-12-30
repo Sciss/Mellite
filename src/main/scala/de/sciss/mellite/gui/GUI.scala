@@ -16,9 +16,10 @@ package gui
 
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.{AffineTransform, Area, Path2D}
-import java.awt.{BasicStroke, Graphics, Graphics2D, RenderingHints, Shape}
-import javax.swing.{Icon, SwingUtilities}
+import java.awt.image.BufferedImage
+import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints, Shape}
 
+import javax.swing.{Icon, ImageIcon, SwingUtilities}
 import de.sciss.audiowidgets.{ParamField, RotaryKnob, Transport}
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
@@ -28,6 +29,7 @@ import de.sciss.lucre.swing.{defer, requireEDT}
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
+import javax.imageio.ImageIO
 
 import scala.concurrent.Future
 import scala.swing.Reactions.Reaction
@@ -213,5 +215,28 @@ object GUI {
       }
     }
     res
+  }
+
+  def getImage(name: String): BufferedImage = {
+    val is = Mellite.getClass.getResourceAsStream(name)
+    val image = if (is != null) {
+      val res = ImageIO.read(is)
+      is.close()
+      res
+    } else {
+      val res = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB)
+      val g2  = res.createGraphics()
+      g2.setColor(Color.black)
+      g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18))
+      g2.drawString("?", 4, 16)
+      g2.dispose()
+      res
+    }
+    image
+  }
+
+  def getImageIcon(name: String): ImageIcon = {
+    val image = getImage(s"icon-$name.png")
+    new ImageIcon(image)
   }
 }

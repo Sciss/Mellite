@@ -11,35 +11,29 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.grapheme.tool
 
 import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeTool}
 
-object BasicRegion {
-  final val MinDur  = 32
-}
-
-/** Most common implementation of a timeline tool, based on region selection and
+/** Most common implementation of a grapheme tool, based on region selection and
   * mouse dragging. It implements `handleSelect` by instantiating a `Drag`
   * object. Double-clicks result in the abstract method `dialog` being called.
   * Sub-classes may choose to provide a custom dialog for double clicks by
   * and thus may return `Some` data if the dialog is positively confirmed.
   */
-trait BasicRegion[S <: Sys[S], A] extends RegionImpl[S, A] with Dragging[S, A] {
-  import TimelineTool._
+trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with Dragging[S, A] {
+  import GraphemeTool._
 
-  protected type Initial = TimelineObjView[S]
+  protected type Initial = GraphemeObjView[S]
 
-  final protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit =
+  final protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, region: GraphemeObjView[S]): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {
-      new Drag(e, hitTrack, pos, region)
+      new Drag(e, modelY, pos, region)
     }
 
   protected def dialog(): Option[A]
@@ -58,5 +52,3 @@ trait BasicRegion[S <: Sys[S], A] extends RegionImpl[S, A] with Dragging[S, A] {
   //    result == OptionPane.Result.Ok
   //  }
 }
-
-

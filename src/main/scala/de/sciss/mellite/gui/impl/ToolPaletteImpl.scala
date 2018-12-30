@@ -1,5 +1,5 @@
 /*
- *  PaletteImpl.scala
+ *  ToolPaletteImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -11,23 +11,21 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl
 
 import java.awt.event.KeyEvent
-import javax.swing.{ButtonGroup, KeyStroke}
 
 import de.sciss.desktop
 import de.sciss.desktop.FocusType
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{BasicTool, BasicTools}
+import javax.swing.{ButtonGroup, KeyStroke}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Action, BoxPanel, Orientation, ToggleButton}
 
 // note: ToolBar looks crap in WebLookAndFeel -- has ugly borders
-final class PaletteImpl[S <: Sys[S]](control: TimelineTools[S], tools: Vec[TimelineTool[S, _]])
+final class ToolPaletteImpl[S <: Sys[S], T <: BasicTool[S, _, _]](control: BasicTools[S, T, _], tools: Vec[T])
   extends /* ToolBar */ BoxPanel(Orientation.Horizontal) {
 
   private val group = new ButtonGroup()

@@ -11,15 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
 import java.awt.event.MouseEvent
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.OptionPane
 import de.sciss.lucre.expr.{SpanLikeObj, StringObj}
@@ -27,12 +22,15 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.{FlowPanel, Label, TextField}
 
-final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends RegionImpl[S, TimelineTool.Cursor] {
+final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S]) extends CollectionImpl[S, TimelineTool.Cursor] {
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")

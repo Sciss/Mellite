@@ -11,50 +11,20 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
-
-import java.awt.image.BufferedImage
-import java.awt.{Color, Font}
-import javax.imageio.ImageIO
-import javax.swing.ImageIcon
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{FadeViewMode, RegionViewMode, TimelineTool, TimelineTools, TimelineTrackCanvas}
 import de.sciss.model.Change
 import de.sciss.model.impl.ModelImpl
 
-object ToolsImpl {
-  def getImage(name: String): BufferedImage = {
-    val is = Mellite.getClass.getResourceAsStream(name)
-    val image = if (is != null) {
-      val res = ImageIO.read(is)
-      is.close()
-      res
-    } else {
-      val res = new BufferedImage(20, 20, BufferedImage.TYPE_INT_ARGB)
-      val g2  = res.createGraphics()
-      g2.setColor(Color.black)
-      g2.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 18))
-      g2.drawString("?", 4, 16)
-      g2.dispose()
-      res
-    }
-    image
-  }
-
-  def getIcon(name: String): ImageIcon = {
-    val image = getImage(s"icon-$name.png")
-    new ImageIcon(image)
-  }
-}
 final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
   extends TimelineTools[S] with ModelImpl[TimelineTools.Update[S]] {
 
   import TimelineTools._
 
-  private var _currentTool: TimelineTool[S, _] = TimelineTool.cursor(canvas)
+  private[this] var _currentTool: TimelineTool[S, _] = TimelineTool.cursor(canvas)
+
   def currentTool: TimelineTool[S, _] = _currentTool
   def currentTool_=(value: TimelineTool[S, _]): Unit =
     if (_currentTool != value) {
@@ -65,7 +35,8 @@ final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
       dispatch(ToolChanged(Change(oldTool, value)))
     }
 
-  private var _visualBoost: Float = 1f
+  private[this] var _visualBoost: Float = 1f
+
   def visualBoost: Float = _visualBoost
   def visualBoost_=(value: Float): Unit =
     if (_visualBoost != value) {
@@ -74,7 +45,8 @@ final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
       dispatch(VisualBoostChanged(Change(oldBoost, value)))
     }
 
-  private var _fadeViewMode: FadeViewMode = FadeViewMode.Curve
+  private[this] var _fadeViewMode: FadeViewMode = FadeViewMode.Curve
+
   def fadeViewMode: FadeViewMode = _fadeViewMode
   def fadeViewMode_=(value: FadeViewMode): Unit =
     if (_fadeViewMode != value) {
@@ -83,7 +55,8 @@ final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
       dispatch(FadeViewModeChanged(Change(oldMode, value)))
     }
 
-  private var _regionViewMode: RegionViewMode = RegionViewMode.TitledBox
+  private[this] var _regionViewMode: RegionViewMode = RegionViewMode.TitledBox
+
   def regionViewMode: RegionViewMode = _regionViewMode
   def regionViewMode_=(value: RegionViewMode): Unit =
     if (_regionViewMode != value) {

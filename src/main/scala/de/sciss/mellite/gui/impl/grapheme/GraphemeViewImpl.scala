@@ -46,7 +46,7 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
 object GraphemeViewImpl {
   private val DEBUG   = false
 
-  private val NoMove  = TimelineTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
+  private val NoMove  = GraphemeTool.Move(deltaTime = 0L, deltaModelY = 0d, copy = false)
 
   import de.sciss.mellite.{logTimeline => logT}
 
@@ -383,7 +383,7 @@ object GraphemeViewImpl {
 //      def findView(pos: Long): Option[GraphemeObjView[S]] =
 //        viewMapG.range(pos, Long.MaxValue).headOption.flatMap(_._2.headOption)
 
-      def findView(pos: Long): Option[GraphemeObjView[S]] = {
+      def findChildView(pos: Long): Option[GraphemeObjView[S]] = {
         val it = viewMapG.valuesIteratorFrom(pos)
         if (it.hasNext) it.next().headOption else None
       }
@@ -392,6 +392,14 @@ object GraphemeViewImpl {
 //        val views = intersect(r.span)
 //        views.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
 //      }
+
+      def iterator: Iterator[GraphemeObjView[S]] = ???
+
+      def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = ???
+
+      def findChildView(frame: Long, modelY: Double): Option[GraphemeObjView[S]] = ???
+
+      def findChildViews(r: GraphemeTool.Rectangular): Iterator[GraphemeObjView[S]] = ???
 
       protected def commitToolChanges(value: Any): Unit = {
         logT(s"Commit tool changes $value")
@@ -416,7 +424,7 @@ object GraphemeViewImpl {
         moveState     = NoMove
 
         state.foreach {
-          case s: TimelineTool.Move => moveState = s
+          case s: GraphemeTool.Move => moveState = s
           case _ =>
         }
       }

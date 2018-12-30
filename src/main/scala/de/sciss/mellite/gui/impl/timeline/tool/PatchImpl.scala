@@ -11,17 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.event.MouseEvent
 import java.awt.geom.{Area, Ellipse2D}
 import java.awt.image.BufferedImage
 import java.awt.{Color, Cursor, Point, RenderingHints, Toolkit}
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.Desktop
 import de.sciss.lucre.expr.SpanLikeObj
@@ -30,7 +25,10 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
 import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.{Proc, Timeline}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 object PatchImpl {
   private def mkImage(aa: Boolean): BufferedImage = {
@@ -56,7 +54,7 @@ object PatchImpl {
     Toolkit.getDefaultToolkit.createCustomCursor(mkImage(aa = Desktop.isMac), new Point(8, 8), "patch")
 }
 final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends RegionImpl[S, TimelineTool.Patch[S]] with Dragging[S, TimelineTool.Patch[S]] {
+  extends CollectionImpl[S, TimelineTool.Patch[S]] with Dragging[S, TimelineTool.Patch[S]] {
 
   import TimelineTool.Patch
 
@@ -68,7 +66,7 @@ final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
 
   protected def dragToParam(d: Drag): Patch[S] = {
     val pos   = d.currentPos
-    val sink  = canvas.findRegion(frame = pos, hitTrack = d.currentTrack) match {
+    val sink  = canvas.findChildView(frame = pos, hitTrack = d.currentTrack) match {
       case Some(r: ProcObjView.Timeline[S]) if r != d.initial /* && r.inputs.nonEmpty */ =>  // region.inputs only carries linked ones!
         Patch.Linked(r)
       case _ =>

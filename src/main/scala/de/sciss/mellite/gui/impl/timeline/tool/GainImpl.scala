@@ -11,25 +11,23 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.gui.edit.EditAttrMap
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth
 import de.sciss.synth.proc.{ObjKeys, Timeline}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicRegion[S, TimelineTool.Gain] {
+  extends BasicCollection[S, TimelineTool.Gain] {
 
   import TimelineTool.Gain
 

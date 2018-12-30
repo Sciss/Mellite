@@ -1,5 +1,5 @@
 /*
- *  RegionLike.scala
+ *  CollectionLike.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -11,18 +11,18 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.event.{MouseAdapter, MouseEvent}
-import scala.swing.Component
-import de.sciss.model.impl.ModelImpl
-import de.sciss.lucre.synth.Sys
 
-/** A basic implementation block for timeline tools that process selected regions. */
-trait RegionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[TimelineTool.Update[A]] {
+import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.model.impl.ModelImpl
+
+import scala.swing.Component
+
+/** A basic implementation block for timeline tools that process selected child views. */
+trait CollectionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[TimelineTool.Update[A]] {
   tool =>
 
   // protected def trackList: TrackList
@@ -36,10 +36,10 @@ trait RegionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[Timel
     * - Clicking on a unselected region, will clear the selection and only select the new region.
     * - Holding shift while clicking will add or remove regions to the list of selected regions.
     */
-  protected final def handleMouseSelection(e: MouseEvent, regionOpt: Option[TimelineObjView[S]]): Unit = {
+  protected final def handleMouseSelection(e: MouseEvent, childOpt: Option[TimelineObjView[S]]): Unit = {
     val selMod = canvas.selectionModel
     if (e.isShiftDown) {
-      regionOpt.foreach { region =>
+      childOpt.foreach { region =>
         if (selMod.contains(region)) {
           selMod -= region
         } else {
@@ -47,11 +47,11 @@ trait RegionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[Timel
         }
       }
     } else {
-      if (!regionOpt.exists(region => selMod.contains(region))) {
+      if (!childOpt.exists(region => selMod.contains(region))) {
         // either hitting a region which wasn't selected, or hitting an empty area
         // --> deselect all
         selMod.clear()
-        regionOpt.foreach(selMod += _)
+        childOpt.foreach(selMod += _)
       }
     }
   }
@@ -61,8 +61,8 @@ trait RegionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[Timel
       e.getComponent.requestFocus()
       val pos       = canvas.screenToFrame(e.getX).toLong
       val hitTrack  = canvas.screenToTrack(e.getY)
-      val regionOpt = canvas.findRegion(pos, hitTrack)  // procs span "two tracks". ouchilah...
-      handlePress(e, hitTrack, pos, regionOpt)
+      val childOpt  = canvas.findChildView(pos, hitTrack)  // procs span "two tracks". ouchilah...
+      handlePress(e, hitTrack, pos, childOpt)
     }
   }
 
@@ -88,12 +88,12 @@ trait RegionLike[S <: Sys[S], A] extends TimelineTool[S, A] with ModelImpl[Timel
     *                   mouse coordinate.
     * @param pos        the frame position corresponding to the horizontal
     *                   mouse coordinate
-    * @param regionOpt  `Some` timeline object that is beneath the mouse
+    * @param childOpt  `Some` timeline object that is beneath the mouse
     *                   position or `None` if the mouse is pressed over
     *                   an empty part of the timeline.
     */
   protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long,
-                            regionOpt: Option[TimelineObjView[S]]): Unit
+                            childOpt: Option[TimelineObjView[S]]): Unit
 
   //  /** Method that is called when the mouse is released. Implemented
   //    * as a no-op, so only sub-classes that want to explicitly perform

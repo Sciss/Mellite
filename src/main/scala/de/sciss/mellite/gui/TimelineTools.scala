@@ -14,14 +14,12 @@
 package de.sciss.mellite
 package gui
 
-import java.awt.Cursor
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
-
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ToolPaletteImpl
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.mellite.gui.impl.timelinetool.{AuditionImpl, CursorImpl, FadeImpl, FunctionImpl, GainImpl, MoveImpl, MuteImpl, PaletteImpl, PatchImpl, ResizeImpl, ToolsImpl}
+import de.sciss.mellite.gui.impl.timeline.ToolsImpl
+import de.sciss.mellite.gui.impl.timeline.tool.{AuditionImpl, CursorImpl, FadeImpl, FunctionImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
 import de.sciss.synth.proc.FadeSpec
@@ -39,7 +37,7 @@ object TimelineTools {
 
   def apply  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTools[S] = new ToolsImpl(canvas)
   def palette[S <: Sys[S]](control: TimelineTools[S], tools: Vec[TimelineTool[S, _]]): Component =
-    new PaletteImpl[S](control, tools)
+    new ToolPaletteImpl[S, TimelineTool[S, _]](control, tools)
 }
 
 object RegionViewMode {
@@ -76,8 +74,7 @@ sealed trait FadeViewMode {
   def id: Int
 }
 
-trait TimelineTools[S <: stm.Sys[S]] extends Model[TimelineTools.Update[S]] {
-  var currentTool   : TimelineTool[S, _]
+trait TimelineTools[S <: stm.Sys[S]] extends BasicTools[S, TimelineTool[S, _], TimelineTools.Update[S]] {
   var visualBoost   : Float
   var fadeViewMode  : FadeViewMode
   var regionViewMode: RegionViewMode
@@ -109,10 +106,11 @@ object TimelineTool {
 
   // ----
 
-  type Move   = ProcActions.Move
-  val  Move   = ProcActions.Move
-  type Resize = ProcActions.Resize
-  val  Resize = ProcActions.Resize
+  type Move                             = ProcActions.Move
+  val  Move   : ProcActions.Move  .type = ProcActions.Move
+  type Resize                           = ProcActions.Resize
+  val  Resize : ProcActions.Resize.type = ProcActions.Resize
+
   final case class Gain    (factor: Float)
   final case class Mute    (engaged: Boolean)
   final case class Fade    (deltaFadeIn: Long, deltaFadeOut: Long, deltaFadeInCurve: Float, deltaFadeOutCurve: Float)
@@ -159,31 +157,7 @@ object TimelineTool {
   * @tparam A   the type of element that represents an ongoing
   *             edit state (typically during mouse drag).
   */
-trait TimelineTool[S <: stm.Sys[S], A] extends Model[TimelineTool.Update[A]] {
-  /** The mouse cursor used when the tool is active. */
-  def defaultCursor: Cursor
-  /** The icon to use in a tool bar. */
-  def icon: Icon
-  /** The human readable name of the tool. */
-  def name: String
-
-  /** Called to activate the tool to operate on the given component. */
-  def install  (component: Component): Unit
-  /** Called to deactivate the tool before switching to a different tool. */
-  def uninstall(component: Component): Unit
-
-  // def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineProcView[S]]): Unit
-
-  /** Called after the end of a mouse drag gesture. If this constitutes a
-    * valid edit, the method should return the resulting undoable edit.
-    *
-    * @param drag   the last editing state
-    * @param cursor the cursor that might be needed to construct the undoable edit
-    * @return either `Some` edit or `None` if the action does not constitute an
-    *         edit or the edit parameters are invalid.
-    */
-  def commit(drag: A)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
-}
+trait TimelineTool[S <: stm.Sys[S], A] extends BasicTool[S, A, TimelineTool.Update[A]]
 
 //object TrackSlideTool {
 //  case class Slide(deltaOuter: Long, deltaInner: Long)

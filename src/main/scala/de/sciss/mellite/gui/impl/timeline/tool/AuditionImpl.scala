@@ -11,25 +11,23 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.{Cursor, Point, Toolkit}
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTrackCanvas, TimelineView}
 import de.sciss.span.Span
 import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 object AuditionImpl {
   private lazy val cursor: Cursor = {
     val tk  = Toolkit.getDefaultToolkit
-    val img = ToolsImpl.getImage("cursor-audition.png")
+    val img = GUI.getImage("cursor-audition.png")
     tk.createCustomCursor(img, new Point(4, 4), "Audition")
   }
 }
@@ -51,7 +49,7 @@ object AuditionImpl {
   * TODO: update -- this is partly fixed now.
   */
 class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends RegionLike[S, Unit] with RubberBand[S, Unit] {
+  extends CollectionLike[S, Unit] with RubberBand[S, Unit] {
 
   // import TrackTool.{Cursor => _}
 
@@ -60,7 +58,7 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
   val icon: Icon            = GUI.iconNormal(Shapes.Audition)
 
   protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineObjView[S]]): Unit = {
-    handleMouseSelection(e, regionOpt = regionOpt)
+    handleMouseSelection(e, childOpt = regionOpt)
 
     val selMod = canvas.selectionModel
     if (selMod.isEmpty) return

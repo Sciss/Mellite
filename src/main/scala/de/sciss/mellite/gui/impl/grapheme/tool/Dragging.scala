@@ -1,28 +1,12 @@
-/*
- *  Dragging.scala
- *  (Mellite)
- *
- *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
- *
- *  This software is published under the GNU Affero General Public License v3+
- *
- *
- *  For further information, please contact Hanns Holger Rutz at
- *  contact@sciss.de
- */
-
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.grapheme.tool
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
-import javax.swing.event.MouseInputAdapter
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.TimelineTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
+import de.sciss.mellite.gui.GraphemeTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
+import javax.swing.event.MouseInputAdapter
 
-/** A mixin trait for region-like timeline tools that enables updates during mouse dragging.
+/** A mixin trait for region-like grapheme tools that enables updates during mouse dragging.
   * It adds an internal class `Drag` that embodies that dragging state (initial
   * and current positions). Dragging is useful for all parameters that can
   * be continuously changed such as region position but also region gain. It does
@@ -33,8 +17,8 @@ import de.sciss.mellite.gui.TimelineTool.{DragAdjust, DragBegin, DragCancel, Dra
   *
   * All the sub-class must do is call `new Drag` and provide the body of method `dragToParam`.
   */
-trait Dragging[S <: Sys[S], A] {
-  _: RegionLike[S, A] =>
+trait Dragging[S <: Sys[S], A] {  // XXX TODO DRY with timeline.tool.Dragging
+  _: CollectionLike[S, A] =>
 
   protected def dragToParam(d: Drag): A
 
@@ -82,18 +66,18 @@ trait Dragging[S <: Sys[S], A] {
     *
     * A drag can be aborted by pressing the <tt>Escape</tt> key.
     */
-  protected class Drag(val firstEvent: MouseEvent, val firstTrack: Int,
+  protected class Drag(val firstEvent: MouseEvent, val firstModelY: Double,
                        val firstPos: Long, val initial: Initial)
     extends MouseInputAdapter with KeyListener {
 
     private[this] var started         = false
     private[this] var _currentEvent   = firstEvent
-    private[this] var _currentTrack   = firstTrack
+    private[this] var _currentModelY  = firstModelY
     private[this] var _currentPos     = firstPos
 
-    def currentEvent: MouseEvent  = _currentEvent
-    def currentTrack: Int         = _currentTrack
-    def currentPos  : Long        = _currentPos
+    def currentEvent  : MouseEvent  = _currentEvent
+    def currentModelY : Double      = _currentModelY
+    def currentPos    : Long        = _currentPos
 
     // ---- constructor ----
     {
@@ -116,22 +100,9 @@ trait Dragging[S <: Sys[S], A] {
     }
 
     private def calcCurrent(e: MouseEvent): Unit = {
-      _currentEvent = e
-      //      _currentTrack = firstTrack // default assumption
-      //      val comp = e.getComponent
-      //      if (e.getX < 0 || e.getX >= comp.getWidth ||
-      //          e.getY < 0 || e.getY >= comp.getHeight) {
-      //
-      //        val parent    = comp.getParent
-      //        val ptParent  = SwingUtilities.convertPoint(comp, e.getX, e.getY, parent)
-      //        val child     = parent.getComponentAt(ptParent)
-      //        if (child != null) {
-      //          _currentTrack = trackList.find(_.renderer.trackComponent == child).getOrElse(firstTrack)
-      //        }
-      //      }
-      //      val convE     = SwingUtilities.convertMouseEvent(comp, e, _currentTrack.renderer.trackComponent)
-      _currentPos   = canvas.screenToFrame(e.getX).toLong
-      _currentTrack = canvas.screenToTrack(e.getY) // - firstEvent.getY) + canvas.screenToTrack(firstEvent.getY)
+      _currentEvent   = e
+      _currentPos     = canvas.screenToFrame(e.getX).toLong
+      _currentModelY  = canvas.screenYToModel(e.getY)
     }
 
     override def mouseDragged(e: MouseEvent): Unit = {

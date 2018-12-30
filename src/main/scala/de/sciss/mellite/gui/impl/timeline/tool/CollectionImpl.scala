@@ -1,5 +1,5 @@
 /*
- *  RegionImpl.scala
+ *  CollectionImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -11,20 +11,18 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.event.MouseEvent
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.TimelineObjView
 import de.sciss.synth.proc.Timeline
+import javax.swing.undo.UndoableEdit
 
 /** A more complete implementation for timeline tools that process selected regions.
   * It implements `handlePress` to update the region selection and then
@@ -32,7 +30,7 @@ import de.sciss.synth.proc.Timeline
   * It also implements `commit` by aggregating individual region based
   * commits performed in the abstract method `commitObj`.
   */
-trait RegionImpl[S <: Sys[S], A] extends RegionLike[S, A] {
+trait CollectionImpl[S <: Sys[S], A] extends CollectionLike[S, A] {
   tool =>
 
   protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineObjView[S]]): Unit = {

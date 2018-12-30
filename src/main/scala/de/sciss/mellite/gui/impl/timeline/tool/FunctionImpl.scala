@@ -11,26 +11,25 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
 import java.awt.event.MouseEvent
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
+import de.sciss.mellite.gui.{BasicTools, GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.log
 import de.sciss.span.Span
 import de.sciss.synth.proc.Proc
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends RegionLike[S, TimelineTool.Function] with Dragging[S, TimelineTool.Function] {
+  extends CollectionLike[S, TimelineTool.Function] with Dragging[S, TimelineTool.Function] {
 
   import TimelineTool.Function
 
@@ -57,7 +56,7 @@ final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[
 
   protected def dragToParam(d: Drag): Function = {
     val dStart  = math.min(d.firstPos, d.currentPos)
-    val dStop   = math.max(dStart + BasicRegion.MinDur, math.max(d.firstPos, d.currentPos))
+    val dStop   = math.max(dStart + BasicTools.MinDur, math.max(d.firstPos, d.currentPos))
     val dTrkIdx = math.min(d.firstTrack, d.currentTrack)
     val dTrkH   = math.max(d.firstTrack, d.currentTrack) - dTrkIdx + 1
 

@@ -452,7 +452,7 @@ object TimelineViewImpl {
 
     private def performDrop(drop: DnD.Drop[S]): Boolean = {
       def withRegions[A](fun: S#Tx => List[TimelineObjView[S]] => Option[A]): Option[A] =
-        canvas.findRegion(drop.frame, canvas.screenToTrack(drop.y)).flatMap { hitRegion =>
+        canvas.findChildView(drop.frame, canvas.screenToTrack(drop.y)).flatMap { hitRegion =>
           val regions = if (selectionModel.contains(hitRegion)) selectionModel.iterator.toList else hitRegion :: Nil
           cursor.step { implicit tx =>
             fun(tx)(regions)
@@ -460,7 +460,7 @@ object TimelineViewImpl {
         }
 
       def withProcRegions[A](fun: S#Tx => List[ProcObjView[S]] => Option[A]): Option[A] =
-        canvas.findRegion(drop.frame, canvas.screenToTrack(drop.y)).flatMap {
+        canvas.findChildView(drop.frame, canvas.screenToTrack(drop.y)).flatMap {
           case hitRegion: ProcObjView[S] =>
             val regions = if (selectionModel.contains(hitRegion)) {
               selectionModel.iterator.collect {
@@ -577,13 +577,13 @@ object TimelineViewImpl {
         viewRange.filterOverlaps((start, stop))
       }
 
-      def findRegion(pos: Long, hitTrack: Int): Option[TimelineObjView[S]] = {
+      def findChildView(pos: Long, hitTrack: Int): Option[TimelineObjView[S]] = {
         val span = Span(pos, pos + 1)
         val regions = intersect(span)
         regions.find(pv => pv.trackIndex <= hitTrack && (pv.trackIndex + pv.trackHeight) > hitTrack)
       }
 
-      def findRegions(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]] = {
+      def findChildViews(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]] = {
         val regions = intersect(r.span)
         regions.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
       }
@@ -618,10 +618,10 @@ object TimelineViewImpl {
         editOpt.foreach(undoManager.add)
       }
 
-      private val NoPatch = TimelineTool.Patch[S](null, null)
+      private[this] val NoPatch = TimelineTool.Patch[S](null, null)
       // not cool
-      private var _toolState = Option.empty[Any]
-      private var patchState = NoPatch
+      private[this] var _toolState = Option.empty[Any]
+      private[this] var patchState = NoPatch
 
       protected def toolState: Option[Any] = _toolState
 

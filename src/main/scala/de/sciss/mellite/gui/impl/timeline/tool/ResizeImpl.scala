@@ -11,26 +11,24 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
+import de.sciss.mellite.gui.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicRegion[S, TimelineTool.Resize] {
+  extends BasicCollection[S, TimelineTool.Resize] {
 
   import TimelineTool.Resize
 

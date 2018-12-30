@@ -11,27 +11,25 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timelinetool
+package de.sciss.mellite.gui.impl.timeline.tool
 
 import java.awt.Cursor
 import java.awt.event.MouseEvent
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
+import de.sciss.mellite.gui.{GUI, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicRegion[S, TimelineTool.Move] with RubberBand[S, TimelineTool.Move] {
+  extends BasicCollection[S, TimelineTool.Move] with RubberBand[S, TimelineTool.Move] {
 
   import TimelineTool.Move
 
