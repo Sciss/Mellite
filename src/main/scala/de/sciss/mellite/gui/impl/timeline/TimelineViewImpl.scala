@@ -34,6 +34,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
+import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}

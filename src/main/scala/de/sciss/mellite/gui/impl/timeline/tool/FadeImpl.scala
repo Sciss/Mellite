@@ -29,7 +29,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicCollection[S, TimelineTool.Fade] {
+  extends BasicTimelineTool[S, TimelineTool.Fade] {
 
   import TimelineTool.{EmptyFade, Fade}
 

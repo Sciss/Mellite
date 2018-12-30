@@ -11,28 +11,27 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl
+package de.sciss.mellite.gui.impl.objview
 
 import java.awt.geom.Area
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.icons.raphael
+import de.sciss.kollflitz.Vec
 import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.HasStartLevels
-import de.sciss.mellite.gui.impl.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.{EnvSegment, Universe}
+import javax.swing.Icon
 
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D
 
 object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {

@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl
+package de.sciss.mellite.gui.impl.tool
 
 import java.awt.event.{MouseAdapter, MouseEvent}
 

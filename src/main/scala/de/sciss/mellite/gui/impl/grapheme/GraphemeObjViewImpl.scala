@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
-import de.sciss.mellite.gui.impl.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
 import de.sciss.synth.proc.Grapheme
 
 import scala.swing.Graphics2D

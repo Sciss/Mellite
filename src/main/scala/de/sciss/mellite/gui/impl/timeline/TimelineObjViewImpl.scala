@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.lucre.expr.{BooleanObj, CellView, DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm
@@ -21,8 +19,9 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.TimelineObjView.{Context, Factory}
+import de.sciss.mellite.gui.impl.objview.{ActionObjView, GenericObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.mellite.gui.impl.{ActionObjView, GenericObjView}
+import de.sciss.mellite.gui.{ObjView, TimelineObjView, TimelineTool}
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 
 object TimelineObjViewImpl {
@@ -48,8 +47,8 @@ object TimelineObjViewImpl {
   }
 
   private var map = Map[Int, Factory](
-    ProcObjView .tpe.typeId -> ProcObjView,
-    ActionObjView  .tpe.typeId -> ActionObjView
+    ProcObjView   .tpe.typeId -> ProcObjView,
+    ActionObjView .tpe.typeId -> ActionObjView
   )
 
   // -------- Generic --------

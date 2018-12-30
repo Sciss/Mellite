@@ -1,5 +1,5 @@
 /*
- *  BasicRegion.scala
+ *  BasicTimelineTool.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2018 Hanns Holger Rutz. All rights reserved.
@@ -18,7 +18,7 @@ import java.awt.event.MouseEvent
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
 import de.sciss.mellite.gui.TimelineObjView
-import de.sciss.mellite.gui.impl.DraggingTool
+import de.sciss.mellite.gui.impl.tool.DraggingTool
 
 /** Most common implementation of a timeline tool, based on region selection and
   * mouse dragging. It implements `handleSelect` by instantiating a `Drag`
@@ -26,7 +26,7 @@ import de.sciss.mellite.gui.impl.DraggingTool
   * Sub-classes may choose to provide a custom dialog for double clicks by
   * and thus may return `Some` data if the dialog is positively confirmed.
   */
-trait BasicCollection[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Int] {
+trait BasicTimelineTool[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Int] {
 
   protected type Initial = TimelineObjView[S]
 

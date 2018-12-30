@@ -23,14 +23,14 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.impl.RubberBandTool
+import de.sciss.mellite.gui.impl.tool.RubberBandTool
 import de.sciss.mellite.gui.{GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicCollection[S, TimelineTool.Move]
+  extends BasicTimelineTool[S, TimelineTool.Move]
     with RubberBandTool[S, TimelineTool.Move, Int, TimelineObjView[S]] {
 
   import TimelineTool.Move

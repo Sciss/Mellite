@@ -11,15 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
-import TimelineTool.EmptyRubber
 import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
+import de.sciss.mellite.gui.TimelineTool.EmptyRubber
+import de.sciss.mellite.gui.{BasicTool, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.log
 
 trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineTrackCanvas[S] {
   final val timelineTools: TimelineTools[S] = TimelineTools(this)

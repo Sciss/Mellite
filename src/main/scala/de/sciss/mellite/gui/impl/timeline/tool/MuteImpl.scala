@@ -22,7 +22,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.TimelineTool.Mute
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.impl.RubberBandTool
+import de.sciss.mellite.gui.impl.tool.RubberBandTool
 import de.sciss.mellite.gui.{BasicTool, GUI, Shapes, TimelineObjView, TimelineTrackCanvas}
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon

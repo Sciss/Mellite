@@ -17,10 +17,10 @@ package gui
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.DragRubber
-import de.sciss.mellite.gui.impl.ToolPaletteImpl
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.ToolsImpl
 import de.sciss.mellite.gui.impl.timeline.tool.{AuditionImpl, CursorImpl, FadeImpl, FunctionImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
+import de.sciss.mellite.gui.impl.tool.ToolPaletteImpl
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
 import de.sciss.synth.proc.FadeSpec

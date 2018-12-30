@@ -11,10 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl
+package de.sciss.mellite.gui.impl.objview
 
-import javax.swing.{Icon, SpinnerNumberModel}
 import de.sciss.desktop
 import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
@@ -22,8 +20,9 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
-import de.sciss.synth.proc.{Confluent, Universe}
 import de.sciss.synth.proc.Implicits._
+import de.sciss.synth.proc.{Confluent, Universe}
+import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.util.Try
 

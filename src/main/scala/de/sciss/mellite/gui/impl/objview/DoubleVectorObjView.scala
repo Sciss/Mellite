@@ -11,25 +11,24 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl
+package de.sciss.mellite.gui.impl.objview
 
 import java.awt.geom.Area
 
-import javax.swing.Icon
 import de.sciss.desktop
+import de.sciss.kollflitz.Vec
 import de.sciss.lucre.expr.{DoubleVector, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ObjViewImpl.{PrimitiveConfig, primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{PrimitiveConfig, primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, Shapes}
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
+import javax.swing.Icon
 
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{Component, Graphics2D, Label, TextField}
 import scala.util.Try
 

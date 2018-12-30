@@ -18,7 +18,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
-import de.sciss.mellite.gui.impl.ListObjViewImpl
+import de.sciss.mellite.gui.impl.objview.ListObjViewImpl
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 

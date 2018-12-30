@@ -11,20 +11,19 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.objview
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
+import javax.swing.Icon
 
 import scala.swing.{Component, Label}
 

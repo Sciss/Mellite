@@ -13,14 +13,12 @@
 
 package de.sciss.mellite.gui.impl.grapheme.tool
 
-import java.awt.event.MouseEvent
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.CollectionToolLike
+import de.sciss.mellite.gui.impl.tool.BasicCollectionTool
 import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeObjView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.UndoableEdit
@@ -31,22 +29,10 @@ import javax.swing.undo.UndoableEdit
   * It also implements `commit` by aggregating individual mark based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends CollectionToolLike[S, A, Double, GraphemeObjView[S]]
+trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Double, GraphemeObjView[S]]
   with GraphemeTool[S, A] {
 
-  tool =>
-
   override protected def canvas: GraphemeCanvas[S]
-
-  protected def handlePress(e: MouseEvent, modelY: Double, pos: Long, markOpt: Option[GraphemeObjView[S]]): Unit = {
-    handleMouseSelection(e, markOpt)
-    // now go on if mark is selected
-    markOpt.fold[Unit] {
-      handleOutside(e, modelY, pos)
-    } { mark =>
-      if (canvas.selectionModel.contains(mark)) handleSelect(e, modelY, pos, mark)
-    }
-  }
 
   def commit(drag: A)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     lazy val tl = canvas.grapheme
@@ -65,8 +51,4 @@ trait CollectionImpl[S <: Sys[S], A] extends CollectionToolLike[S, A, Double, Gr
 
   protected def commitObj(drag: A)(span: SpanLikeObj[S], proc: Obj[S], grapheme: Grapheme[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
-
-  protected def handleSelect (e: MouseEvent, modelY: Double, pos: Long, child: GraphemeObjView[S]): Unit
-
-  protected def handleOutside(e: MouseEvent, modelY: Double, pos: Long): Unit = ()
 }

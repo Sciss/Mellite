@@ -24,14 +24,14 @@ import de.sciss.lucre.stm.{Obj, Plain}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, PlayToggleButton, Shapes}
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 
 import scala.swing.Button
 

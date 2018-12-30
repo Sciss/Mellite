@@ -33,7 +33,8 @@ import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
-import de.sciss.mellite.gui.impl.ListObjViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile

@@ -21,7 +21,7 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
-import de.sciss.mellite.gui.impl.{CollectionToolLike, DraggingTool}
+import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, DraggingTool}
 import de.sciss.mellite.gui.{BasicTools, GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.log
 import de.sciss.span.Span

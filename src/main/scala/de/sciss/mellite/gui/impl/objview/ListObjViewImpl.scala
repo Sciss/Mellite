@@ -11,11 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.objview
 
-import javax.swing.undo.UndoableEdit
 import de.sciss.lucre.expr.{BooleanObj, Expr, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -29,6 +26,8 @@ import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
 import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.gui.impl.widget.WidgetObjView
+import de.sciss.mellite.gui.{ListObjView, ObjView}
+import javax.swing.undo.UndoableEdit
 
 import scala.language.higherKinds
 import scala.swing.{CheckBox, Component, Label}

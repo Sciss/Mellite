@@ -11,21 +11,21 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.objview
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.???!
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewBasicImpl
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.{Grapheme, Universe}
+import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label}
 

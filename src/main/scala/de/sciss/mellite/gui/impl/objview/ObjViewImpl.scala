@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl.objview
 
 import java.awt.geom.Path2D
 import java.awt.{Color => AWTColor}
@@ -22,6 +20,7 @@ import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
+import de.sciss.kollflitz.Vec
 import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.{BooleanObj, CellView, Expr, LongObj, StringObj, Type}
@@ -33,15 +32,17 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
+import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
+import de.sciss.mellite.gui.{EnsembleFrame, FolderFrame, GUI, GraphemeFrame, ListObjView, ObjView, Shapes, TimelineFrame}
+import de.sciss.mellite.{Cf, Mellite}
 import de.sciss.serial.Serializer
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.gui.UniverseView
-import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Universe, Workspace, Color => _Color}
+import de.sciss.synth.proc.{Confluent, ObjKeys, TimeRef, Universe, Workspace}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
 import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, ColorChooser, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
@@ -51,9 +52,9 @@ object ObjViewImpl {
   import java.lang.{String => _String}
 
   import de.sciss.lucre.expr.{IntVector => _IntVector}
-  import de.sciss.nuages.{Nuages => _Nuages}
-  import de.sciss.synth.proc.{Ensemble => _Ensemble, FadeSpec => _FadeSpec, Grapheme => _Grapheme, Timeline => _Timeline}
   import de.sciss.lucre.stm.{Folder => _Folder}
+  import de.sciss.nuages.{Nuages => _Nuages}
+  import de.sciss.synth.proc.{Color => _Color, Ensemble => _Ensemble, FadeSpec => _FadeSpec, Grapheme => _Grapheme, Timeline => _Timeline}
 
   import scala.{Boolean => _Boolean, Long => _Long}
 
@@ -345,7 +346,7 @@ object ObjViewImpl {
     private def mkColorEditor(): (Component, ColorChooser) = {
       val chooser = new ColorChooser()
       val bPredef = _Color.Palette.map { colr =>
-        val action = new Action(null /* colr.name */) {
+        val action: Action = new Action(null /* colr.name */) {
           private val awtColor = toAWT(colr)
           icon = new PaintIcon(awtColor, 32, 32)
           def apply(): Unit = chooser.color = awtColor
@@ -413,7 +414,7 @@ object ObjViewImpl {
 //          messageType = OptionPane.Message.Plain)
 //        opt.show(parent) === OptionPane.Result.Ok
         val title = CellView.name(obj)
-        val w = new WindowImpl[S](title) { self =>
+        val w: WindowImpl[S] = new WindowImpl[S](title) { self =>
           val view: View[S] = View.wrap {
             val (compColor, chooser) = Color.mkColorEditor()
             chooser.color = Color.toAWT(value)

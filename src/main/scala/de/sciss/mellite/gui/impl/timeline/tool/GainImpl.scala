@@ -27,7 +27,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicCollection[S, TimelineTool.Gain] {
+  extends BasicTimelineTool[S, TimelineTool.Gain] {
 
   import TimelineTool.Gain
 

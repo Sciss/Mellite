@@ -28,7 +28,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicCollection[S, TimelineTool.Resize] {
+  extends BasicTimelineTool[S, TimelineTool.Resize] {
 
   import TimelineTool.Resize
 

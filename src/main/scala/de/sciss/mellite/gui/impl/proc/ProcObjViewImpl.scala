@@ -17,7 +17,7 @@ package gui.impl.proc
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
-import de.sciss.mellite.gui.impl.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.{Proc, Universe}
 
 trait ProcObjViewImpl[S <: Sys[S]]

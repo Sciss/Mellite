@@ -21,6 +21,7 @@ import de.sciss.lucre.expr.{CellView, IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 

@@ -11,10 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl
+package de.sciss.mellite.gui.impl.objview
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
@@ -23,10 +21,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
+import de.sciss.mellite.Mellite
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.synth.proc.{Action, Universe}
+import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.Implicits._
+import de.sciss.synth.proc.{Action, Universe}
+import javax.swing.Icon
 
 object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]

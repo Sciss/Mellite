@@ -11,17 +11,17 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl
+package de.sciss.mellite.gui.impl.tool
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTools
 import de.sciss.mellite.gui.BasicTool.{DragCancel, DragEnd, DragRubber}
+import de.sciss.mellite.gui.BasicTools
 import de.sciss.span.Span
 import javax.swing.event.MouseInputAdapter
 
-// XXX TODO --- DRY with Dragging
+// XXX TODO --- DRY with DraggingTool
 trait RubberBandTool[S <: Sys[S], A, Y, Child] {
   _: CollectionToolLike[S, A, Y, Child] =>
 
