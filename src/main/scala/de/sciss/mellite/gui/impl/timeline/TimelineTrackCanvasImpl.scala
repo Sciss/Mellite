@@ -18,15 +18,15 @@ package timeline
 
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
-import TrackTool.EmptyRubber
+import TimelineTool.EmptyRubber
 
 trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineTrackCanvas[S] {
-  final val trackTools: TrackTools[S] = TrackTools(this)
+  final val timelineTools: TimelineTools[S] = TimelineTools(this)
 
-  import TrackTools._
+  import TimelineTools._
 
   protected var toolState: Option[Any]
-  protected var rubberState: TrackTool.DragRubber = EmptyRubber
+  protected var rubberState: TimelineTool.DragRubber = EmptyRubber
 
   private[this] var _trackIndexOffset = 0
 
@@ -39,9 +39,9 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
   final def screenToTrack(y    : Int): Int = y / TimelineView.TrackScale + trackIndexOffset
   final def trackToScreen(track: Int): Int = (track - trackIndexOffset) * TimelineView.TrackScale
 
-  private[this] val toolListener: TrackTool.Listener = {
+  private[this] val toolListener: TimelineTool.Listener = {
     // case TrackTool.DragBegin =>
-    case TrackTool.DragCancel =>
+    case TimelineTool.DragCancel =>
       log(s"Drag cancel $toolState")
       if (toolState.isDefined) {
         toolState   = None
@@ -51,7 +51,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TrackTool.DragEnd =>
+    case TimelineTool.DragEnd =>
       log(s"Drag end $toolState")
       toolState.fold[Unit] {
         if (rubberState.isValid) {
@@ -65,7 +65,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TrackTool.DragAdjust(value) =>
+    case TimelineTool.DragAdjust(value) =>
       // log(s"Drag adjust $value")
       val some = Some(value)
       if (toolState != some) {
@@ -73,19 +73,19 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
         repaint()
       }
 
-    case TrackTool.Adjust(state) =>
+    case TimelineTool.Adjust(state) =>
       log(s"Tool commit $state")
       toolState = None
       commitToolChanges(state)
       repaint()
 
-    case state: TrackTool.DragRubber =>
+    case state: TimelineTool.DragRubber =>
       log(s"Tool rubber $state")
       rubberState = state
       repaint()
   }
 
-  trackTools.addListener {
+  timelineTools.addListener {
     case ToolChanged(change) =>
       change.before.removeListener(toolListener)
       change.now   .addListener   (toolListener)
@@ -93,7 +93,7 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
     case FadeViewModeChanged  (_) => repaint()
     case RegionViewModeChanged(_) => repaint()
   }
-  trackTools.currentTool.addListener(toolListener)
+  timelineTools.currentTool.addListener(toolListener)
 
   private[this] val selectionListener: SelectionModel.Listener[S, TimelineObjView[S]] = {
     case SelectionModel.Update(_ /* added */, _ /* removed */) =>

@@ -46,7 +46,7 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
 object GraphemeViewImpl {
   private val DEBUG   = false
 
-  private val NoMove  = TrackTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
+  private val NoMove  = TimelineTool.Move(deltaTime = 0L, deltaTrack = 0, copy = false)
 
   import de.sciss.mellite.{logTimeline => logT}
 
@@ -183,7 +183,7 @@ object GraphemeViewImpl {
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
           HStrut(4),
-//          TrackTools.palette(canvasView.trackTools, Vector(
+//          TrackTools.palette(canvasView.timelineTools, Vector(
 //            toolCursor, toolMove, toolResize, toolGain, toolFade /* , toolSlide*/ ,
 //            toolMute, toolAudition, toolFunction, toolPatch)),
 //          HStrut(4),
@@ -416,7 +416,7 @@ object GraphemeViewImpl {
         moveState     = NoMove
 
         state.foreach {
-          case s: TrackTool.Move => moveState = s
+          case s: TimelineTool.Move => moveState = s
           case _ =>
         }
       }

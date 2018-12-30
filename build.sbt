@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.30.1-SNAPSHOT"
-lazy val mimaVersion                = "2.30.0"
+lazy val projectVersion             = "2.31.0-SNAPSHOT"
+lazy val mimaVersion                = "2.31.0"
 
 lazy val loggingEnabled             = true
 
@@ -217,8 +217,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "fscape"                         % deps.main.fscape,             // offline audio rendering
       "de.sciss"          %% "patterns-lucre"                 % deps.main.patterns,           // pattern sequences
       "de.sciss"          %  "jump3r"                         % deps.main.jump3r,             // mp3 export
-// currently disabled until Scala 2.13 version is available
- //     "de.sciss"          %% "scalafreesound"                 % deps.main.freesound,          // Freesound support
       "de.sciss"          %% "topology"                       % deps.main.topology,           // (sbt bug)
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "de.sciss"          %% "pdflitz"                        % deps.main.pdflitz,            // PDF export
@@ -226,6 +224,12 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %  "submin"                         % deps.main.submin,             // dark skin
       "com.github.scopt"  %% "scopt"                          % deps.main.scopt               // command line option parsing
     ),
+    libraryDependencies ++= {
+      // currently disabled until Scala 2.13 version is available
+      if (scalaVersion.value == "2.13.0-M5") Nil else Seq(
+        "de.sciss"        %% "scalafreesound"                 % deps.main.freesound           // Freesound support
+      )
+    },
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     mainClass in (Compile,run) := appMainClass,
     initialCommands in console :=

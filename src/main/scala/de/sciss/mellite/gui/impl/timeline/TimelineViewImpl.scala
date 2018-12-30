@@ -175,15 +175,15 @@ object TimelineViewImpl {
     protected val auxMap: IdentifierMap[S#Id, S#Tx, Any]                      = tx0.newInMemoryIdMap
     protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
 
-    private lazy val toolCursor   = TrackTool.cursor  [S](canvas)
-    private lazy val toolMove     = TrackTool.move    [S](canvas)
-    private lazy val toolResize   = TrackTool.resize  [S](canvas)
-    private lazy val toolGain     = TrackTool.gain    [S](canvas)
-    private lazy val toolMute     = TrackTool.mute    [S](canvas)
-    private lazy val toolFade     = TrackTool.fade    [S](canvas)
-    private lazy val toolFunction = TrackTool.function[S](canvas, this)
-    private lazy val toolPatch    = TrackTool.patch   [S](canvas)
-    private lazy val toolAudition = TrackTool.audition[S](canvas, this)
+    private lazy val toolCursor   = TimelineTool.cursor  [S](canvas)
+    private lazy val toolMove     = TimelineTool.move    [S](canvas)
+    private lazy val toolResize   = TimelineTool.resize  [S](canvas)
+    private lazy val toolGain     = TimelineTool.gain    [S](canvas)
+    private lazy val toolMute     = TimelineTool.mute    [S](canvas)
+    private lazy val toolFade     = TimelineTool.fade    [S](canvas)
+    private lazy val toolFunction = TimelineTool.function[S](canvas, this)
+    private lazy val toolPatch    = TimelineTool.patch   [S](canvas)
+    private lazy val toolAudition = TimelineTool.audition[S](canvas, this)
 
     def timeline  (implicit tx: S#Tx): Timeline[S] = timelineH()
     def plainGroup(implicit tx: S#Tx): Timeline[S] = timeline
@@ -216,7 +216,7 @@ object TimelineViewImpl {
 
     def guiInit(): Unit = {
       canvas = new View
-      val ggVisualBoost = GUI.boostRotary()(canvas.trackTools.visualBoost = _)
+      val ggVisualBoost = GUI.boostRotary()(canvas.timelineTools.visualBoost = _)
 
       val actionAttr: Action = Action(null) {
         withSelection { implicit tx =>
@@ -236,7 +236,7 @@ object TimelineViewImpl {
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
           HStrut(4),
-          TrackTools.palette(canvas.trackTools, Vector(
+          TimelineTools.palette(canvas.timelineTools, Vector(
             toolCursor, toolMove, toolResize, toolGain, toolFade /* , toolSlide*/ ,
             toolMute, toolAudition, toolFunction, toolPatch)),
           HStrut(4),
@@ -583,7 +583,7 @@ object TimelineViewImpl {
         regions.find(pv => pv.trackIndex <= hitTrack && (pv.trackIndex + pv.trackHeight) > hitTrack)
       }
 
-      def findRegions(r: TrackTool.Rectangular): Iterator[TimelineObjView[S]] = {
+      def findRegions(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]] = {
         val regions = intersect(r.span)
         regions.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
       }
@@ -592,8 +592,8 @@ object TimelineViewImpl {
         logT(s"Commit tool changes $value")
         val editOpt = cursor.step { implicit tx =>
           value match {
-            case t: TrackTool.Cursor => toolCursor commit t
-            case t: TrackTool.Move =>
+            case t: TimelineTool.Cursor => toolCursor commit t
+            case t: TimelineTool.Move =>
               // println("\n----BEFORE----")
               // println(group.debugPrint)
               val res = toolMove.commit(t)
@@ -602,23 +602,23 @@ object TimelineViewImpl {
               debugCheckConsistency(s"Move $t")
               res
 
-            case t: TrackTool.Resize =>
+            case t: TimelineTool.Resize =>
               val res = toolResize commit t
               debugCheckConsistency(s"Resize $t")
               res
 
-            case t: TrackTool.Gain => toolGain commit t
-            case t: TrackTool.Mute => toolMute commit t
-            case t: TrackTool.Fade => toolFade commit t
-            case t: TrackTool.Function => toolFunction commit t
-            case t: TrackTool.Patch[S] => toolPatch commit t
+            case t: TimelineTool.Gain => toolGain commit t
+            case t: TimelineTool.Mute => toolMute commit t
+            case t: TimelineTool.Fade => toolFade commit t
+            case t: TimelineTool.Function => toolFunction commit t
+            case t: TimelineTool.Patch[S] => toolPatch commit t
             case _ => None
           }
         }
         editOpt.foreach(undoManager.add)
       }
 
-      private val NoPatch = TrackTool.Patch[S](null, null)
+      private val NoPatch = TimelineTool.Patch[S](null, null)
       // not cool
       private var _toolState = Option.empty[Any]
       private var patchState = NoPatch
@@ -628,20 +628,20 @@ object TimelineViewImpl {
       protected def toolState_=(state: Option[Any]): Unit = {
         _toolState        = state
         val r             = canvasComponent.rendering
-        r.ttMoveState     = TrackTool.NoMove
-        r.ttResizeState   = TrackTool.NoResize
-        r.ttGainState     = TrackTool.NoGain
-        r.ttFadeState     = TrackTool.NoFade
-        r.ttFunctionState = TrackTool.NoFunction
+        r.ttMoveState     = TimelineTool.NoMove
+        r.ttResizeState   = TimelineTool.NoResize
+        r.ttGainState     = TimelineTool.NoGain
+        r.ttFadeState     = TimelineTool.NoFade
+        r.ttFunctionState = TimelineTool.NoFunction
         patchState        = NoPatch
 
         state.foreach {
-          case s: TrackTool.Move      => r.ttMoveState      = s
-          case s: TrackTool.Resize    => r.ttResizeState    = s
-          case s: TrackTool.Gain      => r.ttGainState      = s
-          case s: TrackTool.Fade      => r.ttFadeState      = s
-          case s: TrackTool.Function  => r.ttFunctionState  = s
-          case s: TrackTool.Patch[S]  => patchState         = s
+          case s: TimelineTool.Move      => r.ttMoveState      = s
+          case s: TimelineTool.Resize    => r.ttResizeState    = s
+          case s: TimelineTool.Gain      => r.ttGainState      = s
+          case s: TimelineTool.Fade      => r.ttFadeState      = s
+          case s: TimelineTool.Function  => r.ttFunctionState  = s
+          case s: TimelineTool.Patch[S]  => patchState         = s
           case _ =>
         }
       }
@@ -762,13 +762,13 @@ object TimelineViewImpl {
           g.draw(shape1)
         }
 
-        private def drawPatch(g: Graphics2D, patch: TrackTool.Patch[S]): Unit = {
+        private def drawPatch(g: Graphics2D, patch: TimelineTool.Patch[S]): Unit = {
           val src = patch.source
           val srcFrameC = linkFrame(src)
           val srcY = linkY(src, input = false)
           val (sinkFrameC, sinkY) = patch.sink match {
-            case TrackTool.Patch.Unlinked(f, y) => (f, y)
-            case TrackTool.Patch.Linked(sink) =>
+            case TimelineTool.Patch.Unlinked(f, y) => (f, y)
+            case TimelineTool.Patch.Linked(sink) =>
               val f = linkFrame(sink)
               val y1 = linkY(sink, input = true)
               (f, y1)

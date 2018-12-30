@@ -30,10 +30,10 @@ trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas {
 
   def findRegion(frame: Long, hitTrack: Int): Option[TimelineObjView[S]]
 
-  def findRegions(r: TrackTool.Rectangular): Iterator[TimelineObjView[S]]
+  def findRegions(r: TimelineTool.Rectangular): Iterator[TimelineObjView[S]]
 
   def screenToTrack(y    : Int): Int
   def trackToScreen(track: Int): Int
 
-  def trackTools: TrackTools[S]
+  def timelineTools: TimelineTools[S]
 }

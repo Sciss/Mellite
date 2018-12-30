@@ -22,9 +22,9 @@ trait TimelineRendering extends BasicRendering {
   def pntInletSpan                : Paint
   def strokeInletSpan             : Stroke
 
-  def ttMoveState                 : TrackTool.Move
-  def ttResizeState               : TrackTool.Resize
-  def ttGainState                 : TrackTool.Gain
-  def ttFadeState                 : TrackTool.Fade
-  def ttFunctionState             : TrackTool.Function
+  def ttMoveState                 : TimelineTool.Move
+  def ttResizeState               : TimelineTool.Resize
+  def ttGainState                 : TimelineTool.Gain
+  def ttFadeState                 : TimelineTool.Fade
+  def ttFunctionState             : TimelineTool.Function
 }

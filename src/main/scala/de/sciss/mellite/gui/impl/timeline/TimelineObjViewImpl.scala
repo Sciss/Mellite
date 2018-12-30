@@ -100,19 +100,19 @@ object TimelineObjViewImpl {
       val fadeInView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)
       disposables ::= fadeInView.react { implicit tx => opt =>
         deferTx {
-          fadeIn = opt.getOrElse(TrackTool.EmptyFade)
+          fadeIn = opt.getOrElse(TimelineTool.EmptyFade)
         }
         fire(ObjView.Repaint(this))
       }
       val fadeOutView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeOut)
       disposables ::= fadeOutView.react { implicit tx => opt =>
         deferTx {
-          fadeOut = opt.getOrElse(TrackTool.EmptyFade)
+          fadeOut = opt.getOrElse(TimelineTool.EmptyFade)
         }
         fire(ObjView.Repaint(this))
       }
-      fadeIn  = fadeInView ().getOrElse(TrackTool.EmptyFade)
-      fadeOut = fadeOutView().getOrElse(TrackTool.EmptyFade)
+      fadeIn  = fadeInView ().getOrElse(TimelineTool.EmptyFade)
+      fadeOut = fadeOutView().getOrElse(TimelineTool.EmptyFade)
       this
     }
   }

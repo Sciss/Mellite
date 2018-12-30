@@ -41,7 +41,7 @@ The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite" % v
 
-The current version `v` is `"2.30.1"`.
+The current version `v` is `"2.31.0"`.
 
 ## building
 

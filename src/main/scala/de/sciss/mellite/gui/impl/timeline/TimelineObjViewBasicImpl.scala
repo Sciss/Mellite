@@ -93,7 +93,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
       paintBackImpl(g, tlv, r,        selected = selected)
     } else {
       // cheesy work around to show both original and copy
-      val move1 = TrackTool.NoMove
+      val move1 = TimelineTool.NoMove
       updateBounds (g, tlv, r, move1, selected = selected)
       paintBackImpl(g, tlv, r,        selected = selected)
       updateBounds (g, tlv, r, move0, selected = selected)
@@ -102,7 +102,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
   }
 
   private[this] def updateBounds(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering,
-                                 moveState: TrackTool.Move, selected: Boolean): Unit = {
+                                 moveState: TimelineTool.Move, selected: Boolean): Unit = {
     val canvas          = tlv.canvas
     var x1              = -5
     val peer            = canvas.canvasComponent.peer
@@ -192,8 +192,8 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
 
   private[this] def paintBackImpl(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering, selected: Boolean): Unit = {
     val canvas          = tlv.canvas
-    val trackTools      = canvas.trackTools
-    val regionViewMode  = trackTools.regionViewMode
+    val timelineTools   = canvas.timelineTools
+    val regionViewMode  = timelineTools.regionViewMode
 
     import canvas.framesToScreen
     import r.{ttFadeState => fadeState}
@@ -252,14 +252,14 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
       }
 
       this match {
-        case fv: TimelineObjView.HasFade if trackTools.fadeViewMode == FadeViewMode.Curve =>
+        case fv: TimelineObjView.HasFade if timelineTools.fadeViewMode == FadeViewMode.Curve =>
           def adjustFade(in: Curve, deltaCurve: Float): Curve = in match {
             case Curve.linear                 => Curve.parametric(math.max(-20, math.min(20, deltaCurve)))
             case Curve.parametric(curvature)  => Curve.parametric(math.max(-20, math.min(20, curvature + deltaCurve)))
             case other                        => other
           }
 
-          val st      = if (selected) fadeState else TrackTool.NoFade
+          val st      = if (selected) fadeState else TimelineTool.NoFade
           val fdIn    = fv.fadeIn  // (don't remember this comment: "continue here. add delta")
           val fdInFr  = fdIn.numFrames + st.deltaFadeIn
           if (fdInFr > 0) {

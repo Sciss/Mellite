@@ -182,7 +182,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
         val canvas      = tlv.canvas
         val s2f         = canvas.screenToFrames(1) * srRatio
         val lenC        = (px2c - px1c) * s2f
-        val visualBoost = canvas.trackTools.visualBoost
+        val visualBoost = canvas.timelineTools.visualBoost
         val boost       = if (selected) r.ttGainState.factor * visualBoost else visualBoost
         r.sonogramBoost = (audioVal.gain * gain).toFloat * boost
         val startP      = (px1c - px) * s2f + dStart
