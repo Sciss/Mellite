@@ -11,18 +11,19 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package edit
+package de.sciss.mellite.gui.edit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.{IntObj, LongObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.expr.Ops._
 import de.sciss.mellite.ProcActions.{Move, Resize}
+import de.sciss.mellite.gui.{GraphemeTool, TimelineObjView}
+import de.sciss.mellite.{???!, ProcActions, log}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, Code, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
 import javax.swing.undo.UndoableEdit
 
@@ -30,6 +31,8 @@ import scala.collection.immutable.{Seq => ISeq}
 import scala.util.control.NonFatal
 
 object Edits {
+//  private def any2stringadd: Any = ()
+
   def setBus[S <: Sys[S]](objects: Iterable[Obj[S]], intExpr: IntObj[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     val name = "Set Bus"
@@ -183,6 +186,34 @@ object Edits {
     }
   }
 
+  def unlinkAndRemove[S <: Sys[S]](timeline: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S])
+                                  (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+    val scanEdits = obj match {
+      case _: Proc[S] =>
+        //        val proc  = objT
+        //        // val scans = proc.scans
+        //        val edits1 = proc.inputs.iterator.toList.flatMap { case (key, scan) =>
+        //          scan.iterator.collect {
+        //            case Scan.Link.Scan(source) =>
+        //              removeLink(source, scan)
+        //          }.toList
+        //        }
+        //        val edits2 = proc.outputs.iterator.toList.flatMap { case (key, scan) =>
+        //          scan.iterator.collect {
+        //            case Scan.Link.Scan(sink) =>
+        //              removeLink(scan, sink)
+        //          } .toList
+        //        }
+        //        edits1 ++ edits2
+        ???! // SCAN
+
+      case _ => Nil
+    }
+    val name    = "Remove Object"
+    val objEdit = EditTimelineRemoveObj(name, timeline, span, obj)
+    CompoundEdit(scanEdits :+ objEdit, name).get // XXX TODO - not nice, `get`
+  }
+
   def resize[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], amount: Resize, minStart: Long)
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
     SpanLikeObj.Var.unapply(span).flatMap { vr =>
@@ -229,7 +260,7 @@ object Edits {
                 // Crazy heuristics
                 audioCue match {
                   case AudioCue.Obj.Shift(peer, amt) =>
-                    import expr.Ops._
+
                     amt match {
                       case LongObj.Var(amtVr) =>
                         EditVar.Expr[S, Long, LongObj](name, amtVr, amtVr() + dStartCC)
@@ -249,8 +280,21 @@ object Edits {
       } else None
     }
 
-  private def copyImpl[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move, minStart: Long)
-                                   (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def timelineMoveOrCopy[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move, minStart: Long)
+                                     (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+    if (amount.copy) timelineCopyImpl(span, obj, timeline, amount, minStart = minStart)
+    else             timelineMoveImpl(span, obj, timeline, amount, minStart = minStart)
+
+  def graphemeMoveOrCopy[S <: Sys[S]](time: LongObj[S], obj: Obj[S], grapheme: Grapheme[S],
+                                      amount: GraphemeTool.Move, minStart: Long)
+                                     (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+    if (amount.copy) ??? // graphemeCopyImpl(time, obj, grapheme, amount, minStart = minStart)
+    else             graphemeMoveImpl(time, obj, grapheme, amount, minStart = minStart)
+
+  // ---- private ----
+
+  private def timelineCopyImpl[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move, minStart: Long)
+                                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     timeline.modifiableOption.map { tlMod =>
       val objCopy = ProcActions.copy[S](obj, connectInput = true)
       import amount._
@@ -261,7 +305,7 @@ object Edits {
         objCopy.attr.put(TimelineObjView.attrTrackIndex, newTrack)
       }
 
-      val deltaC  = calcDeltaC(span, amount, minStart = minStart)
+      val deltaC  = calcSpanDeltaClipped(span, amount, minStart = minStart)
       val newSpan: SpanLikeObj[S] = SpanLikeObj.newVar[S](
         span.value.shift(deltaC)
       )
@@ -269,12 +313,8 @@ object Edits {
     }
   }
 
-  def moveOrCopy[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move, minStart: Long)
-                             (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
-    if (amount.copy) copyImpl(span, obj, timeline, amount, minStart = minStart)
-    else             moveImpl(span, obj, timeline, amount, minStart = minStart)
-
-  private def calcDeltaC[S <: Sys[S]](span: SpanLikeObj[S], amount: Move, minStart: Long)(implicit tx: S#Tx): Long = {
+  private def calcSpanDeltaClipped[S <: Sys[S]](span: SpanLikeObj[S], amount: Move, minStart: Long)
+                                               (implicit tx: S#Tx): Long = {
     import amount.deltaTime
     if (deltaTime >= 0) deltaTime else span.value match {
       case Span.HasStart(oldStart) => math.max(-(oldStart - minStart      ), deltaTime)
@@ -283,9 +323,18 @@ object Edits {
     }
   }
 
-  private def moveImpl[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move,
-                                    minStart: Long)
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  private def calcPosDeltaClipped[S <: Sys[S]](time: LongObj[S], amount: GraphemeTool.Move, minStart: Long)
+                                               (implicit tx: S#Tx): Long = {
+    import amount.deltaTime
+    if (deltaTime >= 0) deltaTime else {
+      val oldTime = time.value
+      math.max(-(oldTime - minStart), deltaTime)
+    }
+  }
+
+  private def timelineMoveImpl[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S], amount: Move,
+                                            minStart: Long)
+                                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     var edits = List.empty[UndoableEdit]
 
     import amount._
@@ -310,7 +359,7 @@ object Edits {
     }
 
     val name    = "Move"
-    val deltaC  = calcDeltaC(span, amount, minStart = minStart)
+    val deltaC  = calcSpanDeltaClipped(span, amount, minStart = minStart)
     if (deltaC != 0L) {
       // val imp = ExprImplicits[S]
       span match {
@@ -327,31 +376,47 @@ object Edits {
     CompoundEdit(edits, name)
   }
 
-  def unlinkAndRemove[S <: Sys[S]](timeline: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S])
-                                  (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
-    val scanEdits = obj match {
-      case _: Proc[S] =>
-//        val proc  = objT
-//        // val scans = proc.scans
-//        val edits1 = proc.inputs.iterator.toList.flatMap { case (key, scan) =>
-//          scan.iterator.collect {
-//            case Scan.Link.Scan(source) =>
-//              removeLink(source, scan)
-//          }.toList
-//        }
-//        val edits2 = proc.outputs.iterator.toList.flatMap { case (key, scan) =>
-//          scan.iterator.collect {
-//            case Scan.Link.Scan(sink) =>
-//              removeLink(scan, sink)
-//          } .toList
-//        }
-//        edits1 ++ edits2
-        ???! // SCAN
+  private def graphemeMoveImpl[S <: Sys[S]](time: LongObj[S], obj: Obj[S], grapheme: Grapheme[S],
+                                            amount: GraphemeTool.Move, minStart: Long)
+                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+    var edits = List.empty[UndoableEdit]
 
-      case _ => Nil
+//    import amount._
+//    if (deltaTrack != 0) {
+//      // in the case of const, just overwrite, in the case of
+//      // var, check the value stored in the var, and update the var
+//      // instead (recursion). otherwise, it will be some combinatorial
+//      // expression, and we could decide to construct a binary op instead!
+//      // val expr = ExprImplicits[S]
+//
+//      import expr.Ops._
+//      val newTrack: IntObj[S] = obj.attr.$[IntObj](TimelineObjView.attrTrackIndex) match {
+//        case Some(IntObj.Var(vr)) => vr() + deltaTrack
+//        case other => other.fold(0)(_.value) + deltaTrack
+//      }
+//      import de.sciss.equal.Implicits._
+//      val newTrackOpt = if (newTrack === IntObj.newConst[S](0)) None else Some(newTrack)
+//      val edit = EditAttrMap.expr[S, Int, IntObj]("Adjust Track Placement", obj,
+//        TimelineObjView.attrTrackIndex, newTrackOpt)
+//
+//      edits ::= edit
+//    }
+
+    val name    = "Move"
+    val deltaC  = calcPosDeltaClipped(time, amount, minStart = minStart)
+    if (deltaC != 0L) {
+      // val imp = ExprImplicits[S]
+      time match {
+        case LongObj.Var(vr) =>
+          // s.transform(_ shift deltaC)
+          import expr.Ops._
+          val newSpan = vr() + deltaC
+          val edit    = EditVar.Expr[S, Long, LongObj](name, vr, newSpan)
+          edits ::= edit
+        case _ =>
+      }
     }
-    val name    = "Remove Object"
-    val objEdit = EditTimelineRemoveObj(name, timeline, span, obj)
-    CompoundEdit(scanEdits :+ objEdit, name).get // XXX TODO - not nice, `get`
+
+    CompoundEdit(edits, name)
   }
 }

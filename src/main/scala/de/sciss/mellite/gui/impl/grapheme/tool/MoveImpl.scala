@@ -22,6 +22,7 @@ import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.edit.Edits
 import de.sciss.mellite.gui.impl.tool.RubberBandTool
 import de.sciss.mellite.gui.{GUI, GraphemeCanvas, GraphemeObjView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
@@ -62,7 +63,7 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: GraphemeCanvas[S])
   protected def commitObj(drag: Move)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
-    ??? // Edits.moveOrCopy(span, obj, grapheme, drag, minStart = minStart)
+    Edits.graphemeMoveOrCopy(time, child, parent, drag, minStart = minStart)
   }
 
   protected def dialog(): Option[Move] = {

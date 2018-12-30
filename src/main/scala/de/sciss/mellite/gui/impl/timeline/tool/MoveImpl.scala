@@ -63,7 +63,7 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   protected def commitObj(drag: Move)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
-    Edits.moveOrCopy(span, obj, timeline, drag, minStart = minStart)
+    Edits.timelineMoveOrCopy(span, obj, timeline, drag, minStart = minStart)
   }
 
   protected def dialog(): Option[Move] = {

@@ -163,7 +163,7 @@ trait TimelineActions[S <: Sys[S]] {
           plRes.flatMap { pl =>
             if (!pl.isSignificant) None else {
               val move = Move(deltaTime = 0L, deltaTrack = pl.deltaY, copy = false)
-              Edits.moveOrCopy(pl.view.span, pl.view.obj, tl, move, minStart = Long.MinValue)
+              Edits.timelineMoveOrCopy(pl.view.span, pl.view.obj, tl, move, minStart = Long.MinValue)
             }
           }
         }
@@ -236,7 +236,7 @@ trait TimelineActions[S <: Sys[S]] {
             val editsMove = affected.flatMap {
               case (_ /* elemSpan */, elems) =>
                 elems.flatMap { timed =>
-                  Edits.moveOrCopy(timed.span, timed.value, groupMod, amount, minStart = minStart)
+                  Edits.timelineMoveOrCopy(timed.span, timed.value, groupMod, amount, minStart = minStart)
                 }
             } .toList
 
@@ -265,7 +265,7 @@ trait TimelineActions[S <: Sys[S]] {
             case hs: Span.HasStart if hs.start != pos =>
               val delta   = pos - hs.start
               val amount  = ProcActions.Move(deltaTime = delta, deltaTrack = 0, copy = false)
-              Edits.moveOrCopy(span, _view.obj, tl, amount = amount, minStart = 0L)
+              Edits.timelineMoveOrCopy(span, _view.obj, tl, amount = amount, minStart = 0L)
             case _ => None
           }
         }
