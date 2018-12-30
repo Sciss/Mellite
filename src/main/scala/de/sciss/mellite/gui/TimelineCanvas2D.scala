@@ -30,8 +30,13 @@ trait TimelineCanvas2D[S <: Sys[S], Y, Child] extends TimelineCanvas {
 
   def findChildViews(r: BasicTool.Rectangular[Y]): Iterator[Child]
 
-  def screenToModelY(y: Int): Y
-  def modelYToScreen(modelY: Y): Int
+  def screenToModelPos(y: Int): Y
+
+  def screenToModelExtent(dy: Int): Y
+
+  def modelPosToScreen(modelY: Y): Double
+
+  def modelExtentToScreen(modelY: Y): Double
 
 //  def modelYNumeric: Numeric[Y]
 

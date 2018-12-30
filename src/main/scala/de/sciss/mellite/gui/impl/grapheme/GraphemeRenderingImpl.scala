@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import java.awt.geom.{AffineTransform, Area, Ellipse2D}
 

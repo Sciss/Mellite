@@ -36,8 +36,11 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
     repaint()
   }
 
-  final def screenToModelY(y    : Int): Int = y / TimelineView.TrackScale + trackIndexOffset
-  final def modelYToScreen(track: Int): Int = (track - trackIndexOffset) * TimelineView.TrackScale
+  final def screenToModelPos    (y    : Int): Int     = y / TimelineView.TrackScale + trackIndexOffset
+  final def screenToModelExtent (y    : Int): Int     = y / TimelineView.TrackScale
+
+  final def modelPosToScreen    (track  : Int): Double  = (track - trackIndexOffset) * TimelineView.TrackScale
+  final def modelExtentToScreen (tracks : Int): Double  = tracks * TimelineView.TrackScale
 
   final def modelYBox(a: Int, b: Int): (Int, Int) = if (a < b) (a, b - a + 1) else (b, a - b + 1)
 

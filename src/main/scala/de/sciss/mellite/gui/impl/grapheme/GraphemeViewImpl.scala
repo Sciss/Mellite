@@ -32,6 +32,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.model.Change
+import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
 import de.sciss.synth.proc.{Grapheme, TimeRef, Universe}
@@ -45,8 +46,6 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
 
 object GraphemeViewImpl {
   private val DEBUG   = false
-
-  private val NoMove  = GraphemeTool.Move(deltaTime = 0L, deltaModelY = 0d, copy = false)
 
   import de.sciss.mellite.{logTimeline => logT}
 
@@ -139,12 +138,12 @@ object GraphemeViewImpl {
 
     var canvas: GraphemeCanvasImpl[S] = _
 
-    val disposables           = Ref(List.empty[Disposable[S#Tx]])
+    val disposables: Ref[List[Disposable[S#Tx]]] = Ref(Nil)
 
     def mode: Mode = Mode.TwoDim
 
-//    private lazy val toolCursor   = TrackTool.cursor  [S](canvasView)
-//    private lazy val toolMove     = TrackTool.move    [S](canvasView)
+    private[this] lazy val toolCursor   = GraphemeTool.cursor  [S](canvas)
+    private[this] lazy val toolMove     = GraphemeTool.move    [S](canvas)
 
     def grapheme  (implicit tx: S#Tx): Grapheme[S] = graphemeH()
     def plainGroup(implicit tx: S#Tx): Grapheme[S] = grapheme
@@ -183,10 +182,10 @@ object GraphemeViewImpl {
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
           HStrut(4),
-//          TrackTools.palette(canvasView.timelineTools, Vector(
-//            toolCursor, toolMove, toolResize, toolGain, toolFade /* , toolSlide*/ ,
-//            toolMute, toolAudition, toolFunction, toolPatch)),
-//          HStrut(4),
+          GraphemeTools.palette(canvas.graphemeTools, Vector(
+            toolCursor, toolMove
+          )),
+          HStrut(4),
           ggAttr,
           HGlue
         )
@@ -233,13 +232,13 @@ object GraphemeViewImpl {
     private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
     private def addInsetsG(i: Insets): Unit = {
-      val h = i.maxHoriz
+      val h = i.maxHorizontal
       val c = viewMaxHorizG.getOrElse(h, 0) + 1
       viewMaxHorizG += h -> c
     }
 
     private def removeInsetsG(i: Insets): Unit = {
-      val h = i.maxHoriz
+      val h = i.maxHorizontal
       val c = viewMaxHorizG(h) - 1
       if (c == 0) viewMaxHorizG -= h else viewMaxHorizG += h -> c
     }
@@ -289,7 +288,7 @@ object GraphemeViewImpl {
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
         case ObjView.Repaint(_) => objUpdated(view)
-        case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHoriz != now.maxHoriz =>
+        case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHorizontal != now.maxHorizontal =>
           deferTx {
             removeInsetsG(before)
             addInsetsG   (now   )
@@ -375,42 +374,62 @@ object GraphemeViewImpl {
     private final class View extends GraphemeCanvasImpl[S] {
       canvasImpl =>
 
-      // import AbstractGraphemeView._
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[S, GraphemeObjView[S]] = impl.selectionModel
       def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
 
-//      def findView(pos: Long): Option[GraphemeObjView[S]] =
-//        viewMapG.range(pos, Long.MaxValue).headOption.flatMap(_._2.headOption)
-
-      def findChildView(pos: Long): Option[GraphemeObjView[S]] = {
-        val it = viewMapG.valuesIteratorFrom(pos)
+      def findChildView(frame: Long): Option[GraphemeObjView[S]] = {
+        val it = viewMapG.valuesIteratorFrom(frame)
         if (it.hasNext) it.next().headOption else None
       }
 
-//      def findRegions(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]] = {
+      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = {
 //        val views = intersect(r.span)
 //        views.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
-//      }
+        ??? // Iterator.empty
+      }
 
-      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = ???
+      def iterator: Iterator[GraphemeObjView[S]] = viewMapG.valuesIterator.flatMap(_.headOption)
 
-      def iterator: Iterator[GraphemeObjView[S]] = ???
+      def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = {
+        ???
+      }
 
-      def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = ???
+      def findChildView(frame: Long, modelY: Double): Option[GraphemeObjView[S]] = {
+        val dLeft   = math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+        val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+        val dTop    = screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val dBottom = dTop // screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val frame1  = frame  - dLeft
+        val frame2  = frame  + dRight
+        val modelY1 = modelY - dTop
+        val modelY2 = modelY + dBottom
+        val it0 = viewMapG.valuesIteratorFrom(frame1).flatMap(_.headOption).takeWhile(_.timeValue <= frame2)
+        val it  = it0.filter {
+          case hs: GraphemeObjView.HasStartLevels[_] =>
+            hs.startLevels.exists { value =>
+              value >= modelY1 && value <= modelY2
+            }
+          case _ => true
+        }
+        if (!it.hasNext) None else Some(it.minBy {
+          case child: GraphemeObjView.HasStartLevels[_] =>
+            val dy = child.startLevels.iterator.map(value => modelExtentToScreen(value absDif modelY)).min
+            val dx = framesToScreen(math.abs(child.timeValue - frame))  // XXX TODO --- Numbers should have absDif for Long
+            dx.squared + dy.squared
 
-      def findChildView(frame: Long, modelY: Double): Option[GraphemeObjView[S]] = ???
-
-      def findChildViews(r: GraphemeTool.Rectangular): Iterator[GraphemeObjView[S]] = ???
+          case child =>
+            val dx = framesToScreen(math.abs(child.timeValue - frame))  // XXX TODO --- Numbers should have absDif for Long
+            dx * dx
+        })
+      }
 
       protected def commitToolChanges(value: Any): Unit = {
         logT(s"Commit tool changes $value")
         val editOpt = cursor.step { implicit tx =>
           value match {
-//            case t: TrackTool.Cursor    => toolCursor commit t
-//            case t: TrackTool.Move      =>
-//              val res = toolMove.commit(t)
-//              res
+//            case t: GraphemeTool.Cursor    => toolCursor .commit(t)
+            case t: GraphemeTool.Move      => toolMove   .commit(t)
             case _ => None
           }
         }
@@ -418,12 +437,12 @@ object GraphemeViewImpl {
       }
 
       private[this] var _toolState    = Option.empty[Any]
-      private[this] var moveState     = NoMove
+      private[this] var moveState     = GraphemeTool.NoMove
 
       protected def toolState: Option[Any] = _toolState
       protected def toolState_=(state: Option[Any]): Unit = {
         _toolState    = state
-        moveState     = NoMove
+        moveState     = GraphemeTool.NoMove
 
         state.foreach {
           case s: GraphemeTool.Move => moveState = s

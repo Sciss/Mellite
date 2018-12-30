@@ -115,7 +115,7 @@ trait DraggingTool[S <: Sys[S], A, Y] {
     private def calcCurrent(e: MouseEvent): Unit = {
       _currentEvent   = e
       _currentPos     = canvas.screenToFrame(e.getX).toLong
-      _currentModelY  = canvas.screenToModelY(e.getY)
+      _currentModelY  = canvas.screenToModelPos(e.getY)
     }
 
     override def mouseDragged(e: MouseEvent): Unit = {

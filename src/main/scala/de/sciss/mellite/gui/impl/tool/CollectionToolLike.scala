@@ -60,7 +60,7 @@ trait CollectionToolLike[S <: Sys[S], A, Y, Child] extends BasicTool[S, A] with 
     override def mousePressed(e: MouseEvent): Unit = {
       e.getComponent.requestFocus()
       val pos       = canvas.screenToFrame(e.getX).toLong
-      val modelY    = canvas.screenToModelY(e.getY)
+      val modelY    = canvas.screenToModelPos(e.getY)
       val childOpt  = canvas.findChildView(pos, modelY)
       handlePress(e, modelY, pos, childOpt)
     }

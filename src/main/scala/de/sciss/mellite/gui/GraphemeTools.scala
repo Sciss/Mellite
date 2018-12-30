@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
@@ -39,14 +38,6 @@ object GraphemeTools {
 trait GraphemeTools[S <: stm.Sys[S]] extends BasicTools[S, GraphemeTool[S, _], GraphemeTools.Update[S]]
 
 object GraphemeTool {
-  trait Rectangular {
-    def modelYOffset: Double
-    def modelYExtent: Double
-    def span: Span
-
-//    def isValid: Boolean = modelYOffset >= 0
-  }
-
   type Update[+A] = BasicTool.Update[A]
 
   val EmptyRubber: DragRubber[Double] = DragRubber(-1d, -1d, Span(0L, 0L), isValid = false)

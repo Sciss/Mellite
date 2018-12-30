@@ -23,7 +23,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeObjView.HasStartLevels
+import de.sciss.mellite.gui.GraphemeObjView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
@@ -112,7 +112,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
     def startLevels: Vec[Double] = value.startLevels
 
-    def insets: Insets = Insets(4, 4, 4, 4)
+    def insets: Insets = GraphemeObjView.DefaultInsets
 
     private[this] var succOpt = Option.empty[HasStartLevels[S]]
 
@@ -207,7 +207,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
         val y = (1 - v) * hm
         p.setFrame(x - 2, y - 2, 4, 4)
         a1.add(new Area(p))
-        p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
+        p.setFrame(x - HandleRadius, y - HandleRadius, HandleDiameter, HandleDiameter)
         a2.add(new Area(p))
         if (y < min) min = y
         if (y > max) max = y

@@ -110,7 +110,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
     val w               = peer.getWidth
     var x2              = w + 5
 
-    import canvas.{frameToScreen, modelYToScreen}
+    import canvas.{frameToScreen, modelPosToScreen}
     import r.{clipRect, ttResizeState => resizeState}
 
     def adjustStart(start: Long): Long =
@@ -181,10 +181,10 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
     }
 
     val pTrk  = if (selected) math.max(0, trackIndex + moveState.deltaTrack) else trackIndex
-    py        = modelYToScreen(pTrk)
+    py        = modelPosToScreen(pTrk).toInt
     px        = x1
     pw        = x2 - x1
-    ph        = modelYToScreen(pTrk + trackHeight) - py
+    ph        = modelPosToScreen(pTrk + trackHeight).toInt - py
 
     // clipped coordinates
     px1c      = math.max(px +  1, clipRect.x - 2)

@@ -51,6 +51,13 @@ object GraphemeObjView {
   trait HasStartLevels[S <: stm.Sys[S]] extends GraphemeObjView[S] {
     def startLevels: Vec[Double]
   }
+
+  final val HandleRadius    = 3.5
+  final val HandleDiameter  = 7.0
+
+  final val DefaultInsets   = Insets(4, 4, 4, 4)
+
+  final val ScreenTolerance = 7
 }
 trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
   def entryH: stm.Source[S#Tx, Grapheme.Entry[S]]

@@ -63,7 +63,7 @@ trait RubberBandTool[S <: Sys[S], A, Y, Child] {
     private def calcCurrent(e: MouseEvent): Unit = {
       _currentEvent = e
       _currentPos   = canvas.screenToFrame(e.getX).toLong
-      _currentModelY = canvas.screenToModelY(e.getY) // - firstEvent.getY) + canvas.screenToTrack(firstEvent.getY)
+      _currentModelY = canvas.screenToModelPos(e.getY) // - firstEvent.getY) + canvas.screenToTrack(firstEvent.getY)
     }
 
     override def mouseDragged(e: MouseEvent): Unit = {

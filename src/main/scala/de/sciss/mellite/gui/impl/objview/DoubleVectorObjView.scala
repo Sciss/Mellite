@@ -126,11 +126,13 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
 
     private[this] val allSame = value.size <= 1 || { val v0 = value.head; value.forall(_ == v0) }
 
-    def insets: Insets = Insets(4, 4, 4, 4)
+    def insets: Insets = GraphemeObjView.DefaultInsets
 
     def startLevels: Vec[Double] = value
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+      import GraphemeObjView.{HandleDiameter, HandleRadius}
+
       if (value.isEmpty) return
       if (allSame) {
         DoubleObjView.graphemePaintFront(this, value.head, g, gv, r)
@@ -157,7 +159,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
         val y = v * hm
         p.setFrame(x - 2, y - 2, 4, 4)
         a1.add(new Area(p))
-        p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
+        p.setFrame(x - HandleRadius, y - HandleRadius, HandleDiameter, HandleDiameter)
         a2.add(new Area(p))
         if (y < min) min = y
         if (y > max) max = y

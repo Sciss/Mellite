@@ -112,6 +112,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
   def graphemePaintFront[S <: Sys[S]](view: GraphemeObjView[S], value: Double, g: Graphics2D,
                                       gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+    import GraphemeObjView.{HandleDiameter, HandleRadius}
     val c   = gv.canvas
     val jc  = c.canvasComponent.peer
     val h   = jc.getHeight
@@ -122,7 +123,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     p.setFrame(x - 2, y - 2, 4, 4)
     g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
     g.fill(p)
-    p.setFrame(x - 3.5, y - 3.5, 7.0, 7.0)
+    p.setFrame(x - HandleRadius, y - HandleRadius, HandleDiameter, HandleDiameter)
     g.setPaint(if (selected) r.pntRegionOutlineSelected else r.pntRegionOutline)
     g.draw(p)
   }
@@ -135,7 +136,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     with GraphemeObjViewImpl.BasicImpl[S]
     with GraphemeObjView.HasStartLevels[S] {
 
-    def insets: Insets = Insets(4, 4, 4, 4)
+    def insets: Insets = GraphemeObjView.DefaultInsets
 
     def startLevels: Vec[Double] = value +: Vector.empty
 

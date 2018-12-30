@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import java.awt.{BasicStroke, Font, Graphics2D, RenderingHints, Color => JColor}
 import java.util.Locale
@@ -36,6 +33,8 @@ import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Ed
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.{ActionArtifactLocation, AttrMapFrame, BasicTool, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.{Mellite, ObjectActions, ProcActions}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
@@ -170,21 +169,21 @@ object TimelineViewImpl {
     private[this] var viewRange = RangedSeq.empty[TimelineObjView[S], Long]
     private[this] val viewSet   = TSet     .empty[TimelineObjView[S]]
 
-    var canvas: TimelineTrackCanvasImpl[S] = _
-    val disposables: Ref[List[Disposable[S#Tx]]] = Ref(List.empty)
+    var canvas      : TimelineTrackCanvasImpl[S]  = _
+    val disposables : Ref[List[Disposable[S#Tx]]] = Ref(Nil)
 
-    protected val auxMap: IdentifierMap[S#Id, S#Tx, Any]                      = tx0.newInMemoryIdMap
+    protected val auxMap      : IdentifierMap[S#Id, S#Tx, Any]                = tx0.newInMemoryIdMap
     protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
 
-    private lazy val toolCursor   = TimelineTool.cursor  [S](canvas)
-    private lazy val toolMove     = TimelineTool.move    [S](canvas)
-    private lazy val toolResize   = TimelineTool.resize  [S](canvas)
-    private lazy val toolGain     = TimelineTool.gain    [S](canvas)
-    private lazy val toolMute     = TimelineTool.mute    [S](canvas)
-    private lazy val toolFade     = TimelineTool.fade    [S](canvas)
-    private lazy val toolFunction = TimelineTool.function[S](canvas, this)
-    private lazy val toolPatch    = TimelineTool.patch   [S](canvas)
-    private lazy val toolAudition = TimelineTool.audition[S](canvas, this)
+    private[this] lazy val toolCursor   = TimelineTool.cursor  [S](canvas)
+    private[this] lazy val toolMove     = TimelineTool.move    [S](canvas)
+    private[this] lazy val toolResize   = TimelineTool.resize  [S](canvas)
+    private[this] lazy val toolGain     = TimelineTool.gain    [S](canvas)
+    private[this] lazy val toolMute     = TimelineTool.mute    [S](canvas)
+    private[this] lazy val toolFade     = TimelineTool.fade    [S](canvas)
+    private[this] lazy val toolFunction = TimelineTool.function[S](canvas, this)
+    private[this] lazy val toolPatch    = TimelineTool.patch   [S](canvas)
+    private[this] lazy val toolAudition = TimelineTool.audition[S](canvas, this)
 
     def timeline  (implicit tx: S#Tx): Timeline[S] = timelineH()
     def plainGroup(implicit tx: S#Tx): Timeline[S] = timeline
@@ -239,7 +238,8 @@ object TimelineViewImpl {
           HStrut(4),
           TimelineTools.palette(canvas.timelineTools, Vector(
             toolCursor, toolMove, toolResize, toolGain, toolFade /* , toolSlide*/ ,
-            toolMute, toolAudition, toolFunction, toolPatch)),
+            toolMute, toolAudition, toolFunction, toolPatch
+          )),
           HStrut(4),
           ggAttr,
           HStrut(8),
@@ -445,7 +445,7 @@ object TimelineViewImpl {
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
         val (span, obj) = ProcActions.mkAudioRegion(time = tlSpan,
           audioCue = audioCue, gOffset = drag.selection.start /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
-        val track = canvas.screenToModelY(drop.y)
+        val track = canvas.screenToModelPos(drop.y)
         obj.attr.put(TimelineObjView.attrTrackIndex, IntObj.newVar(IntObj.newConst(track)))
         val edit = EditTimelineInsertObj("Insert Audio Region", groupM, span, obj)
         edit
@@ -453,7 +453,7 @@ object TimelineViewImpl {
 
     private def performDrop(drop: DnD.Drop[S]): Boolean = {
       def withRegions[A](fun: S#Tx => List[TimelineObjView[S]] => Option[A]): Option[A] =
-        canvas.findChildView(drop.frame, canvas.screenToModelY(drop.y)).flatMap { hitRegion =>
+        canvas.findChildView(drop.frame, canvas.screenToModelPos(drop.y)).flatMap { hitRegion =>
           val regions = if (selectionModel.contains(hitRegion)) selectionModel.iterator.toList else hitRegion :: Nil
           cursor.step { implicit tx =>
             fun(tx)(regions)
@@ -461,7 +461,7 @@ object TimelineViewImpl {
         }
 
       def withProcRegions[A](fun: S#Tx => List[ProcObjView[S]] => Option[A]): Option[A] =
-        canvas.findChildView(drop.frame, canvas.screenToModelY(drop.y)).flatMap {
+        canvas.findChildView(drop.frame, canvas.screenToModelPos(drop.y)).flatMap {
           case hitRegion: ProcObjView[S] =>
             val regions = if (selectionModel.contains(hitRegion)) {
               selectionModel.iterator.collect {
@@ -579,14 +579,14 @@ object TimelineViewImpl {
       }
 
       def findChildView(pos: Long, modelY: Int): Option[TimelineObjView[S]] = {
-        val span = Span(pos, pos + 1)
-        val regions = intersect(span)
-        regions.find(pv => pv.trackIndex <= modelY && (pv.trackIndex + pv.trackHeight) > modelY)
+        val span      = Span(pos, pos + 1)
+        val children  = intersect(span)
+        children.find(pv => pv.trackIndex <= modelY && (pv.trackIndex + pv.trackHeight) > modelY)
       }
 
       def findChildViews(r: BasicTool.Rectangular[Int]): Iterator[TimelineObjView[S]] = {
-        val regions = intersect(r.span)
-        regions.filter(pv => pv.trackIndex < r.modelYOffset + r.modelYExtent && (pv.trackIndex + pv.trackHeight) > r.modelYOffset)
+        val children = intersect(r.span)
+        children.filter(pv => pv.trackIndex < r.modelYOffset + r.modelYExtent && (pv.trackIndex + pv.trackHeight) > r.modelYOffset)
       }
 
       protected def commitToolChanges(value: Any): Unit = {
@@ -703,12 +703,12 @@ object TimelineViewImpl {
           if (currentDrop.isDefined) currentDrop.foreach { drop =>
             drop.drag match {
               case ad: DnD.AudioDragLike[S] =>
-                val track   = screenToModelY(drop.y)
+                val track   = screenToModelPos(drop.y)
                 val span    = Span(drop.frame, drop.frame + ad.selection.length)
                 drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
 
               case DnD.ObjectDrag(_, view) /* : ObjView.Proc[S] */ =>
-                val track   = screenToModelY(drop.y)
+                val track   = screenToModelPos(drop.y)
                 val length  = defaultDropLength(view, inProgress = true)
                 val span    = Span(drop.frame, drop.frame + length)
                 drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
@@ -736,9 +736,9 @@ object TimelineViewImpl {
 
         private def linkY(view: ProcObjView.Timeline[S], input: Boolean): Int =
           if (input)
-            modelYToScreen(view.trackIndex) + 4
+            modelPosToScreen(view.trackIndex).toInt + 4
           else
-            modelYToScreen(view.trackIndex + view.trackHeight) - 5
+            modelPosToScreen(view.trackIndex + view.trackHeight).toInt - 5
 
 //        private def drawLink(g: Graphics2D, source: ProcObjView.Timeline[S], sink: ProcObjView.Timeline[S]): Unit = {
 //          val srcFrameC = linkFrame(source)
@@ -789,10 +789,10 @@ object TimelineViewImpl {
           g.setColor(colrDropRegionBg)
           val strkOrig = g.getStroke
           g.setStroke(if (rubber) strkRubber else strkDropRegion)
-          val y = modelYToScreen(trackIndex)
+          val y = modelPosToScreen(trackIndex).toInt
           val x1b = math.min(x1 + 1, x2)
           val x2b = math.max(x1b, x2 - 1)
-          g.drawRect(x1b, y + 1, x2b - x1b, modelYToScreen(trackIndex + trackHeight) - y)
+          g.drawRect(x1b, y + 1, x2b - x1b, modelPosToScreen(trackIndex + trackHeight).toInt - y)
           g.setStroke(strkOrig)
         }
       }
