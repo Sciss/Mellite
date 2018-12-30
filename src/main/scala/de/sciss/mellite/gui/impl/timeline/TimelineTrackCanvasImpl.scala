@@ -13,20 +13,23 @@
 
 package de.sciss.mellite.gui.impl.timeline
 
-import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
+import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.TimelineTool.EmptyRubber
-import de.sciss.mellite.gui.{BasicTool, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineTrackCanvas, TimelineView}
-import de.sciss.mellite.log
+import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
+import de.sciss.mellite.gui.{TimelineObjView, TimelineTools, TimelineTrackCanvas, TimelineView}
 
-trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with TimelineTrackCanvas[S] {
+trait TimelineTrackCanvasImpl[S <: Sys[S]]
+  extends TimelineCanvas2DImpl[S, Int, TimelineObjView[S]]
+    with TimelineTrackCanvas[S] {
+
+  // ---- impl ----
+
   final val timelineTools: TimelineTools[S] = TimelineTools(this)
 
   import TimelineTools._
 
-  protected var toolState: Option[Any]
-  protected var rubberState: DragRubber[Int] = EmptyRubber
+  protected def emptyRubber: DragRubber[Int] = EmptyRubber
 
   private[this] var _trackIndexOffset = 0
 
@@ -44,52 +47,6 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
 
   final def modelYBox(a: Int, b: Int): (Int, Int) = if (a < b) (a, b - a + 1) else (b, a - b + 1)
 
-  private[this] val toolListener: TimelineTool.Listener = {
-    // case TrackTool.DragBegin =>
-    case DragCancel =>
-      log(s"Drag cancel $toolState")
-      if (toolState.isDefined) {
-        toolState   = None
-        repaint()
-      } else if (rubberState.isValid) {
-        rubberState = EmptyRubber
-        repaint()
-      }
-
-    case DragEnd =>
-      log(s"Drag end $toolState")
-      toolState.fold[Unit] {
-        if (rubberState.isValid) {
-          rubberState = EmptyRubber
-          repaint()
-        }
-      } { state =>
-        toolState   = None
-        rubberState = EmptyRubber
-        commitToolChanges(state)
-        repaint()
-      }
-
-    case DragAdjust(value) =>
-      // log(s"Drag adjust $value")
-      val some = Some(value)
-      if (toolState != some) {
-        toolState = some
-        repaint()
-      }
-
-    case BasicTool.Adjust(state) =>
-      log(s"Tool commit $state")
-      toolState = None
-      commitToolChanges(state)
-      repaint()
-
-    case state: DragRubber[Int] =>    // XXX TODO: erased type arg, not pretty
-      log(s"Tool rubber $state")
-      rubberState = state
-      repaint()
-  }
-
   timelineTools.addListener {
     case ToolChanged(change) =>
       change.before.removeListener(toolListener)
@@ -99,21 +56,4 @@ trait TimelineTrackCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with Timel
     case RegionViewModeChanged(_) => repaint()
   }
   timelineTools.currentTool.addListener(toolListener)
-
-  private[this] val selectionListener: SelectionModel.Listener[S, TimelineObjView[S]] = {
-    case SelectionModel.Update(_ /* added */, _ /* removed */) =>
-      canvasComponent.repaint() // XXX TODO: dirty rectangle optimization
-  }
-
-  override protected def componentShown(): Unit = {
-    super.componentShown()
-    selectionModel.addListener(selectionListener)
-  }
-
-  override protected def componentHidden(): Unit = {
-    super.componentHidden()
-    selectionModel.removeListener(selectionListener)
-  }
-
-  protected def commitToolChanges(value: Any): Unit
 }

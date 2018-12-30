@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.gui.impl.timeline
 
-import java.awt.{BasicStroke, Font, Graphics2D, RenderingHints, Color => JColor}
+import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
 
 import de.sciss.audiowidgets.TimelineModel
@@ -33,6 +33,7 @@ import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Ed
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
 import de.sciss.mellite.gui.{ActionArtifactLocation, AttrMapFrame, BasicTool, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.mellite.{Mellite, ObjectActions, ProcActions}
 import de.sciss.model.Change
@@ -53,13 +54,6 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation, Split
 import scala.util.Try
 
 object TimelineViewImpl {
-  private val colrDropRegionBg  = new JColor(0xFF, 0xFF, 0xFF, 0x7F)
-  private val strkDropRegion    = new BasicStroke(3f)
-  private val strkRubber        = new BasicStroke(3f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
-    Array[Float](3f, 5f), 0f)
-  //  private val colrLink            = new awt.Color(0x80, 0x80, 0x80)
-  //  private val strkLink            = new BasicStroke(2f)
-
   private final val LinkArrowLen  = 0   // 10  ; currently no arrow tip painted
   private final val LinkCtrlPtLen = 20
 
@@ -93,7 +87,7 @@ object TimelineViewImpl {
     val viewMap = tx.newInMemoryIdMap[TimelineObjView[S]]
 //    val scanMap = tx.newInMemoryIdMap[(String, stm.Source[S#Tx, S#Id])]
 
-    // ugly: the view dispose method cannot iterate over the procs
+    // ugly: the view dispose method cannot iterate over the proc objects
     // (other than through a GUI driven data structure). thus, it
     // only call pv.disposeGUI() and the procMap and scanMap must be
     // freed directly...
@@ -705,13 +699,15 @@ object TimelineViewImpl {
               case ad: DnD.AudioDragLike[S] =>
                 val track   = screenToModelPos(drop.y)
                 val span    = Span(drop.frame, drop.frame + ad.selection.length)
-                drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
+                drawDropFrame(g, modelYStart = track, modelYStop = track + TimelineView.DefaultTrackHeight,
+                  span = span, rubber = false)
 
               case DnD.ObjectDrag(_, view) /* : ObjView.Proc[S] */ =>
                 val track   = screenToModelPos(drop.y)
                 val length  = defaultDropLength(view, inProgress = true)
                 val span    = Span(drop.frame, drop.frame + length)
-                drawDropFrame(g, track, TimelineView.DefaultTrackHeight, span, rubber = false)
+                drawDropFrame(g, modelYStart = track, modelYStop = track + TimelineView.DefaultTrackHeight,
+                  span = span, rubber = false)
 
               case _ =>
             }
@@ -719,10 +715,14 @@ object TimelineViewImpl {
 
           val funSt = rendering.ttFunctionState
           if (funSt.isValid)
-            drawDropFrame(g, funSt.modelYOffset, funSt.modelYExtent, funSt.span, rubber = false)
+            drawDropFrame(g, modelYStart = funSt.modelYOffset, modelYStop = funSt.modelYOffset + funSt.modelYExtent,
+              span = funSt.span, rubber = false)
 
-          if (rubberState.isValid)
-            drawDropFrame(g, rubberState.modelYOffset, rubberState.modelYExtent, rubberState.span, rubber = true)
+          val _rubber = rubberState
+          if (_rubber.isValid) {
+            drawDropFrame(g, modelYStart = _rubber.modelYOffset,
+              modelYStop = _rubber.modelYOffset + _rubber.modelYExtent, span = _rubber.span, rubber = true)
+          }
 
           if (patchState.source != null)
             drawPatch(g, patchState)
@@ -775,25 +775,11 @@ object TimelineViewImpl {
               (f, y1)
           }
 
-          g.setColor(colrDropRegionBg)
-          val strkOrig = g.getStroke
-          g.setStroke(strkDropRegion)
+          g.setColor(TimelineCanvas2DImpl.colorDropRegionBg)
+          val strokeOrig = g.getStroke
+          g.setStroke(TimelineCanvas2DImpl.strokeDropRegion)
           drawLinkLine(g, srcFrameC, srcY, sinkFrameC, sinkY)
-          g.setStroke(strkOrig)
-        }
-
-        private def drawDropFrame(g: Graphics2D, trackIndex: Int, trackHeight: Int, span: Span,
-                                  rubber: Boolean): Unit = {
-          val x1 = frameToScreen(span.start).toInt
-          val x2 = frameToScreen(span.stop).toInt
-          g.setColor(colrDropRegionBg)
-          val strkOrig = g.getStroke
-          g.setStroke(if (rubber) strkRubber else strkDropRegion)
-          val y = modelPosToScreen(trackIndex).toInt
-          val x1b = math.min(x1 + 1, x2)
-          val x2b = math.max(x1b, x2 - 1)
-          g.drawRect(x1b, y + 1, x2b - x1b, modelPosToScreen(trackIndex + trackHeight).toInt - y)
-          g.setStroke(strkOrig)
+          g.setStroke(strokeOrig)
         }
       }
     }

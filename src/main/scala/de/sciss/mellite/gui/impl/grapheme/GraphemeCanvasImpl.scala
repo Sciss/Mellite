@@ -17,14 +17,21 @@ package impl
 package grapheme
 
 import de.sciss.audiowidgets.Axis
-import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.BasicTool.DragRubber
+import de.sciss.mellite.gui.GraphemeTool.EmptyRubber
+import de.sciss.mellite.gui.GraphemeTools.ToolChanged
+import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
 import de.sciss.numbers
 
 import scala.swing.Orientation
 
-trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCanvas[S] {
+trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvas2DImpl[S, Double, GraphemeObjView[S]]
+  with GraphemeCanvas[S] {
+
   final val graphemeTools: GraphemeTools[S] = GraphemeTools(this)
+
+  protected def emptyRubber: DragRubber[Double] = EmptyRubber
 
   def selectionModel: GraphemeObjView.SelectionModel[S]
 
@@ -83,18 +90,10 @@ trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvasImpl with GraphemeCa
 
   final def modelYBox(a: Double, b: Double): (Double, Double) = if (a < b) (a, b - a) else (b, a - b)
 
-  private[this] val selectionListener: SelectionModel.Listener[S, GraphemeObjView[S]] = {
-    case SelectionModel.Update(_ /* added */, _ /* removed */) =>
-      canvasComponent.repaint() // XXX TODO: dirty rectangle optimization
+  graphemeTools.addListener {
+    case ToolChanged(change) =>
+      change.before.removeListener(toolListener)
+      change.now   .addListener   (toolListener)
   }
-
-  override protected def componentShown(): Unit = {
-    super.componentShown()
-    selectionModel.addListener(selectionListener)
-  }
-
-  override protected def componentHidden(): Unit = {
-    super.componentHidden()
-    selectionModel.removeListener(selectionListener)
-  }
+  graphemeTools.currentTool.addListener(toolListener)
 }

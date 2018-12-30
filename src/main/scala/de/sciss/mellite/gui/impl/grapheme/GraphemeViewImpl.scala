@@ -386,7 +386,7 @@ object GraphemeViewImpl {
       def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = {
 //        val views = intersect(r.span)
 //        views.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
-        ??? // Iterator.empty
+        Iterator.empty  // XXX TODO
       }
 
       def iterator: Iterator[GraphemeObjView[S]] = viewMapG.valuesIterator.flatMap(_.headOption)
@@ -524,6 +524,14 @@ object GraphemeViewImpl {
 
           // --- timeline cursor and selection ---
           paintPosAndSelection(g, h)
+
+          // --- ongoing drag and drop / tools ---
+          val _rubber = rubberState
+          if (_rubber.isValid) {
+            // println(s"drawDropFrame(modelYStart = ${_rubber.modelYOffset}, modelYStop = ${_rubber.modelYOffset + _rubber.modelYExtent}, span = ${_rubber.span}")
+            drawDropFrame(g, modelYStart = _rubber.modelYOffset,
+              modelYStop = _rubber.modelYOffset + _rubber.modelYExtent, span = _rubber.span, rubber = true)
+          }
         }
       }
     }
