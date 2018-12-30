@@ -113,13 +113,14 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   def graphemePaintFront[S <: Sys[S]](view: GraphemeObjView[S], value: Double, g: Graphics2D,
                                       gv: GraphemeView[S], r: GraphemeRendering): Unit = {
     import GraphemeObjView.{HandleDiameter, HandleRadius}
-    val c   = gv.canvas
-    val jc  = c.canvasComponent.peer
-    val h   = jc.getHeight
-    val x   = c.frameToScreen(view.timeValue)
-    val y   = (1 - value) * (h - 1)
-    val selected = gv.selectionModel.contains(view)
-    val p = r.ellipse1
+    val c         = gv.canvas
+    val selected  = gv.selectionModel.contains(view)
+    val time0     = view.timeValue
+    val time1     = if (selected) time0 + r.ttMoveState.deltaTime    else time0
+    val value1    = if (selected) value + r.ttMoveState.deltaModelY  else value
+    val x         = c.frameToScreen   (time1  )
+    val y         = c.modelPosToScreen(value1 )
+    val p         = r.ellipse1
     p.setFrame(x - 2, y - 2, 4, 4)
     g.setPaint(if (selected) r.pntRegionBackgroundSelected else r.pntRegionBackground)
     g.fill(p)

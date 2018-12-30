@@ -40,7 +40,7 @@ trait GraphemeTools[S <: stm.Sys[S]] extends BasicTools[S, GraphemeTool[S, _], G
 object GraphemeTool {
   type Update[+A] = BasicTool.Update[A]
 
-  val EmptyRubber: DragRubber[Double] = DragRubber(-1d, -1d, Span(0L, 0L), isValid = false)
+  val EmptyRubber: DragRubber[Double] = DragRubber(0d, 0d, Span(0L, 0L), isValid = false)
 
   // ----
 

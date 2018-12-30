@@ -124,7 +124,7 @@ trait TimelineCanvas2DImpl[S <: Sys[S], Y, Child]
     val x1b = math.min(x1 + 1, x2)
     val x2b = math.max(x1b, x2 - 1)
     val y1b = math.min(y1 + 1, y2)
-    val y2b = math.max(y1, y2 - 1)
+    val y2b = math.max(y1, y2 - 1)  // not y1b!
     g.drawRect(x1b, y1b, x2b - x1b, y2b - y1b)
     g.setStroke(strokeOrig)
   }

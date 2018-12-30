@@ -15,6 +15,7 @@ package de.sciss.mellite
 package gui
 package impl.grapheme
 
+import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
@@ -59,6 +60,8 @@ object GraphemeObjViewImpl {
     def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit = ()
 
     final def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
+
+    final def time(implicit tx: S#Tx): LongObj[S] = entry.key
 
     def initAttrs(entry: Grapheme.Entry[S])(implicit tx: S#Tx): this.type = {
       val time      = entry.key

@@ -131,13 +131,16 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
         val numChE    = endLvl  .size
         if (numChS == 0 || numChE == 0) return
 
-        val numCh     = math.max(numChS, numChE)
-        val c         = gv.canvas
-        val x1        = c.frameToScreen(this.timeValue)
-        val x2        = c.frameToScreen(succ.timeValue)
-        val jc        = c.canvasComponent.peer
-        val h         = jc.getHeight
-        val hm        = h - 1
+        val numCh         = math.max(numChS, numChE)
+        val c             = gv.canvas
+        val startSelected = gv.selectionModel.contains(this)
+        val endSelected   = gv.selectionModel.contains(succ)
+        val startTime0    = this.timeValue
+        val endTime0      = succ.timeValue
+        val startTime     = if (startSelected ) startTime0  + r.ttMoveState.deltaTime else startTime0
+        val endTime       = if (endSelected   ) endTime0    + r.ttMoveState.deltaTime else endTime0
+        val x1            = c.frameToScreen(startTime)
+        val x2            = c.frameToScreen(endTime)
         g.setStroke(r.strokeInletSpan)
         g.setPaint (r.pntInletSpan)
         val path      = r.shape1
@@ -145,10 +148,12 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
         var ch = 0
         while (ch < numCh) {
-          val v1 = startLvl(ch % numChS)
-          val y1 = (1 - v1) * hm
-          val v2 = endLvl  (ch % numChE)
-          val y2 = (1 - v2) * hm
+          val startValue0 = startLvl(ch % numChS)
+          val startValue  = if (startSelected ) startValue0 + r.ttMoveState.deltaModelY else startValue0
+          val y1          = c.modelPosToScreen(startValue)
+          val endValue0   = endLvl  (ch % numChE)
+          val endValue    = if (endSelected   ) endValue0   + r.ttMoveState.deltaModelY else endValue0
+          val y2          = c.modelPosToScreen(endValue)
           path.moveTo(x1, y1)
 
           value.curve match {
@@ -167,7 +172,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
                 path.lineTo(x, y)
                 x += 4
               }
-              // XXX TODO
+              // XXX TODO (what?)
 
           }
 

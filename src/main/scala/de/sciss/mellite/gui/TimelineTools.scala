@@ -88,7 +88,7 @@ object TimelineTool {
 
   type Update[+A] = BasicTool.Update[A]
 
-  val EmptyRubber: DragRubber[Int] = DragRubber(-1, -1, Span(0L, 0L), isValid = false)
+  val EmptyRubber: DragRubber[Int] = DragRubber(0, 0, Span(0L, 0L), isValid = false)
 
   // ----
 

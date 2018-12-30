@@ -14,6 +14,7 @@
 package de.sciss.mellite
 package gui
 
+import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.IdentifierMap
 import de.sciss.lucre.synth.Sys
@@ -65,6 +66,8 @@ trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
   def entry(implicit tx: S#Tx): Grapheme.Entry[S]
 
   // def id(implicit tx: S#Tx): S#Id
+
+  def time(implicit tx: S#Tx): LongObj[S]
 
   var timeValue: Long
 

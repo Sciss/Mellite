@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.grapheme.tool
 import java.awt.Cursor
 import java.awt.event.MouseEvent
 
-import de.sciss.lucre.expr.SpanLikeObj
+import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -63,6 +63,6 @@ final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
       }
     }
 
-  protected def commitObj(drag: Unit)(span: SpanLikeObj[S], obj: Obj[S], grapheme: Grapheme[S])
+  protected def commitObj(drag: Unit)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None
 }

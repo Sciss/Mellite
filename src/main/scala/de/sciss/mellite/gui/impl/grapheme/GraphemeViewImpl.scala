@@ -384,15 +384,37 @@ object GraphemeViewImpl {
       }
 
       def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = {
-//        val views = intersect(r.span)
-//        views.filter(pv => pv.trackIndex < r.trackIndex + r.trackHeight && (pv.trackIndex + pv.trackHeight) > r.trackIndex)
-        Iterator.empty  // XXX TODO
+        val dLeft   = math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+        val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+        val dTop    = screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val dBottom = dTop // screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val frame1  = r.span.start  - dLeft
+        val frame2  = r.span.stop   + dRight
+        val modelY1 = r.modelYOffset - dTop
+        val modelY2 = (r.modelYOffset + r.modelYExtent) + dBottom
+        childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
       }
 
       def iterator: Iterator[GraphemeObjView[S]] = viewMapG.valuesIterator.flatMap(_.headOption)
 
       def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = {
         ???
+      }
+
+      private def childIterator(frame1: Long, frame2: Long,
+                                modelY1: Double, modelY2: Double): Iterator[GraphemeObjView[S]] = {
+        val it0 = viewMapG.valuesIteratorFrom(frame1)
+          .flatMap  (_.headOption)
+          .dropWhile(_.timeValue <  frame1)
+          .takeWhile(_.timeValue <= frame2)
+        val it  = it0.filter {
+          case hs: GraphemeObjView.HasStartLevels[_] =>
+            hs.startLevels.exists { value =>
+              value >= modelY1 && value <= modelY2
+            }
+          case _ => true
+        }
+        it
       }
 
       def findChildView(frame: Long, modelY: Double): Option[GraphemeObjView[S]] = {
@@ -404,14 +426,7 @@ object GraphemeViewImpl {
         val frame2  = frame  + dRight
         val modelY1 = modelY - dTop
         val modelY2 = modelY + dBottom
-        val it0 = viewMapG.valuesIteratorFrom(frame1).flatMap(_.headOption).takeWhile(_.timeValue <= frame2)
-        val it  = it0.filter {
-          case hs: GraphemeObjView.HasStartLevels[_] =>
-            hs.startLevels.exists { value =>
-              value >= modelY1 && value <= modelY2
-            }
-          case _ => true
-        }
+        val it = childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
         if (!it.hasNext) None else Some(it.minBy {
           case child: GraphemeObjView.HasStartLevels[_] =>
             val dy = child.startLevels.iterator.map(value => modelExtentToScreen(value absDif modelY)).min
@@ -437,15 +452,15 @@ object GraphemeViewImpl {
       }
 
       private[this] var _toolState    = Option.empty[Any]
-      private[this] var moveState     = GraphemeTool.NoMove
 
       protected def toolState: Option[Any] = _toolState
       protected def toolState_=(state: Option[Any]): Unit = {
         _toolState    = state
-        moveState     = GraphemeTool.NoMove
+        val r         = canvasComponent.rendering
+        r.ttMoveState = GraphemeTool.NoMove
 
         state.foreach {
-          case s: GraphemeTool.Move => moveState = s
+          case s: GraphemeTool.Move => r.ttMoveState  = s
           case _ =>
         }
       }
@@ -475,7 +490,7 @@ object GraphemeViewImpl {
 
         def imageObserver: JComponent = peer
 
-        final val rendering: GraphemeRendering = new GraphemeRenderingImpl(this, Mellite.isDarkSkin)
+        final val rendering: GraphemeRenderingImpl = new GraphemeRenderingImpl(this, Mellite.isDarkSkin)
 
         override protected def paintComponent(g: Graphics2D): Unit = {
           super.paintComponent(g)

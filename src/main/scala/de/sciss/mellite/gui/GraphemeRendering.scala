@@ -22,4 +22,6 @@ trait GraphemeRendering extends BasicRendering {
   def transform1: AffineTransform
   def area1     : Area
   def area2     : Area
+
+  def ttMoveState : GraphemeTool.Move
 }

@@ -18,7 +18,7 @@ import java.awt.event.MouseEvent
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.SpanLikeObj
+import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
@@ -59,7 +59,7 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: GraphemeCanvas[S])
   override protected def handleOutside(e: MouseEvent, modelY: Double, pos: Long): Unit =
     mkRubber(e, modelY = modelY, pos = pos)
 
-  protected def commitObj(drag: Move)(span: SpanLikeObj[S], obj: Obj[S], grapheme: Grapheme[S])
+  protected def commitObj(drag: Move)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
     ??? // Edits.moveOrCopy(span, obj, grapheme, drag, minStart = minStart)
