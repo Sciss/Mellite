@@ -320,7 +320,7 @@ object GraphemeViewImpl {
 
     def objRemoved(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
       logT(s"objRemoved($time, entry.value = ${entry.value})")
-      val opt = removeObjImpl(gr = gr, time = time, entry = entry)
+      val opt = removeObjImpl(gr = gr, time = time, entry = entry, isMove = false)
       opt.fold[Unit] {
         warnViewNotFound("remove", entry)
       } { r =>
@@ -336,7 +336,7 @@ object GraphemeViewImpl {
     private final class Removed(val oldView: Child, val newViewMap: ViewMap)
 
     // does not invoke EDT code
-    private def removeObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])
+    private def removeObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], isMove: Boolean)
                              (implicit tx: S#Tx): Option[Removed] = {
       val _viewMapG0 = viewMapT()
       val oldObj = entry.value
@@ -357,7 +357,7 @@ object GraphemeViewImpl {
         if (succOld !== succNew) {
           gr.eventBefore(time).foreach { timePred =>
             _viewMapG0.get(timePred).fold {
-              warnViewNotFound("remove", entry)
+              if (!isMove) warnViewNotFound("remove", entry)
             } { viewsPred =>
               viewsPred.foreach { viewPred =>
                 viewPred.succ_=(succNew)
@@ -367,9 +367,9 @@ object GraphemeViewImpl {
         }
 
         val _viewMapG1 = if (viewsNew.isEmpty) {
-          _viewMapG0 + (time -> viewsNew)
-        } else {
           _viewMapG0 - time
+        } else {
+          _viewMapG0 + (time -> viewsNew)
         }
         viewMapT() = _viewMapG1
 
@@ -381,7 +381,7 @@ object GraphemeViewImpl {
     def objMoved(gr: BiPin[S, Obj[S]], entry: Grapheme.Entry[S], timeCh: Change[Long])
                 (implicit tx: S#Tx): Unit = {
       logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, entry.value = ${entry.value})")
-      val opt = removeObjImpl(gr = gr, time = timeCh.before, entry = entry)
+      val opt = removeObjImpl(gr = gr, time = timeCh.before, entry = entry, isMove = true)
       opt.fold[Unit] {
         warnViewNotFound("remove", entry)
       } { r =>
