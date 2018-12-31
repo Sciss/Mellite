@@ -83,13 +83,19 @@ object GraphemeViewImpl {
         val timeSuccOpt = gr.eventAfter(time)
         timeSuccOpt match {
           case Some(timeSucc) =>
-            val entriesSucc = gr.intersect(time)
+            val entriesSucc = gr.intersect(timeSucc)
+//            entriesSucc.foreach { e =>
+//              assert (e.key.value == timeSucc)
+//            }
             populate(curr, timeSucc, entriesSucc)
           case None =>
         }
       }
 
       val entries0 = gr.intersect(time0)
+//      entries0.foreach { e =>
+//        assert (e.key.value == time0)
+//      }
       populate(Nil, time0, entries0)
     }
 
@@ -156,7 +162,6 @@ object GraphemeViewImpl {
 //    def canvasComponent: Component = canvasView.canvasComponent
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      println("DISPOSE")
       val empty: ViewMap = ISortedMap.empty
       deferTx {
         viewMapG = empty
@@ -166,7 +171,6 @@ object GraphemeViewImpl {
     }
 
     def init()(implicit tx: S#Tx): this.type = {
-      println(s"NOW ${viewMapT().size}")
       deferTx(guiInit())
       this
     }
@@ -265,6 +269,7 @@ object GraphemeViewImpl {
 
     def objAddedInit(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Child = {
       logT(s"objAddedInit(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
+      assert (time == entry.key.value, s"time = $time, entry.key = ${entry.key.value}")
       val a = addObjImpl(gr, time = time, entry = entry, updateSucc = false)
       viewMapG = a.newViewMap
       addInsetsEDT(a.newView.insets)
@@ -340,7 +345,7 @@ object GraphemeViewImpl {
         view  <- {
           val res = views.find(_.obj === oldObj)  // do _not_ directly compare the `entry`
           if (res.isEmpty) {
-            println("OOPS")
+            if (DEBUG) println("OOPS - no view found despite time match")
           }
           res
         }
@@ -553,7 +558,7 @@ object GraphemeViewImpl {
           // val range = viewMapG.range(visStartExt, visStopExt)
           def range = viewMapG.iteratorFrom(visStartExt) // .takeWhile(_._1 < visStopExt)
   //          println(s"clipRect.x ${clipRect.x}, .x ${clipRect.width}, visStart $visStart, visStop $visStop, maxHorizF $maxHorizF, size = ${range.size}")
-          var it    = range
+          var it: Iterator[(Long, List[Child])] = range
           var done  = false
           while (it.hasNext && !done) {
             val tup   = it.next()
