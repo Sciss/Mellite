@@ -14,16 +14,16 @@
 package de.sciss.mellite.gui.edit
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.{IntObj, LongObj, SpanLikeObj, StringObj}
+import de.sciss.lucre.expr.Ops._
+import de.sciss.lucre.expr.{DoubleObj, DoubleVector, IntObj, LongObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{expr, stm}
-import de.sciss.lucre.expr.Ops._
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.mellite.gui.{GraphemeTool, TimelineObjView}
 import de.sciss.mellite.{???!, ProcActions, log}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
 import javax.swing.undo.UndoableEdit
 
@@ -345,13 +345,14 @@ object Edits {
       // expression, and we could decide to construct a binary op instead!
       // val expr = ExprImplicits[S]
 
-      import expr.Ops._
-      val newTrack: IntObj[S] = obj.attr.$[IntObj](TimelineObjView.attrTrackIndex) match {
-        case Some(IntObj.Var(vr)) => vr() + deltaTrack
-        case other => other.fold(0)(_.value) + deltaTrack
-      }
       import de.sciss.equal.Implicits._
-      val newTrackOpt = if (newTrack === IntObj.newConst[S](0)) None else Some(newTrack)
+      import expr.Ops._
+      val newTrackOpt: Option[IntObj[S]] = obj.attr.$[IntObj](TimelineObjView.attrTrackIndex) match {
+        case Some(IntObj.Var(vr)) => Some(vr() + deltaTrack)
+        case other =>
+          val v = other.fold(0)(_.value) + deltaTrack
+          if (v === 0) None else Some(IntObj.newConst(v)) // default is zero; in that case remove attribute
+      }
       val edit = EditAttrMap.expr[S, Int, IntObj]("Adjust Track Placement", obj,
         TimelineObjView.attrTrackIndex, newTrackOpt)
 
@@ -376,47 +377,140 @@ object Edits {
     CompoundEdit(edits, name)
   }
 
-  private def graphemeMoveImpl[S <: Sys[S]](time: LongObj[S], obj: Obj[S], grapheme: Grapheme[S],
+  private def graphemeMoveImpl[S <: Sys[S]](time: LongObj[S], value: Obj[S], grapheme: Grapheme[S],
                                             amount: GraphemeTool.Move, minStart: Long)
                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
     var edits = List.empty[UndoableEdit]
+    val name  = "Move"
 
-//    import amount._
-//    if (deltaTrack != 0) {
-//      // in the case of const, just overwrite, in the case of
-//      // var, check the value stored in the var, and update the var
-//      // instead (recursion). otherwise, it will be some combinatorial
-//      // expression, and we could decide to construct a binary op instead!
-//      // val expr = ExprImplicits[S]
-//
-//      import expr.Ops._
-//      val newTrack: IntObj[S] = obj.attr.$[IntObj](TimelineObjView.attrTrackIndex) match {
-//        case Some(IntObj.Var(vr)) => vr() + deltaTrack
-//        case other => other.fold(0)(_.value) + deltaTrack
-//      }
-//      import de.sciss.equal.Implicits._
-//      val newTrackOpt = if (newTrack === IntObj.newConst[S](0)) None else Some(newTrack)
-//      val edit = EditAttrMap.expr[S, Int, IntObj]("Adjust Track Placement", obj,
-//        TimelineObjView.attrTrackIndex, newTrackOpt)
-//
-//      edits ::= edit
-//    }
+    var wasRemoved = false
 
-    val name    = "Move"
-    val deltaC  = calcPosDeltaClipped(time, amount, minStart = minStart)
-    if (deltaC != 0L) {
-      // val imp = ExprImplicits[S]
-      time match {
-        case LongObj.Var(vr) =>
-          // s.transform(_ shift deltaC)
-          import expr.Ops._
-          val newSpan = vr() + deltaC
-          val edit    = EditVar.Expr[S, Long, LongObj](name, vr, newSpan)
-          edits ::= edit
+    def removeOld(grMod: Grapheme.Modifiable[S]): Unit = {
+      require (!wasRemoved)
+      edits ::= EditGraphemeRemoveObj(name, grMod, time, value)
+      wasRemoved = true
+    }
+
+    import amount._
+    val newValueOpt: Option[Obj[S]] = if (deltaModelY == 0) None else {
+      // in the case of const, just overwrite, in the case of
+      // var, check the value stored in the var, and update the var
+      // instead (recursion). otherwise, it will be some combinatorial
+      // expression, and we could decide to construct a binary op instead!
+      // XXX TODO -- do not hard code supported cases; should be handled by GraphemeObjView ?
+
+      def checkDouble(objT: DoubleObj[S]): Option[DoubleObj[S]] =
+        objT match {
+          case DoubleObj.Var(vr) =>
+            val newValue = vr() + deltaModelY
+            edits ::= EditVar(name, vr, newValue)
+            None
+          case _ =>
+            grapheme.modifiableOption.map { grMod =>
+              removeOld(grMod)
+              val v = objT.value + deltaModelY
+              DoubleObj.newVar[S](v)  // "upgrade" to var
+            }
+        }
+
+      def checkDoubleVector(objT: DoubleVector[S]): Option[DoubleVector[S]] =
+        objT match {
+          case DoubleVector.Var(vr) =>
+            val v = vr().value.map(_ + deltaModelY)
+            // val newValue = DoubleVector.newConst[S](v)
+            edits ::= EditVar[S, DoubleVector[S], DoubleVector.Var[S]](name, vr, v)
+            None
+          case _ =>
+            grapheme.modifiableOption.map { grMod =>
+              removeOld(grMod)
+              val v = objT.value.map(_ + deltaModelY)
+              DoubleVector.newVar[S](v)  // "upgrade" to var
+            }
+        }
+
+      // XXX TODO --- gosh what a horrible matching orgy
+      value match {
+        case objT: DoubleObj    [S] => checkDouble      (objT)
+        case objT: DoubleVector [S] => checkDoubleVector(objT)
+
+        case objT: EnvSegment.Obj[S] =>
+          objT match {
+            case EnvSegment.Obj.ApplySingle(start, curve) =>
+              val newStartOpt = checkDouble(start)
+              newStartOpt.map { newStart =>
+                EnvSegment.Obj.ApplySingle(newStart, curve)
+              }
+
+            case EnvSegment.Obj.ApplyMulti(start, curve) =>
+              val newStartOpt = checkDoubleVector(start)
+              newStartOpt.map { newStart =>
+                EnvSegment.Obj.ApplyMulti(newStart, curve)
+              }
+
+            case EnvSegment.Obj.Var(vr) =>
+              val seg = vr().value
+              val v = seg.startLevels match {
+                case Seq(single) =>
+                  EnvSegment.Single (single      + deltaModelY , seg.curve)
+                case multi =>
+                  EnvSegment.Multi  (multi.map(_ + deltaModelY), seg.curve)
+              }
+              edits ::= EditVar[S, EnvSegment.Obj[S], EnvSegment.Obj.Var[S]](name, vr, v)
+              None
+
+            case _ =>
+              grapheme.modifiableOption.map { grMod =>
+                removeOld(grMod)
+                val seg       = objT.value
+                val curve     = CurveObj.newVar[S](seg.curve)
+                seg.startLevels match {
+                  case Seq(single) =>
+                    val singleVar = DoubleObj.newVar[S](single)
+                    EnvSegment.Obj.ApplySingle(singleVar, curve)
+                  case multi =>
+                    val multiVar = DoubleVector.newVar[S](multi)
+                    EnvSegment.Obj.ApplyMulti(multiVar, curve)
+                }
+              }
+          }
+
         case _ =>
+          None
       }
     }
 
-    CompoundEdit(edits, name)
+    val deltaC  = calcPosDeltaClipped(time, amount, minStart = minStart)
+    val hasDeltaTime = deltaC != 0L
+    if (hasDeltaTime || newValueOpt.isDefined) {
+      val newTimeOpt: Option[LongObj[S]] = time match {
+        case LongObj.Var(vr) =>
+          import expr.Ops._
+          val newTime = vr() + deltaC
+          edits ::= EditVar.Expr[S, Long, LongObj](name, vr, newTime)
+          None
+
+        case _ if hasDeltaTime =>
+          grapheme.modifiableOption.map { grMod =>
+            if (newValueOpt.isEmpty) {  // wasn't removed yet
+              removeOld(grMod)
+            }
+            val v = time.value + deltaC
+            LongObj.newConst[S](v)  // "upgrade" to var
+          }
+
+        case _ =>
+          None
+      }
+
+      if (newTimeOpt.isDefined || newValueOpt.isDefined) {
+        val newTime   = newTimeOpt  .getOrElse(time)
+        val newValue  = newValueOpt .getOrElse(value)
+        grapheme.modifiableOption.foreach { grMod =>
+          edits ::= EditGraphemeInsertObj(name, grMod, newTime, newValue)
+        }
+      }
+    }
+
+    CompoundEdit(edits.reverse, name)
   }
 }
