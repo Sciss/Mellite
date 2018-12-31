@@ -27,7 +27,7 @@ package object mellite {
 
   private lazy val logHeader = new SimpleDateFormat("[d MMM yyyy, HH:mm''ss.SSS] 'mllt' - ", Locale.US)
   var showLog         = false
-  var showTimelineLog = false
+  var showTimelineLog = true
 
   @elidable(CONFIG) private[mellite] def log(what: => String): Unit =
     if (showLog) println(logHeader.format(new Date()) + what)

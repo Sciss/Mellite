@@ -22,6 +22,7 @@ import java.util.Locale
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
+import de.sciss.equal.Implicits._
 import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
 import de.sciss.lucre.stm
@@ -62,7 +63,7 @@ object GraphemeViewImpl {
     val tlm             = TimelineModel(bounds = bounds0, visible = vis0, virtual = bounds0, clipStop = false,
       sampleRate = sampleRate)
     // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
-    val _grapheme       = obj
+    val gr              = obj
     val graphemeH       = tx.newHandle(obj)
     var disposables     = List.empty[Disposable[S#Tx]]
     val selectionModel  = SelectionModel[S, GraphemeObjView[S]]
@@ -70,29 +71,29 @@ object GraphemeViewImpl {
 
     // XXX TODO --- this is all horrible; we really need a proper iterator on grapheme
     // that gives time values and full leaf data
-    _grapheme.firstEvent.foreach { time0 =>
+    gr.firstEvent.foreach { time0 =>
       @tailrec
       def populate(pred: List[GraphemeObjView[S]], time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
         val curr = entries.reverseIterator.map { entry =>
-          val view = grView.objAddedI(time, entry = entry, isInit = true)
+          val view = grView.objAddedInit(gr, time = time, entry = entry)
           view
         } .toList
         val succOpt = curr.headOption
         pred.foreach(_.succ_=(succOpt))
-        val timeSuccOpt = _grapheme.eventAfter(time)
+        val timeSuccOpt = gr.eventAfter(time)
         timeSuccOpt match {
           case Some(timeSucc) =>
-            val entriesSucc = _grapheme.intersect(time)
+            val entriesSucc = gr.intersect(time)
             populate(curr, timeSucc, entriesSucc)
           case None =>
         }
       }
 
-      val entries0 = _grapheme.intersect(time0)
+      val entries0 = gr.intersect(time0)
       populate(Nil, time0, entries0)
     }
 
-    val obsGrapheme = _grapheme.changed.react { implicit tx => upd =>
+    val obsGrapheme = gr.changed.react { implicit tx => upd =>
       val gr = upd.pin
       upd.changes.foreach {
         case BiPin.Added(time, entry) =>
@@ -105,15 +106,14 @@ object GraphemeViewImpl {
 
         case BiPin.Moved  (timeChange, entry) =>
           if (DEBUG) println(s"Moved   $entry, $timeChange")
-          grView.objMoved(entry, timeCh = timeChange)
+          grView.objMoved(gr, entry, timeCh = timeChange)
       }
     }
     disposables ::= obsGrapheme
 
     grView.disposables.set(disposables)
 
-    deferTx(grView.guiInit())
-    grView
+    grView.init()
   }
 
   private final class Impl[S <: Sys[S]](val graphemeH     : stm.Source[S#Tx, Grapheme[S]],
@@ -129,10 +129,13 @@ object GraphemeViewImpl {
 
     type C = Component
 
+    private type Child    = GraphemeObjView[S]
+    private type ViewMap  = ISortedMap[Long, List[Child]]
+
     // GUI-thread map of views; always reflects viewMapT
-    private[this] var viewMapG      = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
+    private[this] var viewMapG: ViewMap = ISortedMap.empty
     // transactional map of views
-    private[this] val viewMapT      = Ref(viewMapG)
+    private[this] val viewMapT = Ref(viewMapG)
     // kind-of priority queue keeping track of horizontal margin needed when querying views to paint
     private[this] var viewMaxHorizG = ISortedMap.empty[Int, Int] // maxHoriz to count
 
@@ -153,7 +156,8 @@ object GraphemeViewImpl {
 //    def canvasComponent: Component = canvasView.canvasComponent
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      val empty = ISortedMap.empty[Long, List[GraphemeObjView[S]]]
+      println("DISPOSE")
+      val empty: ViewMap = ISortedMap.empty
       deferTx {
         viewMapG = empty
       }
@@ -161,7 +165,13 @@ object GraphemeViewImpl {
       viewMapT.swap(empty).foreach(_._2.foreach(_.dispose()))
     }
 
-    def guiInit(): Unit = {
+    def init()(implicit tx: S#Tx): this.type = {
+      println(s"NOW ${viewMapT().size}")
+      deferTx(guiInit())
+      this
+    }
+
+    private def guiInit(): Unit = {
       canvas = new View
 
       val actionAttr: Action = Action(null) {
@@ -194,7 +204,7 @@ object GraphemeViewImpl {
       selectionModel.addListener {
         case _ =>
           val hasSome = selectionModel.nonEmpty
-          actionAttr              .enabled = hasSome
+          actionAttr.enabled = hasSome
 //          actionMoveObjectToCursor.enabled = hasSome
       }
 
@@ -231,140 +241,163 @@ object GraphemeViewImpl {
 
     private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
-    private def addInsetsG(i: Insets): Unit = {
+    private def addInsetsEDT(i: Insets): Unit = {
       val h = i.maxHorizontal
       val c = viewMaxHorizG.getOrElse(h, 0) + 1
       viewMaxHorizG += h -> c
     }
 
-    private def removeInsetsG(i: Insets): Unit = {
+    private def removeInsetsEDT(i: Insets): Unit = {
       val h = i.maxHorizontal
       val c = viewMaxHorizG(h) - 1
-      if (c == 0) viewMaxHorizG -= h else viewMaxHorizG += h -> c
+      if (c === 0) viewMaxHorizG -= h else viewMaxHorizG += h -> c
     }
 
     def objAdded(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-      val view = objAddedI(time = time, entry = entry, isInit = false)
-      val succOpt = Some(view)
-      gr.eventBefore(time).foreach { timePred =>
-        viewMapT().get(timePred).foreach { viewsPred =>
-//          deferTx {
-            viewsPred.foreach { viewPred =>
-              viewPred.succ_=(succOpt)
-            }
-//          }
-        }
+      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
+      val a = addObjImpl(gr, time = time, entry = entry, updateSucc = true)
+      deferTx {
+        viewMapG = a.newViewMap
+        addInsetsEDT(a.newView.insets)
+        repaintAll()    // XXX TODO: optimize dirty rectangle
       }
-      gr.eventAfter(time).foreach { timeSucc =>
-        viewMapT().get(timeSucc).foreach { viewsSucc =>
-//          deferTx {
-            view.succ_=(viewsSucc.headOption)
-//          }
-        }
-      }
-      deferTx(repaintAll())    // XXX TODO: optimize dirty rectangle
     }
 
-    def objAddedI(time: Long, entry: Grapheme.Entry[S], isInit: Boolean)
-                 (implicit tx: S#Tx): GraphemeObjView[S] = {
-      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry = $entry / tpe: ${entry.value.tpe})")
-      // entry.span
-      // val proc = entry.value
+    def objAddedInit(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Child = {
+      logT(s"objAddedInit(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
+      val a = addObjImpl(gr, time = time, entry = entry, updateSucc = false)
+      viewMapG = a.newViewMap
+      addInsetsEDT(a.newView.insets)
+      a.newView
+    }
 
-      // val pv = ProcView(entry, viewMap, scanMap)
+    private final class Added(val newView: Child, val newViewMap: ViewMap)
+
+    // does not invoke EDT code
+    private def addObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], updateSucc: Boolean)
+                          (implicit tx: S#Tx): Added = {
       val view = GraphemeObjView(entry = entry, mode = mode)
       val _viewMapG = viewMapT.transformAndGet(m => m + (time -> (view :: m.getOrElse(time, Nil))))
-
-      def doAdd(): Unit = {
-        viewMapG = _viewMapG
-        addInsetsG(view.insets)
-      }
-
-      if (isInit)
-        doAdd()
-      else
-        deferTx(doAdd())
 
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
         case ObjView.Repaint(_) => objUpdated(view)
         case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHorizontal != now.maxHorizontal =>
           deferTx {
-            removeInsetsG(before)
-            addInsetsG   (now   )
+            removeInsetsEDT(before)
+            addInsetsEDT   (now   )
             repaintAll()    // XXX TODO: optimize dirty rectangle
           }
         case _ =>
       }}
 
-      view
+      if (updateSucc) {
+        val succOpt = Some(view)
+        gr.eventBefore(time).foreach { timePred =>
+          viewMapT().get(timePred).foreach { viewsPred =>
+            viewsPred.foreach { viewPred =>
+              viewPred.succ_=(succOpt)
+            }
+          }
+        }
+        gr.eventAfter(time).foreach { timeSucc =>
+          viewMapT().get(timeSucc).foreach { viewsSucc =>
+            view.succ_=(viewsSucc.headOption)
+          }
+        }
+      }
+
+      new Added(view, _viewMapG)
     }
 
     private def warnViewNotFound(action: String, entry: Grapheme.Entry[S]): Unit =
-      Console.err.println(s"Warning: Grapheme - $action. View for object $entry not found.")
+      Console.err.println(s"Warning: Grapheme - $action. View for object $entry (value ${entry.value}) not found.")
 
     def objRemoved(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
-      logT(s"objRemoved($time, $entry)")
-      val _viewMapG0 = viewMapT()
-      _viewMapG0.get(time).fold {
+      logT(s"objRemoved($time, entry.value = ${entry.value})")
+      val opt = removeObjImpl(gr = gr, time = time, entry = entry)
+      opt.fold[Unit] {
         warnViewNotFound("remove", entry)
-      } { views =>
-        views.find(_.entry == entry).fold {
-          warnViewNotFound("remove", entry)
-        } { view =>
-          val succOld     = views.headOption
-          val viewsNew    = views.filterNot(_ == view)
-          val succNew     = viewsNew.headOption
-
-          if (succOld != succNew) {
-            gr.eventBefore(time).foreach { timePred =>
-              _viewMapG0.get(timePred).fold {
-                warnViewNotFound("remove", entry)
-              } { viewsPred =>
-//                deferTx {
-                  viewsPred.foreach { viewPred =>
-                    viewPred.succ_=(succNew)
-                  }
-//                }
-              }
-            }
-          }
-
-          val _viewMapG1  = if (viewsNew.isEmpty) {
-            _viewMapG0 + (time -> viewsNew)
-          } else {
-            _viewMapG0 - time
-          }
-          viewMapT() = _viewMapG1
-
-          val insets = view.insets
-          view.dispose()
-          deferTx {
-            viewMapG = _viewMapG1
-            removeInsetsG(insets)
-            repaintAll() // XXX TODO: optimize dirty rectangle
-          }
+      } { r =>
+        deferTx {
+          viewMapG = r.newViewMap
+          removeInsetsEDT(r.oldView.insets)
+          selectionModel -= r.oldView
+          repaintAll() // XXX TODO: optimize dirty rectangle
         }
       }
     }
 
-    // insignificant changes are ignored, therefore one can just move the span without the track
-    // by using trackCh = Change(0,0), and vice versa
-    def objMoved(entry: Grapheme.Entry[S], timeCh: Change[Long])
+    private final class Removed(val oldView: Child, val newViewMap: ViewMap)
+
+    // does not invoke EDT code
+    private def removeObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])
+                             (implicit tx: S#Tx): Option[Removed] = {
+      val _viewMapG0 = viewMapT()
+      val oldObj = entry.value
+      for {
+        views <- _viewMapG0.get(time)
+        view  <- {
+          val res = views.find(_.obj === oldObj)  // do _not_ directly compare the `entry`
+          if (res.isEmpty) {
+            println("OOPS")
+          }
+          res
+        }
+      } yield {
+        val succOld     = views.headOption
+        val viewsNew    = views.filterNot(_ === view)
+        val succNew     = viewsNew.headOption
+
+        if (succOld !== succNew) {
+          gr.eventBefore(time).foreach { timePred =>
+            _viewMapG0.get(timePred).fold {
+              warnViewNotFound("remove", entry)
+            } { viewsPred =>
+              viewsPred.foreach { viewPred =>
+                viewPred.succ_=(succNew)
+              }
+            }
+          }
+        }
+
+        val _viewMapG1 = if (viewsNew.isEmpty) {
+          _viewMapG0 + (time -> viewsNew)
+        } else {
+          _viewMapG0 - time
+        }
+        viewMapT() = _viewMapG1
+
+        view.dispose()
+        new Removed(view, _viewMapG1)
+      }
+    }
+
+    def objMoved(gr: BiPin[S, Obj[S]], entry: Grapheme.Entry[S], timeCh: Change[Long])
                 (implicit tx: S#Tx): Unit = {
-      logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, $entry)")
-      ???!
-//      viewMap.remove(timeCh.before).fold {
-//        warnViewNotFound("move", entry)
-//      } { view =>
-//        viewMap.put(timeCh.now, view)
-//        deferTx {
-//          viewRange -= timeCh.before
-//          view.timeValue = timeCh .now
-//          viewRange += timeCh.now -> view
-//          repaintAll()  // XXX TODO: optimize dirty rectangle
-//        }
-//      }
+      logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, entry.value = ${entry.value})")
+      val opt = removeObjImpl(gr = gr, time = timeCh.before, entry = entry)
+      opt.fold[Unit] {
+        warnViewNotFound("remove", entry)
+      } { r =>
+        val a = addObjImpl(gr, time = timeCh.now, entry = entry, updateSucc = true)
+        deferTx {
+          val wasSelected = selectionModel.contains(r.oldView)
+          if (wasSelected) {
+            selectionModel -= r.oldView
+          }
+          viewMapG = a.newViewMap
+          val insetsChange = r.oldView.insets != a.newView.insets
+          if (insetsChange) {
+            removeInsetsEDT (r.oldView.insets)
+            addInsetsEDT    (a.newView.insets)
+          }
+          if (wasSelected) {
+            selectionModel += a.newView
+          }
+          repaintAll()    // XXX TODO: optimize dirty rectangle
+        }
+      }
     }
 
     private def objUpdated(view: GraphemeObjView[S]): Unit = {

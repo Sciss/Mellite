@@ -73,6 +73,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   def mkGraphemeView[S <: Sys[S]](entry: Entry[S], value: E[S], mode: GraphemeView.Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
+    // assert (entry.value == value)
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(value), value = value.value, isViewable = isViewable)
       .initAttrs(value).initAttrs(entry)
   }
