@@ -56,7 +56,7 @@ trait CollectionToolLike[S <: Sys[S], A, Y, Child] extends BasicTool[S, A] with 
     }
   }
 
-  private val mia = new MouseAdapter {
+  private[this] val mia = new MouseAdapter {
     override def mousePressed(e: MouseEvent): Unit = {
       e.getComponent.requestFocus()
       val pos       = canvas.screenToFrame(e.getX).toLong
@@ -66,17 +66,17 @@ trait CollectionToolLike[S <: Sys[S], A, Y, Child] extends BasicTool[S, A] with 
     }
   }
 
-  /** Implemented by adding mouse (motion) listeners to the component. */
+  /** Implemented by adding mouse listeners to the component. */
   final def install(component: Component): Unit = {
     component.peer.addMouseListener      (mia)
-    component.peer.addMouseMotionListener(mia)
+    // component.peer.addMouseMotionListener(mia)
     component.cursor = defaultCursor
   }
 
   /** Implemented by removing listeners from component. */
   final def uninstall(component: Component): Unit = {
     component.peer.removeMouseListener      (mia)
-    component.peer.removeMouseMotionListener(mia)
+    // component.peer.removeMouseMotionListener(mia)
     component.cursor = null
   }
 

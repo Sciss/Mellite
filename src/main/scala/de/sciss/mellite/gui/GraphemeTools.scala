@@ -14,10 +14,11 @@
 package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.impl.grapheme.ToolsImpl
-import de.sciss.mellite.gui.impl.grapheme.tool.{CursorImpl, MoveImpl}
+import de.sciss.mellite.gui.impl.grapheme.tool.{AddImpl, CursorImpl, MoveImpl}
 import de.sciss.mellite.gui.impl.tool.ToolPaletteImpl
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
@@ -48,6 +49,8 @@ object GraphemeTool {
     override def toString = s"$productPrefix(deltaTime = $deltaTime, deltaModelY = $deltaModelY, copy = $copy)"
   }
 
+  final case class Add(time: Long, modelY: Double, tpe: Obj.Type)
+
   final val NoMove = Move(deltaTime = 0L, deltaModelY = 0.0, copy = false)
 
 //  final case class Cursor(name: Option[String])
@@ -58,6 +61,7 @@ object GraphemeTool {
 
   def cursor  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Unit] = new CursorImpl(canvas)
   def move    [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Move] = new MoveImpl  (canvas)
+  def add     [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Add ] = new AddImpl   (canvas)
 }
 
 /** A tool that operates on object inside the grapheme view.

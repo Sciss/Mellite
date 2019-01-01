@@ -164,6 +164,7 @@ object GraphemeViewImpl {
 
     private[this] lazy val toolCursor   = GraphemeTool.cursor  [S](canvas)
     private[this] lazy val toolMove     = GraphemeTool.move    [S](canvas)
+    private[this] lazy val toolAdd      = GraphemeTool.add     [S](canvas)
 
     def grapheme  (implicit tx: S#Tx): Grapheme[S] = graphemeH()
     def plainGroup(implicit tx: S#Tx): Grapheme[S] = grapheme
@@ -208,7 +209,7 @@ object GraphemeViewImpl {
         contents ++= Seq(
           HStrut(4),
           GraphemeTools.palette(canvas.graphemeTools, Vector(
-            toolCursor, toolMove
+            toolCursor, toolMove, toolAdd
           )),
           HStrut(4),
           ggAttr,
@@ -501,6 +502,7 @@ object GraphemeViewImpl {
           value match {
 //            case t: GraphemeTool.Cursor    => toolCursor .commit(t)
             case t: GraphemeTool.Move      => toolMove   .commit(t)
+            case t: GraphemeTool.Add       => toolAdd    .commit(t)
             case _ => None
           }
         }
