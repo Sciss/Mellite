@@ -23,6 +23,7 @@ import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.equal.Implicits._
+import de.sciss.fingertree.OrderedSeq
 import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
 import de.sciss.lucre.stm
@@ -136,10 +137,20 @@ object GraphemeViewImpl {
     type C = Component
 
     private type Child    = GraphemeObjView[S]
-    private type ViewMap  = ISortedMap[Long, List[Child]]
+
+    private final class ViewMapEntry(val key: Long, val value: List[Child]) {
+      override def toString: String = s"ViewMapEntry($key, $value)"
+
+      def copy(key: Long = this.key, value: List[Child] = this.value) =
+        new ViewMapEntry(key, value)
+    }
+
+    private type ViewMap  = OrderedSeq[ViewMapEntry, Long]
+
+    private def emptyMap: ViewMap = OrderedSeq.empty(_.key, Ordering.Long)
 
     // GUI-thread map of views; always reflects viewMapT
-    private[this] var viewMapG: ViewMap = ISortedMap.empty
+    private[this] var viewMapG: ViewMap = emptyMap
     // transactional map of views
     private[this] val viewMapT = Ref(viewMapG)
     // kind-of priority queue keeping track of horizontal margin needed when querying views to paint
@@ -162,12 +173,12 @@ object GraphemeViewImpl {
 //    def canvasComponent: Component = canvasView.canvasComponent
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      val empty: ViewMap = ISortedMap.empty
+      val m: ViewMap = emptyMap
       deferTx {
-        viewMapG = empty
+        viewMapG = m
       }
       disposables.swap(Nil).foreach(_.dispose())
-      viewMapT.swap(empty).foreach(_._2.foreach(_.dispose()))
+      viewMapT.swap(m).iterator.foreach(_.value.foreach(_.dispose()))
     }
 
     def init()(implicit tx: S#Tx): this.type = {
@@ -282,7 +293,15 @@ object GraphemeViewImpl {
     private def addObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], updateSucc: Boolean)
                           (implicit tx: S#Tx): Added = {
       val view = GraphemeObjView(entry = entry, mode = mode)
-      val _viewMapG = viewMapT.transformAndGet(m => m + (time -> (view :: m.getOrElse(time, Nil))))
+      val _viewMapG = viewMapT.transformAndGet { m =>
+        val before  = m.get(time)
+        before match {
+          case Some(e)  =>
+            m.removeAll(e) + e.copy(value = view :: e.value)
+          case None =>
+            m + new ViewMapEntry(key = time, value = view :: Nil)
+        }
+      }
 
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
@@ -300,14 +319,14 @@ object GraphemeViewImpl {
         val succOpt = Some(view)
         gr.eventBefore(time).foreach { timePred =>
           viewMapT().get(timePred).foreach { viewsPred =>
-            viewsPred.foreach { viewPred =>
+            viewsPred.value.foreach { viewPred =>
               viewPred.succ_=(succOpt)
             }
           }
         }
         gr.eventAfter(time).foreach { timeSucc =>
           viewMapT().get(timeSucc).foreach { viewsSucc =>
-            view.succ_=(viewsSucc.headOption)
+            view.succ_=(viewsSucc.value.headOption)
           }
         }
       }
@@ -343,15 +362,15 @@ object GraphemeViewImpl {
       for {
         views <- _viewMapG0.get(time)
         view  <- {
-          val res = views.find(_.obj === oldObj)  // do _not_ directly compare the `entry`
+          val res = views.value.find(_.obj === oldObj)  // do _not_ directly compare the `entry`
           if (res.isEmpty) {
             if (DEBUG) println("OOPS - no view found despite time match")
           }
           res
         }
       } yield {
-        val succOld     = views.headOption
-        val viewsNew    = views.filterNot(_ === view)
+        val succOld     = views.value.headOption
+        val viewsNew    = views.value.filterNot(_ === view)
         val succNew     = viewsNew.headOption
 
         if (succOld !== succNew) {
@@ -359,22 +378,21 @@ object GraphemeViewImpl {
             _viewMapG0.get(timePred).fold {
               if (!isMove) warnViewNotFound("remove", entry)
             } { viewsPred =>
-              viewsPred.foreach { viewPred =>
+              viewsPred.value.foreach { viewPred =>
                 viewPred.succ_=(succNew)
               }
             }
           }
         }
 
-        val _viewMapG1 = if (viewsNew.isEmpty) {
-          _viewMapG0 - time
-        } else {
-          _viewMapG0 + (time -> viewsNew)
+        val _viewMapG1 = _viewMapG0.removeAll(views)
+        val _viewMapG2 = if (viewsNew.isEmpty) _viewMapG1 else {
+          _viewMapG1 + views.copy(value = viewsNew)
         }
-        viewMapT() = _viewMapG1
+        viewMapT() = _viewMapG2
 
         view.dispose()
-        new Removed(view, _viewMapG1)
+        new Removed(view, _viewMapG2)
       }
     }
 
@@ -416,10 +434,10 @@ object GraphemeViewImpl {
       def selectionModel: SelectionModel[S, GraphemeObjView[S]] = impl.selectionModel
       def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
 
-      def findChildView(frame: Long): Option[GraphemeObjView[S]] = {
-        val it = viewMapG.valuesIteratorFrom(frame)
-        if (it.hasNext) it.next().headOption else None
-      }
+//      def findChildView(frame: Long): Option[GraphemeObjView[S]] = {
+//        val it = viewMapG.valuesIteratorFrom(frame)
+//        if (it.hasNext) it.next().headOption else None
+//      }
 
       def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = {
         val dLeft   = math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
@@ -433,7 +451,7 @@ object GraphemeViewImpl {
         childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
       }
 
-      def iterator: Iterator[GraphemeObjView[S]] = viewMapG.valuesIterator.flatMap(_.headOption)
+      def iterator: Iterator[GraphemeObjView[S]] = viewMapG.iterator.flatMap(_.value.headOption)
 
       def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = {
         ???
@@ -441,8 +459,8 @@ object GraphemeViewImpl {
 
       private def childIterator(frame1: Long, frame2: Long,
                                 modelY1: Double, modelY2: Double): Iterator[GraphemeObjView[S]] = {
-        val it0 = viewMapG.valuesIteratorFrom(frame1)
-          .flatMap  (_.headOption)
+        val it0 = viewMapG.iteratorFrom(frame1)
+          .flatMap  (_.value.headOption)
           .dropWhile(_.timeValue <  frame1)
           .takeWhile(_.timeValue <= frame2)
         val it  = it0.filter {
@@ -556,23 +574,23 @@ object GraphemeViewImpl {
           val visStartExt = visStart - maxHorizF
           val visStopExt  = visStop  + maxHorizF
           // val range = viewMapG.range(visStartExt, visStopExt)
-          def range = viewMapG.iteratorFrom(visStartExt) // .takeWhile(_._1 < visStopExt)
+          def range() = viewMapG.floorIterator(visStartExt) // .takeWhile(_._1 < visStopExt)
   //          println(s"clipRect.x ${clipRect.x}, .x ${clipRect.width}, visStart $visStart, visStop $visStop, maxHorizF $maxHorizF, size = ${range.size}")
-          var it: Iterator[(Long, List[Child])] = range
+          var it: Iterator[ViewMapEntry] = range()
           var done  = false
           while (it.hasNext && !done) {
             val tup   = it.next()
-            val view  = tup._2.head
+            val view  = tup.value.head
             view.paintBack(g, impl, rendering)
-            if (tup._1 >= visStopExt) done = true
+            if (tup.key >= visStopExt) done = true
           }
-          it    = range
+          it    = range()
           done  = false
           while (it.hasNext && !done) {
             val tup   = it.next()
-            val view  = tup._2.head
+            val view  = tup.value.head
             view.paintFront(g, impl, rendering)
-            if (tup._1 >= visStopExt) done = true
+            if (tup.key >= visStopExt) done = true
           }
 
           // --- timeline cursor and selection ---

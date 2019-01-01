@@ -37,7 +37,7 @@ trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvas2DImpl[S, Double, Gr
 
   // def intersect(span: Span): Iterator[TimelineObjView[S]]
 
-  def findChildView(frame: Long): Option[GraphemeObjView[S]]
+//  def findChildView(frame: Long): Option[GraphemeObjView[S]]
 
   // def findViews(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]]
 

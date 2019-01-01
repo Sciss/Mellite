@@ -19,6 +19,7 @@ lazy val deps = new {
     val desktop             = "0.10.0"
     val equal               = "0.1.3"
     val fileUtil            = "1.1.3"
+    val fingerTree          = "1.5.4"
     val freesound           = "1.13.0"
     val fscape              = "2.20.0"
     val interpreterPane     = "1.10.0"
@@ -199,6 +200,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% s"lucre-$bdb"                    % deps.main.lucre,              // database backend
       "de.sciss"          %% "lucre-expr"                     % deps.main.lucre,
       "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
+      "de.sciss"          %% "fingertree"                     % deps.main.fingerTree,         // data structures
       "de.sciss"          %% "kollflitz"                      % deps.main.kollFlitz,
       "de.sciss"          %% "numbers"                        % deps.main.numbers,            // (sbt bug)
       "de.sciss"          %% "span"                           % deps.main.span,               // (sbt bug)
