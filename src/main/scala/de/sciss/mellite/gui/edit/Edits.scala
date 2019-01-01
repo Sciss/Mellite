@@ -42,7 +42,7 @@ object Edits {
     CompoundEdit(edits, name)
   }
 
-  def setSynthGraph[S <: Sys[S]](procs: Iterable[Proc[S]], codeElem: Code.Obj[S])
+  def setSynthGraph[S <: Sys[S]](processes: Iterable[Proc[S]], codeElem: Code.Obj[S])
                                 (implicit tx: S#Tx, cursor: stm.Cursor[S],
                                  compiler: Code.Compiler): Option[UndoableEdit] = {
     val code = codeElem.value
@@ -74,7 +74,7 @@ object Edits {
         val attrNameOpt = codeElem.attr.get(ObjKeys.attrName)
         val edits       = List.newBuilder[UndoableEdit]
 
-        procs.foreach { p =>
+        processes.foreach { p =>
           val graphEx = SynthGraphObj.newConst[S](sg)  // XXX TODO: ideally would link to code updates
           val edit1   = EditVar.Expr[S, SynthGraph, SynthGraphObj](editName, p.graph, graphEx)
           edits += edit1

@@ -23,6 +23,8 @@ import de.sciss.mellite.gui.impl.grapheme.{GraphemeViewImpl => Impl}
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Grapheme, Universe}
 
+import scala.swing.Action
+
 object GraphemeView {
   def apply[S <: Sys[S]](group: Grapheme[S])
                         (implicit tx: S#Tx, universe: Universe[S],
@@ -48,8 +50,10 @@ trait GraphemeView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S
   // def transportView: TransportView[S]
 
   // ---- GUI actions ----
-//  def actionDelete            : Action
-//  def actionClearSpan         : Action
-//  def actionRemoveSpan        : Action
-//  def actionMoveObjectToCursor: Action
+  def actionSelectAll           : Action
+  def actionSelectFollowing     : Action
+  def actionDelete              : Action
+//  def actionSplitObjects        : Action
+//  def actionClearSpan           : Action
+//  def actionRemoveSpan          : Action
 }

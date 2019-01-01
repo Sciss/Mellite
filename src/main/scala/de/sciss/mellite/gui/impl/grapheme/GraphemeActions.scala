@@ -16,100 +16,53 @@ package gui
 package impl
 package grapheme
 
+import de.sciss.desktop.KeyStrokes.menu2
+import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.edit.EditGraphemeRemoveObj
+import de.sciss.span.Span
 import de.sciss.synth.proc.Grapheme
+
+import scala.swing.Action
+import scala.swing.event.Key
 
 /** Implements the actions defined for the grapheme-view. */
 trait GraphemeActions[S <: Sys[S]] {
   _: GraphemeView[S] =>
 
-//  object actionDelete extends Action("Delete") {
-//    def apply(): Unit = {
-//      val editOpt = withSelection { implicit tx =>_ =>
-//        graphemeMod.flatMap { _ =>
-//            ... // ProcGUIActions.removeProcs(groupMod, views) // XXX TODO - probably should be replaced by Edits.unlinkAndRemove
-//        }
-//      }
-//      editOpt.foreach(undoManager.add)
-//    }
-//  }
-//
-//  object actionClearSpan extends Action("Clear Selected Span") {
-//    import KeyStrokes._
-//    accelerator = Some(menu1 + Key.BackSlash)
-//    enabled     = false
-//
-//    def apply(): Unit =
-//      timelineModel.selection.nonEmptyOption.foreach { selSpan =>
-//        val editOpt = cursor.step { implicit tx =>
-//          graphemeMod.flatMap { groupMod =>
-//            editClearSpan(groupMod, selSpan)
-//          }
-//        }
-//        editOpt.foreach(undoManager.add)
-//      }
-//  }
+  object actionSelectAll extends Action("Select All") {
+    def apply(): Unit = {
+      canvas.iterator.foreach { view =>
+        if (!selectionModel.contains(view)) selectionModel += view
+      }
+    }
+  }
 
-//  object actionRemoveSpan extends Action("Remove Selected Span") {
-//    import KeyStrokes._
-//    accelerator = Some(menu1 + shift + Key.BackSlash)
-//    enabled = false
-//
-//    def apply(): Unit = {
-//      timelineModel.selection.nonEmptyOption.foreach { selSpan =>
-////        val minStart = timelineModel.bounds.start
-//        val editOpt = cursor.step { implicit tx =>
-//          graphemeMod.flatMap { _ =>
-//            // ---- remove ----
-//            // - first call 'clear'
-//            // - then move everything right of the selection span's stop to the left
-//            //   by the selection span's length
-////            val editClear = editClearSpan(groupMod, selSpan)
-//              ...
-////            val affected  = groupMod.intersect(Span.From(selSpan.stop))
-////            val amount    = ProcActions.Move(deltaTime = -selSpan.length, deltaTrack = 0, copy = false)
-////            val editsMove = affected.flatMap {
-////              case (_ /* elemSpan */, elems) =>
-////                elems.flatMap { timed =>
-////                  Edits.move(timed.span, timed.value, amount, minStart = minStart)
-////                }
-////            } .toList
-////
-////            CompoundEdit(editClear.toList ++ editsMove, title)
-//          }
-//        }
-//        editOpt.foreach(undoManager.add)
-//        timelineModel.modifiableOption.foreach { tlm =>
-//          tlm.selection = Span.Void
-//          tlm.position  = selSpan.start
-//        }
-//      }
-//    }
-//  }
+  object actionSelectFollowing extends Action("Select Following Objects") {
+    accelerator = Some(menu2 + Key.F)
+    def apply(): Unit = {
+      selectionModel.clear()
+      val pos = timelineModel.position
+      canvas.intersect(Span.from(pos)).foreach { view =>
+        selectionModel += view
+      }
+    }
+  }
 
-//  object actionMoveObjectToCursor extends Action("Move Object To Cursor") {
-//    enabled = false
-//
-//    def apply(): Unit = {
-////      val pos = timelineModel.position
-//        ...
-////      val edits = withSelection { implicit tx => views =>
-////        val list = views.flatMap { view =>
-////          val span = view.span
-////          span.value match {
-////            case hs: Span.HasStart if hs.start != pos =>
-////              val delta   = pos - hs.start
-////              val amount  = ProcActions.Move(deltaTime = delta, deltaTrack = 0, copy = false)
-////              Edits.move(span, view.obj, amount = amount, minStart = 0L)
-////            case _ => None
-////          }
-////        }
-////        if (list.isEmpty) None else Some(list.toList)
-////      } .getOrElse(Nil)
-////      val editOpt = CompoundEdit(edits, title)
-////      editOpt.foreach(undoManager.add)
-//    }
-//  }
+  object actionDelete extends Action("Delete") {
+    def apply(): Unit = {
+      val editOpt = withSelection { implicit tx => views =>
+        graphemeMod.flatMap { grMod =>
+          val name = title
+          val edits = views.map { view =>
+            EditGraphemeRemoveObj(name = name, grapheme = grMod, time = view.time, elem = view.obj)
+          } .toList
+          CompoundEdit(edits, name)
+        }
+      }
+      editOpt.foreach(undoManager.add)
+    }
+  }
 
   // -----------
 
