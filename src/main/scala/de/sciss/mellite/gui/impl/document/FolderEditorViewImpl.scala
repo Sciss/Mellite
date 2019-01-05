@@ -11,19 +11,18 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.document
+package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
+import de.sciss.desktop.{KeyStrokes, UndoManager, Util, Window}
+import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
-import de.sciss.lucre.expr
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
+import de.sciss.mellite.gui.{FolderEditorView, FolderView, ObjView}
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel
@@ -57,7 +56,7 @@ object FolderEditorViewImpl {
       val (parent, idx) = impl.peer.insertionPoint
       val edits: List[UndoableEdit] = xs.zipWithIndex.map { case (x, j) =>
         EditFolderInsertObj(f.prefix, parent, idx + j, x)
-      } // (breakOut)
+      }
       CompoundEdit(edits, "Create Objects")
     }
 
@@ -76,7 +75,6 @@ object FolderEditorViewImpl {
             println("WARNING: Parent folder of object not found")
             None
           } else {
-            //            implicit val folderSer = Folder.serializer[S]
             val edit = EditFolderRemoveObj[S](nodeView.renderData.humanName, parent, idx, child)
             Some(edit)
           }
@@ -92,7 +90,14 @@ object FolderEditorViewImpl {
           selectionChanged(sel.map(_.renderData))
           actionDuplicate.enabled = sel.nonEmpty
       }
+
+//      Util.addGlobalAction(ggAdd, "type-new", KeyStrokes.menu1 + Key.Key1) {
+//        newTypeDialog()
+//      }
     }
+
+//    private def newTypeDialog(): Unit = {
+//    }
 
     lazy val actionDuplicate: Action = new Action("Duplicate...") {
       accelerator = Some(KeyStrokes.menu1 + Key.D)

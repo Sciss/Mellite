@@ -43,6 +43,7 @@ trait GraphemeView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S
   def selectionModel: GraphemeObjView.SelectionModel[S]
 
   def graphemeH: stm.Source[S#Tx, Grapheme[S]]
+
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 
   def canvas: GraphemeCanvas[S]

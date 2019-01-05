@@ -49,6 +49,11 @@ object ObjView {
     /** Whether it is possible to create an instance of the object via a GUI dialog. */
     def hasMakeDialog: Boolean
 
+    // Note: we use a callback `ok` instead of returning a `Future[Config[S]]` because the
+    // latter means a lot of boiler plate (executionContext) and `Future { }` does not
+    // guarantee execution on the EDT, so it's a total mismatch. If we need abort state,
+    // we could change to `Option[Config[S]]` or `Try[Config[S]]`.
+
     /** Provides an optional initial configuration for the make-new-instance dialog. */
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
                                    (implicit universe: Universe[S]): Unit

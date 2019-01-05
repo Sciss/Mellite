@@ -11,19 +11,18 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package component
+package de.sciss.mellite.gui.impl.component
 
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.Window
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.Application
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, ListObjView, ObjView}
 import de.sciss.swingplus.PopupMenu
 import de.sciss.synth.proc.gui.UniverseView
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, SequentialContainer, Swing}
 
