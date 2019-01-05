@@ -69,7 +69,12 @@ object AttrMapFrameImpl {
 
     protected type InsertConfig = String
 
-    protected def prepareInsert(f: ObjView.Factory): Option[String] = peer.queryKey()
+    protected def prepareInsertDialog(f: ObjView.Factory): Option[String] = peer.queryKey()
+
+    protected def prepareInsertCmdLine(args: List[String]): Option[(String, List[String])] = args match {
+      case key :: rest  => Some((key, rest))
+      case _            => None
+    }
 
     protected def editInsert(f: ObjView.Factory, xs: List[Obj[S]], key: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
       val edits = xs.map { value =>

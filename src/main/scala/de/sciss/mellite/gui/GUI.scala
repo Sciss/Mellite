@@ -19,7 +19,6 @@ import java.awt.geom.{AffineTransform, Area, Path2D}
 import java.awt.image.BufferedImage
 import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints, Shape}
 
-import javax.swing.{Icon, ImageIcon, SwingUtilities}
 import de.sciss.audiowidgets.{ParamField, RotaryKnob, Transport}
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
@@ -31,12 +30,13 @@ import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
 import javax.imageio.ImageIO
+import javax.swing.{Icon, ImageIcon, SwingUtilities}
 
 import scala.concurrent.Future
 import scala.swing.Reactions.Reaction
 import scala.swing.Swing._
 import scala.swing.event.{Key, SelectionChanged, ValueChanged}
-import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Label, TextField}
+import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Label, RootPanel, TextField}
 import scala.util.{Failure, Success, Try}
 
 object GUI {
@@ -246,5 +246,68 @@ object GUI {
   def optionToAborted[A](opt: Option[A]): Try[A] = opt match {
     case Some(x)  => Success(x)
     case None     => Failure(Aborted())
+  }
+
+  /** Sets the location of a given window `w` relative to the on-screen location of visible component `c`.
+    *
+    * @param w        the window to position
+    * @param c        the component relative to which to position the window
+    * @param hAlign   one of `Alignment.Left`, `Alignment.Center`, `Alignment.Right`
+    * @param vAlign   one of `Alignment.Top` , `Alignment.Center`, `Alignment.Bottom`
+    * @param pad      additional spacing (only applies where an alignment is ''not'' `Center`)
+    */
+  def setLocationRelativeTo(w: RootPanel, c: Component,
+                            hAlign: Alignment.Value = Alignment.Center, vAlign: Alignment.Value = Alignment.Center,
+                            pad: Int = 0): Unit = {
+    val wSize     = w.size
+    val cWin      = SwingUtilities.getWindowAncestor(c.peer)
+    if (cWin == null) return
+    val gc        = cWin.getGraphicsConfiguration
+    if (gc   == null) return
+    val gcBounds  = gc.getBounds
+    val cSize     = c.size
+    val cLoc      = c.locationOnScreen
+
+    import cLoc.{x => cx, y => cy}
+    import cSize.{height => ch, width => cw}
+    import gcBounds.{height => gh, width => gw, x => gx, y => gy}
+    import wSize.{height => wh, width => ww}
+
+    val x = hAlign match {
+      case Alignment.Left   | Alignment.Leading   => cx - ww - pad
+      case Alignment.Right  | Alignment.Trailing  => cx + cw + pad
+      case _                                      => cx + (cw - ww)/2
+    }
+
+    val y = vAlign match {
+      case Alignment.Top    | Alignment.Leading   => cy - wh - pad
+      case Alignment.Bottom | Alignment.Trailing  => cy + ch + pad
+      case _                                      => cy + (ch - wh)/2
+    }
+
+    // clip to screen area
+    val yc = math.max(gy, math.min(y, gy + gh - wh))
+    val xc = math.max(gx, math.min(x, gx + gw - ww))
+    w.peer.setLocation(xc, yc)
+  }
+
+  /** Formats a sequence of strings as a table with a given number of columns.
+    * Column width is made to match the longest string in the items, plus a given padding.
+    * Each line is terminated with a newline character.
+    */
+  def formatTextTable(items: Seq[String], columns: Int, pad: Int = 2): String = {
+    val colSize = if (items.isEmpty) 0 else items.iterator.map(_.length).max
+    val sbSz    = ((colSize + pad) * columns + 1) * items.size
+    val sb      = new StringBuilder(sbSz)
+    items.grouped(columns).foreach { sq =>
+      sq.foreach { item  =>
+        val pad = " " * (colSize - item.length)
+        sb.append("  ")
+        sb.append(item)
+        sb.append(pad)
+      }
+      sb.append('\n')
+    }
+    sb.result()
   }
 }

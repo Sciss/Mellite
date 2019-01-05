@@ -24,6 +24,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes}
@@ -63,6 +64,15 @@ object FScapeObjView extends ListObjView.Factory {
     opt.title = s"New $prefix"
     val res = GUI.optionToAborted(opt.show(window))
     done(res)
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = prefix
+    val p = ObjViewCmdLineParser[S](this)
+    p.opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, _) => v)
+    p.parseConfig(args, default)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

@@ -50,15 +50,14 @@ object ObjView {
     type E[~ <: stm.Sys[~]] <: Obj[~]
 
     /** Whether it is possible to create an instance of the object via
-      * `initMakeDialog` or `makeObj`. If this answers `false`, expect
-      * `initMakeDialog` to be a no-op and `makeObj` to simply return `Nil`.
+      * `initMakeDialog`, `initMakeCmdLine`, or `makeObj`. If this answers `false`, expect
+      * `initMakeDialog` and `initMakeCmdLine` to throw an exception, and `makeObj` to simply return `Nil`.
       */
     def canMakeObj: Boolean
 
-    // Note: we use a callback `ok` instead of returning a `Future[Config[S]]` because the
+    // Note: we use a callback `done` instead of returning a `Future[Config[S]]` because the
     // latter means a lot of boiler plate (executionContext) and `Future { }` does not
-    // guarantee execution on the EDT, so it's a total mismatch. If we need abort state,
-    // we could change to `Option[Config[S]]` or `Try[Config[S]]`.
+    // guarantee execution on the EDT, so it's a mismatch.
 
     /** Provides an optional initial configuration for the make-new-instance dialog.
       * If the user aborts the dialog, the `done` call-back should be invoked nevertheless,
@@ -67,6 +66,9 @@ object ObjView {
       */
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit
+
+    /** Tries to create a make-configuration from a command line string. */
+    def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = ???
 
     def category: String
 

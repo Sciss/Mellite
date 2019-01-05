@@ -13,7 +13,9 @@
 
 package de.sciss.mellite.gui.impl.component
 
-import de.sciss.desktop.{OptionPane, Util, Window}
+import java.util.Locale
+
+import de.sciss.desktop.{KeyStrokes, OptionPane, Util, Window}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx, requireEDT}
@@ -25,7 +27,9 @@ import de.sciss.swingplus.PopupMenu
 import de.sciss.synth.proc.gui.UniverseView
 import javax.swing.undo.UndoableEdit
 
-import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, SequentialContainer, Swing}
+import scala.swing.event.{EditDone, FocusLost, Key, KeyPressed}
+import scala.swing.{Action, Alignment, BorderPanel, Button, Component, Dialog, FlowPanel, SequentialContainer, Swing, TextField}
+import scala.tools.cmd.CommandLineParser
 import scala.util.{Failure, Success}
 
 trait CollectionViewImpl[S <: Sys[S]]
@@ -50,7 +54,13 @@ trait CollectionViewImpl[S <: Sys[S]]
 
   protected type InsertConfig
 
-  protected def prepareInsert(f: ObjView.Factory): Option[InsertConfig]
+  /** Prepare new object insertion by generating an 'insert-config', possibly opening a dialog */
+  protected def prepareInsertDialog(f: ObjView.Factory): Option[InsertConfig]
+
+  /** Prepare new object insertion by generating an 'insert-config' from a given argument list,
+    * returning the config along with the possibly filtered list.
+    */
+  protected def prepareInsertCmdLine(args: List[String]): Option[(InsertConfig, List[String])]
 
   protected def editInsert(f: ObjView.Factory, xs: List[Obj[S]], config: InsertConfig)(implicit tx: S#Tx): Option[UndoableEdit]
 
@@ -110,7 +120,7 @@ trait CollectionViewImpl[S <: Sys[S]]
       val winOpt    = Window.find(component)
       f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) {
         case Success(conf) =>
-          val confOpt2  = prepareInsert(f)
+          val confOpt2  = prepareInsertDialog(f)
           confOpt2.foreach { insConf =>
             val editOpt = cursor.step { implicit tx =>
               val xs = f.makeObj(conf)
@@ -165,6 +175,100 @@ trait CollectionViewImpl[S <: Sys[S]]
     res
   }
 
+  private def newTypeDialog(): Unit = {
+    //      // cf. https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
+    //      val regex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".r
+    //
+    //      def splitArgs(cmd: String): List[String] =
+    //        regex.findAllIn(cmd).map { s =>
+    //          val nm    = s.length - 1
+    //          val head  = s.charAt(0)
+    //          val last  = s.charAt(nm)
+    //          if ((head == '\'' && last == '\'') || (head == '\"' && last == '\"'))
+    //            s.substring(1, nm)
+    //          else
+    //            s
+    //        } .toList
+
+    val winOpt  = Window.find(component)
+    val ggText  = new TextField(12)
+    val win     = winOpt.map(_.component) match {
+      case Some(w: scala.swing.Window) => w
+      case _ => null
+    }
+    val dialog  = new Dialog(win)
+    dialog.peer.setUndecorated(true)
+    dialog.contents = ggText
+    dialog.pack()
+    GUI.setLocationRelativeTo(dialog, ggAdd, hAlign = Alignment.Right)
+    ggText.listenTo(ggText)
+    ggText.listenTo(ggText.keys)
+    // note: focus-lost is followed by edit-done as well.
+    // when user hits return, only edit-done is sent.
+    var handled = false
+
+    def handle(body: => Unit): Unit = if (!handled) {
+      handled = true
+      dialog.dispose()
+      body
+    }
+
+    ggText.reactions += {
+      case KeyPressed(_, Key.Escape, _, _)  => handle {}
+      case FocusLost(_, _, _)               => handle {}
+
+      case EditDone(_) => handle {
+        var tokenOk   = true
+        val argString = ggText.text
+        val args0     = CommandLineParser.tokenize(argString, errorFn = { err => println(err); tokenOk = false })
+        val prepOpt   = if (tokenOk) prepareInsertCmdLine(args0) else None
+        prepOpt match {
+          case Some((insConf, cmd :: rest)) =>
+            val nameL = cmd.toLowerCase(Locale.US)
+            val factOpt = ListObjView.factories.find(_.prefix.toLowerCase(Locale.US) == nameL)
+            factOpt match {
+              case Some(f) =>
+                if (f.canMakeObj) {
+                  val res = f.initMakeCmdLine[S](rest)
+                  res match {
+                    case Success(conf) =>
+                      // val confOpt2 = prepareInsertDialog(f)
+                      // confOpt2.foreach { insConf =>
+                      val editOpt = cursor.step { implicit tx =>
+                        val xs = f.makeObj(conf)
+                        editInsert(f, xs, insConf)
+                      }
+                      editOpt.foreach(undoManager.add)
+                    // }
+
+                    case Failure(MessageException(msg)) =>
+                      println()
+                      println(msg)
+
+                    case Failure(ex) =>
+                      val msg = Util.formatException(ex)
+                      println(msg)
+                  }
+
+                } else {
+                  println(s"Object type '$cmd' does not support command line instantiation.")
+                }
+
+              case None =>
+                val pre     = s"Unknown object type '$cmd'. Available:\n\n"
+                val avail   = ListObjView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
+                val availS  = GUI.formatTextTable(avail, columns = 3)
+                println(pre)
+                println(availS)
+            }
+
+          case _ =>
+        }
+      }
+    }
+    dialog.open()
+  }
+
   private def nameAttr = "Attributes Editor"
   private def nameView = "View Selected Element"
 
@@ -181,6 +285,10 @@ trait CollectionViewImpl[S <: Sys[S]]
     component = new BorderPanel {
       add(impl.peer.component, BorderPanel.Position.Center)
       add(_bottomComponent, BorderPanel.Position.South)
+    }
+
+    Util.addGlobalAction(ggAdd, "type-new", KeyStrokes.menu1 + Key.Key1) {
+      newTypeDialog()
     }
 
     initGUI2()
