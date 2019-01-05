@@ -21,6 +21,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
@@ -33,7 +34,7 @@ object MarkdownObjView extends ListObjView.Factory {
   def humanName     : String    = s"$prefix Text"
   def tpe           : Obj.Type  = Markdown
   def category      : String    = ObjView.categOrganisation
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ListObjView[S] = {
     val ex    = obj
@@ -41,25 +42,47 @@ object MarkdownObjView extends ListObjView.Factory {
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = String
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, contents: Option[String] = None, const: Boolean = false)
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
-    val res = GUI.optionToAborted(pane.show(window))
+    val res0    = GUI.optionToAborted(pane.show(window))
+    val res     = res0.map(name => Config[S](name = name))
     done(res)
   }
 
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config()
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    arg[String]("contents")
+      .text(s"Markdown text")
+      .action((v, c) => c.copy(contents = Some(v)))
+
+    parseConfig(args, default)
+  }
+
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    val name  = config
-    val value =
+    import config._
+    val value = contents.getOrElse(
       """# Title
         |
         |body
         |""".stripMargin
-    val obj   = Markdown.newVar(Markdown.newConst[S](value))
+    )
+    val obj0  = Markdown.newConst[S](value)
+    val obj   = if (const) obj0 else Markdown.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

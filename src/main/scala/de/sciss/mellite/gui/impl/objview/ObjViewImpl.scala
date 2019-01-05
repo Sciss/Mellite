@@ -71,7 +71,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = StringObj
     def category      : _String   = ObjView.categPrimitives
-    def canMakeObj : Boolean   = true
+    def canMakeObj    : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: StringObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -84,20 +84,22 @@ object ObjViewImpl {
       new String.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_String]
+    final case class Config[S <: stm.Sys[S]](name: String, value: _String, const: Boolean = false)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue   = new TextField(20)
       ggValue.text  = "Value"
-      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.text))
+      val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.text))
+      val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
     }
 
-    def makeObj[S <: Sys[S]](config: (_String, _String))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = StringObj.newVar(StringObj.newConst[S](value))
+    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+      import config._
+      val obj0  = StringObj.newConst[S](value)
+      val obj   = if (const) obj0 else StringObj.newVar(obj0)
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
@@ -131,7 +133,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = LongObj
     def category      : _String   = ObjView.categPrimitives
-    def canMakeObj : Boolean   = true
+    def canMakeObj    : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: LongObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -144,21 +146,23 @@ object ObjViewImpl {
       new Long.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Long]
+    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: _Long, const: Boolean = false)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val model     = new SpinnerNumberModel(0L, _Long.MinValue, _Long.MaxValue, 1L)
       val ggValue   = new Spinner(model)
-      val res = primitiveConfig[S, _Long](window, tpe = prefix, ggValue = ggValue, prepare =
+      val res0 = primitiveConfig[S, _Long](window, tpe = prefix, ggValue = ggValue, prepare =
         Success(model.getNumber.longValue()))
+      val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
     }
 
-    def makeObj[S <: Sys[S]](config: (String, _Long))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = LongObj.newVar(LongObj.newConst[S](value))
+    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+      import config._
+      val obj0  = LongObj.newConst[S](value)
+      val obj   = if (const) obj0 else LongObj.newVar(obj0)
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
@@ -195,7 +199,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = BooleanObj
     def category      : _String   = ObjView.categPrimitives
-    def canMakeObj : Boolean   = true
+    def canMakeObj    : _Boolean  = true
 
     def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -208,19 +212,21 @@ object ObjViewImpl {
       new Boolean.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Boolean]
+    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: _Boolean, const: _Boolean = false)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue = new CheckBox()
-      val res = primitiveConfig[S, _Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.selected))
+      val res0 = primitiveConfig[S, _Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.selected))
+      val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
     }
 
-    def makeObj[S <: Sys[S]](config: (String, _Boolean))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = BooleanObj.newVar(BooleanObj.newConst[S](value))
+    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+      import config._
+      val obj0  = BooleanObj.newConst[S](value)
+      val obj   = if (const) obj0 else BooleanObj.newVar(obj0)
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
@@ -250,7 +256,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _IntVector
     def category      : _String   = ObjView.categPrimitives
-    def canMakeObj : Boolean   = true
+    def canMakeObj    : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _IntVector[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -263,7 +269,7 @@ object ObjViewImpl {
       new IntVector.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[Vec[Int]]
+    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Vec[Int], const: Boolean = false)
 
     private def parseString(s: String): Try[Vec[Int]] =
       Try(s.split(" ").iterator.map(x => x.trim().toInt).toIndexedSeq)
@@ -273,13 +279,15 @@ object ObjViewImpl {
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue = new TextField("0 0")
-      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
+      val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
+      val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
     }
 
-    def makeObj[S <: Sys[S]](config: (String, Vec[Int]))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = _IntVector.newVar(_IntVector.newConst[S](value))
+    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+      import config._
+      val obj0  = _IntVector.newConst[S](value)
+      val obj   = if (const) obj0 else _IntVector.newVar(obj0)
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
@@ -322,7 +330,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Color.Obj
     def category      : _String   = ObjView.categOrganisation
-    def canMakeObj : Boolean   = true
+    def canMakeObj    : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -334,14 +342,15 @@ object ObjViewImpl {
       new Color.Impl[S](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
     }
 
-    type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Color]
+    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: _Color, const: Boolean = false)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val (ggValue, ggChooser) = mkColorEditor()
-      val res = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
+      val res0 = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
         Success(fromAWT(ggChooser.color)))
+      val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
     }
 
@@ -373,9 +382,10 @@ object ObjViewImpl {
       _Color.Palette.find(_.rgba == rgba).getOrElse(_Color.User(rgba))
     }
 
-    def makeObj[S <: Sys[S]](config: (String, _Color))(implicit tx: S#Tx): List[Obj[S]] = {
-      val (name, value) = config
-      val obj = _Color.Obj.newVar(_Color.Obj.newConst[S](value))
+    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+      import config._
+      val obj0  = _Color.Obj.newConst[S](value)
+      val obj   = if (const) obj0 else _Color.Obj.newVar(obj0)
       if (!name.isEmpty) obj.name = name
       obj :: Nil
     }
@@ -876,7 +886,7 @@ object ObjViewImpl {
     EditFolderInsertObj[S](name, parent, idx, obj)
   }
 
-  type PrimitiveConfig[A] = (String, A)
+  final case class PrimitiveConfig[A](name: String, value: A)
 
   /** Displays a simple new-object configuration dialog, prompting for a name and a value. */
   def primitiveConfig[S <: Sys[S], A](window: Option[desktop.Window], tpe: String, ggValue: Component,
@@ -885,7 +895,7 @@ object ObjViewImpl {
     nameOpt match {
       case Some(name) =>
         prepare.map { value =>
-          (name, value)
+          PrimitiveConfig(name, value)
         }
 
       case None => Failure(Aborted())
@@ -967,7 +977,7 @@ object ObjViewImpl {
           implicit val ser: Serializer[Confluent#Tx, Access[Cf], Ex[Cf]] = exprType.serializer[Confluent]
           val name = CellView.name[Confluent](obj.asInstanceOf[Obj[Confluent]])
             .map(n => s"History for '$n'")
-          val w = new WindowImpl[Confluent](name) {
+          val w: Window[Confluent] = new WindowImpl[Confluent](name) {
             val view: UniverseView[Confluent] = ExprHistoryView[A, Ex](cf, expr.asInstanceOf[Ex[Confluent]])
             init()
           }

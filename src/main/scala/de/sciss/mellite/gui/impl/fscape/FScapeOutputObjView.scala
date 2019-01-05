@@ -11,10 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.fscape
+package de.sciss.mellite.gui.impl.fscape
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
@@ -24,6 +22,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
 import de.sciss.synth.proc.Universe
+import javax.swing.Icon
 
 import scala.util.Failure
 
@@ -50,8 +49,14 @@ object FScapeOutputObjView extends ListObjView.Factory {
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit =
-    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
+                                 (implicit universe: Universe[S]): Unit = {
+    val failed = initMakeCmdLine(Nil)
+    done(failed)
+  }
+
+  /** Tries to create a make-configuration from a command line string. */
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] =
+    Failure(new UnsupportedOperationException(s"Make $humanName"))
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 

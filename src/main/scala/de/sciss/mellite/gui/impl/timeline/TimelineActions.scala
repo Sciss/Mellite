@@ -169,32 +169,6 @@ trait TimelineActions[S <: Sys[S]] {
         }
       }
 
-//            def checkLink(source: TimelineObjView[S], target: TimelineObjView[S]): Unit = {
-//              val targets = getTargets(source)
-//              if (targets.contains(target)) {
-//                val edge = E(source, target)
-//                top.addEdge(edge).foreach { case (top1, moveOpt) =>
-//                  top = top1
-//                  moveOpt.foreach { move =>
-//                    // - In case that the reference is the source vertex of the added edge, the affected vertices
-//                    //   should be moved _after_ the reference and keep their internal grouping order.
-//                    // - In case the reference is the target vertex, the affected vertices should be
-//                    //   moved _before_ the reference
-//                    if (move.isAfter) {
-//                      val thisPl = placed.getOrElseUpdate(view, Placed(trkIdx = view.trackIndex, trkH = view.trackHeight))
-//                      move.affected.foreach {}
-//                      ???
-//                    } else {
-//                      ???
-//                    }
-//                  }
-//                }
-//              }
-//            }
-//
-//            checkLink(view, that)
-//            checkLink(that, view)
-
       val editOpt = CompoundEdit(edits, name = title)
       editOpt.foreach(undoManager.add)
     }

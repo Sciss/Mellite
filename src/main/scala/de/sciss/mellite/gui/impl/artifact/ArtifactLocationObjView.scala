@@ -19,9 +19,10 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.ArtifactLocation
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing._
+import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ListObjView, ObjView}
 import de.sciss.synth.proc.Implicits._
@@ -45,18 +46,41 @@ object ArtifactLocationObjView extends ListObjView.Factory {
     new Impl(tx.newHandle(obj), value, isEditable = editable).init(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, directory: File, const: Boolean = false)
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
-    val res = GUI.optionToAborted(ActionArtifactLocation.queryNew(window = window, askName = true))
+    val res0 = GUI.optionToAborted(ActionArtifactLocation.queryNew(window = window, askName = true))
+    val res = res0.map { case (name, dir) => Config[S](name = name, directory = dir) }
     done(res)
   }
 
-  def makeObj[S <: Sys[S]](config: (String, File))(implicit tx: S#Tx): List[Obj[S]] = {
-    val (name, directory) = config
-    val obj  = ArtifactLocation.newVar[S](directory)
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config(directory = null)
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    arg[File]("location")
+      .text("Directory")
+      .required()
+      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
+      .action((v, c) => c.copy(directory = v))
+
+    parseConfig(args, default)
+  }
+
+  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+    import config._
+    val obj0  = ArtifactLocation.newConst[S](directory)
+    val obj   = if (const) obj0 else ArtifactLocation.newVar[S](obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

@@ -241,6 +241,8 @@ trait CollectionViewImpl[S <: Sys[S]]
                       editOpt.foreach(undoManager.add)
                     // }
 
+                    case Failure(Aborted()) =>
+
                     case Failure(MessageException(msg)) =>
                       println()
                       println(msg)
@@ -255,7 +257,7 @@ trait CollectionViewImpl[S <: Sys[S]]
                 }
 
               case None =>
-                val pre     = s"Unknown object type '$cmd'. Available:\n\n"
+                val pre     = s"Unknown object type '$cmd'. Available:\n"
                 val avail   = ListObjView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
                 val availS  = GUI.formatTextTable(avail, columns = 3)
                 println(pre)

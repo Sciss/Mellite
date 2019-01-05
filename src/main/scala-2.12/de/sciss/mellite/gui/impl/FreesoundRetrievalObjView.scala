@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
@@ -32,9 +30,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl.PrimitiveConfig
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{FolderEditorView, GUI, ListObjView, MarkdownRenderFrame, MessageException, ObjView, Shapes}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile
@@ -89,10 +90,27 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
     done(res)
   }
 
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = PrimitiveConfig(prefix, file(""))
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[File]('d', "download")
+      .text("Download directory")
+      .required()
+      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
+      .action((v, c) => c.copy(value = v))
+
+    parseConfig(args, default)
+  }
+
   def makeObj[S <: Sys[S]](c: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    val (name, locValue) = c
+    import c._
     val search  = TextSearchObj    .newConst[S](TextSearch(""))
-    val loc     = ArtifactLocation .newConst[S](locValue)
+    val loc     = ArtifactLocation .newConst[S](value)
     val obj     = Retrieval[S](search, loc)
     if (!name.isEmpty) obj.name = name
     obj :: Nil

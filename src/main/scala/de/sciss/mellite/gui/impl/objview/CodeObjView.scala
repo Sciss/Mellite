@@ -37,20 +37,20 @@ object CodeObjView extends ListObjView.Factory {
   def humanName     : String    = "Source Code"
   def tpe           : Obj.Type  = Code.Obj
   def category      : String    = ObjView.categMisc
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ListObjView[S] = {
     val value   = obj.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Code]
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Code, const: Boolean = false)
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue = new ComboBox(Seq(Code.FileTransform.name, Code.SynthGraph.name))
-    val res = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
+    val res0 = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
       ggValue.selection.index match {
         case 0 => Success(Code.FileTransform(
           """|val aIn   = AudioFile.openRead(in)
@@ -81,13 +81,14 @@ object CodeObjView extends ListObjView.Factory {
           Failure(MessageException("No code type selected"))
       }
     )
+    val res = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
   }
 
-  def makeObj[S <: Sys[S]](config: (String, Code))(implicit tx: S#Tx): List[Obj[S]] = {
-    val (name, value) = config
-    val peer  = Code.Obj.newVar[S](Code.Obj.newConst(value))
-    val obj   = peer // Obj(Code.Elem(peer))
+  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+    import config._
+    val obj0  = Code.Obj.newConst[S](value)
+    val obj   = if (const) obj0 else Code.Obj.newVar[S](obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{PrimitiveConfig, primitiveConfig, raphaelIcon}
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, MessageException, ObjView, Shapes}
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
@@ -40,7 +40,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = DoubleVector
   def category      : String    = ObjView.categPrimitives
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex          = obj
@@ -53,7 +53,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     new ListImpl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: V, const: Boolean = false)
 
   private def parseString(s: String): Try[V] =
     Try(s.split(" ").iterator.map(x => x.trim().toDouble).toIndexedSeq)
@@ -63,13 +63,15 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue = new TextField("0.0 0.0")
-    val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
+    val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
+    val res = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
   }
 
-  def makeObj[S <: Sys[S]](config: (String, V))(implicit tx: S#Tx): List[Obj[S]] = {
-    val (name, value) = config
-    val obj = DoubleVector.newVar(DoubleVector.newConst[S](value))
+  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+    import config._
+    val obj0  = DoubleVector.newConst[S](value)
+    val obj   = if (const) obj0 else DoubleVector.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

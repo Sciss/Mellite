@@ -18,6 +18,7 @@ import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
@@ -33,34 +34,56 @@ object IntObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = IntObj
   def category      : String    = ObjView.categPrimitives
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ListObjView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
       case IntObj.Var(_)  => true
-      case _            => false
+      case _              => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
     new ListImpl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Int]
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Int, const: Boolean = false)
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
-    val model     = new SpinnerNumberModel(0, Int.MinValue, Int.MaxValue, 1)
-    val ggValue   = new Spinner(model)
-    val res = ObjViewImpl.primitiveConfig[S, Int](window, tpe = prefix, ggValue = ggValue,
+    val model   = new SpinnerNumberModel(0, Int.MinValue, Int.MaxValue, 1)
+    val ggValue = new Spinner(model)
+    val res0    = ObjViewImpl.primitiveConfig[S, Int](window, tpe = prefix, ggValue = ggValue,
       prepare = Success(model.getNumber.intValue()))
+    val res     = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
   }
 
-  def makeObj[S <: Sys[S]](config: (String, Int))(implicit tx: S#Tx): List[Obj[S]] = {
-    val (name, value) = config
-    val obj = IntObj.newVar(IntObj.newConst[S](value))
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config(value = 0)
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    arg[Int]("value")
+      .text("Initial int value")
+      .required()
+      .action((v, c) => c.copy(value = v))
+
+    parseConfig(args, default)
+  }
+
+  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+    import config._
+    val obj0  = IntObj.newConst[S](value)
+    val obj   = if (const) obj0 else IntObj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

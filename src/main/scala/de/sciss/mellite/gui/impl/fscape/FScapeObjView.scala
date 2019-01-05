@@ -44,7 +44,7 @@ object FScapeObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = FScape
   def category      : String    = ObjView.categComposition
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
 //  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 //
@@ -69,10 +69,11 @@ object FScapeObjView extends ListObjView.Factory {
   override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
     val default: Config[S] = prefix
     val p = ObjViewCmdLineParser[S](this)
-    p.opt[String]('n', "name")
+    import p._
+    opt[String]('n', "name")
       .text(s"Object's name (default: $prefix)")
       .action((v, _) => v)
-    p.parseConfig(args, default)
+    parseConfig(args, default)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

@@ -15,6 +15,7 @@ package de.sciss.mellite.gui.impl
 
 import de.sciss.lucre.stm.Sys
 import de.sciss.mellite.gui.{MessageException, ObjView}
+import de.sciss.processor.Processor.Aborted
 import scopt.OptionParser
 
 import scala.util.{Failure, Success, Try}
@@ -25,15 +26,25 @@ object ObjViewCmdLineParser {
 }
 class ObjViewCmdLineParser[C](private val f: ObjView.Factory)
   extends OptionParser[C](f.prefix) {
-  private[this] var _error: String = ""
 
-  override def terminate(exitState: Either[String, Unit]): Unit = ()
+  private[this] var _error    = ""
+  private[this] var _aborted  = false
+
+  override def terminate(exitState: Either[String, Unit]): Unit =
+    if (exitState.isRight) _aborted = true
 
   override def reportError(msg: String): Unit = _error = msg
 
-  def parseConfig(args: List[String], default: C): Try[C] =
-    parse(args, default) match {
+  def parseConfig(args: List[String], default: C): Try[C] = {
+    val opt = parse(args, default)
+    if (_aborted) Failure(Aborted()) else opt match {
       case Some(value)  => Success(value)
       case None         => Failure(MessageException(_error))
     }
+  }
+
+  override def showUsageOnError: Boolean = true // even if we offer '--help'
+
+  // constructor
+  help("help").text("Prints this usage text")
 }

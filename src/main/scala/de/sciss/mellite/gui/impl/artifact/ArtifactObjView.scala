@@ -21,6 +21,7 @@ import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
@@ -74,14 +75,44 @@ object ArtifactObjView extends ListObjView.Factory {
         case Some(value) => Success(value)
         case None => Failure(MessageException("No file was specified"))
       })
-    val res1 = res.flatMap { case (name, f) =>
-      val locOpt = ActionArtifactLocation.query[S](file = f, window = window, askName = true)(implicit tx => universe.workspace.root)
+    val res1 = res.flatMap { c =>
+      import c._
+      val locOpt = ActionArtifactLocation.query[S](file = value, window = window, askName = true)(implicit tx => universe.workspace.root)
       locOpt.fold[MakeResult[S]](Failure(Aborted())) { location =>
-        val cfg = Config(name = name, file = f, location = location)
+        val cfg = Config(name = name, file = value, location = location)
         Success(cfg)
       }
     }
     done(res1)
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config(name = prefix, file = file(""), location = null)
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[File]('l', "location")
+      .text("Artifact's base location (directory). If absent, artifact's direct parent is used.")
+      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
+      .action((v, c) => c.copy(location = (Right(v.name), v)))
+
+    arg[File]("file")
+      .text("File")
+      .required()
+      .action((v, c) => c.copy(file = v))
+
+    parseConfig(args, default).flatMap {
+      case c if c.location == null =>
+        c.file.absolute.parentOption match {
+          case Some(parent) => Success(c.copy(location = (Right(parent.name), parent)))
+          case None => Failure(MessageException(s"No parent directory to '${c.file}'"))
+        }
+
+      case other => Success(other)
+    }
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

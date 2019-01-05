@@ -22,6 +22,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
 import de.sciss.mellite.gui.{CodeFrame, GUI, ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.Implicits._
@@ -51,6 +52,16 @@ object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
     opt.title = s"New $prefix"
     val res = GUI.optionToAborted(opt.show(window))
     done(res)
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = prefix
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, _) => v)
+    parseConfig(args, default)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
