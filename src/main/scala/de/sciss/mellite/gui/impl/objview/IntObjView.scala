@@ -24,7 +24,7 @@ import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.{Icon, SpinnerNumberModel}
 
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object IntObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = IntObj[~]
@@ -33,7 +33,7 @@ object IntObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = IntObj
   def category      : String    = ObjView.categPrimitives
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ListObjView[S] = {
     val ex          = obj
@@ -49,13 +49,13 @@ object IntObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Int]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val model     = new SpinnerNumberModel(0, Int.MinValue, Int.MaxValue, 1)
     val ggValue   = new Spinner(model)
     val res = ObjViewImpl.primitiveConfig[S, Int](window, tpe = prefix, ggValue = ggValue,
-      prepare = Some(model.getNumber.intValue()))
-    res.foreach(ok(_))
+      prepare = Success(model.getNumber.intValue()))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: (String, Int))(implicit tx: S#Tx): List[Obj[S]] = {

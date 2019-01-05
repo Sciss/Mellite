@@ -33,8 +33,9 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
-import de.sciss.mellite.gui.{EnsembleFrame, FolderFrame, GUI, GraphemeFrame, ListObjView, ObjView, Shapes, TimelineFrame}
+import de.sciss.mellite.gui.{EnsembleFrame, FolderFrame, GUI, GraphemeFrame, ListObjView, MessageException, ObjView, Shapes, TimelineFrame}
 import de.sciss.mellite.{Cf, Mellite}
+import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
@@ -46,7 +47,7 @@ import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
 import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, ColorChooser, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object ObjViewImpl {
   import java.lang.{String => _String}
@@ -70,7 +71,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = StringObj
     def category      : _String   = ObjView.categPrimitives
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: StringObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -86,12 +87,12 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_String]
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue   = new TextField(20)
       ggValue.text  = "Value"
-      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Some(ggValue.text))
-      res.foreach(ok(_))
+      val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.text))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](config: (_String, _String))(implicit tx: S#Tx): List[Obj[S]] = {
@@ -130,7 +131,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = LongObj
     def category      : _String   = ObjView.categPrimitives
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: LongObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -146,13 +147,13 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Long]
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val model     = new SpinnerNumberModel(0L, _Long.MinValue, _Long.MaxValue, 1L)
       val ggValue   = new Spinner(model)
       val res = primitiveConfig[S, _Long](window, tpe = prefix, ggValue = ggValue, prepare =
-        Some(model.getNumber.longValue()))
-      res.foreach(ok(_))
+        Success(model.getNumber.longValue()))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](config: (String, _Long))(implicit tx: S#Tx): List[Obj[S]] = {
@@ -194,7 +195,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = BooleanObj
     def category      : _String   = ObjView.categPrimitives
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -210,11 +211,11 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Boolean]
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue = new CheckBox()
-      val res = primitiveConfig[S, _Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Some(ggValue.selected))
-      res.foreach(ok(_))
+      val res = primitiveConfig[S, _Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.selected))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](config: (String, _Boolean))(implicit tx: S#Tx): List[Obj[S]] = {
@@ -249,7 +250,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _IntVector
     def category      : _String   = ObjView.categPrimitives
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _IntVector[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -264,15 +265,16 @@ object ObjViewImpl {
 
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[Vec[Int]]
 
-    private def parseString(s: String): Option[Vec[Int]] =
-      Try(s.split(" ").iterator.map(x => x.trim().toInt).toIndexedSeq).toOption
+    private def parseString(s: String): Try[Vec[Int]] =
+      Try(s.split(" ").iterator.map(x => x.trim().toInt).toIndexedSeq)
+        .recoverWith { case _ => Failure(MessageException(s"Cannot parse '$s' as $humanName")) }
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggValue = new TextField("0 0")
       val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
-      res.foreach(ok(_))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](config: (String, Vec[Int]))(implicit tx: S#Tx): List[Obj[S]] = {
@@ -301,7 +303,7 @@ object ObjViewImpl {
           case (Some(prev), d: Int) => Some(prev :+ d)
           case _ => None
         }
-        case s: _String  => IntVector.parseString(s)
+        case s: _String  => IntVector.parseString(s).toOption
       }
 
       def configureRenderer(label: Label): Component = {
@@ -320,7 +322,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Color.Obj
     def category      : _String   = ObjView.categOrganisation
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ex          = obj
@@ -335,12 +337,12 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = PrimitiveConfig[_Color]
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val (ggValue, ggChooser) = mkColorEditor()
       val res = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
-        Some(fromAWT(ggChooser.color)))
-      res.foreach(ok(_))
+        Success(fromAWT(ggChooser.color)))
+      done(res)
     }
 
     private def mkColorEditor(): (Component, ColorChooser) = {
@@ -478,7 +480,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Folder
     def category      : _String   = ObjView.categOrganisation
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Folder[S])(implicit tx: S#Tx): ListObjView[S] =
       new Folder.Impl[S](tx.newHandle(obj)).initAttrs(obj)
@@ -486,13 +488,13 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = _String
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = "New Folder"
-      val res = opt.show(window)
-      res.foreach(ok(_))
+      val res = GUI.optionToAborted(opt.show(window))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -532,7 +534,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Timeline
     def category      : _String   = ObjView.categComposition
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Timeline[S])(implicit tx: S#Tx): ListObjView[S] =
       new Timeline.Impl(tx.newHandle(obj)).initAttrs(obj)
@@ -540,13 +542,13 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = _String
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
-      val res = opt.show(window)
-      res.foreach(ok(_))
+      val res = GUI.optionToAborted(opt.show(window))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -584,7 +586,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Grapheme
     def category      : _String   = ObjView.categComposition
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Grapheme[S])(implicit tx: S#Tx): ListObjView[S] =
       new Grapheme.Impl(tx.newHandle(obj)).initAttrs(obj)
@@ -592,13 +594,13 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = _String
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
-      val res = opt.show(window)
-      res.foreach(ok(_))
+      val res = GUI.optionToAborted(opt.show(window))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -636,7 +638,7 @@ object ObjViewImpl {
     val humanName     : _String   = "Fade"
     def tpe           : Obj.Type  = _FadeSpec.Obj
     def category      : _String   = ObjView.categComposition
-    def hasMakeDialog : Boolean   = false
+    def canMakeObj : Boolean   = false
 
     def mkListView[S <: Sys[S]](obj: _FadeSpec.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
       val value   = obj.value
@@ -646,9 +648,9 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = Unit
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
-      None // XXX TODO
+      done(Failure(new UnsupportedOperationException(s"Make $humanName")))// XXX TODO
 //      val ggShape = new ComboBox()
 //      Curve.cubed
 //      val ggValue = new ComboBox(Seq(_Code.FileTransform.name, _Code.SynthGraph.name))
@@ -702,7 +704,7 @@ object ObjViewImpl {
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Ensemble
     def category      : _String   = ObjView.categComposition
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Ensemble[S])(implicit tx: S#Tx): ListObjView[S] = {
       val ens         = obj
@@ -718,7 +720,7 @@ object ObjViewImpl {
     final case class Config[S <: stm.Sys[S]](name: String, offset: Long, playing: Boolean)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val ggName    = new TextField(10)
       ggName.text   = prefix
@@ -746,14 +748,16 @@ object ObjViewImpl {
       pane.title  = s"New $prefix"
       val res = pane.show(window)
 
-      if (res == Dialog.Result.Ok) {
+      val res1 = if (res == Dialog.Result.Ok) {
         val name      = ggName.text
         val seconds   = offModel.getNumber.doubleValue()
         val offset    = (seconds * TimeRef.SampleRate + 0.5).toLong
         val playing   = ggPlay.selected
-        val res = Config[S](name = name, offset = offset, playing = playing)
-        ok(res)
+        Success(Config[S](name = name, offset = offset, playing = playing))
+      } else {
+        Failure(Aborted())
       }
+      done(res1)
     }
 
     def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -817,7 +821,7 @@ object ObjViewImpl {
     val humanName     : _String   = "Wolkenpumpe"
     def tpe           : Obj.Type  = _Nuages
     def category      : _String   = ObjView.categComposition
-    def hasMakeDialog : Boolean   = true
+    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Nuages[S])(implicit tx: S#Tx): ListObjView[S] =
       new Nuages.Impl[S](tx.newHandle(obj)).initAttrs(obj)
@@ -825,13 +829,13 @@ object ObjViewImpl {
     type Config[S <: stm.Sys[S]] = _String
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (ok: Config[S] => Unit)
+                                   (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
       val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
         messageType = OptionPane.Message.Question, initial = prefix)
       opt.title = s"New $prefix"
-      val res = opt.show(window)
-      res.foreach(ok(_))
+      val res = GUI.optionToAborted(opt.show(window))
+      done(res)
     }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -876,13 +880,15 @@ object ObjViewImpl {
 
   /** Displays a simple new-object configuration dialog, prompting for a name and a value. */
   def primitiveConfig[S <: Sys[S], A](window: Option[desktop.Window], tpe: String, ggValue: Component,
-                                      prepare: => Option[A]): Option[PrimitiveConfig[A]] = {
+                                      prepare: => Try[A]): Try[PrimitiveConfig[A]] = {
     val nameOpt = GUI.keyValueDialog(value = ggValue, title = s"New $tpe", defaultName = tpe, window = window)
-    for {
-      name  <- nameOpt
-      value <- prepare
-    } yield {
-      (name, value)
+    nameOpt match {
+      case Some(name) =>
+        prepare.map { value =>
+          (name, value)
+        }
+
+      case None => Failure(Aborted())
     }
   }
 

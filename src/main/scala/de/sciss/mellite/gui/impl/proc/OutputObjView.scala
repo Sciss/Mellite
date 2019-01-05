@@ -23,6 +23,8 @@ import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
 import de.sciss.synth.proc.{Output, Universe}
 
+import scala.util.Failure
+
 object OutputObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
@@ -30,7 +32,7 @@ object OutputObjView extends ListObjView.Factory {
   val humanName     : String    = s"Process $prefix"
   def tpe           : Obj.Type  = Output
   def category      : String    = ObjView.categMisc
-  def hasMakeDialog : Boolean   = false
+  def canMakeObj : Boolean   = false
 
   def mkListView[S <: Sys[S]](obj: Output[S])(implicit tx: S#Tx): OutputObjView[S] with ListObjView[S] = {
     val value = obj.key
@@ -40,8 +42,9 @@ object OutputObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = Unit
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = ()
+                                 (done: MakeResult[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit =
+    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 

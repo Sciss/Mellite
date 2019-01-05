@@ -19,13 +19,14 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
+import de.sciss.mellite.gui.{CodeFrame, ListObjView, MessageException, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Component, Label}
+import scala.util.{Failure, Success}
 
 // -------- Code --------
 
@@ -36,7 +37,7 @@ object CodeObjView extends ListObjView.Factory {
   def humanName     : String    = "Source Code"
   def tpe           : Obj.Type  = Code.Obj
   def category      : String    = ObjView.categMisc
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ListObjView[S] = {
     val value   = obj.value
@@ -46,12 +47,12 @@ object CodeObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[Code]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue = new ComboBox(Seq(Code.FileTransform.name, Code.SynthGraph.name))
     val res = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
       ggValue.selection.index match {
-        case 0 => Some(Code.FileTransform(
+        case 0 => Success(Code.FileTransform(
           """|val aIn   = AudioFile.openRead(in)
             |val aOut  = AudioFile.openWrite(out, aIn.spec)
             |val bufSz = 8192
@@ -69,17 +70,18 @@ object CodeObjView extends ListObjView.Factory {
             |aIn .close()
             |""".stripMargin))
 
-        case 1 => Some(Code.SynthGraph(
+        case 1 => Success(Code.SynthGraph(
           """|val in   = ScanIn("in")
             |val sig  = in
             |ScanOut("out", sig)
             |""".stripMargin
         ))
 
-        case _  => None
+        case _  =>
+          Failure(MessageException("No code type selected"))
       }
     )
-    res.foreach(ok)
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: (String, Code))(implicit tx: S#Tx): List[Obj[S]] = {

@@ -22,7 +22,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, MarkdownEditorFrame, ObjView, Shapes}
+import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Markdown, Universe}
 
@@ -33,7 +33,7 @@ object MarkdownObjView extends ListObjView.Factory {
   def humanName     : String    = s"$prefix Text"
   def tpe           : Obj.Type  = Markdown
   def category      : String    = ObjView.categOrganisation
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ListObjView[S] = {
     val ex    = obj
@@ -44,12 +44,12 @@ object MarkdownObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = String
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
-    val res = pane.show(window)
-    res.foreach(ok(_))
+    val res = GUI.optionToAborted(pane.show(window))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
+import de.sciss.desktop.{KeyStrokes, UndoManager, Util, Window}
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
@@ -91,13 +91,29 @@ object FolderEditorViewImpl {
           actionDuplicate.enabled = sel.nonEmpty
       }
 
-//      Util.addGlobalAction(ggAdd, "type-new", KeyStrokes.menu1 + Key.Key1) {
-//        newTypeDialog()
-//      }
+      Util.addGlobalAction(ggAdd, "type-new", KeyStrokes.menu1 + Key.Key1) {
+        newTypeDialog()
+      }
     }
 
-//    private def newTypeDialog(): Unit = {
-//    }
+    private def newTypeDialog(): Unit = {
+      // cf. https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
+      val regex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".r
+
+      def splitArgs(cmd: String): List[String] =
+        regex.findAllIn(cmd).map { s =>
+          val nm    = s.length - 1
+          val head  = s.charAt(0)
+          val last  = s.charAt(nm)
+          if ((head == '\'' && last == '\'') || (head == '\"' && last == '\"'))
+            s.substring(1, nm)
+          else
+            s
+        } .toList
+
+
+
+    }
 
     lazy val actionDuplicate: Action = new Action("Duplicate...") {
       accelerator = Some(KeyStrokes.menu1 + Key.D)

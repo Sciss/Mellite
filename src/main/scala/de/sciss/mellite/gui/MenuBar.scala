@@ -46,7 +46,7 @@ object MenuBar {
       .add(Item("close",              proxy(("Close",                   menu1 + Key.W))))
       .add(Item("close-all", ActionCloseAllWorkspaces))
       .addLine()
-      .add(Item("bounce", proxy((s"${ActionBounceTimeline.title}...", menu1 + Key.B))))
+      .add(Item("bounce", proxy((s"${ActionBounce.title}...", menu1 + Key.B))))
       // .add(Item("bounce-transform",   proxy("Bounce And Transform...",  (menu1 + shift + Key.B))))
     if (itQuit.visible) mFile.addLine().add(itQuit)
 

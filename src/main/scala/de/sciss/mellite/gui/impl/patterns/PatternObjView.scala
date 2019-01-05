@@ -42,7 +42,7 @@ object PatternObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Pattern
   def category      : String    = ObjView.categComposition
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ListObjView[S] = {
     val vr = Pattern.Var.unapply(obj).getOrElse {
@@ -55,13 +55,13 @@ object PatternObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = String
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
-    val res = opt.show(window)
-    res.foreach(ok)
+    val res = GUI.optionToAborted(opt.show(window))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

@@ -1,5 +1,5 @@
 /*
- *  ActionBounceTimeline.scala
+ *  ActionBounce.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -51,7 +51,7 @@ import scala.swing.{Button, ButtonGroup, CheckBox, Component, Dialog, Label, Pro
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
-object ActionBounceTimeline {
+object ActionBounce {
   private[this] val DEBUG = false
 
   final val title = "Export as Audio File"
@@ -216,7 +216,7 @@ object ActionBounceTimeline {
         storeString (attrMP3Artist    , mp3.artist )
         storeString (attrMP3Comment   , mp3.comment)
     }
-    
+
     storeInt      (attrSampleRate , q.sampleRate)
     storeDouble   (attrGain       , q.gain.decibels, default = Double.NaN)
     storeBoolean  (attrNormalize  , q.gain.normalized, default = true)
@@ -753,13 +753,13 @@ object ActionBounceTimeline {
 
             case _ => // either no location was set, or it's not parent of the file
               ActionArtifactLocation.query[S](f)(implicit tx => universe.workspace.root) match {
-                case Some(either) =>
+                case Some((either, directory)) =>
                   either match {
                     case Left(source) =>
                       settings = settings.copy(location = Some(source))
                       ok
 
-                    case Right((name, directory)) =>
+                    case Right(name) =>
                       val (edit0, source) = cursor.step { implicit tx =>
                         val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
                         val folder  = universe.workspace.root
@@ -1130,11 +1130,11 @@ object ActionBounceTimeline {
     }
   }
 }
-abstract class ActionBounceTimeline[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
-                                                 objH: stm.Source[S#Tx, Obj[S]], storeSettings: Boolean = true)
-  extends scala.swing.Action(ActionBounceTimeline.title) {
+class ActionBounce[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
+                                objH: stm.Source[S#Tx, Obj[S]], storeSettings: Boolean = true)
+  extends scala.swing.Action(ActionBounce.title) {
 
-  import ActionBounceTimeline.{storeSettings => _, _}
+  import ActionBounce.{storeSettings => _, _}
 
   private[this] var settings = QuerySettings[S]()
 
@@ -1155,7 +1155,7 @@ abstract class ActionBounceTimeline[S <: Sys[S]](view: UniverseView[S] with View
   def apply(): Unit = {
     if (storeSettings) {
       settings = cursor.step { implicit tx =>
-        ActionBounceTimeline.recallSettings(objH(),
+        ActionBounce.recallSettings(objH(),
           defaultRealtime = defaultRealtime, defaultFile = defaultFile, defaultChannels = defaultChannels)
       }
     }
@@ -1168,7 +1168,7 @@ abstract class ActionBounceTimeline[S <: Sys[S]](view: UniverseView[S] with View
       if (ok) {
         if (storeSettings) {
           cursor.step { implicit tx =>
-            ActionBounceTimeline.storeSettings(_settings, objH())
+            ActionBounce.storeSettings(_settings, objH())
           }
         }
 

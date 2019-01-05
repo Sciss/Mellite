@@ -29,7 +29,7 @@ import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.swing.{Component, Graphics2D, Label}
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   type E[S <: stm.Sys[S]]       = DoubleObj[S]
@@ -39,7 +39,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = DoubleObj
   def category      : String    = ObjView.categPrimitives
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex          = obj
@@ -55,12 +55,12 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val model     = new SpinnerNumberModel(0.0, Double.NegativeInfinity, Double.PositiveInfinity, 1.0)
     val ggValue   = new Spinner(model)
-    val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Some(model.getNumber.doubleValue))
-    res.foreach(ok(_))
+    val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(model.getNumber.doubleValue))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: (String, V))(implicit tx: S#Tx): List[Obj[S]] = {

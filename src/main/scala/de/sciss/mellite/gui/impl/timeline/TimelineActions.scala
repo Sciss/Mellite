@@ -50,8 +50,8 @@ trait TimelineActions[S <: Sys[S]] {
       }
   }
 
-  object actionBounce extends ActionBounceTimeline(this, timelineH) {
-    import ActionBounceTimeline._
+  object actionBounce extends ActionBounce(this, timelineH) {
+    import ActionBounce._
 
     override protected def prepare(set0: QuerySettings[S]): QuerySettings[S] =
       if (timelineModel.selection.isEmpty) set0 else set0.copy(span = timelineModel.selection)

@@ -83,6 +83,6 @@ object EnsembleViewImpl {
       playing   .dispose()
     }
 
-    object actionBounce extends ActionBounceTimeline(this, ensembleH)
+    object actionBounce extends ActionBounce(this, ensembleH)
   }
 }

@@ -62,7 +62,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
   def humanName: String = s"Freesound $prefix"
   def tpe: Obj.Type     = Retrieval
   def category: String  = ObjView.categComposition
-  def hasMakeDialog     = true
+  def canMakeObj     = true
 
   private[this] final val ClientId  = "WxJZb6eY0rqYVYqzkkfP"
 
@@ -76,14 +76,17 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue   = new PathField
     ggValue.mode  = FileDialog.Folder
     ggValue.title = "Select Download Folder"
     val res = ObjViewImpl.primitiveConfig[S, File](window, tpe = humanName, ggValue = ggValue,
-      prepare = ggValue.valueOption)
-    res.foreach(ok)
+      prepare = ggValue.valueOption match {
+        case Some(value)  => Success(value)
+        case None         => Failure(MessageException("No download directory was specified"))
+      })
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](c: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

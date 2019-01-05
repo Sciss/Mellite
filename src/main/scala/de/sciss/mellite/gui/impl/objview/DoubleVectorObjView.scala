@@ -23,14 +23,14 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{PrimitiveConfig, primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, MessageException, ObjView, Shapes}
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label, TextField}
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   type E[S <: stm.Sys[S]]       = DoubleVector[S]
@@ -40,7 +40,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = DoubleVector
   def category      : String    = ObjView.categPrimitives
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex          = obj
@@ -55,15 +55,16 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
 
   type Config[S <: stm.Sys[S]] = PrimitiveConfig[V]
 
-  private def parseString(s: String): Option[V] =
-    Try(s.split(" ").iterator.map(x => x.trim().toDouble).toIndexedSeq).toOption
+  private def parseString(s: String): Try[V] =
+    Try(s.split(" ").iterator.map(x => x.trim().toDouble).toIndexedSeq)
+      .recoverWith { case _ => Failure(MessageException(s"Cannot parse '$s' as $humanName")) }
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue = new TextField("0.0 0.0")
     val res = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
-    res.foreach(ok(_))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: (String, V))(implicit tx: S#Tx): List[Obj[S]] = {
@@ -105,7 +106,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
         case (Some(prev), d: Double) => Some(prev :+ d)
         case _ => None
       }
-      case s: String  => parseString(s)
+      case s: String  => parseString(s).toOption
     }
 
     def configureRenderer(label: Label): Component = {

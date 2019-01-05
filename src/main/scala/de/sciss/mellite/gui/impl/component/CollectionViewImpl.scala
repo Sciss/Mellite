@@ -13,18 +13,20 @@
 
 package de.sciss.mellite.gui.impl.component
 
-import de.sciss.desktop.Window
+import de.sciss.desktop.{OptionPane, Util, Window}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Application
-import de.sciss.mellite.gui.{AttrMapFrame, GUI, ListObjView, ObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, ListObjView, MessageException, ObjView}
+import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
 import de.sciss.synth.proc.gui.UniverseView
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, SequentialContainer, Swing}
+import scala.util.{Failure, Success}
 
 trait CollectionViewImpl[S <: Sys[S]]
   extends UniverseView[S]
@@ -106,15 +108,33 @@ trait CollectionViewImpl[S <: Sys[S]]
 
     def apply(): Unit = {
       val winOpt    = Window.find(component)
-      f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) { conf =>
-        val confOpt2  = prepareInsert(f)
-        confOpt2.foreach { insConf =>
-          val editOpt = cursor.step { implicit tx =>
-            val xs = f.makeObj(conf)
-            editInsert(f, xs, insConf)
+      f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) {
+        case Success(conf) =>
+          val confOpt2  = prepareInsert(f)
+          confOpt2.foreach { insConf =>
+            val editOpt = cursor.step { implicit tx =>
+              val xs = f.makeObj(conf)
+              editInsert(f, xs, insConf)
+            }
+            editOpt.foreach(undoManager.add)
           }
-          editOpt.foreach(undoManager.add)
-        }
+
+        case Failure(Aborted()) =>
+
+        case Failure(e) =>
+          val text = e match {
+            case Aborted() => ""
+            case MessageException(m) => m
+            case _ => Util.formatException(e)
+          }
+          if (text.nonEmpty) {
+            val optUnable = OptionPane.message(
+              message     = s"Unable to create object of type ${f.humanName} \n\n$text",
+              messageType = OptionPane.Message.Error
+            )
+            optUnable.title = title
+            optUnable.show()
+          }
       }
     }
   }
@@ -124,7 +144,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     val pop     = Popup()
     val tlP     = Application.topLevelObjects
     val flt     = Application.objectFilter
-    val f0      = ListObjView.factories.filter(f => f.hasMakeDialog && flt(f.prefix)).toSeq.sortBy(_.humanName)
+    val f0      = ListObjView.factories.filter(f => f.canMakeObj && flt(f.prefix)).toSeq.sortBy(_.humanName)
     val (top0, sub) = f0.partition(f => tlP.contains(f.prefix))
     val top     = tlP.flatMap(prefix => top0.find(_.prefix == prefix))
     top.foreach { f =>

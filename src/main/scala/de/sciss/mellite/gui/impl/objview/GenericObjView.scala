@@ -28,6 +28,7 @@ import de.sciss.synth.proc.{Grapheme, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label}
+import scala.util.Failure
 
 object GenericObjView extends ObjView.Factory with ListObjView.Factory with GraphemeObjView.Factory {
   val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
@@ -35,14 +36,15 @@ object GenericObjView extends ObjView.Factory with ListObjView.Factory with Grap
   def humanName: String = prefix
   def tpe: Obj.Type     = ???!  // RRR
   val category          = "None"
-  def hasMakeDialog     = false
+  def canMakeObj     = false
 
   type E     [S <: stm.Sys[S]]  = Obj[S]
   type Config[S <: stm.Sys[S]]  = Unit
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = ()
+                                 (done: MakeResult[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit =
+    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 

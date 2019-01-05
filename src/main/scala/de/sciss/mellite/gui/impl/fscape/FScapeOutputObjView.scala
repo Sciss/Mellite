@@ -25,6 +25,8 @@ import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
 import de.sciss.synth.proc.Universe
 
+import scala.util.Failure
+
 object FScapeOutputObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = FScape.Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
@@ -32,7 +34,7 @@ object FScapeOutputObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = FScape.Output
   def category      : String    = ObjView.categMisc
-  def hasMakeDialog : Boolean   = false
+  def canMakeObj : Boolean   = false
 
   private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 
@@ -47,8 +49,9 @@ object FScapeOutputObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = Unit
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = ()
+                                 (done: MakeResult[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit =
+    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
 
   def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 

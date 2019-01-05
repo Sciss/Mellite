@@ -46,29 +46,34 @@ object ActionArtifactLocation {
   //    }
 
   type LocationSource [S <: Sys[S]] = stm.Source[S#Tx, ArtifactLocation[S]]
-  type QueryResult    [S <: Sys[S]] = Either[LocationSource[S], (String, File)]
+  type LocationSourceT[S <: Sys[S]] = (stm.Source[S#Tx, ArtifactLocation[S]], File)
+  type QueryResult    [S <: Sys[S]] = (Either[LocationSource[S], String], File)
 
   def merge[S <: Sys[S]](result: QueryResult[S])
                         (implicit tx: S#Tx): Option[(Option[Obj[S]], ArtifactLocation[S])] = {
     val (list0, loc) = result match {
-      case Left(source) => (None, source())
-      case Right((name, directory)) =>
+      case (Left(source), _) => (None, source())
+      case (Right(name), directory) =>
         val locM = create(name, directory)
         (Some(locM), locM)
     }
     Some(list0 -> loc) // loc.modifiableOption.map(list0 -> _)
   }
 
-  def query[S <: Sys[S]](file: File, window: Option[desktop.Window] = None)(root: S#Tx => Folder[S])
+  def query[S <: Sys[S]](file: File, window: Option[desktop.Window] = None, askName: Boolean = false)
+                        (root: S#Tx => Folder[S])
                         (implicit universe: Universe[S]): Option[QueryResult[S]] = {
 
-    def createNew(): Option[(String, File)] = queryNew(child = Some(file), window = window)
+    def createNew(): Option[(String, File)] = queryNew(child = Some(file), window = window, askName = askName)
+
+    def createNewRes(): Option[QueryResult[S]] =
+      createNew().map { case (name, base) => (Right(name), base) }
 
     val options = find(file = file, window = window)(root)
 
     options match {
-      case Vec() => createNew().map(Right.apply)
-      case Vec(Labeled(source)) => Some(Left(source))
+      case Vec() => createNewRes()
+      case Vec(Labeled((source, base))) => Some((Left(source), base))
 
       case _ =>
         val ggList = new swingplus.ListView(options)
@@ -81,9 +86,9 @@ object ActionArtifactLocation {
         // println(s"res = $optRes, ok = ${OptionPane.Result.Ok.id}, cancel = ${OptionPane.Result.Cancel.id}")
         import equal.Implicits._
         if (optRes === 0) {
-          ggList.selection.items.headOption.map(v => Left(v.value))
+          ggList.selection.items.headOption.map(v => (Left(v.value._1), v.value._2))
         } else if (optRes === 1) {
-          createNew().map(Right.apply)
+          createNewRes()
         } else {
           None
         }
@@ -91,17 +96,17 @@ object ActionArtifactLocation {
   }
 
   def find[S <: Sys[S]](file: File, window: Option[desktop.Window] = None)(root: S#Tx => Folder[S])
-                       (implicit universe: Universe[S]): Vec[Labeled[LocationSource[S]]] = {
+                       (implicit universe: Universe[S]): Vec[Labeled[LocationSourceT[S]]] = {
     import universe.cursor
-    val options: Vec[Labeled[LocationSource[S]]] = cursor.step { implicit tx =>
-      /* @tailrec */ def loop(xs: List[Obj[S]], res: Vec[Labeled[LocationSource[S]]]): Vec[Labeled[LocationSource[S]]] =
+    val options: Vec[Labeled[LocationSourceT[S]]] = cursor.step { implicit tx =>
+      /* @tailrec */ def loop(xs: List[Obj[S]], res: Vec[Labeled[LocationSourceT[S]]]): Vec[Labeled[LocationSourceT[S]]] =
         xs match {
           case head :: tail =>
             val res1 = head match {
               case objT: ArtifactLocation[S] =>
                 val parent = objT.directory
                 if (Try(Artifact.relativize(parent, file)).isSuccess) {
-                  res :+ Labeled(tx.newHandle(objT))(objT.name)
+                  res :+ Labeled(tx.newHandle(objT) -> parent)(objT.name)
                 } else res
 
               case objT: Folder[S] =>
@@ -122,17 +127,23 @@ object ActionArtifactLocation {
     options
   }
 
-  def queryNew(child: Option[File] = None, window: Option[Window] = None): Option[(String, File)] = {
+  def queryNew(child: Option[File] = None, window: Option[Window] = None, askName: Boolean = false): Option[(String, File)] = {
     val dlg = FileDialog.folder(init = child.flatMap(_.parentOption), title = "Choose Artifact Base Location")
     dlg.show(None) match {
       case Some(dir) =>
         child match {
-          case Some(file) if Try(Artifact.relativize(dir, file)).isFailure => queryNew(child, window) // try again
+          case Some(file) if Try(Artifact.relativize(dir, file)).isFailure =>
+            queryNew(child, window, askName = askName) // try again
           case _ =>
-            val res = Dialog.showInput[String](null,
-              "Enter initial store name:", "New Artifact Location",
-              Dialog.Message.Question, initial = dir.name)
-            res.map(_ -> dir)
+            val defaultName = dir.name
+            if (askName) {
+              val res = Dialog.showInput[String](null,
+                "Enter initial store name:", "New Artifact Location",
+                Dialog.Message.Question, initial = dir.name)
+              res.map(_ -> dir)
+            } else {
+              Some((defaultName, dir))
+            }
         }
       case _=> None
     }

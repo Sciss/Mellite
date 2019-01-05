@@ -24,6 +24,7 @@ import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
 
 import scala.language.higherKinds
+import scala.util.Try
 
 object ObjView {
   /** Standard `AttrMap` key whose value is of type `Color.Obj`. */
@@ -44,18 +45,27 @@ object ObjView {
 
     type Config[S <: stm.Sys[S]]
 
+    type MakeResult[S <: stm.Sys[S]] = Try[Config[S]]
+
     type E[~ <: stm.Sys[~]] <: Obj[~]
 
-    /** Whether it is possible to create an instance of the object via a GUI dialog. */
-    def hasMakeDialog: Boolean
+    /** Whether it is possible to create an instance of the object via
+      * `initMakeDialog` or `makeObj`. If this answers `false`, expect
+      * `initMakeDialog` to be a no-op and `makeObj` to simply return `Nil`.
+      */
+    def canMakeObj: Boolean
 
     // Note: we use a callback `ok` instead of returning a `Future[Config[S]]` because the
     // latter means a lot of boiler plate (executionContext) and `Future { }` does not
     // guarantee execution on the EDT, so it's a total mismatch. If we need abort state,
     // we could change to `Option[Config[S]]` or `Try[Config[S]]`.
 
-    /** Provides an optional initial configuration for the make-new-instance dialog. */
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
+    /** Provides an optional initial configuration for the make-new-instance dialog.
+      * If the user aborts the dialog, the `done` call-back should be invoked nevertheless,
+      * using the value of `Processor.Aborted` to indicate so. If only a message should be
+      * shown instead of a full exception, use `MessageException`.
+      */
+    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit
 
     def category: String

@@ -23,7 +23,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
+import de.sciss.mellite.gui.{CodeFrame, GUI, ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Action, Universe}
 import javax.swing.Icon
@@ -41,16 +41,16 @@ object ActionObjView extends ListObjView.Factory with TimelineObjView.Factory {
 
   type Config[S <: stm.Sys[S]] = String
 
-  def hasMakeDialog   = true
+  def canMakeObj   = true
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
-    val res = opt.show(window)
-    res.foreach(ok(_))
+    val res = GUI.optionToAborted(opt.show(window))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

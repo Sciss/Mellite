@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.gui.impl.artifact
 
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop
 import de.sciss.file._
 import de.sciss.icons.raphael
@@ -25,9 +23,11 @@ import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ListObjView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 object ArtifactLocationObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = ArtifactLocation[~] // Elem[S]
@@ -36,7 +36,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   def humanName     : String    = "File Location"
   def tpe           : Obj.Type  = ArtifactLocation
   def category      : String    = ObjView.categResources
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: ArtifactLocation[S])(implicit tx: S#Tx): ArtifactLocationObjView[S] with ListObjView[S] = {
     val peer      = obj
@@ -48,9 +48,11 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit =
-    ActionArtifactLocation.queryNew(window = window).foreach(ok(_))
+                                 (done: MakeResult[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit = {
+    val res = GUI.optionToAborted(ActionArtifactLocation.queryNew(window = window, askName = true))
+    done(res)
+  }
 
   def makeObj[S <: Sys[S]](config: (String, File))(implicit tx: S#Tx): List[Obj[S]] = {
     val (name, directory) = config

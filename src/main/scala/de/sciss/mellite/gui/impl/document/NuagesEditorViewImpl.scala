@@ -212,8 +212,8 @@ object NuagesEditorViewImpl {
 
     def dispose()(implicit tx: S#Tx): Unit = folderView.dispose()
 
-    object actionBounce extends ActionBounceTimeline(this, nuagesH) {
-      import ActionBounceTimeline._
+    object actionBounce extends ActionBounce(this, nuagesH) {
+      import ActionBounce._
 
       override protected def spanPresets(): SpanPresets = {
         cursor.step { implicit tx =>

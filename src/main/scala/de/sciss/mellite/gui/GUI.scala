@@ -26,6 +26,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.{defer, requireEDT}
+import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
@@ -36,6 +37,7 @@ import scala.swing.Reactions.Reaction
 import scala.swing.Swing._
 import scala.swing.event.{Key, SelectionChanged, ValueChanged}
 import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Label, TextField}
+import scala.util.{Failure, Success, Try}
 
 object GUI {
   def keyValueDialog(value: Component, title: String = "New Entry", defaultName: String = "Name",
@@ -238,5 +240,11 @@ object GUI {
   def getImageIcon(name: String): ImageIcon = {
     val image = getImage(s"icon-$name.png")
     new ImageIcon(image)
+  }
+
+  /** Interprets an option so that `Some(x)` is a `Success(x)`, and `None` means `Failure(Aborted())`. */
+  def optionToAborted[A](opt: Option[A]): Try[A] = opt match {
+    case Some(x)  => Success(x)
+    case None     => Failure(Aborted())
   }
 }

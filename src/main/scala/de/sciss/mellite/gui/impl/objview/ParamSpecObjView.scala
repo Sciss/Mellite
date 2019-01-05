@@ -44,6 +44,7 @@ import scala.concurrent.{Future, Promise}
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Alignment, BorderPanel, BoxPanel, Component, Dialog, FlowPanel, Label, Orientation, Swing, TextField}
+import scala.util.{Failure, Success}
 
 object ParamSpecObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
@@ -52,7 +53,7 @@ object ParamSpecObjView extends ListObjView.Factory {
   def humanName     : String    = "Param Spec"
   def tpe           : Obj.Type  = ParamSpec.Obj
   def category      : String    = ObjView.categOrganisation
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ListObjView[S] = {
     val value     = obj.value
@@ -251,7 +252,7 @@ object ParamSpecObjView extends ListObjView.Factory {
   }
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val panel = new PanelImpl(nameIn = Some(prefix), editable = true)
 
@@ -260,10 +261,12 @@ object ParamSpecObjView extends ListObjView.Factory {
     pane.title  = s"New $humanName"
     val res = pane.show(window)
 
-    if (res == Dialog.Result.Ok) {
-      val res = Config[S](name = panel.name, init = panel.spec)
-      ok(res)
+    val res1 = if (res == Dialog.Result.Ok) {
+      Success(Config[S](name = panel.name, init = panel.spec))
+    } else {
+      Failure(Aborted())
     }
+    done(res1)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

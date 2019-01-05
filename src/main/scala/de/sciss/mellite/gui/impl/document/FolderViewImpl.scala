@@ -292,23 +292,16 @@ object FolderViewImpl {
     def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]] = {
       val locationsOk = locations.flatMap { view =>
         try {
-          Artifact.relativize(view.directory, f)
-          Some(view)
+          val dir = view.directory
+          Artifact.relativize(dir, f)
+          Some((Left(view.objH), dir))
         } catch {
           case NonFatal(_) => None
         }
       } .headOption
 
-      locationsOk match {
-        case Some(loc)  => Some(Left(loc.objH))
-        case _          =>
-          //          val parent = selection.flatMap { nodeView =>
-          //            nodeView.renderData match {
-          //              case f: ObjView.Folder[S] => Some(f.obj)
-          //              case _ => None
-          //            }
-          //          } .headOption
-          ActionArtifactLocation.query[S](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
+      locationsOk.orElse {
+        ActionArtifactLocation.query[S](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
       }
     }
   }

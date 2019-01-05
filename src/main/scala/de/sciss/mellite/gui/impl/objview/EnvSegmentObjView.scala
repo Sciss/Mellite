@@ -33,6 +33,7 @@ import de.sciss.synth.proc.{EnvSegment, Universe}
 import javax.swing.Icon
 
 import scala.swing.Graphics2D
+import scala.util.Failure
 
 object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   type E[S <: stm.Sys[S]]       = EnvSegment.Obj[S]
@@ -42,7 +43,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   def humanName     : String    = "Envelope Segment"
   def tpe           : Obj.Type  = EnvSegment.Obj
   def category      : String    = ObjView.categPrimitives
-  def hasMakeDialog : Boolean   = false // true
+  def canMakeObj : Boolean   = false // true
 
   def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex    = obj
@@ -53,8 +54,9 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   type Config[S <: stm.Sys[S]] = Unit
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = ()
+                                 (done: MakeResult[S] => Unit)
+                                 (implicit universe: Universe[S]): Unit =
+    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = Nil
 

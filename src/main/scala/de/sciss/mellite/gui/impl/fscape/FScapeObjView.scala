@@ -14,8 +14,6 @@
 package de.sciss.mellite
 package gui.impl.fscape
 
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.fscape.lucre.FScape
@@ -31,6 +29,8 @@ import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.Ref
 import scala.swing.{Button, ProgressBar}
@@ -43,7 +43,7 @@ object FScapeObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = FScape
   def category      : String    = ObjView.categComposition
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
 //  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 //
@@ -56,13 +56,13 @@ object FScapeObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = String
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
-    val res = opt.show(window)
-    res.foreach(ok)
+    val res = GUI.optionToAborted(opt.show(window))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

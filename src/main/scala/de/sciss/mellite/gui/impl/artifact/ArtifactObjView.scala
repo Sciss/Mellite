@@ -17,12 +17,13 @@ import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, PathField}
 import de.sciss.file._
 import de.sciss.icons.raphael
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
+import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, MessageException, ObjView}
+import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
@@ -31,6 +32,7 @@ import javax.swing.undo.UndoableEdit
 
 import scala.swing.FlowPanel
 import scala.swing.event.SelectionChanged
+import scala.util.{Failure, Success}
 
 object ArtifactObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Artifact[~]
@@ -39,7 +41,7 @@ object ArtifactObjView extends ListObjView.Factory {
   def humanName     : String    = "File"
   def tpe           : Obj.Type  = Artifact
   def category      : String    = ObjView.categResources
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Artifact[S])(implicit tx: S#Tx): ArtifactObjView[S] with ListObjView[S] = {
     val peer      = obj
@@ -48,10 +50,10 @@ object ArtifactObjView extends ListObjView.Factory {
     new Impl[S](tx.newHandle(obj), value, isEditable = editable).init(obj)
   }
 
-  type LocationConfig[S <: stm.Sys[S]] = Either[stm.Source[S#Tx, ArtifactLocation[S]], (String, File)]
+  type LocationConfig[S <: stm.Sys[S]] = ActionArtifactLocation.QueryResult[S]
   final case class Config[S <: stm.Sys[S]](name: String, file: File, location: LocationConfig[S])
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(ok: Config[S] => Unit)
+  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val ggFile  = new PathField
     ggFile.mode = FileDialog.Save
@@ -68,21 +70,25 @@ object ArtifactObjView extends ListObjView.Factory {
     }
     val ggValue = new FlowPanel(ggFile, ggMode)
     val res = ObjViewImpl.primitiveConfig[S, File](window, tpe = prefix, ggValue = ggValue,
-      prepare = Some(ggFile.value))
-    res.foreach { case (name, f) =>
-      ActionArtifactLocation.query[S](file = f, window = window)(implicit tx => universe.workspace.root)
-        .foreach { location =>
-          val res1 = Config(name = name, file = f, location = location)
-          ok(res1)
-        }
+      prepare = ggFile.valueOption match {
+        case Some(value) => Success(value)
+        case None => Failure(MessageException("No file was specified"))
+      })
+    val res1 = res.flatMap { case (name, f) =>
+      val locOpt = ActionArtifactLocation.query[S](file = f, window = window, askName = true)(implicit tx => universe.workspace.root)
+      locOpt.fold[MakeResult[S]](Failure(Aborted())) { location =>
+        val cfg = Config(name = name, file = f, location = location)
+        Success(cfg)
+      }
     }
+    done(res1)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
     import config._
     val (list0, loc) = location match {
-      case Left(source) => (Nil, source())
-      case Right((nameLoc, directory)) =>
+      case (Left(source), _) => (Nil, source())
+      case (Right(nameLoc), directory) =>
         val objLoc  = ActionArtifactLocation.create(name = nameLoc, directory = directory)
         (objLoc :: Nil, objLoc)
     }

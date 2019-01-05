@@ -188,7 +188,7 @@ object CodeFrameImpl {
                                                  undoManager: UndoManager)
     extends PlainView[S](codeView, rightViewOpt) with CanBounce {
 
-    object actionBounce extends ActionBounceTimeline[S](this, objH)
+    object actionBounce extends ActionBounce[S](this, objH)
   }
 
   // trying to minimize IntelliJ false error highlights

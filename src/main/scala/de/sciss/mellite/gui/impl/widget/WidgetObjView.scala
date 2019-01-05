@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes, WidgetEditorFrame}
+import de.sciss.mellite.gui.{GUI, ListObjView, ObjView, Shapes, WidgetEditorFrame}
 import de.sciss.synth.proc.{Universe, Widget}
 import de.sciss.synth.proc.Implicits._
 import javax.swing.Icon
@@ -33,7 +33,7 @@ object WidgetObjView extends ListObjView.Factory {
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Widget
   def category      : String    = ObjView.categOrganisation
-  def hasMakeDialog : Boolean   = true
+  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ListObjView[S] = {
     val value = "" // ex.value
@@ -43,12 +43,12 @@ object WidgetObjView extends ListObjView.Factory {
   type Config[S <: stm.Sys[S]] = String
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (ok: Config[S] => Unit)
+                                 (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
-    val res = pane.show(window)
-    res.foreach(ok(_))
+    val res = GUI.optionToAborted(pane.show(window))
+    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
