@@ -15,9 +15,11 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
+    val audioFile           = "1.5.1"
     val audioWidgets        = "1.14.0"
     val desktop             = "0.10.0"
     val equal               = "0.1.3"
+    val fileCache           = "0.5.0"
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
     val freesound           = "1.13.0"
@@ -34,16 +36,24 @@ lazy val deps = new {
     val pdflitz             = "1.4.0"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
+    val processor           = "0.4.2"
     val raphaelIcons        = "1.0.5"
     val scalaCollider       = "1.28.0"
     val scalaColliderSwing  = "1.41.0"
-    val scalaColliderUGen   = "1.19.2"
+    val scalaColliderUGens  = "1.19.2"
+    val scalaOSC            = "1.2.0"
+    val scalaSTM            = "0.9"
+    val scalaSwing          = "2.1.0"
+    val scissDSP            = "1.3.1"
     val scopt               = "3.7.1"
+    val serial              = "1.1.1"
     val sonogram            = "1.11.0"
     val soundProcesses      = "3.24.0"
     val span                = "1.4.2"
     val submin              = "0.2.4"
     val swingPlus           = "0.4.0"
+    val syntaxPane          = "1.2.0"
+    val treeTable           = "1.5.0"
     val topology            = "1.1.1"
     val webLaF              = "2.1.4"
     val wolkenpumpe         = "2.29.0"
@@ -190,41 +200,52 @@ lazy val root = project.withId(baseNameL).in(file("."))
     description := appDescription,
     resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
-      "de.sciss"          %% "soundprocesses-views"           % deps.main.soundProcesses,     // computer-music framework
-      "de.sciss"          %% "soundprocesses-compiler"        % deps.main.soundProcesses,     // computer-music framework
-      "jline"             %  "jline"                          % deps.main.jline,              // must match scala-compiler
-      "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
-      "de.sciss"          %% "scalacollider"                  % deps.main.scalaCollider,
-      "de.sciss"          %  "scalacolliderugens-spec"        % deps.main.scalaColliderUGen,  // meta data
-      "de.sciss"          %% "lucre-core"                     % deps.main.lucre,
-      "de.sciss"          %% s"lucre-$bdb"                    % deps.main.lucre,              // database backend
-      "de.sciss"          %% "lucre-expr"                     % deps.main.lucre,
-      "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
-      "de.sciss"          %% "fingertree"                     % deps.main.fingerTree,         // data structures
-      "de.sciss"          %% "kollflitz"                      % deps.main.kollFlitz,
-      "de.sciss"          %% "numbers"                        % deps.main.numbers,            // (sbt bug)
-      "de.sciss"          %% "span"                           % deps.main.span,               // (sbt bug)
-      "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // (sbt bug)
-      "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improv
-      "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // (sbt bug)
-      "de.sciss"          %% "scalacolliderswing-interpreter" % deps.main.scalaColliderSwing, // REPL view
-      "de.sciss"          %% "lucreswing"                     % deps.main.lucreSwing,         // reactive Swing components
-      "de.sciss"          %% "audiowidgets-swing"             % deps.main.audioWidgets,       // audio application widgets
+      "com.github.scopt"  %% "scopt"                          % deps.main.scopt,              // command line option parsing
+      "de.sciss"          %% "audiofile"                      % deps.main.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.main.audioWidgets,       // audio application widgets
-      "de.sciss"          %% "swingplus"                      % deps.main.swingPlus,          // Swing extensions
+      "de.sciss"          %% "audiowidgets-core"              % deps.main.audioWidgets,       // audio application widgets
+      "de.sciss"          %% "audiowidgets-swing"             % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "desktop"                        % deps.main.desktop,
-      "de.sciss"          %% "sonogramoverview"               % deps.main.sonogram,           // sonogram component
-      "de.sciss"          %% "raphael-icons"                  % deps.main.raphaelIcons,       // icon set
-      "de.sciss"          %% "model"                          % deps.main.model,              // non-txn MVC
+      "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
+      "de.sciss"          %% "filecache-common"               % deps.main.fileCache,          // caching data to disk
+      "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // extension methods for files
+      "de.sciss"          %% "fingertree"                     % deps.main.fingerTree,         // data structures
       "de.sciss"          %% "fscape"                         % deps.main.fscape,             // offline audio rendering
-      "de.sciss"          %% "patterns-lucre"                 % deps.main.patterns,           // pattern sequences
       "de.sciss"          %  "jump3r"                         % deps.main.jump3r,             // mp3 export
-      "de.sciss"          %% "topology"                       % deps.main.topology,           // (sbt bug)
-      "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
+      "de.sciss"          %% "kollflitz"                      % deps.main.kollFlitz,          // more collections methods
+      "de.sciss"          %% "lucre-base"                     % deps.main.lucre,              // object system
+      "de.sciss"          %% s"lucre-$bdb"                    % deps.main.lucre,              // object system (database backend)
+      "de.sciss"          %% "lucre-confluent"                % deps.main.lucre,              // object system
+      "de.sciss"          %% "lucre-core"                     % deps.main.lucre,              // object system
+      "de.sciss"          %% "lucre-expr"                     % deps.main.lucre,              // object system
+      "de.sciss"          %% "lucreswing"                     % deps.main.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "model"                          % deps.main.model,              // non-txn MVC
+      "de.sciss"          %% "numbers"                        % deps.main.numbers,            // extension methods for numbers
+      "de.sciss"          %% "patterns"                       % deps.main.patterns,           // pattern sequences
+      "de.sciss"          %% "processor"                      % deps.main.processor,          // futures with progress and cancel
       "de.sciss"          %% "pdflitz"                        % deps.main.pdflitz,            // PDF export
-      "de.sciss"          %  "weblaf"                         % deps.main.webLaF,             // look and feel
+      "de.sciss"          %% "raphael-icons"                  % deps.main.raphaelIcons,       // icon set
+      "de.sciss"          %% "scalacollider"                  % deps.main.scalaCollider,      // realtime sound synthesis
+      "de.sciss"          %% "scalacolliderugens-api"         % deps.main.scalaColliderUGens, // realtime sound synthesis
+      "de.sciss"          %% "scalacolliderugens-core"        % deps.main.scalaColliderUGens, // realtime sound synthesis
+      "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // UI methods for scala-collider
+      "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
+      "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
+      "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing
+      "de.sciss"          %% "serial"                         % deps.main.serial,             // serialization
+      "de.sciss"          %% "sonogramoverview"               % deps.main.sonogram,           // sonogram component
+      "de.sciss"          %% "soundprocesses"                 % deps.main.soundProcesses,     // computer-music framework
+      "de.sciss"          %% "span"                           % deps.main.span,               // time spans
       "de.sciss"          %  "submin"                         % deps.main.submin,             // dark skin
-      "com.github.scopt"  %% "scopt"                          % deps.main.scopt               // command line option parsing
+      "de.sciss"          %  "syntaxpane"                     % deps.main.syntaxPane,         // code editor
+      "de.sciss"          %% "swingplus"                      % deps.main.swingPlus,          // Swing extensions
+      "de.sciss"          %% "topology"                       % deps.main.topology,           // graph sorting
+      "de.sciss"          %  "treetable-java"                 % deps.main.treeTable,          // widget
+      "de.sciss"          %% "treetable-scala"                % deps.main.treeTable,          // widget
+      "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improv
+      "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
+      "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
+      "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
     ),
     libraryDependencies ++= {
       // currently disabled until Scala 2.13 version is available

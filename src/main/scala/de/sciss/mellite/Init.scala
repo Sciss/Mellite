@@ -54,7 +54,7 @@ trait Init {
       val fscapeF = FScape.genViewFactory()
       GenView.tryAddFactory(fscapeF)
     } catch {
-      case _: com.typesafe.config.ConfigException =>
+      case ex if ex.getClass.getName.contains("com.typesafe.config.ConfigException") /* : com.typesafe.config.ConfigException */ =>
         Console.err.println(s"Mellite.init: Failed to initialize Akka.")
     }
   }

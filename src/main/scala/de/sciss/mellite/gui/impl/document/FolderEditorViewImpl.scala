@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.{KeyStrokes, UndoManager, Util, Window}
+import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
