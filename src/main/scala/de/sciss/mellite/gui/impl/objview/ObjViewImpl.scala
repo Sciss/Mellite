@@ -32,7 +32,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
-import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
+import de.sciss.mellite.gui.impl.{ExprHistoryView, ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.{EnsembleFrame, FolderFrame, GUI, GraphemeFrame, ListObjView, MessageException, ObjView, Shapes, TimelineFrame}
 import de.sciss.mellite.{Cf, Mellite}
 import de.sciss.processor.Processor.Aborted
@@ -84,7 +84,7 @@ object ObjViewImpl {
       new String.Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
     }
 
-    final case class Config[S <: stm.Sys[S]](name: String, value: _String, const: Boolean = false)
+    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: _String, const: Boolean = false)
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
@@ -94,6 +94,26 @@ object ObjViewImpl {
       val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.text))
       val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
+    }
+
+    override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+      val default: Config[S] = Config(value = "")
+      val p = ObjViewCmdLineParser[S](this)
+      import p._
+      opt[String]('n', "name")
+        .text(s"Object's name (default: $prefix)")
+        .action((v, c) => c.copy(name = v))
+
+      opt[Unit]('c', "const")
+        .text(s"Make constant instead of variable")
+        .action((_, c) => c.copy(const = true))
+
+      arg[String]("value")
+        .text("Initial string value")
+        .required()
+        .action((v, c) => c.copy(value = v))
+
+      parseConfig(args, default)
     }
 
     def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -157,6 +177,26 @@ object ObjViewImpl {
         Success(model.getNumber.longValue()))
       val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
+    }
+
+    override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+      val default: Config[S] = Config(value = 0L)
+      val p = ObjViewCmdLineParser[S](this)
+      import p._
+      opt[String]('n', "name")
+        .text(s"Object's name (default: $prefix)")
+        .action((v, c) => c.copy(name = v))
+
+      opt[Unit]('c', "const")
+        .text(s"Make constant instead of variable")
+        .action((_, c) => c.copy(const = true))
+
+      arg[Long]("value")
+        .text("Initial long value")
+        .required()
+        .action((v, c) => c.copy(value = v))
+
+      parseConfig(args, default)
     }
 
     def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -223,6 +263,26 @@ object ObjViewImpl {
       done(res)
     }
 
+    override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+      val default: Config[S] = Config(value = false)
+      val p = ObjViewCmdLineParser[S](this)
+      import p._
+      opt[String]('n', "name")
+        .text(s"Object's name (default: $prefix)")
+        .action((v, c) => c.copy(name = v))
+
+      opt[Unit]('c', "const")
+        .text(s"Make constant instead of variable")
+        .action((_, c) => c.copy(const = true))
+
+      arg[Boolean]("value")
+        .text("Initial boolean value (0, 1, false, true)")
+        .required()
+        .action((v, c) => c.copy(value = v))
+
+      parseConfig(args, default)
+    }
+
     def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
       import config._
       val obj0  = BooleanObj.newConst[S](value)
@@ -272,16 +332,36 @@ object ObjViewImpl {
     final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Vec[Int], const: Boolean = false)
 
     private def parseString(s: String): Try[Vec[Int]] =
-      Try(s.split(" ").iterator.map(x => x.trim().toInt).toIndexedSeq)
+      Try(s.split(",").iterator.map(x => x.trim().toInt).toIndexedSeq)
         .recoverWith { case _ => Failure(MessageException(s"Cannot parse '$s' as $humanName")) }
 
     def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                    (done: MakeResult[S] => Unit)
                                    (implicit universe: Universe[S]): Unit = {
-      val ggValue = new TextField("0 0")
+      val ggValue = new TextField("0,0")
       val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
       val res = res0.map(c => Config[S](name = c.name, value = c.value))
       done(res)
+    }
+
+    override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+      val default: Config[S] = Config(value = Vec())
+      val p = ObjViewCmdLineParser[S](this)
+      import p._
+      opt[String]('n', "name")
+        .text(s"Object's name (default: $prefix)")
+        .action((v, c) => c.copy(name = v))
+
+      opt[Unit]('c', "const")
+        .text(s"Make constant instead of variable")
+        .action((_, c) => c.copy(const = true))
+
+      arg[Seq[Int]]("values")
+        .text("Comma-separated list of int values (, for empty list)")
+        .required()
+        .action((v, c) => c.copy(value = v.toIndexedSeq))
+
+      parseConfig(args, default)
     }
 
     def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -315,7 +395,7 @@ object ObjViewImpl {
       }
 
       def configureRenderer(label: Label): Component = {
-        label.text = value.mkString(" ")
+        label.text = value.mkString(",")
         label
       }
     }
@@ -483,29 +563,16 @@ object ObjViewImpl {
 
   // -------- Folder --------
 
-  object Folder extends ListObjView.Factory {
+  object Folder extends NoArgsListObjViewFactory {
     type E[~ <: stm.Sys[~]] = _Folder[~]
     def icon          : Icon      = UIManager.getIcon("Tree.openIcon")  // Swing.EmptyIcon
     val prefix        : _String   = "Folder"
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Folder
     def category      : _String   = ObjView.categOrganisation
-    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Folder[S])(implicit tx: S#Tx): ListObjView[S] =
       new Folder.Impl[S](tx.newHandle(obj)).initAttrs(obj)
-
-    type Config[S <: stm.Sys[S]] = _String
-
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (done: MakeResult[S] => Unit)
-                                   (implicit universe: Universe[S]): Unit = {
-      val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-        messageType = OptionPane.Message.Question, initial = prefix)
-      opt.title = "New Folder"
-      val res = GUI.optionToAborted(opt.show(window))
-      done(res)
-    }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
       val obj  = _Folder[S]
@@ -537,29 +604,16 @@ object ObjViewImpl {
 
   // -------- Timeline --------
 
-  object Timeline extends ListObjView.Factory {
+  object Timeline extends NoArgsListObjViewFactory {
     type E[S <: stm.Sys[S]] = _Timeline[S]
     val icon          : Icon      = raphaelIcon(raphael.Shapes.Ruler)
     val prefix        : _String   = "Timeline"
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Timeline
     def category      : _String   = ObjView.categComposition
-    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Timeline[S])(implicit tx: S#Tx): ListObjView[S] =
       new Timeline.Impl(tx.newHandle(obj)).initAttrs(obj)
-
-    type Config[S <: stm.Sys[S]] = _String
-
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (done: MakeResult[S] => Unit)
-                                   (implicit universe: Universe[S]): Unit = {
-      val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-        messageType = OptionPane.Message.Question, initial = prefix)
-      opt.title = s"New $prefix"
-      val res = GUI.optionToAborted(opt.show(window))
-      done(res)
-    }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
       val obj = _Timeline[S] // .Modifiable[S]
@@ -589,29 +643,16 @@ object ObjViewImpl {
 
   // -------- Grapheme --------
 
-  object Grapheme extends ListObjView.Factory {
+  object Grapheme extends NoArgsListObjViewFactory {
     type E[S <: stm.Sys[S]] = _Grapheme[S]
     val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
     val prefix        : _String   = "Grapheme"
     def humanName     : _String   = prefix
     def tpe           : Obj.Type  = _Grapheme
     def category      : _String   = ObjView.categComposition
-    def canMakeObj : Boolean   = true
 
     def mkListView[S <: Sys[S]](obj: _Grapheme[S])(implicit tx: S#Tx): ListObjView[S] =
       new Grapheme.Impl(tx.newHandle(obj)).initAttrs(obj)
-
-    type Config[S <: stm.Sys[S]] = _String
-
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (done: MakeResult[S] => Unit)
-                                   (implicit universe: Universe[S]): Unit = {
-      val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-        messageType = OptionPane.Message.Question, initial = prefix)
-      opt.title = s"New $prefix"
-      val res = GUI.optionToAborted(opt.show(window))
-      done(res)
-    }
 
     def makeObj[S <: Sys[S]](name: _String)(implicit tx: S#Tx): List[Obj[S]] = {
       val obj = _Grapheme[S] // .Modifiable[S]

@@ -175,6 +175,8 @@ trait CollectionViewImpl[S <: Sys[S]]
     res
   }
 
+  private[this] lazy val ggNewType = new TextField(12)
+
   private def newTypeDialog(): Unit = {
     //      // cf. https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double
     //      val regex = "[^\\s\"']+|\"([^\"]*)\"|'([^']*)'".r
@@ -191,18 +193,17 @@ trait CollectionViewImpl[S <: Sys[S]]
     //        } .toList
 
     val winOpt  = Window.find(component)
-    val ggText  = new TextField(12)
     val win     = winOpt.map(_.component) match {
       case Some(w: scala.swing.Window) => w
       case _ => null
     }
     val dialog  = new Dialog(win)
     dialog.peer.setUndecorated(true)
-    dialog.contents = ggText
+    dialog.contents = ggNewType
     dialog.pack()
     GUI.setLocationRelativeTo(dialog, ggAdd, hAlign = Alignment.Right)
-    ggText.listenTo(ggText)
-    ggText.listenTo(ggText.keys)
+    ggNewType.listenTo(ggNewType)
+    ggNewType.listenTo(ggNewType.keys)
     // note: focus-lost is followed by edit-done as well.
     // when user hits return, only edit-done is sent.
     var handled = false
@@ -213,18 +214,20 @@ trait CollectionViewImpl[S <: Sys[S]]
       body
     }
 
-    ggText.reactions += {
+    def clearText(): Unit = ggNewType.text = ""
+
+    ggNewType.reactions += {
       case KeyPressed(_, Key.Escape, _, _)  => handle {}
       case FocusLost(_, _, _)               => handle {}
 
       case EditDone(_) => handle {
         var tokenOk   = true
-        val argString = ggText.text
+        val argString = ggNewType.text
         val args0     = CommandLineParser.tokenize(argString, errorFn = { err => println(err); tokenOk = false })
         val prepOpt   = if (tokenOk) prepareInsertCmdLine(args0) else None
         prepOpt match {
           case Some((insConf, cmd :: rest)) =>
-            val nameL = cmd.toLowerCase(Locale.US)
+            val nameL   = cmd.toLowerCase(Locale.US)
             val factOpt = ListObjView.factories.find(_.prefix.toLowerCase(Locale.US) == nameL)
             factOpt match {
               case Some(f) =>
@@ -232,14 +235,12 @@ trait CollectionViewImpl[S <: Sys[S]]
                   val res = f.initMakeCmdLine[S](rest)
                   res match {
                     case Success(conf) =>
-                      // val confOpt2 = prepareInsertDialog(f)
-                      // confOpt2.foreach { insConf =>
                       val editOpt = cursor.step { implicit tx =>
                         val xs = f.makeObj(conf)
                         editInsert(f, xs, insConf)
                       }
                       editOpt.foreach(undoManager.add)
-                    // }
+                      clearText()
 
                     case Failure(Aborted()) =>
 
@@ -254,6 +255,7 @@ trait CollectionViewImpl[S <: Sys[S]]
 
                 } else {
                   println(s"Object type '$cmd' does not support command line instantiation.")
+                  clearText()
                 }
 
               case None =>

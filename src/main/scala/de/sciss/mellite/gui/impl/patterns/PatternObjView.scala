@@ -14,35 +14,34 @@
 package de.sciss.mellite
 package gui.impl.patterns
 
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
-import de.sciss.{desktop, patterns}
-import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.desktop.UndoManager
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Plain}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, PlayToggleButton, Shapes}
+import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
-import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.Button
 
-object PatternObjView extends ListObjView.Factory {
+object PatternObjView extends NoArgsListObjViewFactory {
   type E[~ <: stm.Sys[~]] = Pattern[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Pattern)
   val prefix        : String    = "Pattern"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Pattern
   def category      : String    = ObjView.categComposition
-  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ListObjView[S] = {
     val vr = Pattern.Var.unapply(obj).getOrElse {
@@ -50,18 +49,6 @@ object PatternObjView extends ListObjView.Factory {
       _vr
     }
     new Impl(tx.newHandle(vr)).initAttrs(obj)
-  }
-
-  type Config[S <: stm.Sys[S]] = String
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
-    val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-      messageType = OptionPane.Message.Question, initial = prefix)
-    opt.title = s"New $prefix"
-    val res = GUI.optionToAborted(opt.show(window))
-    done(res)
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {

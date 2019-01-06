@@ -14,21 +14,19 @@
 package de.sciss.mellite
 package gui.impl.proc
 
-import javax.swing.Icon
-import javax.swing.undo.UndoableEdit
-import de.sciss.desktop
-import de.sciss.desktop.OptionPane
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl
-import de.sciss.mellite.gui.{GUI, ListObjView, ObjView, TimelineObjView}
+import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{ObjKeys, Proc, Universe}
+import de.sciss.synth.proc.{ObjKeys, Proc}
+import javax.swing.Icon
+import javax.swing.undo.UndoableEdit
 
-object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
+object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory {
   type E[~ <: stm.Sys[~]] = Proc[~]
 
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Cogs)
@@ -36,22 +34,9 @@ object ProcObjView extends ListObjView.Factory with TimelineObjView.Factory {
   val humanName     : String    = "Process"
   def tpe           : Obj.Type  = Proc
   def category      : String    = ObjView.categComposition
-  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx): ProcObjView[S] with ListObjView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
-
-  type Config[S <: stm.Sys[S]] = String
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
-    val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-      messageType = OptionPane.Message.Question, initial = prefix)
-    opt.title = s"New $prefix"
-    val res = GUI.optionToAborted(opt.show(window))
-    done(res)
-  }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
     val obj  = Proc[S]

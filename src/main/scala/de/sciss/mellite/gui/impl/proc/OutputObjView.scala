@@ -13,40 +13,27 @@
 
 package de.sciss.mellite.gui.impl.proc
 
-import javax.swing.Icon
-import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
-import de.sciss.synth.proc.{Output, Universe}
+import de.sciss.synth.proc.Output
+import javax.swing.Icon
 
-import scala.util.Failure
-
-object OutputObjView extends ListObjView.Factory {
+object OutputObjView extends NoMakeListObjViewFactory {
   type E[~ <: stm.Sys[~]] = Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
   val prefix        : String    = "Output"
   val humanName     : String    = s"Process $prefix"
   def tpe           : Obj.Type  = Output
   def category      : String    = ObjView.categMisc
-  def canMakeObj : Boolean   = false
 
   def mkListView[S <: Sys[S]](obj: Output[S])(implicit tx: S#Tx): OutputObjView[S] with ListObjView[S] = {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
-
-  type Config[S <: stm.Sys[S]] = Unit
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit =
-    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
-
-  def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Output[S]], val value: String)
     extends OutputObjView[S]

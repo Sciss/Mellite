@@ -21,6 +21,7 @@ import de.sciss.lucre.expr.{DoubleVector, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, MessageException, ObjView, Shapes}
@@ -56,16 +57,36 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: V, const: Boolean = false)
 
   private def parseString(s: String): Try[V] =
-    Try(s.split(" ").iterator.map(x => x.trim().toDouble).toIndexedSeq)
+    Try(s.split(",").iterator.map(x => x.trim().toDouble).toIndexedSeq)
       .recoverWith { case _ => Failure(MessageException(s"Cannot parse '$s' as $humanName")) }
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
-    val ggValue = new TextField("0.0 0.0")
+    val ggValue = new TextField("0.0,0.0")
     val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
     val res = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config(value = Vec())
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action((v, c) => c.copy(name = v))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    arg[Seq[Double]]("values")
+      .text("Comma-separated list of double values (, for empty list)")
+      .required()
+      .action((v, c) => c.copy(value = v.toIndexedSeq))
+
+    parseConfig(args, default)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -112,7 +133,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     }
 
     def configureRenderer(label: Label): Component = {
-      label.text = value.iterator.map(_.toFloat).mkString(" ")  // avoid excessive number of digits!
+      label.text = value.iterator.map(_.toFloat).mkString(",")  // avoid excessive number of digits!
       label
     }
   }

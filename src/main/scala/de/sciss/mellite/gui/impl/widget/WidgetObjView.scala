@@ -14,41 +14,28 @@
 package de.sciss.mellite
 package gui.impl.widget
 
-import de.sciss.desktop
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{GUI, ListObjView, ObjView, Shapes, WidgetEditorFrame}
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes, WidgetEditorFrame}
 import de.sciss.synth.proc.Implicits._
+import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-object WidgetObjView extends ListObjView.Factory {
+object WidgetObjView extends NoArgsListObjViewFactory {
   type E[~ <: stm.Sys[~]] = Widget[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Gauge)
   val prefix        : String    = "Widget"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Widget
   def category      : String    = ObjView.categOrganisation
-  def canMakeObj : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ListObjView[S] = {
     val value = "" // ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
-  }
-
-  type Config[S <: stm.Sys[S]] = String
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
-    val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
-    pane.title  = s"New $humanName"
-    val res = GUI.optionToAborted(pane.show(window))
-    done(res)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.gui.impl.objview
 
-import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
@@ -24,29 +23,19 @@ import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewBasicImpl
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, TimelineObjView}
-import de.sciss.synth.proc.{Grapheme, Universe}
+import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label}
-import scala.util.Failure
 
-object GenericObjView extends ObjView.Factory with ListObjView.Factory with GraphemeObjView.Factory {
+object GenericObjView extends NoMakeListObjViewFactory with GraphemeObjView.Factory {
   val icon: Icon        = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
   val prefix            = "Generic"
   def humanName: String = prefix
   def tpe: Obj.Type     = ???!  // RRR
   val category          = "None"
-  def canMakeObj     = false
 
-  type E     [S <: stm.Sys[S]]  = Obj[S]
-  type Config[S <: stm.Sys[S]]  = Unit
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit =
-    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
-
-  def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
+  type E[S <: stm.Sys[S]]  = Obj[S]
 
   def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): TimelineObjView[S] = {
     val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)

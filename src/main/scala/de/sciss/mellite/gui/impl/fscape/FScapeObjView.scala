@@ -14,8 +14,7 @@
 package de.sciss.mellite
 package gui.impl.fscape
 
-import de.sciss.desktop
-import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.desktop.UndoManager
 import de.sciss.fscape.lucre.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.icons.raphael
@@ -24,9 +23,8 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
@@ -37,14 +35,13 @@ import scala.concurrent.stm.Ref
 import scala.swing.{Button, ProgressBar}
 import scala.util.Failure
 
-object FScapeObjView extends ListObjView.Factory {
+object FScapeObjView extends NoArgsListObjViewFactory {
   type E[~ <: stm.Sys[~]] = FScape[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Sparks)
   val prefix        : String    = "FScape"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = FScape
   def category      : String    = ObjView.categComposition
-  def canMakeObj    : Boolean   = true
 
 //  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 //
@@ -53,28 +50,6 @@ object FScapeObjView extends ListObjView.Factory {
   def mkListView[S <: Sys[S]](obj: FScape[S])
                              (implicit tx: S#Tx): FScapeObjView[S] with ListObjView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
-
-  type Config[S <: stm.Sys[S]] = String
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
-    val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
-      messageType = OptionPane.Message.Question, initial = prefix)
-    opt.title = s"New $prefix"
-    val res = GUI.optionToAborted(opt.show(window))
-    done(res)
-  }
-
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
-    val default: Config[S] = prefix
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, _) => v)
-    parseConfig(args, default)
-  }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
     val obj  = FScape[S]

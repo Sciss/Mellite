@@ -13,27 +13,22 @@
 
 package de.sciss.mellite.gui.impl.fscape
 
-import de.sciss.desktop
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView}
-import de.sciss.synth.proc.Universe
 import javax.swing.Icon
 
-import scala.util.Failure
-
-object FScapeOutputObjView extends ListObjView.Factory {
+object FScapeOutputObjView extends NoMakeListObjViewFactory {
   type E[~ <: stm.Sys[~]] = FScape.Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
   val prefix        : String    = "FScape.Output"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = FScape.Output
   def category      : String    = ObjView.categMisc
-  def canMakeObj : Boolean   = false
 
   private[this] lazy val _init: Unit = ListObjView.addFactory(this)
 
@@ -44,21 +39,6 @@ object FScapeOutputObjView extends ListObjView.Factory {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
-
-  type Config[S <: stm.Sys[S]] = Unit
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
-    val failed = initMakeCmdLine(Nil)
-    done(failed)
-  }
-
-  /** Tries to create a make-configuration from a command line string. */
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] =
-    Failure(new UnsupportedOperationException(s"Make $humanName"))
-
-  def makeObj[S <: Sys[S]](config: Unit)(implicit tx: S#Tx): List[Obj[S]] = Nil
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FScape.Output[S]], val value: String)
     extends FScapeOutputObjView[S]
