@@ -35,6 +35,7 @@ trait RubberBandTool[S <: Sys[S], A, Y, Child] {
     private[this] var _currentEvent   = firstEvent
     private[this] var _currentModelY  = firstModelY
     private[this] var _currentPos     = firstPos
+    private[this] var _added          = Set.empty[Child]
 
     def currentEvent  : MouseEvent  = _currentEvent
     def currentModelY : Y           = _currentModelY
@@ -83,13 +84,13 @@ trait RubberBandTool[S <: Sys[S], A, Y, Child] {
         isValid = true)
       dispatch(rubber)
 
-      val regions = canvas.findChildViews(rubber).toSet
-      val selMod  = canvas.selectionModel
-      // XXX TODO --- not very efficient
-      val toRemove  = selMod.iterator.filter(child => !regions.contains(child))
-      val toAdd     = regions        .filter(child => !selMod .contains(child))
+      val regions   = canvas.findChildViews(rubber).toSet
+      val selMod    = canvas.selectionModel
+      val toRemove  = _added .diff(regions)
+      val toAdd     = regions.diff(_added)
       toRemove.foreach(selMod -= _)
       toAdd   .foreach(selMod += _)
+      _added        = regions
     }
 
     def keyPressed(e: KeyEvent): Unit =

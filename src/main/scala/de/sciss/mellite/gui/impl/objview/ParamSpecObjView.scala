@@ -283,7 +283,7 @@ object ParamSpecObjView extends ListObjView.Factory {
       "sine"        -> SineWarp,
       "fader"       -> FaderWarp,
       "dbfader"     -> DbFaderWarp,
-      "int"         -> IntWarp,
+      "int"         -> IntWarp
     )
 
     def reads: String => Warp = { s =>
