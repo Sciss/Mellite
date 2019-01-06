@@ -95,11 +95,11 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     obj :: Nil
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], value: E[S], mode: GraphemeView.Mode)
+  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(value), value = value.value, isViewable = isViewable)
-      .initAttrs(value).initAttrs(entry)
+    new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = obj.value, isViewable = isViewable)
+      .init(obj, entry)
   }
 
   // ---- basic ----
@@ -140,10 +140,10 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
 
   private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
                                                 objH: stm.Source[S#Tx, E[S]],
-                                                value: V,
+                                                var value: V,
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
-      with GraphemeObjViewImpl.BasicImpl[S]
+      with GraphemeObjViewImpl.SimpleExpr[S, V, E]
       with GraphemeObjView.HasStartLevels[S] {
 
     private[this] val allSame = value.size <= 1 || { val v0 = value.head; value.forall(_ == v0) }

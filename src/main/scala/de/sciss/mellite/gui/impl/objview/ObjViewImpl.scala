@@ -180,7 +180,31 @@ object ObjViewImpl {
     }
   }
 
+  trait SimpleExpr[S <: Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ExprLike[S, A, Ex]
+    with ObjViewImpl.Impl[S] {
+
+    def value: A
+
+    protected def value_=(x: A): Unit
+
+    protected def exprValue: A = value
+    protected def exprValue_=(x: A): Unit = value = x
+
+    def init(ex: Ex[S])(implicit tx: S#Tx): this.type = {
+      initAttrs(ex)
+      disposables ::= ex.changed.react { implicit tx => upd =>
+        deferTx {
+          exprValue = upd.now
+        }
+        fire(ObjView.Repaint(this))
+      }
+      this
+    }
+  }
+
   trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ObjView[S] {
+    protected var exprValue: A
+
     protected def expr(implicit tx: S#Tx): Ex[S]
 
     protected implicit def exprType: Type.Expr[A, Ex]

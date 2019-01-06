@@ -333,7 +333,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     val value     = obj.value
     val editable  = detectEditable(obj)
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = value, isEditable = editable)
-      .initAttrs(obj).initAttrs(entry)
+      .init(obj, entry)
   }
 
   private implicit object ReadCurve extends scopt.Read[Curve] {
@@ -465,17 +465,11 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
   // ---- GraphemeObjView ----
 
-//  private final class SegmentEnd[S <: Sys[S]](val frame: Long, val view: ScalarOptionView[S], obs: Disposable[S#Tx])
-//    extends Disposable[S#Tx] {
-//
-//    def dispose()(implicit tx: S#Tx): Unit = obs.dispose()
-//  }
-
   private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
                                                 objH: stm.Source[S#Tx, E[S]],
-                                                value: V, val isEditable: Boolean)
+                                                var value: V, val isEditable: Boolean)
     extends Impl[S](objH)
-      with GraphemeObjViewImpl.BasicImpl[S]
+      with GraphemeObjViewImpl.SimpleExpr[S, V, E]
       with GraphemeObjView.HasStartLevels[S] {
 
     private[this] val allSame =

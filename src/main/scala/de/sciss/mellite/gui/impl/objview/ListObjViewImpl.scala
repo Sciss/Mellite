@@ -16,16 +16,15 @@ package de.sciss.mellite.gui.impl.objview
 import de.sciss.lucre.expr.{BooleanObj, Expr, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.ListObjView
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
 import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.gui.impl.widget.WidgetObjView
-import de.sciss.mellite.gui.{ListObjView, ObjView}
 import javax.swing.undo.UndoableEdit
 
 import scala.language.higherKinds
@@ -109,8 +108,6 @@ object ListObjViewImpl {
   trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]]
     extends ObjViewImpl.ExprLike[S, A, Ex] with ListObjView[S] {
 
-    protected var exprValue: A
-
     // /** Tests a value from a `Change` update. */
     // protected def testValue       (v: Any): Option[A]
     protected def convertEditValue(v: Any): Option[A]
@@ -136,26 +133,7 @@ object ListObjViewImpl {
   }
 
   trait SimpleExpr[S <: Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ExprLike[S, A, Ex]
-    with ListObjView[S] with ObjViewImpl.Impl[S] {
-    // _: ObjView[S] =>
-
-    override  def value: A
-    protected def value_=(x: A): Unit
-
-    protected def exprValue: A = value
-    protected def exprValue_=(x: A): Unit = value = x
-
-    def init(ex: Ex[S])(implicit tx: S#Tx): this.type = {
-      initAttrs(ex)
-      disposables ::= ex.changed.react { implicit tx => upd =>
-        deferTx {
-          exprValue = upd.now
-        }
-        fire(ObjView.Repaint(this))
-      }
-      this
-    }
-  }
+    with ListObjView[S] with ObjViewImpl.SimpleExpr[S, A, Ex]
 
   private final val ggCheckBox = new CheckBox()
 

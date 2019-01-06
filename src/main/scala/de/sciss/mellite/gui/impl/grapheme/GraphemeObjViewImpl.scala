@@ -15,14 +15,16 @@ package de.sciss.mellite
 package gui
 package impl.grapheme
 
-import de.sciss.lucre.expr.LongObj
+import de.sciss.lucre.expr.{Expr, LongObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.objview.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
 import de.sciss.synth.proc.Grapheme
+import de.sciss.synth.proc.Grapheme.Entry
 
+import scala.language.higherKinds
 import scala.swing.Graphics2D
 
 object GraphemeObjViewImpl {
@@ -71,5 +73,15 @@ object GraphemeObjViewImpl {
 
     def paintBack (g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = ()
     def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = ()
+  }
+
+  trait SimpleExpr[S <: Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]]
+    extends BasicImpl[S] with ObjViewImpl.SimpleExpr[S, A, Ex] {
+
+    def init(ex: Ex[S], entry: Entry[S])(implicit tx: S#Tx): this.type = {
+      init(ex)
+      initAttrs(entry)
+      this
+    }
   }
 }
