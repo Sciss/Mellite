@@ -49,8 +49,23 @@ class ObjViewCmdLineParser[C](private val f: ObjView.Factory)
     }
   }
 
+  // how annoying can it be...
+
+  private[this] var showedUsage = false
+
+  override def showUsage(): Unit = if (!showedUsage) {
+    super.showUsage()
+    showedUsage = true
+  }
+
+  override def showUsageAsError(): Unit = if (!showedUsage) {
+    super.showUsageAsError()
+    showedUsage = true
+  }
+
   override def showUsageOnError: Boolean = true // even if we offer '--help'
 
   // constructor
   help("help").text("Prints this usage text")
+
 }

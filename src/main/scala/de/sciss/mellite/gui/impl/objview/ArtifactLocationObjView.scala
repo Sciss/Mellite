@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl.artifact
+package de.sciss.mellite.gui.impl.objview
 
 import de.sciss.desktop
 import de.sciss.file._
@@ -23,7 +23,6 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ListObjView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
@@ -60,9 +59,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
     val default: Config[S] = Config(directory = null)
     val p = ObjViewCmdLineParser[S](this)
     import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, c) => c.copy(name = v))
+    name((v, c) => c.copy(name = v))
 
     opt[Unit]('c', "const")
       .text(s"Make constant instead of variable")

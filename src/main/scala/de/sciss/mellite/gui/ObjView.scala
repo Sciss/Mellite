@@ -68,7 +68,7 @@ object ObjView {
                                    (implicit universe: Universe[S]): Unit
 
     /** Tries to create a make-configuration from a command line string. */
-    def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = ???
+    def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S]
 
     def category: String
 

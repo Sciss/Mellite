@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl.artifact
+package de.sciss.mellite.gui.impl.objview
 
 import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, PathField}
@@ -22,7 +22,6 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.ComboBox
@@ -90,9 +89,7 @@ object ArtifactObjView extends ListObjView.Factory {
     val default: Config[S] = Config(name = prefix, file = file(""), location = null)
     val p = ObjViewCmdLineParser[S](this)
     import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, c) => c.copy(name = v))
+    name((v, c) => c.copy(name = v))
 
     opt[File]('l', "location")
       .text("Artifact's base location (directory). If absent, artifact's direct parent is used.")

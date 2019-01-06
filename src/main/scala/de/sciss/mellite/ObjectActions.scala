@@ -22,14 +22,14 @@ import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.AudioCue
 
 object ObjectActions {
-  def mkAudioFile[S <: Sys[S]](loc: ArtifactLocation[S], f: File, spec: AudioFileSpec)
+  def mkAudioFile[S <: Sys[S]](loc: ArtifactLocation[S], f: File, spec: AudioFileSpec, name: Option[String] = None)
                               (implicit tx: S#Tx): AudioCue.Obj[S] = {
     val offset    = LongObj  .newVar[S](0L )
     val gain      = DoubleObj.newVar[S](1.0)
     val artifact  = Artifact(loc, f) // loc.add(f)
     val audio     = AudioCue.Obj(artifact, spec, offset, gain)
-    val name      = f.base
-    audio.name    = name
+    val name1     = name.getOrElse(f.base)
+    audio.name    = name1
     // if (index == -1) folder.addLast(obj) else folder.insert(index, obj)
     audio
   }

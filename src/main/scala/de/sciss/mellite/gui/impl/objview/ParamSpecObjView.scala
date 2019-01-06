@@ -269,6 +269,8 @@ object ParamSpecObjView extends ListObjView.Factory {
     done(res1)
   }
 
+  def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = ???
+
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
     val name  = config.name
     val value = config.init

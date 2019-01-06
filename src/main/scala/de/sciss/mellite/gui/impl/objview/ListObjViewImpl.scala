@@ -19,7 +19,6 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.artifact.{ArtifactLocationObjView, ArtifactObjView}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView

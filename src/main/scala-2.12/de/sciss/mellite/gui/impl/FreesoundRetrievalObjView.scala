@@ -55,12 +55,17 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
 object FreesoundRetrievalObjView extends ListObjView.Factory {
-  def init(): Unit = tpe.init()
+  private[this] lazy val _init: Unit = {
+    tpe.init()
+    ListObjView.addFactory(this)
+  }
+
+  def init(): Unit = _init
 
   type E[~ <: stm.Sys[~]] = Retrieval[~]
   val icon: Icon        = ObjViewImpl.raphaelIcon(freesound.swing.Shapes.Retrieval)
-  val prefix            = "Retrieval"
-  def humanName: String = s"Freesound $prefix"
+  val prefix            = "Freesound"
+  def humanName: String = s"$prefix Retrieval"
   def tpe: Obj.Type     = Retrieval
   def category: String  = ObjView.categComposition
   def canMakeObj     = true
@@ -94,9 +99,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
     val default: Config[S] = PrimitiveConfig(prefix, file(""))
     val p = ObjViewCmdLineParser[S](this)
     import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, c) => c.copy(name = v))
+    name((v, c) => c.copy(name = v))
 
     opt[File]('d', "download")
       .text("Download directory")

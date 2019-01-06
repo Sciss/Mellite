@@ -23,8 +23,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, GUI, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, GUI, ListObjView, MessageException, ObjView}
 import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec, SampleFormat}
@@ -54,7 +55,7 @@ object AudioCueObjView extends ListObjView.Factory {
 
   type LocationConfig[S <: stm.Sys[S]] = ActionArtifactLocation.QueryResult[S]
 
-  final case class Config1[S <: stm.Sys[S]](file: File, spec: AudioFileSpec, location: LocationConfig[S])
+  final case class Config1[S <: stm.Sys[S]](name: String, file: File, spec: AudioFileSpec, location: LocationConfig[S])
   type Config[S <: stm.Sys[S]] = List[Config1[S]]
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
@@ -96,7 +97,8 @@ object AudioCueObjView extends ListObjView.Factory {
 
                   locOpt match {
                     case Some(loc) =>
-                      loop(rem = tail, locSeq = loc :: locSeq, res = Config1(file = head, spec = spec, location = loc) :: res)
+                      loop(rem = tail, locSeq = loc :: locSeq, res =
+                        Config1(name = head.base, file = head, spec = spec, location = loc) :: res)
 
                     case None =>
                       Failure(Aborted())
@@ -110,6 +112,44 @@ object AudioCueObjView extends ListObjView.Factory {
       }
     }
     done(res)
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config1[S](name = "", file = file(""), spec = null, location = null) :: Nil
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    name((v, c) => c.head.copy(name = v) :: Nil)
+
+    opt[File]('l', "location")
+      .text("Artifact's base location (directory). If absent, artifact's direct parent is used.")
+      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
+      .action((v, c) => c.head.copy[S](location = (Right(v.name), v)) :: Nil)
+
+    arg[File]("file")
+      .text("File")
+      .required()
+      .validate { f =>
+        val tr = Try(AudioFile.identify(f))
+        tr match {
+          case Success(Some(_)) => success
+          case Success(None)    => failure(s"Cannot identify audio file: $f")
+          case Failure(ex)      => failure(s"Cannot identify audio file: ${ex.getMessage}")
+        }
+      }
+      .action { (f, c) =>
+        val spec = AudioFile.readSpec(f)
+        c.head.copy(name = f.base, file = f, spec = spec) :: Nil
+      }
+
+    parseConfig(args, default).map(_.head).flatMap {
+      case c if c.location == null =>
+        c.file.absolute.parentOption match {
+          case Some(parent) => Success(c.copy[S](location = (Right(parent.name), parent)) :: Nil)
+          case None => Failure(MessageException(s"No parent directory to '${c.file}'"))
+        }
+
+      case other => Success(other :: Nil)
+    }
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -129,7 +169,7 @@ object AudioCueObjView extends ListObjView.Factory {
               loc0
           }
       }
-      val audioObj = ObjectActions.mkAudioFile(loc, cfg.file, cfg.spec)
+      val audioObj = ObjectActions.mkAudioFile(loc, cfg.file, cfg.spec, name = Some(cfg.name))
       res ::= audioObj
     }
     res.reverse
