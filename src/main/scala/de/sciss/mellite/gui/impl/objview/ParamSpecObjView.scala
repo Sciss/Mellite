@@ -53,7 +53,7 @@ object ParamSpecObjView extends ListObjView.Factory {
   def humanName     : String    = "Param Spec"
   def tpe           : Obj.Type  = ParamSpec.Obj
   def category      : String    = ObjView.categOrganisation
-  def canMakeObj : Boolean   = true
+  def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ListObjView[S] = {
     val value     = obj.value

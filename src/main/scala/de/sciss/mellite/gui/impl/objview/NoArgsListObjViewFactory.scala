@@ -44,9 +44,7 @@ trait NoArgsListObjViewFactory extends ListObjView.Factory {
     val default: Config[S] = prefix
     val p = ObjViewCmdLineParser[S](this)
     import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, _) => v)
+    name((v, _) => v)
     parseConfig(args, default)
   }
 }

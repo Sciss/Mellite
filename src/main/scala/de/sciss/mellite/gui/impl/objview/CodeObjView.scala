@@ -19,6 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.{CodeFrame, ListObjView, MessageException, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
@@ -26,9 +27,7 @@ import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Component, Label}
-import scala.util.{Failure, Success}
-
-// -------- Code --------
+import scala.util.{Failure, Success, Try}
 
 object CodeObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Code.Obj[~]
@@ -46,43 +45,83 @@ object CodeObjView extends ListObjView.Factory {
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Code, const: Boolean = false)
 
+  private def defaultCode(id: Int): Try[Code] = id match {
+    case Code.FileTransform.id => Success(Code.FileTransform(
+      """|val aIn   = AudioFile.openRead(in)
+         |val aOut  = AudioFile.openWrite(out, aIn.spec)
+         |val bufSz = 8192
+         |val buf   = aIn.buffer(bufSz)
+         |var rem   = aIn.numFrames
+         |while (rem > 0) {
+         |  val chunk = math.min(bufSz, rem).toInt
+         |  aIn .read (buf, 0, chunk)
+         |  // ...
+         |  aOut.write(buf, 0, chunk)
+         |  rem -= chunk
+         |  // checkAbort()
+         |}
+         |aOut.close()
+         |aIn .close()
+         |""".stripMargin))
+
+    case Code.SynthGraph.id => Success(Code.SynthGraph(
+      """|val in   = ScanIn("in")
+         |val sig  = in
+         |ScanOut("out", sig)
+         |""".stripMargin))
+
+    case Code.Action.id => Success(Code.Action(
+      """|println("bang!")
+         |""".stripMargin))
+
+    case _ =>
+      Failure(MessageException("No code type selected"))
+  }
+
+  // cf. SP #58
+  private lazy val codeSeq  : Seq[Code.Type]          = Seq(Code.FileTransform      , Code.SynthGraph     , Code.Action     )
+  private lazy val codeNames: Seq[String]             = Seq(Code.FileTransform.name , Code.SynthGraph.name, Code.Action.name)
+  private lazy val codeMap  : Map[String, Code.Type]  =
+    codeNames.iterator.zip(codeSeq.iterator).map { case (n, tpe) =>
+      val nm = n.filterNot(_.isSpaceChar).toLowerCase
+      nm -> tpe
+    } .toMap
+
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
-    val ggValue = new ComboBox(Seq(Code.FileTransform.name, Code.SynthGraph.name))
+    val ggValue = new ComboBox(codeNames)
     val res0 = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
-      ggValue.selection.index match {
-        case 0 => Success(Code.FileTransform(
-          """|val aIn   = AudioFile.openRead(in)
-            |val aOut  = AudioFile.openWrite(out, aIn.spec)
-            |val bufSz = 8192
-            |val buf   = aIn.buffer(bufSz)
-            |var rem   = aIn.numFrames
-            |while (rem > 0) {
-            |  val chunk = math.min(bufSz, rem).toInt
-            |  aIn .read (buf, 0, chunk)
-            |  // ...
-            |  aOut.write(buf, 0, chunk)
-            |  rem -= chunk
-            |  // checkAbort()
-            |}
-            |aOut.close()
-            |aIn .close()
-            |""".stripMargin))
-
-        case 1 => Success(Code.SynthGraph(
-          """|val in   = ScanIn("in")
-            |val sig  = in
-            |ScanOut("out", sig)
-            |""".stripMargin
-        ))
-
-        case _  =>
-          Failure(MessageException("No code type selected"))
-      }
+      defaultCode(ggValue.selection.index)
     )
     val res = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
+  }
+
+  private implicit object ReadCode extends scopt.Read[Code] {
+    def arity: Int = 1
+
+    def reads: String => Code = { s =>
+      val tpe = codeMap(s.toLowerCase)
+      defaultCode(tpe.id).get
+    }
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+    val default: Config[S] = Config(value = null)
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    name((v, c) => c.copy(name = v))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant offset instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    arg[Code]("type")
+      .text(codeMap.keysIterator.mkString("Code type (", ",", ")"))
+      .action((v, c) => c.copy(value = v))
+
+    parseConfig(args, default)
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

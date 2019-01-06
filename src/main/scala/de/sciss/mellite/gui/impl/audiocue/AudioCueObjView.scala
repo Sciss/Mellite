@@ -112,8 +112,6 @@ object AudioCueObjView extends ListObjView.Factory {
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = ???
-
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
     var locMade = Map.empty[(String, File), ArtifactLocation[S]]
     var res     = List.empty[Obj[S]]

@@ -14,9 +14,10 @@
 package de.sciss.mellite.gui.impl
 
 import de.sciss.lucre.stm.Sys
+import de.sciss.mellite.gui.impl.objview.EnsembleObjView.prefix
 import de.sciss.mellite.gui.{MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
-import scopt.OptionParser
+import scopt.{OptionDef, OptionParser}
 
 import scala.util.{Failure, Success, Try}
 
@@ -34,6 +35,11 @@ class ObjViewCmdLineParser[C](private val f: ObjView.Factory)
     if (exitState.isRight) _aborted = true
 
   override def reportError(msg: String): Unit = _error = msg
+
+  def name(action: (String, C) => C): OptionDef[String, C] =
+    opt[String]('n', "name")
+      .text(s"Object's name (default: $prefix)")
+      .action(action)
 
   def parseConfig(args: List[String], default: C): Try[C] = {
     val opt = parse(args, default)

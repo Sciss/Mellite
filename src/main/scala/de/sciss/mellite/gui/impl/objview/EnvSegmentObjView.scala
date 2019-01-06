@@ -15,7 +15,6 @@ package de.sciss.mellite.gui.impl.objview
 
 import java.awt.geom.Area
 
-import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.kollflitz.Vec
 import de.sciss.lucre.expr.Type
@@ -28,14 +27,13 @@ import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
 import de.sciss.synth.Curve
+import de.sciss.synth.proc.EnvSegment
 import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.{EnvSegment, Universe}
 import javax.swing.Icon
 
 import scala.swing.Graphics2D
-import scala.util.Failure
 
-object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
+object EnvSegmentObjView extends NoMakeListObjViewFactory /* XXX TODO */ with GraphemeObjView.Factory {
   type E[S <: stm.Sys[S]]       = EnvSegment.Obj[S]
   type V                        = EnvSegment
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Connect)
@@ -43,22 +41,12 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   def humanName     : String    = "Envelope Segment"
   def tpe           : Obj.Type  = EnvSegment.Obj
   def category      : String    = ObjView.categPrimitives
-  def canMakeObj : Boolean   = false // true
 
   def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
     val ex    = obj
     val value = ex.value
     new ListImpl[S](tx.newHandle(obj), value).init(obj)
   }
-
-  type Config[S <: stm.Sys[S]] = Unit
-
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit =
-    done(Failure(new UnsupportedOperationException(s"Make $humanName")))
-
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = Nil
 
   def mkGraphemeView[S <: Sys[S]](entry: Entry[S], value: E[S], mode: GraphemeView.Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {

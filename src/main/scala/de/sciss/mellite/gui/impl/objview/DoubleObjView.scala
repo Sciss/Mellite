@@ -69,9 +69,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
     val default: Config[S] = Config(value = 0.0)
     val p = ObjViewCmdLineParser[S](this)
     import p._
-    opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
-      .action((v, c) => c.copy(name = v))
+    name((v, c) => c.copy(name = v))
 
     opt[Unit]('c', "const")
       .text(s"Make constant instead of variable")
