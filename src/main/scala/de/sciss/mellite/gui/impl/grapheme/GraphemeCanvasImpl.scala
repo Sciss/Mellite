@@ -21,7 +21,6 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.GraphemeTool.EmptyRubber
 import de.sciss.mellite.gui.GraphemeTools.ToolChanged
-import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
 import de.sciss.numbers
 
 import scala.swing.Orientation

@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.timeline
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.TimelineTool.EmptyRubber
-import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
+import de.sciss.mellite.gui.impl.TimelineCanvas2DImpl
 import de.sciss.mellite.gui.{TimelineObjView, TimelineTools, TimelineTrackCanvas, TimelineView}
 
 trait TimelineTrackCanvasImpl[S <: Sys[S]]

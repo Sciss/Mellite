@@ -11,19 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
-import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeViewImpl => Impl}
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Grapheme, Universe}
-
-import scala.swing.Action
 
 object GraphemeView {
   def apply[S <: Sys[S]](group: Grapheme[S])
@@ -37,24 +31,9 @@ object GraphemeView {
     case object TwoDim extends Mode
   }
 }
-trait GraphemeView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] {
-  def timelineModel: TimelineModel
-  
-  def selectionModel: GraphemeObjView.SelectionModel[S]
-
+trait GraphemeView[S <: stm.Sys[S]] extends TimelineViewBase[S, Double, GraphemeObjView[S]] {
   def graphemeH: stm.Source[S#Tx, Grapheme[S]]
-
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 
-  def canvas: GraphemeCanvas[S]
-
-  // def transportView: TransportView[S]
-
-  // ---- GUI actions ----
-  def actionSelectAll           : Action
-  def actionSelectFollowing     : Action
-  def actionDelete              : Action
-//  def actionSplitObjects        : Action
-//  def actionClearSpan           : Action
-//  def actionRemoveSpan          : Action
+  override def canvas: GraphemeCanvas[S]
 }

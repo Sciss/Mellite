@@ -24,7 +24,6 @@ import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.equal.Implicits._
 import de.sciss.fingertree.OrderedSeq
-import de.sciss.icons.raphael
 import de.sciss.lucre.bitemp.BiPin
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike.peer
@@ -44,7 +43,7 @@ import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation}
+import scala.swing.{BorderPanel, BoxPanel, Component, Orientation}
 
 object GraphemeViewImpl {
   private val DEBUG   = false
@@ -128,8 +127,9 @@ object GraphemeViewImpl {
                                         val selectionModel: SelectionModel[S, GraphemeObjView[S]])
                                        (implicit val universe: Universe[S],
                                         val undoManager: UndoManager)
-    extends GraphemeActions[S]
-      with GraphemeView[S]
+    extends GraphemeView[S]
+      with TimelineViewBaseImpl[S, Double, GraphemeObjView[S]]
+      with GraphemeActions[S]
       with ComponentHolder[Component] {
 
     impl =>
@@ -169,10 +169,6 @@ object GraphemeViewImpl {
     def grapheme  (implicit tx: S#Tx): Grapheme[S] = graphemeH()
     def plainGroup(implicit tx: S#Tx): Grapheme[S] = grapheme
 
-//    def window: Window = component.peer.getClientProperty("de.sciss.mellite.Window").asInstanceOf[Window]
-
-//    def canvasComponent: Component = canvasView.canvasComponent
-
     def dispose()(implicit tx: S#Tx): Unit = {
       val m: ViewMap = emptyMap
       deferTx {
@@ -187,23 +183,10 @@ object GraphemeViewImpl {
       this
     }
 
-    private def guiInit(): Unit = {
+    override protected def guiInit(): Unit = {
+      super.guiInit()
+
       canvas = new View
-
-      val actionAttr: Action = Action(null) {
-        withSelection { implicit tx =>
-          seq => {
-            seq.foreach { view =>
-              AttrMapFrame(view.obj)
-            }
-            None
-          }
-        }
-      }
-
-      actionAttr.enabled = false
-      val ggAttr = GUI.toolButton(actionAttr, raphael.Shapes.Wrench, "Attributes Editor")
-      ggAttr.focusable = false
 
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
@@ -212,24 +195,10 @@ object GraphemeViewImpl {
             toolCursor, toolMove, toolAdd
           )),
           HStrut(4),
-          ggAttr,
+          ggChildAttr, ggChildView,
           HGlue
         )
       }
-
-      selectionModel.addListener {
-        case _ =>
-          val hasSome = selectionModel.nonEmpty
-          actionAttr.enabled = hasSome
-//          actionMoveObjectToCursor.enabled = hasSome
-      }
-
-//      timelineModel.addListener {
-//        case TimelineModel.Selection(_, span) if span.before.isEmpty != span.now.isEmpty =>
-//          val hasSome = span.now.nonEmpty
-//          actionClearSpan .enabled = hasSome
-//          actionRemoveSpan.enabled = hasSome
-//      }
 
       val pane2 = canvas.component
 //      pane2.dividerSize         = 4

@@ -11,15 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeView}
 import de.sciss.mellite.gui.edit.EditGraphemeRemoveObj
+import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
 import de.sciss.span.Span
 import de.sciss.synth.proc.Grapheme
 
@@ -28,7 +27,7 @@ import scala.swing.event.Key
 
 /** Implements the actions defined for the grapheme-view. */
 trait GraphemeActions[S <: Sys[S]] {
-  _: GraphemeView[S] =>
+  view: GraphemeView[S] with TimelineViewBaseImpl[S, Double, GraphemeObjView[S]] =>
 
   object actionSelectAll extends Action("Select All") {
     def apply(): Unit = {
@@ -100,17 +99,4 @@ trait GraphemeActions[S <: Sys[S]] {
 ////    } .toList
 ////    CompoundEdit(allEdits, "Clear Span")
 //  }
-
-  protected def withSelection[A](fun: S#Tx => TraversableOnce[GraphemeObjView[S]] => Option[A]): Option[A] =
-    if (selectionModel.isEmpty) None else {
-      val sel = selectionModel.iterator
-      cursor.step { implicit tx => fun(tx)(sel) }
-    }
-
-  protected def withFilteredSelection[A](p: GraphemeObjView[S] => Boolean)
-                                        (fun: S#Tx => TraversableOnce[GraphemeObjView[S]] => Option[A]): Option[A] = {
-    val sel = selectionModel.iterator
-    val flt = sel.filter(p)
-    if (flt.hasNext) cursor.step { implicit tx => fun(tx)(flt) } else None
-  }
 }

@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui.impl.tool
+package de.sciss.mellite.gui.impl
 
 import java.awt.{BasicStroke, Color, Graphics2D, Stroke}
 

@@ -18,8 +18,8 @@ import java.util.Locale
 
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
+import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.{UndoManager, Window}
 import de.sciss.fingertree.RangedSeq
 import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
@@ -33,8 +33,8 @@ import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Ed
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.mellite.gui.impl.tool.TimelineCanvas2DImpl
-import de.sciss.mellite.gui.{ActionArtifactLocation, AttrMapFrame, BasicTool, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
+import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.mellite.{Mellite, ObjectActions, ProcActions}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
@@ -50,7 +50,7 @@ import scala.concurrent.stm.{Ref, TSet}
 import scala.math.{max, min}
 import scala.swing.Swing._
 import scala.swing.event.ValueChanged
-import scala.swing.{Action, BorderPanel, BoxPanel, Component, Orientation, SplitPane}
+import scala.swing.{BorderPanel, BoxPanel, Component, Orientation, SplitPane}
 import scala.util.Try
 
 object TimelineViewImpl {
@@ -127,7 +127,7 @@ object TimelineViewImpl {
 
     tlView.disposables.set(disposables)(tx.peer)
 
-    deferTx(tlView.guiInit())
+    tlView.init()
 
     // must come after guiInit because views might call `repaint` in the meantime!
     timeline.iterator.foreach { case (span, seq) =>
@@ -146,8 +146,9 @@ object TimelineViewImpl {
                                         val selectionModel: SelectionModel[S, TimelineObjView[S]],
                                         val globalView: GlobalProcsView[S],
                                         val transportView: TransportView[S], tx0: S#Tx)
-    extends TimelineActions[S]
-      with TimelineView[S]
+    extends TimelineView[S]
+      with TimelineViewBaseImpl[S, Int, TimelineObjView[S]]
+      with TimelineActions[S]
       with ComponentHolder[Component]
       with TimelineObjView.Context[S]
       with AuxContextImpl[S] {
@@ -182,8 +183,6 @@ object TimelineViewImpl {
     def timeline  (implicit tx: S#Tx): Timeline[S] = timelineH()
     def plainGroup(implicit tx: S#Tx): Timeline[S] = timeline
 
-    def window: Window = component.peer.getClientProperty("de.sciss.mellite.Window").asInstanceOf[Window]
-
     def dispose()(implicit tx: S#Tx): Unit = {
       deferTx {
         viewRange = RangedSeq.empty
@@ -208,24 +207,16 @@ object TimelineViewImpl {
       }
     }
 
-    def guiInit(): Unit = {
+    def init()(implicit tx: S#Tx): this.type = {
+      deferTx(guiInit())
+      this
+    }
+
+    override protected def guiInit(): Unit = {
+      super.guiInit()
+
       canvas = new View
       val ggVisualBoost = GUI.boostRotary()(canvas.timelineTools.visualBoost = _)
-
-      val actionAttr: Action = Action(null) {
-        withSelection { implicit tx =>
-          seq => {
-            seq.foreach { view =>
-              AttrMapFrame(view.obj)
-            }
-            None
-          }
-        }
-      }
-
-      actionAttr.enabled = false
-      val ggAttr = GUI.attrButton(actionAttr, "Attributes Editor")
-      ggAttr.focusable = false
 
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
@@ -235,7 +226,7 @@ object TimelineViewImpl {
             toolMute, toolAudition, toolFunction, toolPatch
           )),
           HStrut(4),
-          ggAttr,
+          ggChildAttr, ggChildView,
           HStrut(8),
           ggVisualBoost,
           HGlue,
@@ -259,7 +250,6 @@ object TimelineViewImpl {
           val hasSome = selectionModel.nonEmpty
           if (hadSelectedObjects != hasSome) {
             hadSelectedObjects = hasSome
-            actionAttr                .enabled = hasSome
             actionSplitObjects        .enabled = hasSome
             actionCleanUpObjects      .enabled = hasSome
             actionAlignObjectsToCursor.enabled = hasSome

@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
 import java.io.File
 
@@ -30,6 +27,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
+import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView, ListObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{ObjKeys, Universe}

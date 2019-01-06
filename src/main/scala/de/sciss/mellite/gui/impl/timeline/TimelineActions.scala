@@ -11,12 +11,9 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
@@ -25,14 +22,17 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ProcActions.Move
+import de.sciss.mellite.ProcActions
+import de.sciss.mellite.gui.{ActionBounce, TimelineView, TimelineObjView}
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
+import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}
 import de.sciss.topology
 import de.sciss.topology.Topology
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.Action
 import scala.swing.event.Key
@@ -40,7 +40,7 @@ import scala.util.Success
 
 /** Implements the actions defined for the timeline-view. */
 trait TimelineActions[S <: Sys[S]] {
-  view: TimelineView[S] =>
+  view: TimelineView[S] with TimelineViewBaseImpl[S, Int, TimelineObjView[S]] =>
 
   object actionStopAllSound extends Action("StopAllSound") {
     def apply(): Unit =
@@ -51,16 +51,15 @@ trait TimelineActions[S <: Sys[S]] {
   }
 
   object actionBounce extends ActionBounce(this, timelineH) {
-    import ActionBounce._
 
-    override protected def prepare(set0: QuerySettings[S]): QuerySettings[S] =
+    override protected def prepare(set0: ActionBounce.QuerySettings[S]): ActionBounce.QuerySettings[S] =
       if (timelineModel.selection.isEmpty) set0 else set0.copy(span = timelineModel.selection)
 
     override protected def spanPresets(): SpanPresets = {
       val all = cursor.step { implicit tx =>
-        presetAllTimeline(timeline)
+        ActionBounce.presetAllTimeline(timeline)
       }
-      all ::: timelineModel.selection.nonEmptyOption.map(value => SpanPreset("Selection", value)).toList
+      all ::: timelineModel.selection.nonEmptyOption.map(value => ActionBounce.SpanPreset("Selection", value)).toList
     }
   }
 
@@ -162,7 +161,7 @@ trait TimelineActions[S <: Sys[S]] {
           val tl = timeline
           plRes.flatMap { pl =>
             if (!pl.isSignificant) None else {
-              val move = Move(deltaTime = 0L, deltaTrack = pl.deltaY, copy = false)
+              val move = ProcActions.Move(deltaTime = 0L, deltaTrack = pl.deltaY, copy = false)
               Edits.timelineMoveOrCopy(pl.view.span, pl.view.obj, tl, move, minStart = Long.MinValue)
             }
           }
@@ -413,18 +412,5 @@ trait TimelineActions[S <: Sys[S]] {
     val list2 = editLeftSpan.fold(list1)(_ :: list1)
     val list3 = editRemoveFadeOut :: list2
     (list3, rightSpan, rightObj)
-  }
-
-  protected def withSelection[A](fun: S#Tx => TraversableOnce[TimelineObjView[S]] => Option[A]): Option[A] =
-    if (selectionModel.isEmpty) None else {
-      val sel = selectionModel.iterator
-      cursor.step { implicit tx => fun(tx)(sel) }
-    }
-
-  protected def withFilteredSelection[A](p: TimelineObjView[S] => Boolean)
-                                      (fun: S#Tx => TraversableOnce[TimelineObjView[S]] => Option[A]): Option[A] = {
-    val sel = selectionModel.iterator
-    val flt = sel.filter(p)
-    if (flt.hasNext) cursor.step { implicit tx => fun(tx)(flt) } else None
   }
 }

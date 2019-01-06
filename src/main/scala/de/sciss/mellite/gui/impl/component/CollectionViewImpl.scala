@@ -15,10 +15,11 @@ package de.sciss.mellite.gui.impl.component
 
 import java.util.Locale
 
-import de.sciss.desktop.{KeyStrokes, OptionPane, Util, Window}
+import de.sciss.desktop
+import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Application
 import de.sciss.mellite.gui.{AttrMapFrame, GUI, ListObjView, MessageException, ObjView}
@@ -77,8 +78,11 @@ trait CollectionViewImpl[S <: Sys[S]]
   lazy final protected val actionView: Action = Action(null) {
     val sel = selectedObjects.filter(_.isViewable)
     val sz  = sel.size
-    if (sz > 0) GUI.atomic[S, Unit](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
-      sel.foreach(_.openView(None)) /// XXX TODO - find window
+    if (sz > 0) {
+      val windowOption = Window.find(this)
+      GUI.atomic[S, Unit](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
+        sel.foreach(_.openView(windowOption))
+      }
     }
   }
 
@@ -117,7 +121,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     icon = f.icon
 
     def apply(): Unit = {
-      val winOpt    = Window.find(component)
+      val winOpt = desktop.Window.find(component)
       f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) {
         case Success(conf) =>
           val confOpt2  = prepareInsertDialog(f)
@@ -169,7 +173,7 @@ trait CollectionViewImpl[S <: Sys[S]]
       pop.add(group)
     }
 
-    val window = Window.find(component).getOrElse(sys.error(s"No window for $impl"))
+    val window = desktop.Window.find(component).getOrElse(sys.error(s"No window for $impl"))
     val res = pop.create(window)
     res.peer.pack() // so we can read `size` correctly
     res
@@ -192,7 +196,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     //            s
     //        } .toList
 
-    val winOpt  = Window.find(component)
+    val winOpt  = desktop.Window.find(component)
     val win     = winOpt.map(_.component) match {
       case Some(w: scala.swing.Window) => w
       case _ => null
@@ -273,6 +277,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     dialog.open()
   }
 
+  // XXX TODO DRY with TimelineViewBaseImpl
   private def nameAttr = "Attributes Editor"
   private def nameView = "View Selected Element"
 

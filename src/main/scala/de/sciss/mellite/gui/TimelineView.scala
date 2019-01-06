@@ -11,17 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
-import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.timeline.{TimelineViewImpl => Impl}
+import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.{Timeline, Universe}
-import de.sciss.synth.proc.gui.{TransportView, UniverseView}
 
 import scala.swing.Action
 
@@ -38,22 +35,16 @@ object TimelineView {
 
   final val DefaultTrackHeight = 8
 }
-trait TimelineView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] with CanBounce {
-  def timelineModel   : TimelineModel
-  def selectionModel  : TimelineObjView.SelectionModel[S]
-
+trait TimelineView[S <: stm.Sys[S]] extends TimelineViewBase[S, Int, TimelineObjView[S]] with CanBounce {
   def timelineH: stm.Source[S#Tx , Timeline[S]]
   def timeline(implicit tx: S#Tx): Timeline[S]
 
-  def canvas        : TimelineTrackCanvas[S]
+  override def canvas: TimelineTrackCanvas[S]
 
   def globalView    : GlobalProcsView[S]
   def transportView : TransportView  [S]
 
-  // ---- GUI actions ----
-  def actionSelectAll           : Action
-  def actionSelectFollowing     : Action
-  def actionDelete              : Action
+  // ---- further GUI actions ----
   def actionSplitObjects        : Action
   def actionCleanUpObjects      : Action
   def actionStopAllSound        : Action
