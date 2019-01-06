@@ -68,7 +68,6 @@ object WidgetFrameImpl {
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
       if (!view.codeView.dirty) None else Some(this)
 
-
     private[this] def _vetoMessage = "The text has been edited."
 
     def vetoMessage(implicit tx: S#Tx): String = _vetoMessage

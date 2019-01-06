@@ -245,6 +245,7 @@ object ParamSpecObjView extends ListObjView.Factory {
     if (!editable) {
       ggLo    .enabled = false
       ggHi    .enabled = false
+      ggWarp  .enabled = false
       ggCurve .enabled = false
     }
 
@@ -424,7 +425,7 @@ object ParamSpecObjView extends ListObjView.Factory {
 //    resizable = false
 
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
-      if (!view.editable && !view.dirty) None else Some(this)
+      if (!view.editable || !view.dirty) None else Some(this)
 
     private def _vetoMessage = "The object has been edited."
 

@@ -16,10 +16,12 @@ package de.sciss.mellite.gui.impl.objview
 import java.awt.geom.Area
 
 import de.sciss.desktop
+import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.equal.Implicits._
 import de.sciss.icons.raphael
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.expr.{CellView, Type}
+import de.sciss.lucre.expr.{CellView, DoubleObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.edit.EditVar
@@ -27,26 +29,27 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.{HandleDiameter, HandleRadius, HasStartLevels}
-import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
+import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.{GUI, GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
 import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
-import de.sciss.swingplus.ComboBox.Model.SelectionChanged
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.gui.UniverseView
-import de.sciss.synth.proc.{EnvSegment, Universe}
+import de.sciss.synth.proc.{CurveObj, EnvSegment, Universe}
+import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
 
-import scala.concurrent.{Future, Promise}
 import scala.concurrent.stm.Ref
+import scala.concurrent.{Future, Promise}
 import scala.swing.Swing.EmptyIcon
-import scala.swing.{Action, Alignment, BorderPanel, BoxPanel, Component, Dialog, FlowPanel, Graphics2D, Label, Orientation, Swing, TextField}
+import scala.swing.event.{SelectionChanged, ValueChanged}
+import scala.swing.{Action, Alignment, BorderPanel, Component, Dialog, FlowPanel, Graphics2D, Label, Swing, TextField}
 import scala.util.{Failure, Success}
 
 object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
@@ -77,12 +80,12 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
     private[this] val mStartLvl = new SpinnerNumberModel(0.0, -1.0e6, 1.0e6, 0.1)
     private[this] val mParam    = new SpinnerNumberModel(0.0, -1.0e6, 1.0e6, 0.1)
-    private[this] val sqCurve    = Seq[Curve](
+    private[this] val sqCurve   = Seq[Curve](
       Curve.step, Curve.linear, Curve.exponential,
       Curve.sine, Curve.welch, Curve.parametric(0f), Curve.squared, Curve.cubed
     )
     private[this] val nCurve    = sqCurve.map { w => w.toString.capitalize }
-    private[this] val mCurve     = ComboBox.Model.wrap(nCurve)
+    private[this] val mCurve    = ComboBox.Model.wrap(nCurve)
 
     def nameOption: Option[String] = ggNameOpt.flatMap { gg =>
       val s0 = gg.text
@@ -118,15 +121,15 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
       val warpI = sqCurve.indexOf(warpNorm)
       mCurve.selectedItem = if (warpI < 0) None else Some(nCurve(warpI))
 
-      updateExampleAndParam()
+      updateParam()
     }
 
     private def mkSpinner(m: SpinnerModel): Spinner = {
       val res = new Spinner(m)
-//      res.listenTo(res)
-//      res.reactions += {
-//        case ValueChanged(_) => updateExample()
-//      }
+      res.listenTo(res)
+      res.reactions += {
+        case ValueChanged(_) => dispatch(())
+      }
       res
     }
 
@@ -136,45 +139,52 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     private[this] val ggCurve   = new ComboBox(mCurve) {
       listenTo(selection)
       reactions += {
-        case SelectionChanged(_) => updateExampleAndParam()
+        case SelectionChanged(_) => updateParam()
       }
     }
 
-    private[this] val lbName      = new Label(if (nameIn.isEmpty) "" else "Name:", EmptyIcon, Alignment.Right)
+    private[this] val lbName      = {
+      val res = new Label("Name:", EmptyIcon, Alignment.Right)
+      if (nameIn.isEmpty) res.visible = false
+      res
+    }
     private[this] val lbStartLvl  = new Label( "Start Level:", EmptyIcon, Alignment.Right)
     private[this] val lbCurve     = new Label(       "Curve:", EmptyIcon, Alignment.Right)
     private[this] val lbParam     = new Label(   "Curvature:", EmptyIcon, Alignment.Right)
 
-    private def updateExampleAndParam(fire: Boolean = true): Unit = {
+    private def updateParam(fire: Boolean = true): Unit = {
       val v = value // updateExample(fire = false)
       ggParam.enabled = editable && v.curve.isInstanceOf[Curve.parametric]
       if (fire) dispatch(())
     }
 
-    updateExampleAndParam(fire = false)
+    updateParam(fire = false)
 
     private[this] val boxParams = new GroupPanel {
       horizontal= Seq(
-        Par(Trailing)(lbName, lbStartLvl), Par(ggName , ggStartLvl),
-        Gap.Preferred(GroupPanel.Placement.Unrelated),
-        Par(Trailing)(lbCurve, lbParam), Par(ggCurve, ggParam))
+        Par(Trailing)(lbName, lbStartLvl, lbCurve, lbParam),
+        Par          (ggName, ggStartLvl, ggCurve, ggParam)
+      )
       vertical = Seq(
-        Par(Baseline)(lbName, ggName ),
-        Par(Baseline)(lbStartLvl  , ggStartLvl  , lbCurve , ggCurve ),
-        Par(Baseline)(lbParam, ggParam))
+        Par(Baseline)(lbName    , ggName    ),
+        Par(Baseline)(lbStartLvl, ggStartLvl),
+        Par(Baseline)(lbCurve   , ggCurve   ),
+        Par(Baseline)(lbParam   , ggParam   )
+      )
     }
 
-    private[this] val box = new BoxPanel(Orientation.Vertical)
-    box.contents += boxParams
+//    private[this] val box = new BoxPanel(Orientation.Vertical)
+//    box.contents += boxParams
 //    box.contents += Swing.VStrut(8)
 //    box.contents += boxDemo
 
     if (!editable) {
       ggStartLvl.enabled = false
+      ggCurve   .enabled = false
       ggParam   .enabled = false
     }
 
-    def component: Component = box
+    def component: Component = boxParams // box
   }
 
   // XXX TODO DRY with ParamSpecObjView
@@ -231,20 +241,36 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
     private def updateDirty(): Unit = {
       val valueNow  = panel.value
-      val isDirty   = value != valueNow
+      val isDirty   = value !== valueNow
       val wasDirty  = _dirty.single.swap(isDirty)
-      if (isDirty != wasDirty) actionApply.enabled = isDirty
+      if (isDirty !== wasDirty) actionApply.enabled = isDirty
     }
 
     def save(): Unit = {
       requireEDT()
       val newValue = panel.value
       val editOpt = cursor.step { implicit tx =>
+        val title = s"Edit $humanName"
         objH() match {
           case EnvSegment.Obj.Var(pVr) =>
             val pVal  = EnvSegment.Obj.newConst[S](newValue)
-            val edit  = EditVar.Expr[S, EnvSegment, EnvSegment.Obj](s"Edit $humanName", pVr, pVal)
+            val edit  = EditVar.Expr[S, EnvSegment, EnvSegment.Obj](title, pVr, pVal)
             Some(edit)
+
+          case EnvSegment.Obj.ApplySingle(DoubleObj.Var(startVr), CurveObj.Var(curveVr)) =>
+            var edits = List.empty[UndoableEdit]
+            val newCurve = newValue.curve
+            if (curveVr.value !== newCurve) {
+              val curveVal = CurveObj.newConst[S](newCurve)
+              edits ::= EditVar.Expr[S, Curve, CurveObj](title, curveVr, curveVal)
+            }
+            val newStart = newValue.startLevels.headOption.getOrElse(0.0) // XXX TODO
+            if (startVr.value !== newStart) {
+              val startVal = DoubleObj.newConst[S](newStart)
+              edits ::= EditVar.Expr[S, Double, DoubleObj](title, startVr, startVal)
+            }
+            CompoundEdit(edits, title)
+
           case _ => None
         }
       }
@@ -266,7 +292,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     //    resizable = false
 
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
-      if (!view.editable && !view.dirty) None else Some(this)
+      if (!view.editable || !view.dirty) None else Some(this)
 
     private def _vetoMessage = "The object has been edited."
 
@@ -295,10 +321,17 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     }
   }
 
+  private def detectEditable[S <: Sys[S]](obj: E[S]): Boolean =
+    obj match {
+      case EnvSegment.Obj.Var(_) => true
+      case EnvSegment.Obj.ApplySingle(DoubleObj.Var(_), CurveObj.Var(_)) => true
+      case _ => false // XXX TODO --- support multi
+    }
+
   def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
                                  (implicit tx: S#Tx): GraphemeObjView[S] = {
     val value     = obj.value
-    val editable  = EnvSegment.Obj.Var.unapply(obj).isDefined
+    val editable  = detectEditable(obj)
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = value, isEditable = editable)
       .initAttrs(obj).initAttrs(entry)
   }
@@ -339,7 +372,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     pane.title  = s"New $humanName"
     val res = pane.show(window)
 
-    val res1 = if (res == Dialog.Result.Ok) {
+    val res1 = if (res === Dialog.Result.Ok) {
       Success(Config[S](name = panel.name, value = panel.value))
     } else {
       Failure(Aborted())
@@ -446,7 +479,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
       with GraphemeObjView.HasStartLevels[S] {
 
     private[this] val allSame =
-      value.numChannels <= 1 || { val v0 = value.startLevels; val vh = v0.head; v0.forall(_ == vh) }
+      value.numChannels <= 1 || { val v0 = value.startLevels; val vh = v0.head; v0.forall(_ === vh) }
 
     def startLevels: Vec[Double] = value.startLevels
 
@@ -467,7 +500,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
         val endLvl    = succ .startLevels
         val numChS    = startLvl.size
         val numChE    = endLvl  .size
-        if (numChS == 0 || numChE == 0) return
+        if (numChS === 0 || numChE === 0) return
 
         val numCh         = math.max(numChS, numChE)
         val c             = gv.canvas
@@ -523,7 +556,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     }
 
     override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
-      if (value.numChannels == 0) return
+      if (value.numChannels === 0) return
       val levels = value.startLevels
       if (allSame) {
         DoubleObjView.graphemePaintFront(this, levels.head, g, gv, r)
