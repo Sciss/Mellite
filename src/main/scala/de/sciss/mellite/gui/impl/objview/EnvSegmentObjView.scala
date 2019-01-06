@@ -16,8 +16,8 @@ package de.sciss.mellite.gui.impl.objview
 import java.awt.geom.Area
 
 import de.sciss.desktop
+import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.equal.Implicits._
 import de.sciss.icons.raphael
 import de.sciss.kollflitz.Vec
@@ -32,8 +32,7 @@ import de.sciss.mellite.gui.GraphemeObjView.{HandleDiameter, HandleRadius, HasSt
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{GUI, GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
-import de.sciss.mellite.util.Veto
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
@@ -45,11 +44,9 @@ import de.sciss.synth.proc.{CurveObj, EnvSegment, Universe}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
 
-import scala.concurrent.stm.Ref
-import scala.concurrent.{Future, Promise}
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{SelectionChanged, ValueChanged}
-import scala.swing.{Action, Alignment, BorderPanel, Component, Dialog, FlowPanel, Graphics2D, Label, Swing, TextField}
+import scala.swing.{Alignment, Component, Dialog, Graphics2D, Label, Swing, TextField}
 import scala.util.{Failure, Success}
 
 object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
@@ -197,8 +194,8 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
 
     private[this] var value       : EnvSegment        = _
     private[this] var panel       : PanelImpl         = _
-    private[this] val _dirty      : Ref[Boolean]      = Ref(false)
-    private[this] var actionApply : Action            = _
+    // private[this] val _dirty      : Ref[Boolean]      = Ref(false)
+    // private[this] var actionApply : Action            = _
     private[this] var observer    : Disposable[S#Tx]  = _
 
     def init(obj0: EnvSegment.Obj[S])(implicit tx: S#Tx): this.type = {
@@ -219,32 +216,33 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
       panel.value = value0
 
       panel.addListener {
-        case _ => updateDirty()
+        case _ => save() // updateDirty()
       }
 
-      actionApply = Action("Apply") {
-        save()
-        updateDirty()
-      }
+//      actionApply = Action("Apply") {
+//        save()
+//        updateDirty()
+//      }
 
-      actionApply.enabled = false
-      val ggApply   = GUI.toolButton(actionApply, raphael.Shapes.Check, tooltip = "Save changes")
-      val panelBot  = new FlowPanel(FlowPanel.Alignment.Trailing)(ggApply)
+//      actionApply.enabled = false
+//      val ggApply   = GUI.toolButton(actionApply, raphael.Shapes.Check, tooltip = "Save changes")
+//      val panelBot  = new FlowPanel(FlowPanel.Alignment.Trailing)(ggApply)
 
-      component = new BorderPanel {
-        add(panel.component, BorderPanel.Position.Center)
-        add(panelBot       , BorderPanel.Position.South )
-      }
+//      component = new BorderPanel {
+//        add(panel.component, BorderPanel.Position.Center)
+//        add(panelBot       , BorderPanel.Position.South )
+//      }
+      component = panel.component
     }
 
-    def dirty(implicit tx: S#Tx): Boolean = _dirty.get(tx.peer)
+//    def dirty(implicit tx: S#Tx): Boolean = _dirty.get(tx.peer)
 
-    private def updateDirty(): Unit = {
-      val valueNow  = panel.value
-      val isDirty   = value !== valueNow
-      val wasDirty  = _dirty.single.swap(isDirty)
-      if (isDirty !== wasDirty) actionApply.enabled = isDirty
-    }
+//    private def updateDirty(): Unit = {
+//      val valueNow  = panel.value
+//      val isDirty   = value !== valueNow
+//      val wasDirty  = _dirty.single.swap(isDirty)
+//      if (isDirty !== wasDirty) actionApply.enabled = isDirty
+//    }
 
     def save(): Unit = {
       requireEDT()
@@ -253,9 +251,12 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
         val title = s"Edit $humanName"
         objH() match {
           case EnvSegment.Obj.Var(pVr) =>
-            val pVal  = EnvSegment.Obj.newConst[S](newValue)
-            val edit  = EditVar.Expr[S, EnvSegment, EnvSegment.Obj](title, pVr, pVal)
-            Some(edit)
+            val oldVal  = pVr.value
+            if (newValue === oldVal) None else {
+              val pVal    = EnvSegment.Obj.newConst[S](newValue)
+              val edit    = EditVar.Expr[S, EnvSegment, EnvSegment.Obj](title, pVr, pVal)
+              Some(edit)
+            }
 
           case EnvSegment.Obj.ApplySingle(DoubleObj.Var(startVr), CurveObj.Var(curveVr)) =>
             var edits = List.empty[UndoableEdit]
@@ -287,38 +288,38 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   // XXX TODO DRY with ParamSpecObjView
   private final class FrameImpl[S <: Sys[S]](val view: ViewImpl[S],
                                              name: CellView[S#Tx, String])
-    extends WindowImpl[S](name) with Veto[S#Tx] {
+    extends WindowImpl[S](name) /* with Veto[S#Tx] */ {
 
     //    resizable = false
 
-    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
-      if (!view.editable || !view.dirty) None else Some(this)
-
-    private def _vetoMessage = "The object has been edited."
-
-    def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
-
-    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
-      val p = Promise[Unit]()
-      deferTx {
-        val message = s"${_vetoMessage}\nDo you want to save the changes?"
-        val opt = OptionPane.confirmation(message = message, optionType = OptionPane.Options.YesNoCancel,
-          messageType = OptionPane.Message.Warning)
-        opt.title = s"Close - $title"
-        opt.show(Some(window)) match {
-          case OptionPane.Result.No =>
-            p.success(())
-
-          case OptionPane.Result.Yes =>
-            /* val fut = */ view.save()
-            p.success(())
-
-          case OptionPane.Result.Cancel | OptionPane.Result.Closed =>
-            p.failure(Aborted())
-        }
-      }
-      p.future
-    }
+//    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+//      if (!view.editable || !view.dirty) None else Some(this)
+//
+//    private def _vetoMessage = "The object has been edited."
+//
+//    def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
+//
+//    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
+//      val p = Promise[Unit]()
+//      deferTx {
+//        val message = s"${_vetoMessage}\nDo you want to save the changes?"
+//        val opt = OptionPane.confirmation(message = message, optionType = OptionPane.Options.YesNoCancel,
+//          messageType = OptionPane.Message.Warning)
+//        opt.title = s"Close - $title"
+//        opt.show(Some(window)) match {
+//          case OptionPane.Result.No =>
+//            p.success(())
+//
+//          case OptionPane.Result.Yes =>
+//            /* val fut = */ view.save()
+//            p.success(())
+//
+//          case OptionPane.Result.Cancel | OptionPane.Result.Closed =>
+//            p.failure(Aborted())
+//        }
+//      }
+//      p.future
+//    }
   }
 
   private def detectEditable[S <: Sys[S]](obj: E[S]): Boolean =
