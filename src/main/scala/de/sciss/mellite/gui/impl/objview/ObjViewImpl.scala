@@ -16,7 +16,6 @@ package de.sciss.mellite.gui.impl.objview
 import java.awt.geom.Path2D
 import java.awt.{Color => AWTColor}
 
-import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.confluent.Access
 import de.sciss.lucre.event.impl.ObservableImpl
@@ -29,10 +28,11 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
 import de.sciss.mellite.gui.{GUI, ObjView}
 import de.sciss.mellite.{Cf, Mellite}
+import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.gui.UniverseView
-import de.sciss.synth.proc.{Color, Confluent, ObjKeys, Universe, Workspace}
+import de.sciss.synth.proc.{Color, Confluent, ObjKeys, TimeRef, Universe, Workspace}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -41,6 +41,55 @@ import scala.swing.Component
 import scala.util.{Failure, Try}
 
 object ObjViewImpl {
+  object TimeArg {
+    // XXX TODO --- support '[HH:]MM:SS[.mmm]'
+    implicit object Read extends scopt.Read[TimeArg] {
+      def arity: Int = 1
+
+      def reads: String => TimeArg = { s =>
+        val t = s.trim
+        if (t.endsWith("s")) {
+          val n = t.substring(0, t.length - 1).toDouble
+          Sec(n)
+        } else {
+          val n = t.toLong
+          Frames(n)
+        }
+      }
+    }
+
+    final case class Sec(n: Double) extends TimeArg {
+      def frames(sr: Double): Long = (n * TimeRef.SampleRate + 0.5).toLong
+    }
+
+    final case class Frames(n: Long) extends TimeArg {
+      override def toString: String = n.toString
+
+      def frames(sr: Double): Long = n
+    }
+  }
+  sealed trait TimeArg {
+    def frames(sr: Double = TimeRef.SampleRate): Long
+  }
+
+  object GainArg {
+    implicit object Read extends scopt.Read[GainArg] {
+      def arity: Int = 1
+
+      def reads: String => GainArg = { s =>
+        val t = s.trim
+        val frames = if (t.endsWith("dB")) {
+          val db = t.substring(0, t.length - 2).toDouble
+          import numbers.Implicits._
+          db.dbAmp
+        } else {
+          t.toDouble
+        }
+        GainArg(frames)
+      }
+    }
+  }
+  final case class GainArg(linear: Double)
 
   def nameOption[S <: stm.Sys[S]](obj: Obj[S])(implicit tx: S#Tx): Option[String] =
     obj.attr.$[StringObj](ObjKeys.attrName).map(_.value)

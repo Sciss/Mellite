@@ -69,7 +69,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     val default: Config[S] = Config(value = Vec())
     val p = ObjViewCmdLineParser[S](this)
     import p._

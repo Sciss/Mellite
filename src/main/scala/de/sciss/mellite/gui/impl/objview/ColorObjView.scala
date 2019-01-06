@@ -98,7 +98,7 @@ object ColorObjView extends ListObjView.Factory {
     def reads: String => Color = { s => parseString(s).get }
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     val default: Config[S] = Config(value = null)
     val p = ObjViewCmdLineParser[S](this)
     import p._

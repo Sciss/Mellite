@@ -21,7 +21,7 @@ import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
+import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{TimeArg, raphaelIcon}
 import de.sciss.mellite.gui.{EnsembleFrame, ListObjView, ObjView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Spinner}
@@ -97,25 +97,7 @@ object EnsembleObjView extends ListObjView.Factory {
     done(res1)
   }
 
-  private case class Time(frames: Long)
-
-  // XXX TODO --- support '[HH:]MM:SS[.mmm]'
-  private implicit object ReadTime extends scopt.Read[Time] {
-    def arity: Int = 1
-
-    def reads: String => Time = { s =>
-      val t = s.trim
-      val frames = if (t.endsWith("s")) {
-        val sec = t.substring(0, t.length - 1).toDouble
-        (sec * TimeRef.SampleRate + 0.5).toLong
-      } else {
-        t.toLong
-      }
-      Time(frames)
-    }
-  }
-
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     val default: Config[S] = Config()
     val p = ObjViewCmdLineParser[S](this)
     import p._
@@ -125,9 +107,9 @@ object EnsembleObjView extends ListObjView.Factory {
       .text("Initial playing value (0, 1, false, true)")
       .action((v, c) => c.copy(playing = v))
 
-    opt[Time]('p', "playing")
+    opt[TimeArg]('p', "playing")
       .text("Offset value (frames, 1.3s, ...)")
-      .action((v, c) => c.copy(offset = v.frames))
+      .action((v, c) => c.copy(offset = v.frames()))
 
     opt[Unit]('c', "const")
       .text(s"Make constant offset instead of variable")

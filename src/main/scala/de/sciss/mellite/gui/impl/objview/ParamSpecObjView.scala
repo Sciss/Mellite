@@ -26,7 +26,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.{GUI, ListObjView, ObjView}
 import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
@@ -61,7 +61,7 @@ object ParamSpecObjView extends ListObjView.Factory {
     new Impl(tx.newHandle(obj), value, isEditable = editable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String, init: ParamSpec)
+  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
 
   private final class PanelImpl(nameIn: Option[String], editable: Boolean) extends ModelImpl[Unit] {
 
@@ -262,19 +262,73 @@ object ParamSpecObjView extends ListObjView.Factory {
     val res = pane.show(window)
 
     val res1 = if (res == Dialog.Result.Ok) {
-      Success(Config[S](name = panel.name, init = panel.spec))
+      Success(Config[S](name = panel.name, value = panel.spec))
     } else {
       Failure(Aborted())
     }
     done(res1)
   }
 
-  def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = ???
+  private implicit object ReadWarp extends scopt.Read[Warp] {
+    def arity: Int = 1
+
+    private[this] val map: Map[String, Warp] = Map(
+      "lin"         -> LinearWarp,
+      "linear"      -> LinearWarp,
+      "exp"         -> ExponentialWarp,
+      "exponential" -> ExponentialWarp,
+      "cos"         -> CosineWarp,
+      "cosine"      -> CosineWarp,
+      "sin"         -> SineWarp,
+      "sine"        -> SineWarp,
+      "fader"       -> FaderWarp,
+      "dbfader"     -> DbFaderWarp,
+      "int"         -> IntWarp,
+    )
+
+    def reads: String => Warp = { s =>
+      map.getOrElse(s.toLowerCase, {
+        val p = s.toDouble
+        ParametricWarp(p)
+      })
+    }
+  }
+
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
+    val default: Config[S] = Config()
+    val p = ObjViewCmdLineParser[S](this)
+    import p._
+    // ParamSpec(lo: Double, hi: Double, warp: Warp, unit: String)
+    name((v, c) => c.copy(name = v))
+    opt[Warp]('w', "warp")
+      .text(s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})")
+      .action((v, c) => c.copy(value = c.value.copy(warp = v)))
+
+    opt[Unit]('c', "const")
+      .text(s"Make constant instead of variable")
+      .action((_, c) => c.copy(const = true))
+
+    opt[String]('u', "unit")
+      .text("Unit label")
+      .action { (v, c) => c.copy(value = c.value.copy(unit = v)) }
+
+    arg[Double]("low")
+      .text("Lowest parameter value")
+      .required()
+      .action { (v, c) => c.copy(value = c.value.copy(lo = v)) }
+
+    arg[Double]("high")
+      .text("Highest parameter value")
+      .required()
+      .action { (v, c) => c.copy(value = c.value.copy(hi = v)) }
+
+    parseConfig(args, default)
+  }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    val name  = config.name
-    val value = config.init
-    val obj = ParamSpec.Obj.newVar(ParamSpec.Obj.newConst[S](value))
+    import config._
+    val obj0  = ParamSpec.Obj.newConst[S](value)
+    val obj   = if (const) obj0 else ParamSpec.Obj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

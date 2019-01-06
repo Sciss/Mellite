@@ -85,7 +85,7 @@ object ArtifactObjView extends ListObjView.Factory {
     done(res1)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] = {
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     val default: Config[S] = Config(name = prefix, file = file(""), location = null)
     val p = ObjViewCmdLineParser[S](this)
     import p._

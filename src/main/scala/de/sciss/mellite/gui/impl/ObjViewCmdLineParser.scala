@@ -14,7 +14,6 @@
 package de.sciss.mellite.gui.impl
 
 import de.sciss.lucre.stm.Sys
-import de.sciss.mellite.gui.impl.objview.EnsembleObjView.prefix
 import de.sciss.mellite.gui.{MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import scopt.{OptionDef, OptionParser}
@@ -38,7 +37,7 @@ class ObjViewCmdLineParser[C](private val f: ObjView.Factory)
 
   def name(action: (String, C) => C): OptionDef[String, C] =
     opt[String]('n', "name")
-      .text(s"Object's name (default: $prefix)")
+      .text(s"Object's name (default: ${f.prefix})")
       .action(action)
 
   def parseConfig(args: List[String], default: C): Try[C] = {

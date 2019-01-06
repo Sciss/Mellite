@@ -175,7 +175,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     res
   }
 
-  private[this] lazy val ggNewType = new TextField(12)
+  private[this] lazy val ggNewType = new TextField(16)
 
   private def newTypeDialog(): Unit = {
     //      // cf. https://stackoverflow.com/questions/366202/regex-for-splitting-a-string-using-space-when-not-surrounded-by-single-or-double

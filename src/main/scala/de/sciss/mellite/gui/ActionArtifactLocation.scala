@@ -69,7 +69,7 @@ object ActionArtifactLocation {
     def createNewRes(): Option[QueryResult[S]] =
       createNew().map { case (name, base) => (Right(name), base) }
 
-    val options = find(file = file, window = window)(root)
+    val options = find(file = file)(root)
 
     options match {
       case Vec() => createNewRes()
@@ -95,7 +95,7 @@ object ActionArtifactLocation {
     }
   }
 
-  def find[S <: Sys[S]](file: File, window: Option[desktop.Window] = None)(root: S#Tx => Folder[S])
+  def find[S <: Sys[S]](file: File)(root: S#Tx => Folder[S])
                        (implicit universe: Universe[S]): Vec[Labeled[LocationSourceT[S]]] = {
     import universe.cursor
     val options: Vec[Labeled[LocationSourceT[S]]] = cursor.step { implicit tx =>

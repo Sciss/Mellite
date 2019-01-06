@@ -37,6 +37,6 @@ trait NoMakeListObjViewFactory extends ListObjView.Factory {
                                           (implicit universe: Universe[S]): Unit =
     done(initMakeCmdLine(Nil))
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String]): MakeResult[S] =
+  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] =
     Failure(new UnsupportedOperationException(s"Make $humanName"))
 }
