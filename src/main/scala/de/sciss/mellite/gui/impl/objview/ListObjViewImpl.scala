@@ -68,7 +68,7 @@ object ListObjViewImpl {
     IntObjView                .tpe.typeId -> IntObjView,
     MarkdownObjView           .tpe.typeId -> MarkdownObjView,
     ObjViewImpl.Boolean       .tpe.typeId -> ObjViewImpl.Boolean,
-    ObjViewImpl.Color         .tpe.typeId -> ObjViewImpl.Color,
+    ColorObjView              .tpe.typeId -> ColorObjView,
     ObjViewImpl.Ensemble      .tpe.typeId -> ObjViewImpl.Ensemble,
     ObjViewImpl.FadeSpec      .tpe.typeId -> ObjViewImpl.FadeSpec,
     ObjViewImpl.Folder        .tpe.typeId -> ObjViewImpl.Folder,

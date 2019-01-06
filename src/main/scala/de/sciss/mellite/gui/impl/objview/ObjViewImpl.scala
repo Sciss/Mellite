@@ -26,11 +26,9 @@ import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.{BooleanObj, CellView, Expr, LongObj, StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
-import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.{View, Window, deferTx}
+import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
-import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.mellite.gui.impl.{ExprHistoryView, ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.{EnsembleFrame, FolderFrame, GUI, GraphemeFrame, ListObjView, MessageException, ObjView, Shapes, TimelineFrame}
@@ -46,7 +44,7 @@ import javax.swing.{Icon, SpinnerNumberModel, UIManager}
 
 import scala.language.higherKinds
 import scala.swing.Swing.EmptyIcon
-import scala.swing.{Action, Alignment, BorderPanel, Button, CheckBox, ColorChooser, Component, Dialog, FlowPanel, GridPanel, Label, Swing, TextField}
+import scala.swing.{Alignment, CheckBox, Component, Dialog, Label, TextField}
 import scala.util.{Failure, Success, Try}
 
 object ObjViewImpl {
@@ -399,166 +397,6 @@ object ObjViewImpl {
         label
       }
     }
-  }
-
-  // -------- Color --------
-
-  object Color extends ListObjView.Factory {
-    type E[~ <: stm.Sys[~]] = _Color.Obj[~]
-    val icon          : Icon      = raphaelIcon(raphael.Shapes.Paint)
-    val prefix        : _String   = "Color"
-    def humanName     : _String   = prefix
-    def tpe           : Obj.Type  = _Color.Obj
-    def category      : _String   = ObjView.categOrganisation
-    def canMakeObj    : Boolean   = true
-
-    def mkListView[S <: Sys[S]](obj: _Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
-      val ex          = obj
-      val value       = ex.value
-      val isEditable  = ex match {
-        case _Color.Obj.Var(_)  => true
-        case _                  => false
-      }
-      new Color.Impl[S](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
-    }
-
-    final case class Config[S <: stm.Sys[S]](name: String = prefix, value: _Color, const: Boolean = false)
-
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                   (done: MakeResult[S] => Unit)
-                                   (implicit universe: Universe[S]): Unit = {
-      val (ggValue, ggChooser) = mkColorEditor()
-      val res0 = primitiveConfig[S, _Color](window, tpe = prefix, ggValue = ggValue, prepare =
-        Success(fromAWT(ggChooser.color)))
-      val res = res0.map(c => Config[S](name = c.name, value = c.value))
-      done(res)
-    }
-
-    private def mkColorEditor(): (Component, ColorChooser) = {
-      val chooser = new ColorChooser()
-      val bPredef = _Color.Palette.map { colr =>
-        val action: Action = new Action(null /* colr.name */) {
-          private val awtColor = toAWT(colr)
-          icon = new PaintIcon(awtColor, 32, 32)
-          def apply(): Unit = chooser.color = awtColor
-        }
-        val b = new Button(action)
-        // b.horizontalAlignment = Alignment.Left
-        b.focusable = false
-        b
-      }
-      val pPredef = new GridPanel(4, 4)
-      pPredef.contents ++= bPredef
-      val panel = new BorderPanel {
-        add(pPredef, BorderPanel.Position.West  )
-        add(chooser, BorderPanel.Position.Center)
-      }
-      (panel, chooser)
-    }
-
-    def toAWT(c: _Color): java.awt.Color = new java.awt.Color(c.rgba)
-    def fromAWT(c: java.awt.Color): _Color = {
-      val rgba = c.getRGB
-      _Color.Palette.find(_.rgba == rgba).getOrElse(_Color.User(rgba))
-    }
-
-    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-      import config._
-      val obj0  = _Color.Obj.newConst[S](value)
-      val obj   = if (const) obj0 else _Color.Obj.newVar(obj0)
-      if (!name.isEmpty) obj.name = name
-      obj :: Nil
-    }
-
-    final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, _Color.Obj[S]],
-                                  var value: _Color, isEditable0: _Boolean)
-      extends ListObjView /* .Color */[S]
-      with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, _Color, _Color.Obj] {
-
-      type E[~ <: stm.Sys[~]] = _Color.Obj[~]
-
-      def isEditable = false    // not until we have proper editing components
-
-      def factory: ObjView.Factory = Color
-
-      def exprType: Type.Expr[_Color, _Color.Obj] = _Color.Obj
-
-      def expr(implicit tx: S#Tx): _Color.Obj[S] = objH()
-
-      def configureRenderer(label: Label): Component = {
-        // renderers are used for "stamping", so we can reuse a single object.
-        label.icon = ListIcon
-        ListIcon.paint = Color.toAWT(value)
-        label
-      }
-
-      def convertEditValue(v: Any): Option[_Color] = v match {
-        case c: _Color  => Some(c)
-        case _          => None
-      }
-
-      def isViewable: _Boolean = isEditable0
-
-      override def openView(parent: Option[Window[S]])
-                           (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-//        val opt = OptionPane.confirmation(message = component, optionType = OptionPane.Options.OkCancel,
-//          messageType = OptionPane.Message.Plain)
-//        opt.show(parent) === OptionPane.Result.Ok
-        val title = CellView.name(obj)
-        val w: WindowImpl[S] = new WindowImpl[S](title) { self =>
-          val view: View[S] = View.wrap {
-            val (compColor, chooser) = Color.mkColorEditor()
-            chooser.color = Color.toAWT(value)
-            val ggCancel = Button("Cancel") {
-              closeMe() // self.handleClose()
-            }
-
-            def apply(): Unit = {
-              val colr = Color.fromAWT(chooser.color)
-              import universe.cursor
-              val editOpt = cursor.step { implicit tx =>
-                objH() match {
-                  case _Color.Obj.Var(vr) =>
-                    Some(EditVar.Expr[S, _Color, _Color.Obj]("Change Color", vr, _Color.Obj.newConst[S](colr)))
-                  case _ => None
-                }
-              }
-              editOpt.foreach { edit =>
-                parent.foreach { p =>
-                  p.view match {
-                    case e: View.Editable[S] => e.undoManager.add(edit)
-                  }
-                }
-              }
-            }
-
-            val ggOk = Button("Ok") {
-              apply()
-              closeMe() // self.handleClose()
-            }
-            val ggApply = Button("Apply") {
-              apply()
-            }
-            val pane = new BorderPanel {
-              add(compColor, BorderPanel.Position.Center)
-              add(new FlowPanel(ggOk, ggApply, Swing.HStrut(8), ggCancel), BorderPanel.Position.South)
-            }
-            pane
-          }
-
-          def closeMe(): Unit = {
-            import universe.cursor
-            cursor.step { implicit tx => self.dispose() }
-          }
-
-          init()
-        }
-        Some(w)
-      }
-    }
-
-    private val ListIcon = new PaintIcon(java.awt.Color.black, 48, 16)
   }
 
   // -------- Folder --------
