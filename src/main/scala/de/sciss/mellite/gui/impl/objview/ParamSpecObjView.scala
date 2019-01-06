@@ -300,10 +300,6 @@ object ParamSpecObjView extends ListObjView.Factory {
     import p._
     // ParamSpec(lo: Double, hi: Double, warp: Warp, unit: String)
     name((v, c) => c.copy(name = v))
-    opt[Warp]('w', "warp")
-      .text(s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})")
-      .action((v, c) => c.copy(value = c.value.copy(warp = v)))
-
     opt[Unit]('c', "const")
       .text(s"Make constant instead of variable")
       .action((_, c) => c.copy(const = true))
@@ -321,6 +317,10 @@ object ParamSpecObjView extends ListObjView.Factory {
       .text("Highest parameter value")
       .required()
       .action { (v, c) => c.copy(value = c.value.copy(hi = v)) }
+
+    arg[Warp]("warp")
+      .text(s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})")
+      .action((v, c) => c.copy(value = c.value.copy(warp = v)))
 
     parseConfig(args, default)
   }
@@ -426,7 +426,7 @@ object ParamSpecObjView extends ListObjView.Factory {
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
       if (!view.editable && !view.dirty) None else Some(this)
 
-    private def _vetoMessage = "The spec has been edited."
+    private def _vetoMessage = "The object has been edited."
 
     def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
 
