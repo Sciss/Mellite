@@ -26,5 +26,5 @@ trait TimelineRendering extends BasicRendering {
   def ttResizeState               : TimelineTool.Resize
   def ttGainState                 : TimelineTool.Gain
   def ttFadeState                 : TimelineTool.Fade
-  def ttFunctionState             : TimelineTool.Function
+  def ttFunctionState             : TimelineTool.Add
 }

@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.Adjust
 import de.sciss.mellite.gui.edit.EditGraphemeInsertObj
-import de.sciss.mellite.gui.{BasicTool, GUI, GraphemeCanvas, GraphemeObjView, GraphemeTool}
+import de.sciss.mellite.gui.{BasicTool, GUI, GraphemeCanvas, GraphemeObjView, GraphemeTool, Shapes}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{CurveObj, EnvSegment}
@@ -38,8 +38,9 @@ final class AddImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
   type Child  = GraphemeObjView[S]
 
   def defaultCursor: AWTCursor  = AWTCursor.getPredefinedCursor(AWTCursor.CROSSHAIR_CURSOR)
-  def name                      = "Add"
-  val icon: Icon                = GUI.iconNormal(raphael.Shapes.Plus)
+  def name                      = "Add Envelope Segment"
+//  val icon: Icon                = GUI.iconNormal(raphael.Shapes.Plus)
+  val icon: Icon                = GUI.iconNormal(Shapes.plus(raphael.Shapes.Connect))
 
   private[this] val mia = new MouseAdapter {
     override def mousePressed(e: MouseEvent): Unit = {

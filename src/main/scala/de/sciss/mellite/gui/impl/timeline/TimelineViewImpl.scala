@@ -605,7 +605,7 @@ object TimelineViewImpl {
             case t: TimelineTool.Gain => toolGain commit t
             case t: TimelineTool.Mute => toolMute commit t
             case t: TimelineTool.Fade => toolFade commit t
-            case t: TimelineTool.Function => toolFunction commit t
+            case t: TimelineTool.Add => toolFunction commit t
             case t: TimelineTool.Patch[S] => toolPatch commit t
             case _ => None
           }
@@ -635,7 +635,7 @@ object TimelineViewImpl {
           case s: TimelineTool.Resize    => r.ttResizeState    = s
           case s: TimelineTool.Gain      => r.ttGainState      = s
           case s: TimelineTool.Fade      => r.ttFadeState      = s
-          case s: TimelineTool.Function  => r.ttFunctionState  = s
+          case s: TimelineTool.Add  => r.ttFunctionState  = s
           case s: TimelineTool.Patch[S]  => patchState         = s
           case _ =>
         }

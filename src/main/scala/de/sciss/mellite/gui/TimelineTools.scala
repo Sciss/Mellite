@@ -19,7 +19,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.ToolsImpl
-import de.sciss.mellite.gui.impl.timeline.tool.{AuditionImpl, CursorImpl, FadeImpl, FunctionImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
+import de.sciss.mellite.gui.impl.timeline.tool.{AuditionImpl, CursorImpl, FadeImpl, AddImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
 import de.sciss.mellite.gui.impl.tool.ToolPaletteImpl
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
@@ -105,9 +105,9 @@ object TimelineTool {
   final val NoResize    = Resize(deltaStart = 0L, deltaStop = 0L)
   final val NoGain      = Gain(1f)
   final val NoFade      = Fade(0L, 0L, 0f, 0f)
-  final val NoFunction  = Function(-1, -1, Span(0L, 0L))
+  final val NoFunction  = Add(-1, -1, Span(0L, 0L))
 
-  final case class Function(modelYOffset: Int, modelYExtent: Int, span: Span)
+  final case class Add(modelYOffset: Int, modelYExtent: Int, span: Span)
     extends Update[Nothing] with Rectangular
 
   final case class Cursor  (name: Option[String])
@@ -129,8 +129,8 @@ object TimelineTool {
   def gain    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Gain    ] = new GainImpl    (canvas)
   def mute    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Mute    ] = new MuteImpl    (canvas)
   def fade    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Fade    ] = new FadeImpl    (canvas)
-  def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Function] =
-    new FunctionImpl(canvas, view)
+  def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Add] =
+    new AddImpl(canvas, view)
 
   def patch   [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Patch[S]] = new PatchImpl   (canvas)
 

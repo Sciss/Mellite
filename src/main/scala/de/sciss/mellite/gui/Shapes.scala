@@ -13,9 +13,29 @@
 
 package de.sciss.mellite.gui
 
-import java.awt.geom.Path2D
+import java.awt.geom.{AffineTransform, GeneralPath, Path2D}
+
+import de.sciss.icons.raphael
 
 object Shapes {
+  def plus(fun: Path2D => Unit)(p: Path2D): Unit = {
+    val pp = new GeneralPath(Path2D.WIND_EVEN_ODD)
+    raphael.Shapes.Plus(pp)
+    val at = AffineTransform.getScaleInstance(0.5, 0.5)
+    pp.transform(at)
+    p.append(pp, false)
+    pp.reset()
+    fun(pp)
+//    at.setToScale(0.667, 0.667)
+//    at.translate(32 * 0.333, 32 * 0.333)
+    at.setToTranslation(32 * 0.25, 32 * 0.25)
+    at.scale(0.75, 0.75)
+    pp.transform(at)
+    p.append(pp, false)
+  }
+
+  //
+
   def RealNumber(p: Path2D): Unit = {
     p.moveTo(29.892f, 27.416f)
     p.curveTo(29.136002f, 27.272001f, 27.804f, 26.300001f, 27.408f, 25.796f)

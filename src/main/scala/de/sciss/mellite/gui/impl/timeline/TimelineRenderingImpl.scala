@@ -30,5 +30,5 @@ final class TimelineRenderingImpl(component: Component, isDark: Boolean)
   var ttResizeState   : TimelineTool.Resize    = TimelineTool.NoResize
   var ttGainState     : TimelineTool.Gain      = TimelineTool.NoGain
   var ttFadeState     : TimelineTool.Fade      = TimelineTool.NoFade
-  var ttFunctionState : TimelineTool.Function  = TimelineTool.NoFunction
+  var ttFunctionState : TimelineTool.Add  = TimelineTool.NoFunction
 }

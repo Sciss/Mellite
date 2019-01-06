@@ -1,5 +1,5 @@
 /*
- *  FunctionImpl.scala
+ *  AddImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -22,23 +22,24 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
 import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, DraggingTool}
-import de.sciss.mellite.gui.{BasicTools, GUI, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.gui.{BasicTools, GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.log
 import de.sciss.span.Span
 import de.sciss.synth.proc.Proc
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionToolLike[S, TimelineTool.Function, Int, TimelineObjView[S]]
-    with DraggingTool[S, TimelineTool.Function, Int]
-    with TimelineTool[S, TimelineTool.Function] {
+final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
+  extends CollectionToolLike[S, TimelineTool.Add, Int, TimelineObjView[S]]
+    with DraggingTool[S, TimelineTool.Add, Int]
+    with TimelineTool[S, TimelineTool.Add] {
 
-  import TimelineTool.Function
+  import TimelineTool.Add
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  val name                  = "Function"
-  val icon: Icon            = GUI.iconNormal(raphael.Shapes.Cogs)
+  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
+  val name                  = "Add Process" // "Function"
+//  val icon: Icon            = GUI.iconNormal(raphael.Shapes.Cogs)
+  val icon: Icon            = GUI.iconNormal(Shapes.plus(raphael.Shapes.Cogs))
 
   protected type Initial = Unit
 
@@ -57,16 +58,16 @@ final class FunctionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[
     }
   }
 
-  protected def dragToParam(d: Drag): Function = {
+  protected def dragToParam(d: Drag): Add = {
     val dStart  = math.min(d.firstPos, d.currentPos)
     val dStop   = math.max(dStart + BasicTools.MinDur, math.max(d.firstPos, d.currentPos))
     val dTrkIdx = math.min(d.firstModelY, d.currentModelY)
     val dTrkH   = math.max(d.firstModelY, d.currentModelY) - dTrkIdx + 1
 
-    Function(modelYOffset = dTrkIdx, modelYExtent = dTrkH, span = Span(dStart, dStop))
+    Add(modelYOffset = dTrkIdx, modelYExtent = dTrkH, span = Span(dStart, dStop))
   }
 
-  def commit(drag: Function)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+  def commit(drag: Add)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
     canvas.timeline.modifiableOption.map { g =>
       val span  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[S]
       val p     = Proc[S]
