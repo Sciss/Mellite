@@ -109,7 +109,7 @@ object CodeViewImpl2 {
         val inp  = io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
         val text = inp.getLines().mkString("\n")
         inp.close()
-        codePane.editorTab.text = text
+        codePane.text = text
       } catch {
         case NonFatal(e) => e.printStackTrace()
       }
@@ -137,8 +137,12 @@ object CodeViewImpl2 {
 
     def currentText: String = codePane.data.text
 
-    def dispose()(implicit tx: S#Tx): Unit =
+    def dispose()(implicit tx: S#Tx): Unit = {
       bottom.foreach(_.dispose())
+      deferTx {
+        codePane.dispose()
+      }
+    }
 
     def undoAction: Action = new ActionAdapter(codePane.currentEditor.actions.undo)
     def redoAction: Action = new ActionAdapter(codePane.currentEditor.actions.redo)
@@ -288,7 +292,7 @@ object CodeViewImpl2 {
           postlude          = "\n}",
           examples          = Nil
         ),
-        text              = code.source,
+        text0             = code.source,
 //        font        = ...,
         stylingName       = Some(if (Mellite.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
@@ -310,7 +314,7 @@ object CodeViewImpl2 {
 //      )
 
       codePane.onChange {
-        case dotterweide.ide.Panel.FileOrDirtyChange(_, d) => dirty = d
+        case dotterweide.ide.Panel.DirtyChanged(d) => dirty = d
         case _ =>
       }
 
