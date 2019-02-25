@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.31.0"
+lazy val projectVersion             = "2.31.1-SNAPSHOT"
 lazy val mimaVersion                = "2.31.0"
 
 lazy val loggingEnabled             = true
@@ -15,9 +15,11 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
+    val akka                = "2.5.21"
     val audioFile           = "1.5.1"
     val audioWidgets        = "1.14.0"
     val desktop             = "0.10.0"
+    val dotterweide         = "0.1.0-SNAPSHOT"
     val equal               = "0.1.3"
     val fileCache           = "0.5.0"
     val fileUtil            = "1.1.3"
@@ -230,6 +232,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "scalacolliderugens-core"        % deps.main.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // UI methods for scala-collider
       "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
+      "de.sciss"          %% "dotterweide-ui"                 % deps.main.dotterweide,        // Code editor
+      "de.sciss"          %% "dotterweide-scala"              % deps.main.dotterweide,        // Code editor
       "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
       "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing
       "de.sciss"          %% "serial"                         % deps.main.serial,             // serialization
@@ -245,6 +249,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improv
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
+      "com.typesafe.akka" %% "akka-stream"                    % deps.main.akka,               // align with akka actor version
+      "com.typesafe.akka" %% "akka-stream-testkit"            % deps.main.akka,               // align with akka actor version
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
     ),
     libraryDependencies ++= {
