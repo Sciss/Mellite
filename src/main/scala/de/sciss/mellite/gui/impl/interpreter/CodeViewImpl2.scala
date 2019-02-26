@@ -30,7 +30,10 @@ import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.synth.proc.{Code, Universe}
-import dotterweide.editor.ColorScheme
+import dotterweide.Span
+import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
+import dotterweide.editor.controller.FlashAction
+import dotterweide.editor.painter.FlashPainter
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
 import javax.swing.Icon
@@ -43,7 +46,7 @@ import scala.concurrent.{Future, Promise}
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object CodeViewImpl2 {
   private val intpMap = mutable.WeakHashMap.empty[Int, Future[Interpreter]]
@@ -280,6 +283,31 @@ object CodeViewImpl2 {
       this
     }
 
+    private class InterpreterFlash(ed: Editor, intp: Interpreter, flash: Flash)
+      extends FlashAction(ed.document, ed.terminal, flash) {
+
+      override protected def run(id: Int, span: Span): Unit = {
+        val res = intp.interpret(span.text)
+        if (!res.isSuccess) flash.changeLevel(id, Flash.LevelError)
+      }
+    }
+
+    private def intpReady(tr: Try[Interpreter]): Unit = tr match {
+      case Success(intp) =>
+        val flash = new FlashImpl
+        codePane.editors.foreach { ed =>
+          val action  = new InterpreterFlash(ed, intp, flash)
+          val painter = new FlashPainter(ed.painterContext, flash)
+          ed.addAction  (action)
+          ed.addPainter (painter)
+        }
+
+      case Failure(ex) =>
+        ex.printStackTrace()
+        val msg = "Failed to initialize interpreter!"
+        codePane.status.message = msg
+    }
+
     private def guiInit(): Unit = {
       val imports = Code.getImports(code.id)
       val impS    = imports.map(i => s"  import $i\n").mkString
@@ -297,21 +325,27 @@ object CodeViewImpl2 {
         stylingName       = Some(if (Mellite.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
-      // XXX TODO:
-//      val iPane           = InterpreterPane.wrapAsync(interpreter(code.id), codePane)
+      val intpFut = interpreter(code.id)
+      intpFut.value match {
+        case Some(tr) =>
+          intpReady(tr)
+        case None =>
+          intpFut.onComplete { tr =>
+            defer {
+              intpReady(tr)
+            }
+          }
+      }
+
       actionApply         = Action("Apply")(save())
       actionApply.enabled = false
 
-      // XXX TODO
-//      doc.addUndoableEditListener(
-//        new UndoableEditListener {
-//          def undoableEditHappened(e: UndoableEditEvent): Unit =
-//            if (clearGreen) {
-//              clearGreen = false
-//              ggCompile.icon = compileIcon(None)
-//            }
-//        }
-//      )
+      codePane.document.onChange { _ =>
+        if (clearGreen) {
+          clearGreen = false
+          ggCompile.icon = compileIcon(None)
+        }
+      }
 
       codePane.onChange {
         case dotterweide.ide.Panel.DirtyChanged(d) => dirty = d
@@ -325,20 +359,10 @@ object CodeViewImpl2 {
       val bot2 = HGlue :: ggApply :: ggCompile :: bot1
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot2: _*)
 
-//      val iPaneC  = iPane.component
       val iPaneC  = codePane.component
-      val top     = // iPaneC.peer.getComponent(iPaneC.peer.getComponentCount - 1) match {
-//        case jc: javax.swing.JComponent =>
-//          jc.add(panelBottom.peer)
-//          iPaneC
-//        case _ =>
-        new BorderPanel {
-          add(iPaneC     , BorderPanel.Position.Center)
-          add(panelBottom, BorderPanel.Position.South )
-        }
-//      }
+      codePane.setBottomRightComponent(panelBottom)
 
-      component = top
+      component = iPaneC
       iPaneC.requestFocus()
     }
   }
