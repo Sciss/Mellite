@@ -31,9 +31,9 @@ import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.synth.proc.{Code, Universe}
 import dotterweide.Span
-import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
 import dotterweide.editor.controller.FlashAction
 import dotterweide.editor.painter.FlashPainter
+import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
 import javax.swing.Icon
@@ -44,8 +44,7 @@ import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
 import scala.swing.Swing._
-import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel}
-import scala.util.control.NonFatal
+import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.{Failure, Success, Try}
 
 object CodeViewImpl2 {
@@ -107,16 +106,16 @@ object CodeViewImpl2 {
 
     //    private type CodeT = Code { type In = In0; type Out = Out0 }
 
-    private def loadText(idx: Int): Unit = {
-      try {
-        val inp  = io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
-        val text = inp.getLines().mkString("\n")
-        inp.close()
-        codePane.text = text
-      } catch {
-        case NonFatal(e) => e.printStackTrace()
-      }
-    }
+//    private def loadText(idx: Int): Unit = {
+//      try {
+//        val inp  = io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
+//        val text = inp.getLines().mkString("\n")
+//        inp.close()
+//        codePane.text = text
+//      } catch {
+//        case NonFatal(e) => e.printStackTrace()
+//      }
+//    }
 
 //    private[this] val codeCfg = {
 //      val b = CodePane.Config()
@@ -312,8 +311,12 @@ object CodeViewImpl2 {
       val imports = Code.getImports(code.id)
       val impS    = imports.map(i => s"  import $i\n").mkString
 
+      val scalaVersionP = "version.number"
+      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP)
+        .getOrElse(throw new NoSuchElementException(scalaVersionP))
       codePane = new dotterweide.ide.PanelImpl(
         language          = new ScalaLanguage(
+          scalaVersion      = scalaVersion,
           prelude           = s"""$impS
                                  |object Main {
                                  |""".stripMargin,
