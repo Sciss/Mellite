@@ -46,24 +46,6 @@ object CodeObjView extends ListObjView.Factory {
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Code, const: Boolean = false)
 
   private def defaultCode(id: Int): Try[Code] = id match {
-    case Code.FileTransform.id => Success(Code.FileTransform(
-      """|val aIn   = AudioFile.openRead(in)
-         |val aOut  = AudioFile.openWrite(out, aIn.spec)
-         |val bufSz = 8192
-         |val buf   = aIn.buffer(bufSz)
-         |var rem   = aIn.numFrames
-         |while (rem > 0) {
-         |  val chunk = math.min(bufSz, rem).toInt
-         |  aIn .read (buf, 0, chunk)
-         |  // ...
-         |  aOut.write(buf, 0, chunk)
-         |  rem -= chunk
-         |  // checkAbort()
-         |}
-         |aOut.close()
-         |aIn .close()
-         |""".stripMargin))
-
     case Code.SynthGraph.id => Success(Code.SynthGraph(
       """|val in   = ScanIn("in")
          |val sig  = in
@@ -79,8 +61,8 @@ object CodeObjView extends ListObjView.Factory {
   }
 
   // cf. SP #58
-  private lazy val codeSeq  : Seq[Code.Type]          = Seq(Code.FileTransform      , Code.SynthGraph     , Code.Action     )
-  private lazy val codeNames: Seq[String]             = Seq(Code.FileTransform.name , Code.SynthGraph.name, Code.Action.name)
+  private lazy val codeSeq  : Seq[Code.Type]          = Seq(Code.SynthGraph     , Code.Action     )
+  private lazy val codeNames: Seq[String]             = Seq(Code.SynthGraph.name, Code.Action.name)
   private lazy val codeMap  : Map[String, Code.Type]  =
     codeNames.iterator.zip(codeSeq.iterator).map { case (n, tpe) =>
       val nm = n.filterNot(_.isSpaceChar).toLowerCase

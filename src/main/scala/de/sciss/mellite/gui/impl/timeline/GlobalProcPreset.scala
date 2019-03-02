@@ -99,7 +99,7 @@ object GlobalProcPreset {
            |val bus   = "bus" .kr(0f)
            |val amp   = gain * (1 - mute)
            |val mul   = in * amp
-           |val sig   = ${if (numInChannels == numOutChannels) "mul" else s"Seq.tabulate($numOutChannels)(i => mul \\ (i % $numInChannels)): GE"}
+           |val sig   = ${if (numInChannels == numOutChannels) "mul" else s"Seq.tabulate($numOutChannels)(i => mul.out(i % $numInChannels)): GE"}
            |Out.ar(bus, sig)
            |""".stripMargin
       )
@@ -108,6 +108,7 @@ object GlobalProcPreset {
     final protected def graph[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): SynthGraphObj[S] = {
       val numInChannels  = numInputChannels (controls)
       val numOutChannels = numOutputChannels(controls)
+      // Note: be careful when you change this to take care of the source code string above
       val g = SynthGraph {
         import synth.proc.graph.Ops._
         import synth.proc.graph._
