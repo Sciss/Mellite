@@ -30,14 +30,14 @@ import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.synth.proc.{Code, Universe}
-import dotterweide.editor.controller.FlashAction
+import dotterweide.Span
+import dotterweide.editor.controller.{FlashAction, LookUpTypeAction}
 import dotterweide.editor.painter.FlashPainter
-import dotterweide.editor.{Async, ColorScheme, Data, Editor, Flash, FlashImpl}
+import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
 import dotterweide.languages.scala.node.ScalaType
-import dotterweide.node.{NodeType, Node => DNode}
-import dotterweide.{Span, editor}
+import dotterweide.node.NodeType
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -285,48 +285,23 @@ object CodeViewImpl2 {
     }
 
     private class LookUpDocumentation(ed: Editor, lang: ScalaLanguage)
-      extends editor.Action with editor.StructureAction  {
+      extends LookUpTypeAction(
+        document  = ed.document,
+        terminal  = ed.terminal,
+        data      = ed.data,
+        adviser   = lang.adviser
+      )(ed.async) {
 
-      def name    : String        = "Look up Documentation for Cursor"
-      def mnemonic: Char          = 'C'
-      def keys    : ISeq[String]  = "ctrl alt pressed D" :: Nil
+//      def name    : String        = "Look up Documentation for Cursor"
+//      def mnemonic: Char          = 'C'
+//      def keys    : ISeq[String]  = "ctrl alt pressed D" :: Nil
 
-      implicit protected def async : Async = ed.async
-
-      protected def data: Data  = ed.data
-
-      protected def applyWithStructure(root: DNode): Unit = {
-        // this is a way to reconstruct the type path by "hand" from parsing up the `SelectNode` chain
-
-//        root.leafAt(ed.terminal.offset).foreach { leaf =>
-//          @tailrec
-//          def loop(sn: DNode, res: List[String]): List[String] =
-//            sn match {
-//              case rn : SNode.RefNameNode =>
-//                rn.parent match {
-//                  case Some(p)  => loop(p, res)
-//                  case _        => res
-//                }
-//
-//              case ssn: SNode.SelectNode  => loop(ssn.qualifierNode, ssn.nameNode.name :: res)
-//              case in : SNode.IdentNode   => in.nameNode.name :: res
-//              case _ =>
-//                println(s"--- break at $sn")
-//                res
-//            }
-//
-//          val chain = loop(leaf, Nil)
-//          if (chain.nonEmpty) println(chain.mkString("."))
-//        }
-
-        val fut: Future[Option[NodeType]] = lang.parser.typeAtAsync(ed.document, data, ed.terminal.offset)
-        fut.foreach { tpeOpt =>
-          println(s"Type by parser: $tpeOpt")
-          tpeOpt.foreach {
-            case tpe: ScalaType =>
-              println(s"Doc path: ${tpe.scalaDocPath()}")
-            case _ =>
-          }
+      override protected def run(tpeOpt: Option[NodeType]): Unit = {
+        tpeOpt.foreach {
+          case tpe: ScalaType =>
+            println(s"Doc path: ${tpe.scalaDocPath()}")
+          case _ =>
+            super.run(tpeOpt)
         }
       }
     }
@@ -409,7 +384,7 @@ object CodeViewImpl2 {
         case _ =>
       }
 
-      lazy val ggApply: Button = GUI.toolButton(actionApply, raphael.Shapes.Check , tooltip = "Save text changes")
+      lazy val ggApply: Button = GUI.toolButton(actionApply, raphael.Shapes.Check, tooltip = "Save text changes")
 
       val bot0: List[Component] = ggProgress :: Nil
       val bot1 = if (bottom.isEmpty) bot0 else bot0 ++ bottom.map(_.component)
