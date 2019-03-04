@@ -232,6 +232,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // UI methods for scala-collider
       "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
       "de.sciss"          %% "dotterweide-ui"                 % deps.main.dotterweide,        // Code editor
+      "de.sciss"          %% "dotterweide-doc-browser"        % deps.main.dotterweide,        // Scaladoc browser
       "de.sciss"          %% "dotterweide-scala"              % deps.main.dotterweide,        // Code editor
       "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
       "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing

@@ -20,6 +20,7 @@ import java.awt.Color
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.file._
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Sys, TxnLike}
@@ -31,10 +32,11 @@ import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.synth.proc.{Code, Universe}
 import dotterweide.Span
+import dotterweide.build.{Module, Version}
 import dotterweide.editor.controller.{FlashAction, LookUpTypeAction}
 import dotterweide.editor.painter.FlashPainter
 import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
-import dotterweide.ide.ActionAdapter
+import dotterweide.ide.{ActionAdapter, DocUtil}
 import dotterweide.languages.scala.ScalaLanguage
 import dotterweide.languages.scala.node.ScalaType
 import dotterweide.node.NodeType
@@ -46,7 +48,7 @@ import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
 import scala.swing.Swing._
-import scala.swing.{Action, Button, Component, FlowPanel}
+import scala.swing.{Action, Button, Component, Dialog, FlowPanel, GridPanel, Label, ProgressBar, Swing}
 import scala.util.{Failure, Success, Try}
 
 object CodeViewImpl2 {
@@ -284,24 +286,72 @@ object CodeViewImpl2 {
       this
     }
 
-    private class LookUpDocumentation(ed: Editor, lang: ScalaLanguage)
+    private class LookUpDocAction(ed: Editor, doc: LookUpDocumentation)
       extends LookUpTypeAction(
         document  = ed.document,
         terminal  = ed.terminal,
         data      = ed.data,
-        adviser   = lang.adviser
+        adviser   = doc.language.adviser
       )(ed.async) {
-
-//      def name    : String        = "Look up Documentation for Cursor"
-//      def mnemonic: Char          = 'C'
-//      def keys    : ISeq[String]  = "ctrl alt pressed D" :: Nil
 
       override protected def run(tpeOpt: Option[NodeType]): Unit = {
         tpeOpt.foreach {
           case tpe: ScalaType =>
-            println(s"Doc path: ${tpe.scalaDocPath()}")
+            println(tpe)
+            tpe.scalaDocPath() match {
+              case Some(path) =>
+                doc.resolve(path)
+
+              case None =>
+                println(s"No scala-doc path for ${tpe.presentation}")
+            }
           case _ =>
             super.run(tpeOpt)
+        }
+      }
+    }
+
+    private class LookUpDocumentation(val language: ScalaLanguage) {
+      private[this] val docModule   = Module("de.sciss", s"scalacollider-unidoc_${language.scalaVersion.binaryCompatible}", Version(1,28,0))
+      private[this] val baseDir     = DocUtil.defaultUnpackDir(Mellite.cacheDir / "api", docModule)
+      private[this] val ready       = new File(baseDir, "ready")
+
+      private def prepareJar(): Future[Unit] =
+        if (ready.isFile) Future.successful(()) else {
+          val (dl, futRes)    = DocUtil.downloadAndExtract(docModule, target = baseDir, darkCss = Mellite.isDarkSkin)
+          val progress        = new ProgressBar
+          val progressDialog  = new Dialog(null /* frame */) {
+            title = "Look up Documentation"
+            contents = new GridPanel(2, 1) {
+              vGap    = 2
+              border  = Swing.EmptyBorder(2, 4, 2, 4)
+              contents += new Label("Downloading API documentation...")
+              contents += progress
+            }
+            pack().centerOnScreen()
+            open()
+          }
+          dl.onChange { pr =>
+            Swing.onEDT(progress.value = (pr.relative * 100).toInt)
+          }
+          futRes.onComplete(_ => Swing.onEDT(progressDialog.dispose()))
+          futRes
+        }
+
+      def resolve(path: String): Unit = {
+        prepareJar().onComplete {
+          case Success(_) =>
+            ready.createNewFile()
+            // XXX TODO --- `toURI` will escape the hash symbol; we should use URIs throughout
+            //                val docURI = (baseDir / path).toURI
+            val docURI = "file://" + new File(baseDir, path).getPath
+            println(docURI)
+            WebBrowser.instance.openURI(docURI)
+
+          case Failure(ex) =>
+            val msg = Option(ex.getMessage).getOrElse(ex.getClass.getSimpleName)
+            ex.printStackTrace()
+            println(s"Failed to download and extract javadoc jar: $msg")
         }
       }
     }
@@ -333,7 +383,7 @@ object CodeViewImpl2 {
 
     private def guiInit(): Unit = {
       val scalaVersionP = "version.number"
-      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP)
+      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP).flatMap(Version.parse(_).toOption)
         .getOrElse(throw new NoSuchElementException(scalaVersionP))
       val language      = new ScalaLanguage(
         scalaVersion      = scalaVersion,
@@ -365,10 +415,11 @@ object CodeViewImpl2 {
       actionApply         = Action("Apply")(save())
       actionApply.enabled = false
 
-      codePane.structureVisible = true  // XXX TODO DEBUG
+      // codePane.structureVisible = true  // debug
 
+      val doc = new LookUpDocumentation(language)
       codePane.editors.foreach { ed =>
-        val action = new LookUpDocumentation(ed, language)
+        val action = new LookUpDocAction(ed, doc)
         ed.addAction(action)
       }
 

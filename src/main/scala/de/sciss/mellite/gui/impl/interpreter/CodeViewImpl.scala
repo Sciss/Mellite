@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package interpreter
+package de.sciss.mellite.gui.impl.interpreter
 
 import java.awt.Color
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
@@ -30,6 +27,8 @@ import de.sciss.lucre.stm.{Sys, TxnLike}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, defer, deferTx, requireEDT}
+import de.sciss.mellite.{Mellite, executionContext}
+import de.sciss.mellite.gui.{CodeView, GUI}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import de.sciss.swingplus.Implicits._
@@ -108,7 +107,7 @@ object CodeViewImpl {
 
     private def loadText(idx: Int): Unit = {
       try {
-        val inp  = io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
+        val inp  = scala.io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
         val text = inp.getLines().mkString("\n")
         inp.close()
         codePane.editor.text = text
