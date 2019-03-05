@@ -294,21 +294,22 @@ object CodeViewImpl2 {
         adviser   = doc.language.adviser
       )(ed.async) {
 
-      override protected def run(tpeOpt: Option[NodeType]): Unit = {
-        tpeOpt.foreach {
-          case tpe: ScalaType =>
-            println(tpe)
+      override protected def run(tpeOpt: Option[NodeType]): Unit =
+        tpeOpt match {
+          case Some(tpe: ScalaType) =>
+            // println(tpe)
             tpe.scalaDocPath() match {
               case Some(path) =>
                 doc.resolve(path)
 
               case None =>
                 println(s"No scala-doc path for ${tpe.presentation}")
+                doc.resolveBase()
             }
           case _ =>
-            super.run(tpeOpt)
+            // super.run(tpeOpt)
+            doc.resolveBase()
         }
-      }
     }
 
     private class LookUpDocumentation(val language: ScalaLanguage) {
@@ -338,14 +339,31 @@ object CodeViewImpl2 {
           futRes
         }
 
+      private def mkBasePath: String = {
+        val s     = code.docBaseSymbol.replace('.', '/')
+        val i     = s.lastIndexOf('/')
+        val s1    = s.substring(i + 1)
+        val isPkg = s1.isEmpty || s1.charAt(0).isLower
+        val path  = if (isPkg) s + "/index.html" else s + ".html"
+        path
+      }
+
+      def resolveBase(): Unit = {
+        resolve(mkBasePath)
+      }
+
       def resolve(path: String): Unit = {
         prepareJar().onComplete {
           case Success(_) =>
             ready.createNewFile()
             // XXX TODO --- `toURI` will escape the hash symbol; we should use URIs throughout
             //                val docURI = (baseDir / path).toURI
-            val docURI = "file://" + new File(baseDir, path).getPath
-            println(docURI)
+            val i     = path.indexOf('#')
+            val s     = if (i < 0) path else path.substring(0, i)
+            val f0    = new File(baseDir, s)
+            val path1 = if (f0.exists()) path else mkBasePath
+            val docURI = "file://" + new File(baseDir, path1).getPath
+            // println(docURI)
             WebBrowser.instance.openURI(docURI)
 
           case Failure(ex) =>
