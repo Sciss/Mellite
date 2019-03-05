@@ -16,7 +16,7 @@ package de.sciss.mellite
 import javax.swing.UIManager
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
-import de.sciss.file.File
+import de.sciss.file.{File, file}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.requireEDT
@@ -107,6 +107,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   def clearLog  (): Unit = LogFrame.instance.log.clear()
   def logToFront(): Unit = LogFrame.instance.front()  // XXX TODO - should avoid focus transfer
+
 
   /** Tries to start the aural system by booting SuperCollider.
     * This reads the relevant preferences entries such as

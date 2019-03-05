@@ -21,7 +21,7 @@ import de.sciss.lucre.stm.{Obj, Plain}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
+import de.sciss.mellite.gui.impl.code.CodeFrameImpl
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, PlayToggleButton, Shapes}

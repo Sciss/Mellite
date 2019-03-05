@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui
 package impl
-package interpreter
+package code
 
 import de.sciss.desktop
 import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}

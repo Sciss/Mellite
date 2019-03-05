@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui
 package impl
-package interpreter
+package code
 
 import javax.swing.event.{AncestorEvent, AncestorListener}
 import javax.swing.undo.UndoableEdit

@@ -16,7 +16,7 @@ package gui
 
 import de.sciss.desktop
 import de.sciss.lucre.stm.Workspace
-import de.sciss.mellite.gui.impl.interpreter.{InterpreterFrameImpl => Impl}
+import de.sciss.mellite.gui.impl.code.{InterpreterFrameImpl => Impl}
 import de.sciss.synth.proc
 
 import scala.swing.event.Key

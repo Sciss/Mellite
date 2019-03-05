@@ -18,7 +18,7 @@ import de.sciss.lucre
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.interpreter.{CodeFrameImpl => Impl}
+import de.sciss.mellite.gui.impl.code.{CodeFrameImpl => Impl}
 import de.sciss.synth.proc.{Action, Code, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}

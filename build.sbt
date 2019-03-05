@@ -15,16 +15,17 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
+    val appDirs             = "1.0.3"
     val audioFile           = "1.5.1"
     val audioWidgets        = "1.14.0"
     val desktop             = "0.10.0"
-    val dotterweide         = "0.1.0-SNAPSHOT"
+    val dotterweide         = "0.1.0"
     val equal               = "0.1.3"
     val fileCache           = "0.5.0"
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.14.0-SNAPSHOT"
-    val fscape              = "2.21.0-SNAPSHOT"
+    val freesound           = "1.14.0"
+    val fscape              = "2.21.0"
     val interpreterPane     = "1.10.0"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
@@ -33,7 +34,7 @@ lazy val deps = new {
     val lucreSwing          = "1.14.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.8.0-SNAPSHOT"
+    val patterns            = "0.8.0"
     val pdflitz             = "1.4.0"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -49,7 +50,7 @@ lazy val deps = new {
     val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.0"
-    val soundProcesses      = "3.25.0-SNAPSHOT"
+    val soundProcesses      = "3.25.0"
     val span                = "1.4.2"
     val submin              = "0.2.4"
     val swingPlus           = "0.4.0"
@@ -57,7 +58,7 @@ lazy val deps = new {
     val treeTable           = "1.5.0"
     val topology            = "1.1.1"
     val webLaF              = "2.1.4"
-    val wolkenpumpe         = "2.30.0-SNAPSHOT"
+    val wolkenpumpe         = "2.30.0"
   }
 }
 
@@ -77,7 +78,8 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.12.8",
-  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-M5"),
+  // 2.13.0 is missing dispatch/reboot at the moment
+  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-M5" */),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_", "-Xsource:2.13"
@@ -182,6 +184,7 @@ lazy val assemblySettings = Seq(
     assemblyMergeStrategy in assembly := {
       case PathList("org", "xmlpull", _ @ _*) => MergeStrategy.first
       case PathList("org", "w3c", "dom", "events", _ @ _*) => MergeStrategy.first // bloody Apache Batik
+      case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
       case x =>
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
@@ -247,6 +250,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %  "treetable-java"                 % deps.main.treeTable,          // widget
       "de.sciss"          %% "treetable-scala"                % deps.main.treeTable,          // widget
       "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improv
+      "net.harawata"      %  "appdirs"                        % deps.main.appDirs,            // finding cache directory
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory

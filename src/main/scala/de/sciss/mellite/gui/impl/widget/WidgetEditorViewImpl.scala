@@ -21,7 +21,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl
+import de.sciss.mellite.gui.impl.code.CodeFrameImpl
 import de.sciss.mellite.gui.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.{Universe, Widget}

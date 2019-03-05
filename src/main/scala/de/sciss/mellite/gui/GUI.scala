@@ -94,15 +94,15 @@ object GUI {
   }
 
   /** No texture, for more finely drawn icons. */
-  def sharpIcon(fun: Path2D => Unit): Icon = {
+  def sharpIcon(fun: Path2D => Unit, extent: Int = 20): Icon = {
     val in0 = new Path2D.Float()
     fun(in0)
-    val scale = 19.0 / 32
+    val scale = (extent - 1).toDouble / 32
     val in  = AffineTransform.getScaleInstance(scale, scale).createTransformedShape(in0)
     val out = new Area(sharpStrk.createStrokedShape(in))
     out.add(new Area(in))
     val scheme = if (Mellite.isDarkSkin) Transport.LightScheme else Transport.DarkScheme
-    new SharpIcon(extent = 20, scheme = scheme, out, in)
+    new SharpIcon(extent = extent, scheme = scheme, out, in)
   }
 
   def toolButton(action: Action, iconFun: Path2D => Unit, tooltip: String = ""): Button = {

@@ -88,7 +88,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
   private def codeFrame[S <: Sys[S]](obj: FScape[S])
                                     (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
-    import de.sciss.mellite.gui.impl.interpreter.CodeFrameImpl.{make, mkSource}
+    import de.sciss.mellite.gui.impl.code.CodeFrameImpl.{make, mkSource}
     val codeObj = mkSource(obj = obj, codeId = FScape.Code.id, key = FScape.attrSource,
       init = "// FScape graph function source code\n\n")
 

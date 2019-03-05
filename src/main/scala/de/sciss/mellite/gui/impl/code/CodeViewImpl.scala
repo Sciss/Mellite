@@ -14,13 +14,12 @@
 package de.sciss.mellite
 package gui
 package impl
-package interpreter
+package code
 
 import java.awt.Color
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.file._
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Sys, TxnLike}
@@ -32,14 +31,12 @@ import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
 import de.sciss.synth.proc.{Code, Universe}
 import dotterweide.Span
-import dotterweide.build.{Module, Version}
-import dotterweide.editor.controller.{FlashAction, LookUpTypeAction}
+import dotterweide.build.Version
+import dotterweide.editor.controller.FlashAction
 import dotterweide.editor.painter.FlashPainter
 import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
-import dotterweide.ide.{ActionAdapter, DocUtil}
+import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
-import dotterweide.languages.scala.node.ScalaType
-import dotterweide.node.NodeType
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -48,10 +45,10 @@ import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
 import scala.swing.Swing._
-import scala.swing.{Action, Button, Component, Dialog, FlowPanel, GridPanel, Label, ProgressBar, Swing}
+import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.{Failure, Success, Try}
 
-object CodeViewImpl2 {
+object CodeViewImpl {
   private val intpMap = mutable.WeakHashMap.empty[Int, Future[Interpreter]]
 
   /* We use one shared interpreter for all code frames of each context. */
@@ -95,6 +92,16 @@ object CodeViewImpl2 {
 
     private[this] val _dirty = Ref(false)
 
+    private[this] val language = {
+      val v = de.sciss.mellite.BuildInfo.scalaVersion
+      new ScalaLanguage(
+        scalaVersion      = Version.parse(v).get,
+        prelude           = Code.fullPrelude(code),
+        postlude          = code.postlude,
+        examples          = Nil
+      )
+    }
+
     def dirty(implicit tx: TxnLike): Boolean = _dirty.get(tx.peer)
 
     protected def dirty_=(value: Boolean): Unit = {
@@ -108,50 +115,24 @@ object CodeViewImpl2 {
       }
     }
 
-    //    private type CodeT = Code { type In = In0; type Out = Out0 }
-
-//    private def loadText(idx: Int): Unit = {
-//      try {
-//        val inp  = io.Source.fromFile(s"codeview$idx.txt", "UTF-8")
-//        val text = inp.getLines().mkString("\n")
-//        inp.close()
-//        codePane.text = text
-//      } catch {
-//        case NonFatal(e) => e.printStackTrace()
-//      }
-//    }
-
-//    private[this] val codeCfg = {
-//      val b = CodePane.Config()
-//      // XXX TODO - should be a preferences option
-//      b.style = if (Mellite.isDarkSkin) Style.BlueForest else Style.Light
-//      b.text = code.source
-//      // XXX TODO - cheesy hack
-//      b.keyMap += (KeyStrokes.menu1 + Key.Key1 -> (() => loadText(1)))
-//      b.keyMap += (KeyStrokes.menu1 + Key.Key2 -> (() => loadText(2)))
-//      b.build
-//    }
-
-    // import code.{id => codeId}
-
-    private[this] var codePane: dotterweide.ide.Panel = _
+    private[this] var editorPanel: dotterweide.ide.Panel = _
     private[this] val futCompile = Ref(Option.empty[Future[Any]])
     private[this] var actionApply: Action = _
 
     def isCompiling(implicit tx: TxnLike): Boolean =
       futCompile.get(tx.peer).isDefined
 
-    def currentText: String = codePane.data.text
+    def currentText: String = editorPanel.data.text
 
     def dispose()(implicit tx: S#Tx): Unit = {
       bottom.foreach(_.dispose())
       deferTx {
-        codePane.dispose()
+        editorPanel.dispose()
       }
     }
 
-    def undoAction: Action = new ActionAdapter(codePane.currentEditor.actions.undo)
-    def redoAction: Action = new ActionAdapter(codePane.currentEditor.actions.redo)
+    def undoAction: Action = new ActionAdapter(editorPanel.currentEditor.actions.undo)
+    def redoAction: Action = new ActionAdapter(editorPanel.currentEditor.actions.redo)
 
     private def saveSource(newSource: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
       // val expr  = ExprImplicits[S]
@@ -170,7 +151,7 @@ object CodeViewImpl2 {
       // so let's clear the undo history now...
       // (note that if we don't do this, the user will see
       // a warning dialog when closing the window)
-      codePane.history.clear()
+      editorPanel.history.clear()
     }
 
     def save(): Future[Unit] = {
@@ -286,94 +267,6 @@ object CodeViewImpl2 {
       this
     }
 
-    private class LookUpDocAction(ed: Editor, doc: LookUpDocumentation)
-      extends LookUpTypeAction(
-        document  = ed.document,
-        terminal  = ed.terminal,
-        data      = ed.data,
-        adviser   = doc.language.adviser
-      )(ed.async) {
-
-      override protected def run(tpeOpt: Option[NodeType]): Unit =
-        tpeOpt match {
-          case Some(tpe: ScalaType) =>
-            // println(tpe)
-            tpe.scalaDocPath() match {
-              case Some(path) =>
-                doc.resolve(path)
-
-              case None =>
-                println(s"No scala-doc path for ${tpe.presentation}")
-                doc.resolveBase()
-            }
-          case _ =>
-            // super.run(tpeOpt)
-            doc.resolveBase()
-        }
-    }
-
-    private class LookUpDocumentation(val language: ScalaLanguage) {
-      private[this] val docModule   = Module("de.sciss", s"scalacollider-unidoc_${language.scalaVersion.binaryCompatible}", Version(1,28,0))
-      private[this] val baseDir     = DocUtil.defaultUnpackDir(Mellite.cacheDir / "api", docModule)
-      private[this] val ready       = new File(baseDir, "ready")
-
-      private def prepareJar(): Future[Unit] =
-        if (ready.isFile) Future.successful(()) else {
-          val (dl, futRes)    = DocUtil.downloadAndExtract(docModule, target = baseDir, darkCss = Mellite.isDarkSkin)
-          val progress        = new ProgressBar
-          val progressDialog  = new Dialog(null /* frame */) {
-            title = "Look up Documentation"
-            contents = new GridPanel(2, 1) {
-              vGap    = 2
-              border  = Swing.EmptyBorder(2, 4, 2, 4)
-              contents += new Label("Downloading API documentation...")
-              contents += progress
-            }
-            pack().centerOnScreen()
-            open()
-          }
-          dl.onChange { pr =>
-            Swing.onEDT(progress.value = (pr.relative * 100).toInt)
-          }
-          futRes.onComplete(_ => Swing.onEDT(progressDialog.dispose()))
-          futRes
-        }
-
-      private def mkBasePath: String = {
-        val s     = code.docBaseSymbol.replace('.', '/')
-        val i     = s.lastIndexOf('/')
-        val s1    = s.substring(i + 1)
-        val isPkg = s1.isEmpty || s1.charAt(0).isLower
-        val path  = if (isPkg) s + "/index.html" else s + ".html"
-        path
-      }
-
-      def resolveBase(): Unit = {
-        resolve(mkBasePath)
-      }
-
-      def resolve(path: String): Unit = {
-        prepareJar().onComplete {
-          case Success(_) =>
-            ready.createNewFile()
-            // XXX TODO --- `toURI` will escape the hash symbol; we should use URIs throughout
-            //                val docURI = (baseDir / path).toURI
-            val i     = path.indexOf('#')
-            val s     = if (i < 0) path else path.substring(0, i)
-            val f0    = new File(baseDir, s)
-            val path1 = if (f0.exists()) path else mkBasePath
-            val docURI = "file://" + new File(baseDir, path1).getPath
-            // println(docURI)
-            WebBrowser.instance.openURI(docURI)
-
-          case Failure(ex) =>
-            val msg = Option(ex.getMessage).getOrElse(ex.getClass.getSimpleName)
-            ex.printStackTrace()
-            println(s"Failed to download and extract javadoc jar: $msg")
-        }
-      }
-    }
-
     private class InterpreterFlash(ed: Editor, intp: Interpreter, flash: Flash)
       extends FlashAction(ed.document, ed.terminal, flash) {
 
@@ -386,7 +279,7 @@ object CodeViewImpl2 {
     private def intpReady(tr: Try[Interpreter]): Unit = tr match {
       case Success(intp) =>
         val flash = new FlashImpl
-        codePane.editors.foreach { ed =>
+        editorPanel.editors.foreach { ed =>
           val action  = new InterpreterFlash(ed, intp, flash)
           val painter = new FlashPainter(ed.painterContext, flash)
           ed.addAction  (action)
@@ -396,22 +289,16 @@ object CodeViewImpl2 {
       case Failure(ex) =>
         ex.printStackTrace()
         val msg = "Failed to initialize interpreter!"
-        codePane.status.message = msg
+        editorPanel.status.message = msg
     }
 
     private def guiInit(): Unit = {
-      val scalaVersionP = "version.number"
-      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP).flatMap(Version.parse(_).toOption)
-        .getOrElse(throw new NoSuchElementException(scalaVersionP))
-      val language      = new ScalaLanguage(
-        scalaVersion      = scalaVersion,
-        prelude           = Code.fullPrelude(code),
-        postlude          = code.postlude,
-        examples          = Nil
-      )
+//      val scalaVersionP = "version.number"
+//      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP).flatMap(Version.parse(_).toOption)
+//        .getOrElse(throw new NoSuchElementException(scalaVersionP))
 //      println(prelude)
 //      println(code.postlude)
-      codePane          = new dotterweide.ide.PanelImpl(
+      editorPanel          = new dotterweide.ide.PanelImpl(
         language          = language,
         text0             = code.source,
 //        font        = ...,
@@ -435,20 +322,19 @@ object CodeViewImpl2 {
 
       // codePane.structureVisible = true  // debug
 
-      val doc = new LookUpDocumentation(language)
-      codePane.editors.foreach { ed =>
-        val action = new LookUpDocAction(ed, doc)
+      editorPanel.editors.foreach { ed =>
+        val action = ApiBrowser.lookUpDocAction(code, ed, language)
         ed.addAction(action)
       }
 
-      codePane.document.onChange { _ =>
+      editorPanel.document.onChange { _ =>
         if (clearGreen) {
           clearGreen = false
           ggCompile.icon = compileIcon(None)
         }
       }
 
-      codePane.onChange {
+      editorPanel.onChange {
         case dotterweide.ide.Panel.DirtyChanged(d) => dirty = d
         case _ =>
       }
@@ -460,8 +346,8 @@ object CodeViewImpl2 {
       val bot2 = HGlue :: ggApply :: ggCompile :: bot1
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot2: _*)
 
-      val iPaneC  = codePane.component
-      codePane.setBottomRightComponent(panelBottom)
+      val iPaneC  = editorPanel.component
+      editorPanel.setBottomRightComponent(panelBottom)
 
       component = iPaneC
       iPaneC.requestFocus()

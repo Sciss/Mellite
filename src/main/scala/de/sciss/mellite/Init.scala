@@ -21,12 +21,15 @@ import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}
+import net.harawata.appdirs.AppDirsFactory
 
 trait Init {
   def cacheDir: File = _cacheDir
 
   private[this] lazy val _cacheDir = {
-    val res = new File(new File(sys.props("user.home"), "mellite"), "cache")
+    val appDirs = AppDirsFactory.getInstance
+    val path    = appDirs.getUserCacheDir("mellite", /* version */ null, /* author */ null)
+    val res     = new File(path) // new File(new File(sys.props("user.home"), "mellite"), "cache")
     res.mkdirs()
     res
   }
