@@ -13,6 +13,7 @@
 
 package de.sciss.mellite.gui
 
+import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
@@ -22,7 +23,7 @@ import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.synth.proc.{SoundProcesses, Transport, Universe}
 
 import scala.swing.ToggleButton
-import scala.swing.event.ButtonClicked
+import scala.swing.event.{ButtonClicked, Key}
 
 object PlayToggleButton {
   def apply[S <: Sys[S]](transport: Transport[S])(implicit tx: S#Tx): PlayToggleButton[S] =
@@ -85,7 +86,9 @@ object PlayToggleButton {
       val shpPower          = raphael.Shapes.Power _
       ggPower.icon          = GUI.iconNormal  (shpPower)
       ggPower.disabledIcon  = GUI.iconDisabled(shpPower)
-      ggPower.tooltip       = "Toggle DSP"
+      val ksPower           = KeyStrokes.shift + Key.F10
+      ggPower.tooltip       = s"Toggle DSP (${GUI.keyStrokeText(ksPower)})"
+      Util.addGlobalKey(ggPower, ksPower)
       component             = ggPower
     }
   }

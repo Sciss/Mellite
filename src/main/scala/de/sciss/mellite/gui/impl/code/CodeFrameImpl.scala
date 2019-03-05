@@ -11,31 +11,31 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package code
+package de.sciss.mellite.gui.impl.code
 
-import javax.swing.event.{AncestorEvent, AncestorListener}
-import javax.swing.undo.UndoableEdit
-import de.sciss.desktop.{OptionPane, UndoManager}
+import de.sciss.desktop.{OptionPane, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IdPeek, Obj}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ProcActions
+import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, GUI, PlayToggleButton, ProcOutputsView, SplitPaneView}
 import de.sciss.mellite.util.Veto
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.impl.ActionImpl
 import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Universe}
+import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
-import scala.swing.{Button, Component, Orientation, SplitPane}
+import scala.swing.{Button, Component, Orientation, TabbedPane}
 
 object CodeFrameImpl {
   // ---- adapter for editing a Proc's source ----
@@ -73,11 +73,13 @@ object CodeFrameImpl {
     }
 
     implicit val undo: UndoManager = UndoManager()
-    val rightView = ProcOutputsView [S](obj)
-    val viewPower = PlayToggleButton[S](obj)
+    val outputsView = ProcOutputsView [S](obj)
+    val attrView    = AttrMapView     [S](obj)
+    val viewPower   = PlayToggleButton[S](obj)
+    val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
-    make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil, rightViewOpt = Some(rightView),
-      canBounce = true)
+    make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
   }
 
   // ---- adapter for editing a Action's source ----
@@ -156,34 +158,59 @@ object CodeFrameImpl {
       bottom = bottom, rightViewOpt = None, canBounce = canBounce)
   }
 
-  private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[View[S]])
+  private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[(String, View[S])])
                                       (implicit val universe: Universe[S],
                                        val undoManager: UndoManager)
-    extends View.Editable[S] with UniverseView[S] {
+    extends View.Editable[S] with UniverseView[S] with ComponentHolder[Component] {
 
     type C = Component
 
-    lazy val component: Component = rightViewOpt.fold[C](codeView.component) { rightView =>
-      val res = new SplitPane(Orientation.Vertical, codeView.component, rightView.component)
-      res.oneTouchExpandable  = true
-      res.resizeWeight        = 1.0
-      // cf. https://stackoverflow.com/questions/4934499
-      res.peer.addAncestorListener(new AncestorListener {
-        def ancestorAdded  (e: AncestorEvent): Unit = res.dividerLocation = 1.0
-        def ancestorRemoved(e: AncestorEvent): Unit = ()
-        def ancestorMoved  (e: AncestorEvent): Unit = ()
-      })
-      res
+//    private[this] var tabs: TabbedPane  = _
+
+    def init()(implicit tx: S#Tx): this.type = {
+      deferTx(guiInit())
+      this
+    }
+
+    private def guiInit(): Unit = {
+      component = rightViewOpt.fold[C](codeView.component) { case (rightTitle, rightView) =>
+        val _tabs = new TabbedPane
+        _tabs.peer.putClientProperty("styleId", "attached")
+        _tabs.focusable  = false
+        val pageEdit    = new TabbedPane.Page("Editor"  , codeView  .component, null)
+        val pageRender  = new TabbedPane.Page(rightTitle, rightView .component, null)
+        _tabs.pages     += pageEdit
+        _tabs.pages     += pageRender
+        //      _tabs.pages     += pageAttr
+        Util.addTabNavigation(_tabs)
+
+        //      render(initialText)
+
+        // tabs = _tabs
+
+//        val res = new SplitPane(Orientation.Vertical, codeView.component, rightView.component)
+//        res.oneTouchExpandable  = true
+//        res.resizeWeight        = 1.0
+//        // cf. https://stackoverflow.com/questions/4934499
+//        res.peer.addAncestorListener(new AncestorListener {
+//          def ancestorAdded  (e: AncestorEvent): Unit = res.dividerLocation = 1.0
+//          def ancestorRemoved(e: AncestorEvent): Unit = ()
+//          def ancestorMoved  (e: AncestorEvent): Unit = ()
+//        })
+//        res
+
+        _tabs
+      }
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      codeView               .dispose()
-      rightViewOpt.foreach(_.dispose())
+      codeView                 .dispose()
+      rightViewOpt.foreach(_._2.dispose())
     }
   }
 
   private final class CanBounceView[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], codeView: View[S],
-                                                 rightViewOpt: Option[View[S]])
+                                                 rightViewOpt: Option[(String, View[S])])
                                                 (implicit universe: Universe[S],
                                                  undoManager: UndoManager)
     extends PlainView[S](codeView, rightViewOpt) with CanBounce {
@@ -194,10 +221,13 @@ object CodeFrameImpl {
   // trying to minimize IntelliJ false error highlights
   private final type CodeT[In0, Out0] = Code { type In = In0; type Out = Out0 }
 
+  /**
+    * @param rightViewOpt optional title and component for a second tab view
+    */
   def make[S <: Sys[S], In0, Out0](pObj: Obj[S], pObjH: stm.Source[S#Tx, Obj[S]], obj: Code.Obj[S],
                                    code0: CodeT[In0, Out0],
                                    handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
-                                   rightViewOpt: Option[View[S]], canBounce: Boolean)
+                                   rightViewOpt: Option[(String, View[S])], canBounce: Boolean)
                                   (implicit tx: S#Tx, universe: Universe[S],
                                    undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
     // val _name   = /* title getOrElse */ obj.attr.name
@@ -208,6 +238,7 @@ object CodeFrameImpl {
     else
       new PlainView(codeView, rightViewOpt)
 
+    view.init()
     val _name = CellView.name(pObj)
     val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.contextName)
     res.init()

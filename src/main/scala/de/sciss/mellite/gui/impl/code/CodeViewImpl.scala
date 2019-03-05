@@ -18,7 +18,7 @@ package code
 
 import java.awt.Color
 
-import de.sciss.desktop.UndoManager
+import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -45,6 +45,7 @@ import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
 import scala.swing.Swing._
+import scala.swing.event.Key
 import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.{Failure, Success, Try}
 
@@ -253,8 +254,13 @@ object CodeViewImpl {
 
     private[this] lazy val actionCompile = Action("Compile")(compile())
 
-    private[this] lazy val ggCompile: Button = GUI.toolButton(actionCompile, raphael.Shapes.Hammer,
-      tooltip = "Verify that current buffer compiles")
+    private[this] lazy val ggCompile: Button = {
+      val ks  = KeyStrokes.menu1 + Key.F9
+      val res = GUI.toolButton(actionCompile, raphael.Shapes.Hammer,
+        tooltip = s"Verify that buffer compiles (${GUI.keyStrokeText(ks)})")
+      Util.addGlobalKey(res, ks)
+      res
+    }
 
     private def compileIcon(colr: Option[Color]): Icon =
       raphael.Icon(extent = 20, fill = colr.getOrElse(raphael.TexturePaint(24)),
@@ -339,7 +345,9 @@ object CodeViewImpl {
         case _ =>
       }
 
-      lazy val ggApply: Button = GUI.toolButton(actionApply, raphael.Shapes.Check, tooltip = "Save text changes")
+      val ksApply = KeyStrokes.menu1 + Key.S
+      val ggApply = GUI.toolButton(actionApply, raphael.Shapes.Check,
+        tooltip = s"Save changes (${GUI.keyStrokeText(ksApply)})")
 
       val bot0: List[Component] = ggProgress :: Nil
       val bot1 = if (bottom.isEmpty) bot0 else bot0 ++ bottom.map(_.component)

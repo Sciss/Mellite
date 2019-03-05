@@ -14,7 +14,7 @@
 package de.sciss.mellite
 package gui.impl.fscape
 
-import de.sciss.desktop.UndoManager
+import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.fscape.lucre.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.icons.raphael
@@ -25,14 +25,15 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes, SplitPaneView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 import scala.concurrent.stm.Ref
-import scala.swing.{Button, ProgressBar}
+import scala.swing.event.Key
+import scala.swing.{Button, Orientation, ProgressBar}
 import scala.util.Failure
 
 object FScapeObjView extends NoArgsListObjViewFactory {
@@ -189,7 +190,11 @@ object FScapeObjView extends NoArgsListObjViewFactory {
           }
         }
       }
-      GUI.toolButton(actionRender, Shapes.Sparks)
+      val ks  = KeyStrokes.shift + Key.F10
+      val res = GUI.toolButton(actionRender, Shapes.Sparks)
+      Util.addGlobalKey(res, ks)
+      res.tooltip = s"Run Rendering (${GUI.keyStrokeText(ks)})"
+      res
     }
 
     val viewDebug = View.wrap[S, Button] {
@@ -205,8 +210,11 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     val bottom = viewProgress :: viewCancel :: viewRender :: viewDebug :: Nil
 
     implicit val undo: UndoManager = UndoManager()
-    val rightView = FScapeOutputsView[S](obj)
-    make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = Some(rightView),
+    val outputsView = FScapeOutputsView [S](obj)
+    val attrView    = AttrMapView       [S](obj)
+    val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
+
+    make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = Some(("In/Out", rightView)),
       canBounce = false)  // XXX TODO --- perhaps a standard bounce option would be useful
   }
 }

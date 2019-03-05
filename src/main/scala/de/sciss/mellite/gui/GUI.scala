@@ -30,7 +30,7 @@ import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
 import javax.imageio.ImageIO
-import javax.swing.{Icon, ImageIcon, SwingUtilities}
+import javax.swing.{Icon, ImageIcon, KeyStroke, SwingUtilities}
 
 import scala.concurrent.Future
 import scala.swing.Reactions.Reaction
@@ -40,6 +40,12 @@ import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Lab
 import scala.util.{Failure, Success, Try}
 
 object GUI {
+  def keyStrokeText(ks: KeyStroke): String = {
+    val s0  = ks.toString
+    val i   = s0.indexOf("pressed ")
+    if (i < 0) s0 else s0.substring(0, i) + s0.substring(i + 8)
+  }
+
   def keyValueDialog(value: Component, title: String = "New Entry", defaultName: String = "Name",
                      window: Option[desktop.Window] = None): Option[String] = {
     val ggName  = new TextField(10)
