@@ -108,7 +108,7 @@ object WidgetEditorViewImpl {
 
       val bot: View[S] = View.wrap {
         actionRender  = Action(null   )(renderAndShow())
-        val ksRender  = KeyStrokes.menu1 + Key.Enter
+        val ksRender  = KeyStrokes.shift + Key.F10
         val ttRender  = s"Render (${Util.keyStrokeText(ksRender)})"
 
         //      lazy val ggApply : Button = GUI.toolButton(actionApply , raphael.Shapes.Check       , tooltip = "Save text changes")

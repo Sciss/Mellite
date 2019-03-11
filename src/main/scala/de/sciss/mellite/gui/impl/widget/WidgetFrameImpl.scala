@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui.impl.widget
 
 import de.sciss.desktop.{OptionPane, UndoManager}
-import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.expr.{BooleanObj, CellView}
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
@@ -31,7 +31,8 @@ object WidgetFrameImpl {
   def editor[S <: Sys[S]](obj: Widget[S], bottom: ISeq[View[S]])
                          (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
-    val view  = WidgetEditorView(obj, bottom = bottom)
+    val showEditor  = obj.attr.$[BooleanObj](Widget.attrEditMode).forall(_.value)
+    val view  = WidgetEditorView(obj, showEditor = showEditor, bottom = bottom)
     val res   = new EditorFrameImpl[S](view).init()
     trackTitle(res, view.renderer)
     res

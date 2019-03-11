@@ -13,10 +13,9 @@
 
 package de.sciss.mellite
 
-import javax.swing.UIManager
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
-import de.sciss.file.{File, file}
+import de.sciss.file.File
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.requireEDT
@@ -26,6 +25,7 @@ import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame,
 import de.sciss.osc
 import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
+import javax.swing.UIManager
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.{TxnExecutor, atomic}
@@ -50,6 +50,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  de.sciss.lucre.bitemp.impl.BiGroupImpl.showLog = true
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
+//  de.sciss.fscape.showStreamLog = true
 
   override def main(args: Array[String]): Unit = {
     val default = Config()
