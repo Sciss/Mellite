@@ -348,6 +348,7 @@ object CodeViewImpl {
       val ksApply = KeyStrokes.menu1 + Key.S
       val ggApply = GUI.toolButton(actionApply, raphael.Shapes.Check,
         tooltip = s"Save changes (${GUI.keyStrokeText(ksApply)})")
+      Util.addGlobalKey(ggApply, ksApply)
 
       val bot0: List[Component] = ggProgress :: Nil
       val bot1 = if (bottom.isEmpty) bot0 else bot0 ++ bottom.map(_.component)
