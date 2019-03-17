@@ -15,6 +15,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
+    val akka                = "2.5.19"  // "2.5.21" has broken printDebugDump
     val appDirs             = "1.0.3"
     val audioFile           = "1.5.1"
     val audioWidgets        = "1.14.0"
@@ -24,7 +25,7 @@ lazy val deps = new {
     val fileCache           = "0.5.0"
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.14.0"
+    val freesound           = "1.15.0-SNAPSHOT"
     val fscape              = "2.22.0-SNAPSHOT"
     val interpreterPane     = "1.10.0"
     val jline               = "2.14.6"
@@ -34,15 +35,15 @@ lazy val deps = new {
     val lucreSwing          = "1.14.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.8.0"
+    val patterns            = "0.9.0-SNAPSHOT"
     val pdflitz             = "1.4.0"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val processor           = "0.4.2"
     val raphaelIcons        = "1.0.5"
-    val scalaCollider       = "1.28.0"
+    val scalaCollider       = "1.28.1"
     val scalaColliderSwing  = "1.41.0"
-    val scalaColliderUGens  = "1.19.2"
+    val scalaColliderUGens  = "1.19.3"
     val scalaOSC            = "1.2.0"
     val scalaSTM            = "0.9"
     val scalaSwing          = "2.1.0"
@@ -50,7 +51,7 @@ lazy val deps = new {
     val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.0"
-    val soundProcesses      = "3.25.1-SNAPSHOT"
+    val soundProcesses      = "3.26.0-SNAPSHOT"
     val span                = "1.4.2"
     val submin              = "0.2.4"
     val swingPlus           = "0.4.0"
@@ -58,7 +59,7 @@ lazy val deps = new {
     val treeTable           = "1.5.0"
     val topology            = "1.1.1"
     val webLaF              = "2.1.4"
-    val wolkenpumpe         = "2.30.0"
+    val wolkenpumpe         = "2.31.0-SNAPSHOT"
   }
 }
 
@@ -254,6 +255,12 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
+    ),
+    // avoid broken printDebugDump
+    dependencyOverrides ++= Seq(
+      "com.typesafe.akka" %% "akka-actor"           % deps.main.akka,
+      "com.typesafe.akka" %% "akka-stream"          % deps.main.akka,
+      "com.typesafe.akka" %% "akka-stream-testkit"  % deps.main.akka,
     ),
     libraryDependencies ++= {
       // currently disabled until Scala 2.13 version is available

@@ -51,6 +51,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
 //  de.sciss.fscape.showStreamLog = true
+//  Prefs.useLogFrame = false
 
   override def main(args: Array[String]): Unit = {
     val default = Config()
@@ -217,15 +218,16 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     // I think space bar hijacking in the timeline frame
     UIManager.getDefaults.remove("SplitPane.ancestorInputMap")
 
+    // early, so error printing in `initTypes` is already captured
+    if (Prefs.useLogFrame) LogFrame.instance    // init
+    DocumentViewHandler.instance                // init
+
     // ---- type extensions ----
     // since some are registering view factories,
     // and those might use `isDarkSkin`, we place
     // this call after `lafInfo.install()`.
 
     initTypes()
-
-    if (Prefs.useLogFrame) LogFrame.instance    // init
-    DocumentViewHandler.instance    // init
 
     new MainFrame
 

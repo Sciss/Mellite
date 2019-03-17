@@ -95,7 +95,7 @@ object PatternObjView extends NoArgsListObjViewFactory {
     val objH    = tx.newHandle(obj)
     val code0   = codeEx0.value match {
       case cs: Pattern.Code => cs
-      case other => sys.error(s"Pattern source code does not produce patterns.Graph: ${other.contextName}")
+      case other => sys.error(s"Pattern source code does not produce patterns.Graph: ${other.tpe.humanName}")
     }
 
     val handler = new CodeView.Handler[S, Unit, Pat[_]] {

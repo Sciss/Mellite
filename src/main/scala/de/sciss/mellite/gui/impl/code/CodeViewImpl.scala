@@ -311,7 +311,7 @@ object CodeViewImpl {
         stylingName       = Some(if (Mellite.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
-      val intpFut       = interpreter(code.id)
+      val intpFut       = interpreter(code.tpe.id)
       intpFut.value match {
         case Some(tr) =>
           intpReady(tr)

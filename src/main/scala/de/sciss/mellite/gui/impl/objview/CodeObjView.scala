@@ -61,11 +61,11 @@ object CodeObjView extends ListObjView.Factory {
   }
 
   // cf. SP #58
-  private lazy val codeSeq  : Seq[Code.Type]          = Seq(Code.SynthGraph     , Code.Action     )
-  private lazy val codeNames: Seq[String]             = Seq(Code.SynthGraph.name, Code.Action.name)
+  private lazy val codeSeq    = Code.types
+  private lazy val codeNames  = codeSeq.map(_.humanName)
   private lazy val codeMap  : Map[String, Code.Type]  =
-    codeNames.iterator.zip(codeSeq.iterator).map { case (n, tpe) =>
-      val nm = n.filterNot(_.isSpaceChar).toLowerCase
+    codeSeq.iterator.map { tpe =>
+      val nm = tpe.prefix.toLowerCase
       nm -> tpe
     } .toMap
 
@@ -138,7 +138,7 @@ object CodeObjView extends ListObjView.Factory {
     }
 
     def configureRenderer(label: Label): Component = {
-      label.text = value.contextName
+      label.text = value.tpe.humanName
       label
     }
   }

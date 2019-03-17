@@ -98,7 +98,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     val objH    = tx.newHandle(obj)
     val code0   = codeEx0.value match {
       case cs: FScape.Code => cs
-      case other => sys.error(s"FScape source code does not produce fscape.Graph: ${other.contextName}")
+      case other => sys.error(s"FScape source code does not produce fscape.Graph: ${other.tpe.humanName}")
     }
 
     import de.sciss.fscape.Graph

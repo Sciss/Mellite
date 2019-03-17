@@ -91,7 +91,7 @@ object WidgetEditorViewImpl {
       val codeEx0   = codeObj
       val code0   = codeEx0.value match {
         case cs: Widget.Code => cs
-        case other => sys.error(s"Widget source code does not produce Widget.Graph: ${other.contextName}")
+        case other => sys.error(s"Widget source code does not produce Widget.Graph: ${other.tpe.humanName}")
       }
       val objH = tx.newHandle(obj)
 

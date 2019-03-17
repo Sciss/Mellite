@@ -123,7 +123,7 @@ object ApiBrowser {
   private[this] var lookUpRefBusy = false
 
   private def mkBasePath(code: Option[Code]): String = {
-    val baseSymbol  = code.fold("de.sciss.synth.proc")(_.docBaseSymbol)
+    val baseSymbol  = code.fold("de.sciss.synth.proc")(_.tpe.docBaseSymbol)
     val s           = baseSymbol.replace('.', '/')
     val i           = s.lastIndexOf('/')
     val s1          = s.substring(i + 1)

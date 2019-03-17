@@ -57,7 +57,7 @@ object CodeFrameImpl {
     val objH    = tx.newHandle(obj)
     val code0   = codeEx0.value match {
       case cs: Code.SynthGraph => cs
-      case other => sys.error(s"Proc source code does not produce SynthGraph: ${other.contextName}")
+      case other => sys.error(s"Proc source code does not produce SynthGraph: ${other.tpe.humanName}")
     }
 
     val handler = new CodeView.Handler[S, Unit, SynthGraph] {
@@ -93,7 +93,7 @@ object CodeFrameImpl {
     val codeEx0 = codeObj
     val code0   = codeEx0.value match {
       case cs: Code.Action => cs
-      case other => sys.error(s"Action source code does not produce plain function: ${other.contextName}")
+      case other => sys.error(s"Action source code does not produce plain function: ${other.tpe.humanName}")
     }
 
     val objH  = tx.newHandle(obj)
@@ -240,7 +240,7 @@ object CodeFrameImpl {
 
     view.init()
     val _name = CellView.name(pObj)
-    val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.contextName)
+    val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.tpe.humanName)
     res.init()
     res
   }
