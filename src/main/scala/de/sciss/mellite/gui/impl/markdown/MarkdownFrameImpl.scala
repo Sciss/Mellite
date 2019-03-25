@@ -15,7 +15,7 @@ package de.sciss.mellite
 package gui.impl.markdown
 
 import de.sciss.desktop.{OptionPane, UndoManager}
-import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.expr.{BooleanObj, CellView}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
@@ -32,8 +32,9 @@ object MarkdownFrameImpl {
   def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
-    val view  = MarkdownEditorView(obj, bottom = bottom)
-    val res   = new EditorFrameImpl[S](view).init()
+    val showEditor  = obj.attr.$[BooleanObj](Markdown.attrEditMode).forall(_.value)
+    val view        = MarkdownEditorView(obj, showEditor = showEditor, bottom = bottom)
+    val res         = new EditorFrameImpl[S](view).init()
     trackTitle(res, view.renderer)
     res
   }

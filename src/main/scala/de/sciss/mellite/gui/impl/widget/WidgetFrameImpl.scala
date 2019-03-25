@@ -32,8 +32,8 @@ object WidgetFrameImpl {
                          (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] = {
     implicit val undo: UndoManager = UndoManager()
     val showEditor  = obj.attr.$[BooleanObj](Widget.attrEditMode).forall(_.value)
-    val view  = WidgetEditorView(obj, showEditor = showEditor, bottom = bottom)
-    val res   = new EditorFrameImpl[S](view).init()
+    val view        = WidgetEditorView(obj, showEditor = showEditor, bottom = bottom)
+    val res         = new EditorFrameImpl[S](view).init()
     trackTitle(res, view.renderer)
     res
   }
