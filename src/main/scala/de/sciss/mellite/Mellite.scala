@@ -35,7 +35,7 @@ import scala.util.control.NonFatal
 
 object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") with Application with Init {
   @volatile
-  private[this] var _config: Config = _
+  private[this] var _config: Config = Config()
 
   def config: Config = _config
 
@@ -51,15 +51,18 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
 //  de.sciss.fscape.showStreamLog = true
-//  Prefs.useLogFrame = false
 
   override def main(args: Array[String]): Unit = {
-    val default = Config()
+    val default = _config
 
     val p = new scopt.OptionParser[Config]("mellite") {
       opt[Seq[String]]('r', "auto-run")
         .text("Run object with given name from root folder's top level. Comma separated list for multiple objects.")
         .action { (v, c) => c.copy(autoRun = v.toList) }
+
+      opt[Unit]("no-log-frame")
+        .text("Do not create log frame (post window).")
+        .action { (_, c) => c.copy(logFrame = false) }
 
       arg[File]("<workspaces>")
         .unbounded()
@@ -219,8 +222,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     UIManager.getDefaults.remove("SplitPane.ancestorInputMap")
 
     // early, so error printing in `initTypes` is already captured
-    if (Prefs.useLogFrame) LogFrame.instance    // init
-    DocumentViewHandler.instance                // init
+    if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
+    DocumentViewHandler.instance                                  // init
 
     // ---- type extensions ----
     // since some are registering view factories,

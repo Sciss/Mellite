@@ -20,7 +20,7 @@ lazy val deps = new {
     val audioFile           = "1.5.1"
     val audioWidgets        = "1.14.0"
     val desktop             = "0.10.0"
-    val dotterweide         = "0.1.0"
+    val dotterweide         = "0.1.1-SNAPSHOT"
     val equal               = "0.1.3"
     val fileCache           = "0.5.0"
     val fileUtil            = "1.1.3"
@@ -257,11 +257,11 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
     ),
     // avoid broken printDebugDump
-    dependencyOverrides ++= Seq(
-      "com.typesafe.akka" %% "akka-actor"           % deps.main.akka,
-      "com.typesafe.akka" %% "akka-stream"          % deps.main.akka,
-      "com.typesafe.akka" %% "akka-stream-testkit"  % deps.main.akka,
-    ),
+    // dependencyOverrides ++= Seq(
+    //   "com.typesafe.akka" %% "akka-actor"           % deps.main.akka,
+    //   "com.typesafe.akka" %% "akka-stream"          % deps.main.akka,
+    //   "com.typesafe.akka" %% "akka-stream-testkit"  % deps.main.akka,
+    // ),
     libraryDependencies ++= {
       // currently disabled until Scala 2.13 version is available
       if (scalaVersion.value == "2.13.0-M5") Nil else Seq(

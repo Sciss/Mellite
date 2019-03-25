@@ -15,4 +15,4 @@ package de.sciss.mellite
 
 import de.sciss.file.File
 
-final case class Config(open: List[File] = Nil, autoRun: List[String] = Nil)
+final case class Config(open: List[File] = Nil, autoRun: List[String] = Nil, logFrame: Boolean = true)
