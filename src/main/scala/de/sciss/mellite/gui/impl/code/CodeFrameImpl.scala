@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.gui.impl.code
 
-import de.sciss.desktop.{OptionPane, UndoManager, Util}
+import de.sciss.desktop.{Menu, OptionPane, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
@@ -155,7 +155,7 @@ object CodeFrameImpl {
     val objH    = tx.newHandle(obj)
 
     make[S, _code.In, _code.Out](pObj = obj, pObjH = objH, obj = obj, code0 = _code, handler = None,
-      bottom = bottom, rightViewOpt = None, canBounce = canBounce)
+      bottom = bottom, rightViewOpt = None, debugMenuItems = Nil, canBounce = canBounce)
   }
 
   private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[(String, View[S])])
@@ -227,7 +227,9 @@ object CodeFrameImpl {
   def make[S <: Sys[S], In0, Out0](pObj: Obj[S], pObjH: stm.Source[S#Tx, Obj[S]], obj: Code.Obj[S],
                                    code0: CodeT[In0, Out0],
                                    handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
-                                   rightViewOpt: Option[(String, View[S])], canBounce: Boolean)
+                                   rightViewOpt: Option[(String, View[S])] = None,
+                                   debugMenuItems: List[swing.Action] = Nil,
+                                   canBounce: Boolean)
                                   (implicit tx: S#Tx, universe: Universe[S],
                                    undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
     // val _name   = /* title getOrElse */ obj.attr.name
@@ -240,7 +242,9 @@ object CodeFrameImpl {
 
     view.init()
     val _name = CellView.name(pObj)
-    val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.tpe.humanName)
+    val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.tpe.humanName,
+      debugMenuItems = debugMenuItems
+    )
     res.init()
     res
   }
@@ -267,13 +271,29 @@ object CodeFrameImpl {
   // ---- frame impl ----
 
   private final class FrameImpl[S <: Sys[S]](val codeView: CodeView[S, _], val view: View[S],
-                                             name: CellView[S#Tx, String], contextName: String)
+                                             name: CellView[S#Tx, String], contextName: String,
+                                             debugMenuItems: List[swing.Action])
     extends WindowImpl[S](name.map(n => s"$n : $contextName Code")) with CodeFrame[S] with Veto[S#Tx] {
 
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
       if (!codeView.isCompiling && !codeView.dirty) None else Some(this)
 
     private def _vetoMessage = "The code has been edited."
+
+    override protected def initGUI(): Unit = {
+      super.initGUI()
+      if (debugMenuItems.nonEmpty) {
+        val mf = window.handler.menuFactory
+        mf.get("actions").foreach {
+          case g: Menu.Group =>
+            val winOpt = Some(window)
+            debugMenuItems.iterator.zipWithIndex.foreach { case (a, ai) =>
+              g.add(winOpt, Menu.Item(s"debug-${ai + 1}", a))
+            }
+          case _ =>
+        }
+      }
+    }
 
     def vetoMessage(implicit tx: S#Tx): String =
       if (codeView.isCompiling) "Ongoing compilation." else _vetoMessage

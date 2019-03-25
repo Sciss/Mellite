@@ -32,12 +32,15 @@ import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
+import scala.concurrent.Promise
 import scala.concurrent.stm.Ref
 import scala.swing.event.Key
-import scala.swing.{Button, Orientation, ProgressBar}
+import scala.swing.{Action, Button, Orientation, ProgressBar}
 import scala.util.Failure
 
 object FScapeObjView extends NoArgsListObjViewFactory {
+  final val DEBUG_LAUNCH = false
+
   type E[~ <: stm.Sys[~]] = FScape[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Sparks)
   val prefix        : String    = "FScape"
@@ -138,6 +141,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
       GUI.toolButton(actionCancel, raphael.Shapes.Cross, tooltip = "Abort Rendering")
     }
 
+    var debugLaunchP  = Option.empty[Promise[Unit]]
+    var debugLaunchC  = 0
+
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
     val viewRender = View.wrap[S, Button] {
       val actionRender = new swing.Action("Render") { self =>
@@ -156,6 +162,12 @@ object FScapeObjView extends NoArgsListObjViewFactory {
               // config.nodeBufferSize
               // config.executionContext
               // config.seed
+              if (DEBUG_LAUNCH) {
+                val pDebug              = Promise[Unit]()
+                debugLaunchP            = Some(pDebug)
+                debugLaunchC            = 0
+                config.debugWaitLaunch  = Some(pDebug.future)
+              }
 
               def finished()(implicit tx: S#Tx): Unit = {
                 renderRef.set(None)(tx.peer)
@@ -200,11 +212,18 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     }
 
     val viewDebug = View.wrap[S, Button] {
-      Button("Debug") {
-        renderRef.single.get.foreach { r =>
-          val ctrl = r.control
-          println(ctrl.stats)
-          ctrl.debugDotGraph()
+      new Button("Debug") {
+        action = Action(text) {
+          renderRef.single.get.foreach { r =>
+            val ctrl = r.control
+            if (debugLaunchC == 1 && DEBUG_LAUNCH) {
+              debugLaunchP.foreach(_.trySuccess(()))
+            } else {
+              println(ctrl.stats)
+              ctrl.debugDotGraph()
+            }
+            debugLaunchC += 1
+          }
         }
       }
     }
@@ -216,8 +235,24 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     val attrView    = AttrMapView       [S](obj)
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
-    make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = Some(("In/Out", rightView)),
-      canBounce = false)  // XXX TODO --- perhaps a standard bounce option would be useful
+    import de.sciss.fscape.{showControlLog, showStreamLog}
+
+    val actToggleControl = Action("Toggle Control Debug") {
+      showControlLog = !showControlLog
+      println(s"Control Debug is ${if (showControlLog) "ON" else "OFF"}")
+    }
+    val actToggleStream = Action("Toggle Stream Debug") {
+      showStreamLog = !showStreamLog
+      println(s"Stream Debug is ${if (showStreamLog) "ON" else "OFF"}")
+    }
+
+    make(obj, objH, codeObj,
+      code0           = code0,
+      handler         = Some(handler), bottom = bottom,
+      rightViewOpt    = Some(("In/Out", rightView)),
+      debugMenuItems  = List(actToggleControl, actToggleStream),
+      canBounce       = false   // XXX TODO --- perhaps a standard bounce option would be useful
+    )
   }
 }
 trait FScapeObjView[S <: stm.Sys[S]] extends ObjView[S] {

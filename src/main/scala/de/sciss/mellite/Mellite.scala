@@ -50,7 +50,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  de.sciss.lucre.bitemp.impl.BiGroupImpl.showLog = true
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
-//  de.sciss.fscape.showStreamLog = true
+//  de.sciss.fscape.showStreamLog   = true
+//  de.sciss.fscape.showControlLog  = true
+//  Prefs.useLogFrame = false
 
   override def main(args: Array[String]): Unit = {
     val default = _config
