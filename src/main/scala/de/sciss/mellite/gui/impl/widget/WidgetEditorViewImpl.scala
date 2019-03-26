@@ -109,7 +109,7 @@ object WidgetEditorViewImpl {
       val bot: View[S] = View.wrap {
         actionRender  = Action(null   )(renderAndShow())
         val ksRender  = KeyStrokes.shift + Key.F10
-        val ttRender  = s"Render (${Util.keyStrokeText(ksRender)})"
+        val ttRender  = s"Build (${Util.keyStrokeText(ksRender)})"
 
         //      lazy val ggApply : Button = GUI.toolButton(actionApply , raphael.Shapes.Check       , tooltip = "Save text changes")
         val ggRender: Button = GUI.toolButton(actionRender, raphael.Shapes.RefreshArrow, tooltip = ttRender)
@@ -133,8 +133,8 @@ object WidgetEditorViewImpl {
       val _tabs = new TabbedPane
       _tabs.peer.putClientProperty("styleId", "attached")
       _tabs.focusable  = false
-      val pageEdit    = new TabbedPane.Page("Editor"  , paneEdit          , null)
-      val pageRender  = new TabbedPane.Page("Rendered", renderer.component, null)
+      val pageEdit    = new TabbedPane.Page("Editor"   , paneEdit          , null)
+      val pageRender  = new TabbedPane.Page("Interface", renderer.component, null)
       _tabs.pages     += pageEdit
       _tabs.pages     += pageRender
       //      _tabs.pages     += pageAttr
@@ -150,6 +150,7 @@ object WidgetEditorViewImpl {
         codeView.component.requestFocus()
       } else {
         _tabs.selection.index = 1
+        paneEdit.preferredSize = renderer.component.preferredSize
       }
     }
   }

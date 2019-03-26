@@ -197,6 +197,7 @@ object MarkdownEditorViewImpl {
         paneImpl.component.requestFocus()
       } else {
         _tabs.selection.index = 1
+//        paneEdit.preferredSize = renderer.component.preferredSize
       }
     }
   }
