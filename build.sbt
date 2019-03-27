@@ -53,7 +53,7 @@ lazy val deps = new {
     val sonogram            = "1.11.0"
     val soundProcesses      = "3.27.0"
     val span                = "1.4.2"
-    val submin              = "0.2.4"
+    val submin              = "0.2.5"
     val swingPlus           = "0.4.1"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.0"
@@ -278,7 +278,11 @@ lazy val root = project.withId(baseNameL).in(file("."))
     },
     libraryDependencies ++= Seq(
       "org.openjfx" % "javafx-swing"    % "11.0.2" classifier jfxClassifer,
+      "org.openjfx" % "javafx-base"     % "11.0.2" classifier jfxClassifer,
+      "org.openjfx" % "javafx-controls" % "11.0.2" classifier jfxClassifer,
       "org.openjfx" % "javafx-graphics" % "11.0.2" classifier jfxClassifer,
+      "org.openjfx" % "javafx-media"    % "11.0.2" classifier jfxClassifer,
+      "org.openjfx" % "javafx-web"      % "11.0.2" classifier jfxClassifer,
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     mainClass in (Compile,run) := appMainClass,
