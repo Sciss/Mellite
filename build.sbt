@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.33.0"
+lazy val projectVersion             = "2.33.1-SNAPSHOT"
 lazy val mimaVersion                = "2.33.0"
 
 lazy val loggingEnabled             = true
@@ -125,12 +125,12 @@ lazy val pkgUniversalSettings = Seq(
   executableScriptName /* in Universal */ := appNameL,
   // NOTE: doesn't work on Windows, where we have to
   // provide manual file `MELLITE_config.txt` instead!
-  javaOptions in Universal ++= Seq(
-    // -J params will be added as jvm parameters
-    "-J-Xmx1024m",
-    // others will be added as app parameters
-    "-Djavax.accessibility.assistive_technologies=",  // work around for #70
-  ),
+//  javaOptions in Universal ++= Seq(
+//    // -J params will be added as jvm parameters
+//    "-J-Xmx1024m",
+//    // others will be added as app parameters
+//    "-Djavax.accessibility.assistive_technologies=",  // work around for #70
+//  ),
   // Since our class path is very very long,
   // we use instead the wild-card, supported
   // by Java 6+. In the packaged script this
@@ -191,6 +191,14 @@ lazy val assemblySettings = Seq(
         oldStrategy(x)
     }
   )
+
+// Determine OS version of JavaFX binaries
+lazy val jfxClassifer = System.getProperty("os.name") match {
+  case n if n.startsWith("Linux")   => "linux"
+  case n if n.startsWith("Mac")     => "mac"
+  case n if n.startsWith("Windows") => "win"
+  case _ => throw new Exception("Unknown platform!")
+}
 
 lazy val root = project.withId(baseNameL).in(file("."))
   .enablePlugins(BuildInfoPlugin)
@@ -268,6 +276,10 @@ lazy val root = project.withId(baseNameL).in(file("."))
         "de.sciss"        %% "scalafreesound"                 % deps.main.freesound           // Freesound support
       )
     },
+    libraryDependencies ++= Seq(
+      "org.openjfx" % "javafx-swing"    % "11.0.2" classifier jfxClassifer,
+      "org.openjfx" % "javafx-graphics" % "11.0.2" classifier jfxClassifer,
+    ),
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     mainClass in (Compile,run) := appMainClass,
     initialCommands in console :=
