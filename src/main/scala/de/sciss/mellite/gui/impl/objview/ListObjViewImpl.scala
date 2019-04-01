@@ -100,7 +100,7 @@ object ListObjViewImpl {
     def value: Any
 
     def configureRenderer(label: Label): Component = {
-      label.text = value.toString
+      label.text = value.toString.replace('\n', ' ')
       label
     }
   }

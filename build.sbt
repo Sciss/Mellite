@@ -150,7 +150,8 @@ lazy val pkgDebianSettings = Seq(
   packageSummary            in Debian := appDescription,
   mainClass                 in Debian := appMainClass,
   maintainer                in Debian := s"$authorName <$authorEMail>",
-  debianPackageDependencies in Debian += "java8-runtime",
+  debianPackageDependencies in Debian ++= Seq("java8-runtime"),
+  debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
   packageDescription        in Debian :=
     """Mellite is a computer music environment,
       | a desktop application based on SoundProcesses.
