@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.gui.impl.audiocue
 
-import de.sciss.audiowidgets.AxisFormat
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
@@ -22,6 +21,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
@@ -30,7 +30,7 @@ import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, GUI, ListObjView, MessageException, ObjView}
 import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.io.{AudioFile, AudioFileSpec, SampleFormat}
+import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}
 import javax.swing.Icon
 
@@ -217,8 +217,6 @@ object AudioCueObjView extends ListObjView.Factory {
     res.reverse
   }
 
-  private val timeFmt = AxisFormat.Time(hours = false, millis = true)
-
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
                                 var value: AudioCue)
     extends AudioCueObjView[S]
@@ -251,24 +249,10 @@ object AudioCueObjView extends ListObjView.Factory {
     }
 
     def configureRenderer(label: Label): Component = {
-      // ex. AIFF, stereo 16-bit int 44.1 kHz, 0:49.492
       val spec    = value.spec
-      val smp     = spec.sampleFormat
-      val isFloat = smp match {
-        case SampleFormat.Float | SampleFormat.Double => "float"
-        case _ => "int"
-      }
-      val chans   = spec.numChannels match {
-        case 1 => "mono"
-        case 2 => "stereo"
-        case n => s"$n-chan."
-      }
-      val sr  = f"${spec.sampleRate/1000}%1.1f"
-      val dur = timeFmt.format(spec.numFrames.toDouble / spec.sampleRate)
-
+      val txt     = AudioFileIn.formatSpec(spec)
       // XXX TODO: add offset and gain information if they are non-default
-      val txt    = s"${spec.fileType.name}, $chans ${smp.bitsPerSample}-$isFloat $sr kHz, $dur"
-      label.text = txt
+      label.text  = txt
       label
     }
   }

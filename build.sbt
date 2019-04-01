@@ -32,7 +32,7 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val lucre               = "3.11.1"
-    val lucreSwing          = "1.15.1"
+    val lucreSwing          = "1.15.2-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val patterns            = "0.10.0"
@@ -216,7 +216,8 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "filecache-common"               % deps.main.fileCache,          // caching data to disk
       "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // extension methods for files
       "de.sciss"          %% "fingertree"                     % deps.main.fingerTree,         // data structures
-      "de.sciss"          %% "fscape"                         % deps.main.fscape,             // offline audio rendering
+      "de.sciss"          %% "fscape-lucre"                   % deps.main.fscape,             // offline audio rendering
+      "de.sciss"          %% "fscape-views"                   % deps.main.fscape,             // offline audio rendering
       "de.sciss"          %  "jump3r"                         % deps.main.jump3r,             // mp3 export
       "de.sciss"          %% "kollflitz"                      % deps.main.kollFlitz,          // more collections methods
       "de.sciss"          %% "lucre-base"                     % deps.main.lucre,              // object system
