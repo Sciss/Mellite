@@ -249,8 +249,7 @@ object AudioCueObjView extends ListObjView.Factory {
     }
 
     def configureRenderer(label: Label): Component = {
-      val spec    = value.spec
-      val txt     = AudioFileIn.formatSpec(spec)
+      val txt     = AudioFileIn.specToString(value.spec)
       // XXX TODO: add offset and gain information if they are non-default
       label.text  = txt
       label
