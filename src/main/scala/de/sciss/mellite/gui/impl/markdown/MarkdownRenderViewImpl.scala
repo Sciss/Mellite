@@ -82,6 +82,12 @@ object MarkdownRenderViewImpl {
     protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = None
   }
 
+  private final case class Percent(value: Int) {
+    override def toString: String = s"$value%"
+
+    def fraction: Double = value * 0.01
+  }
+
   private abstract class Base[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
     extends MarkdownRenderView.Basic[S]
       with ComponentHolder[Component]
@@ -157,12 +163,6 @@ object MarkdownRenderViewImpl {
       val html      = mdp.markdownToHtml(text)
       _editor.text  = html
       _editor.peer.setCaretPosition(0)
-    }
-
-    private final case class Percent(value: Int) {
-      override def toString: String = s"$value%"
-
-      def fraction: Double = value * 0.01
     }
 
     private def guiInit(): Unit = {

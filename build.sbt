@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.34.0-SNAPSHOT"
+lazy val projectVersion             = "2.34.0"
 lazy val mimaVersion                = "2.34.0"
 
 lazy val loggingEnabled             = true
@@ -26,7 +26,7 @@ lazy val deps = new {
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
     val freesound           = "1.16.0"
-    val fscape              = "2.24.0-SNAPSHOT"
+    val fscape              = "2.24.0"
     val interpreterPane     = "1.10.0"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
@@ -125,12 +125,16 @@ lazy val pkgUniversalSettings = Seq(
   executableScriptName /* in Universal */ := appNameL,
   // NOTE: doesn't work on Windows, where we have to
   // provide manual file `MELLITE_config.txt` instead!
-  javaOptions in Universal ++= Seq(
-    // -J params will be added as jvm parameters
-    // "-J-Xmx1024m",
-    // others will be added as app parameters
-    "-Djavax.accessibility.assistive_technologies=",  // work around for #70
-  ),
+// NOTE: This workaround for #70 is incompatible with Java 11...
+// instead recommend to users of Linux with JDK 8 to create
+// `~/.accessibility.properties`
+//
+//  javaOptions in Universal ++= Seq(
+//    // -J params will be added as jvm parameters
+//    // "-J-Xmx1024m",
+//    // others will be added as app parameters
+//    "-Djavax.accessibility.assistive_technologies=",  // work around for #70
+//  ),
   // Since our class path is very very long,
   // we use instead the wild-card, supported
   // by Java 6+. In the packaged script this

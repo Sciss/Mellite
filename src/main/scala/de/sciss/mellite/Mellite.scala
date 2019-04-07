@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
-import de.sciss.file.File
+import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.requireEDT
@@ -226,6 +226,25 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     // early, so error printing in `initTypes` is already captured
     if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
     DocumentViewHandler.instance                                  // init
+
+    // at this point, awt.Toolkit will have loaded Atk
+    sys.props.get("javax.accessibility.assistive_technologies") match {
+      case Some("org.GNOME.Accessibility.AtkWrapper") =>
+        println(
+          s"""WARNING: Assistive technology installed
+             |  that is known to cause performance problems.
+             |
+             |  It is recommended to create a plain text file
+             |  `$userHome/.accessibility.properties`
+             |  with contents
+             |
+             |  javax.accessibility.assistive_technologies=
+             |
+             |""".stripMargin
+        )
+
+      case _ =>
+    }
 
     // ---- type extensions ----
     // since some are registering view factories,

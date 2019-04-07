@@ -36,8 +36,8 @@ provided by Didier Descouens under CC BY 4.0 license.
   [github.com/Sciss/Mellite](http://github.com/Sciss/Mellite).
   
 In order to run the application, you must have a Java Development Kit (JDK) installed. The recommended version
-is 8. You can use either OpenJDK or Oracle JDK. On the Raspberry Pi, we currently recommend Oracle JDK, as there
-are stability issues with OpenJDK 8. Oracle JDK 8 is available from
+is __JDK 8.__ You can use either OpenJDK or Oracle JDK. On the Raspberry Pi, we currently recommend Oracle JDK, 
+as there are stability issues with OpenJDK 8. Oracle JDK 8 is available from
 [here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). On Linux, to install
 OpenJDK, use `sudo apt install openjdk-8-jdk`.
 
@@ -45,7 +45,21 @@ In order to use the built-in API browser, you additionally need JavaFX. It may b
 OpenJDK, you should install the package `openjfx` (e.g. `sudo apt install openjfx`.)
 
 For real-time sound reproduction, the [SuperCollider](https://supercollider.github.io/download) server is needed.
-The recommended version is 3.9.0 or above (technically 3.7.0 or higher should work). 
+The recommended version is 3.9.0 or above (technically 3.7.0 or higher should work).
+
+### issues
+
+When using JDK 8 under Debian and GNOME, there is a __bug in the assistive technology (Atk)__ which results in
+performance degradation over time, as the some of the UI is used. To solve this problem, create a plain text file
+`~/.accessibility.properties` (that is, in your home directory) and put the following contents inside:
+
+    javax.accessibility.assistive_technologies=
+
+Mellite has now also been tested with __JDK 11.__ You will see some warnings/errors when starting, including
+"An illegal reflective access operation has occurred" and
+"ERROR com.alee.utils.ProprietaryUtils - java.lang.NoSuchFieldException: AA_TEXT_PROPERTY_KEY". These are related
+to the Web Look-and-Feel, and can be ignored. However, JavaFX is not available as a system-wide package for JDK 11,
+so the API browser currently does not work under JDK 11.
 
 ## linking
 
@@ -55,7 +69,7 @@ The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite" % v
 
-The current version `v` is `"2.33.0"`.
+The current version `v` is `"2.34.0"`.
 
 ## building from source
 

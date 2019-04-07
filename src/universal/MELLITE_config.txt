@@ -1,4 +1,4 @@
 # Java options for Windows
 # (Linux and Mac use conf/application.ini instead!)
 # Due to bug in sbt-native-packager, this file must be manually created
--Xmx1024m
+# -Xmx1024m
