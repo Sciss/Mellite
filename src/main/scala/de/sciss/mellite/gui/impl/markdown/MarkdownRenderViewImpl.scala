@@ -14,28 +14,28 @@
 package de.sciss.mellite
 package gui.impl.markdown
 
-import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
-import de.sciss.desktop
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRenderView}
 import de.sciss.mellite.gui.impl.component.NavigationHistory
-import de.sciss.swingplus.EditorPane
+import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRenderView}
+import de.sciss.{desktop, numbers}
+import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
+import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
 import org.pegdown.PegDownProcessor
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.event.Key
+import scala.swing.event.{Key, SelectionChanged}
 import scala.swing.{Action, BorderPanel, Component, FlowPanel, ScrollPane, Swing}
 
 object MarkdownRenderViewImpl {
@@ -100,7 +100,7 @@ object MarkdownRenderViewImpl {
     // ---- impl ----
 
     private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]
-    private[this] var _editor: EditorPane = _
+    private[this] var _editor: HTMLEditorPaneWithZoom = _
     private[this] val nav   = NavigationHistory.empty[S, stm.Source[S#Tx, Markdown[S]]]
     private[this] var actionBwd: Action = _
     private[this] var actionFwd: Action = _
@@ -159,8 +159,14 @@ object MarkdownRenderViewImpl {
       _editor.peer.setCaretPosition(0)
     }
 
+    private final case class Percent(value: Int) {
+      override def toString: String = s"$value%"
+
+      def fraction: Double = value * 0.01
+    }
+
     private def guiInit(): Unit = {
-      _editor = new EditorPane("text/html", "") {
+      _editor = new HTMLEditorPaneWithZoom("") {
         editable      = false
         border        = Swing.EmptyBorder(8)
         preferredSize = (500, 500)
@@ -232,8 +238,36 @@ object MarkdownRenderViewImpl {
       }
       actionFwd.enabled = false
 
-      val ggBwd = GUI.toolButton(actionBwd, raphael.Shapes.Backward)
-      val ggFwd = GUI.toolButton(actionFwd, raphael.Shapes.Forward )
+      val paneRender = new ScrollPane(_editor)
+      paneRender.peer.putClientProperty("styleId", "undecorated")
+
+      val ggBwd  = GUI.toolButton(actionBwd, raphael.Shapes.Backward)
+      val ggFwd  = GUI.toolButton(actionFwd, raphael.Shapes.Forward )
+      val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400).map(Percent)
+      val ggZoom = new ComboBox(zoomItems) {
+        selection.item = Percent(100)
+        listenTo(selection)
+        reactions += {
+          case SelectionChanged(_) =>
+            _editor.zoom = selection.item.fraction
+//            paneRender.horizontalScrollBarPolicy =
+//              if (_editor.zoom == 1.0)  ScrollPane.BarPolicy.AsNeeded
+//              else                      ScrollPane.BarPolicy.Always  // work around bugs in zoom hack
+        }
+      }
+
+      def zoom(dir: Int): Unit = {
+        import numbers.Implicits._
+        ggZoom.selection.index = (ggZoom.selection.index + dir).clip(0, zoomItems.size - 1)
+      }
+
+      def zoomIn  (): Unit = zoom(+1)
+      def zoomOut (): Unit = zoom(-1)
+
+      import KeyStrokes._
+      Util.addGlobalAction(ggZoom, "dec", ctrl + Key.Minus          )(zoomOut ())
+      Util.addGlobalAction(ggZoom, "inc", ctrl + Key.Plus           )(zoomIn  ())
+      Util.addGlobalAction(ggZoom, "inc", shift + ctrl + Key.Equals )(zoomIn  ())
 
       if (!embedded) {
         import KeyStrokes._
@@ -243,11 +277,8 @@ object MarkdownRenderViewImpl {
 
       val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = mkEditButton().fold(bot1)(_ :: bot1)
-      val bot3 = HGlue :: ggBwd :: ggFwd :: bot2
+      val bot3 = HGlue :: ggZoom :: ggBwd :: ggFwd :: bot2
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)
-
-      val paneRender = new ScrollPane(_editor)
-      paneRender.peer.putClientProperty("styleId", "undecorated")
 
       val pane = new BorderPanel {
         add(paneRender  , BorderPanel.Position.Center)
