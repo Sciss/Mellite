@@ -29,6 +29,9 @@ import javax.swing.text.{AbstractDocument, Element, Position, StyleConstants, Vi
   * small zoom factors (e.g. 0.5) the width is not filled.
   *
   * So this needs more work in the future.
+  *
+  * Also check this for more ideas (?):
+  * https://github.com/kyo2010/VSTimeMachinGUI/blob/8e896da4aa46280cf09198729a2222ccc8868e39/src/vs/time/kkv/connector/Utils/ScaledTextPane.java
   */
 class HTMLEditorPaneWithZoom(text0: String) extends EditorPane("text/html", text0) {
   private def contentType0 = "text/html"

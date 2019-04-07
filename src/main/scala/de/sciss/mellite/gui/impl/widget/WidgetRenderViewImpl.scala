@@ -14,6 +14,7 @@
 package de.sciss.mellite
 package gui.impl.widget
 
+import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.stm
@@ -24,14 +25,17 @@ import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
+import de.sciss.numbers
 import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
 import de.sciss.synth.proc.{Universe, Widget}
+import javax.swing.JComponent
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.{Action, BorderPanel, Component, FlowPanel, Swing}
+import scala.swing.event.Key
+import scala.swing.{Action, BorderPanel, Component, FlowPanel, Font, Swing}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
@@ -48,12 +52,13 @@ object WidgetRenderViewImpl {
 
     type C = Component
 
-    private[this] val widgetRef = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]
-    private[this] val graphRef  = Ref.make[Widget.Graph]
-    private[this] val viewRef   = Ref(Option.empty[Disposable[S#Tx]])
+    private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]
+    private[this] val graphRef    = Ref.make[Widget.Graph]
+    private[this] val viewRef     = Ref(Option.empty[Disposable[S#Tx]])
+    private[this] var zoomFactor  = 1.0f
 
     //    private[this] var paneRender: Component   = _
-    private[this] var paneBorder: BorderPanel1 = _
+    private[this] var paneBorder: BorderPanelWithAdd = _
 
 
     def dispose()(implicit tx: S#Tx): Unit = {
@@ -86,14 +91,32 @@ object WidgetRenderViewImpl {
 //      val wH = tx.newHandle(w)
     }
 
-    private class BorderPanel1 extends BorderPanel {
+    private class BorderPanelWithAdd extends BorderPanel {
+      // make that public
       override def add(c: Component, l: BorderPanel.Position.Value): Unit =
         super.add(c, l)
     }
 
-    def setGraph(g: Graph)(implicit tx: S#Tx): Unit = {
+    private def setZoom(top: JComponent /*, done: mutable.Set[JComponent] = mutable.Set.empty*/): Unit =
+      /*if (done.add(top))*/ {
+        top.getFont match {
+          case f: Font =>
+            val fN = f.deriveFont(f.getSize2D * zoomFactor)
+            top.setFont(fN)
+          case _ =>
+        }
+
+        top.getComponents.foreach {
+          case c: JComponent => setZoom(c)
+          case _ =>
+        }
+      }
+
+    def setGraph(g: Graph)(implicit tx: S#Tx): Unit = setGraphForce(g, force = false)
+
+    private def setGraphForce(g: Graph, force: Boolean)(implicit tx: S#Tx): Unit = {
       val old = graphRef.swap(g)
-      if (g != old) {
+      if (force || g != old) {
         // N.B. we have to use `try` instead of `Try` because
         // `MissingIn` is a `ControlThrowable` which would not be caught.
         val vTry = try {
@@ -111,6 +134,7 @@ object WidgetRenderViewImpl {
               ex.printStackTrace()
               Swing.HGlue
           }
+          if (zoomFactor != 1f) setZoom(comp.peer)
           paneBorder.add(comp, BorderPanel.Position.Center)
           paneBorder.revalidate()
         }
@@ -132,10 +156,34 @@ object WidgetRenderViewImpl {
       val bot3 = HGlue :: bot2
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)
 
-//      paneRender = new ScrollPane // (_editor)
+      val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400)
+      var zoomIdx   = zoomItems.indexOf(100)
+
+      def zoom(dir: Int): Unit = {
+        import numbers.Implicits._
+        val newIdx = (zoomIdx + dir).clip(0, zoomItems.size - 1)
+        if (zoomIdx != newIdx) {
+          zoomIdx     = newIdx
+          zoomFactor  = zoomItems(newIdx) * 0.01f
+          cursor.step { implicit tx =>
+            setGraphForce(graphRef(), force = true)
+          }
+        }
+      }
+
+      def zoomIn  (): Unit = zoom(+1)
+      def zoomOut (): Unit = zoom(-1)
+
+      import KeyStrokes._
+      Util.addGlobalAction(panelBottom, "dec", ctrl + Key.Minus          )(zoomOut ())
+      Util.addGlobalAction(panelBottom, "inc", ctrl + Key.Plus           )(zoomIn  ())
+      Util.addGlobalAction(panelBottom, "inc", shift + ctrl + Key.Equals )(zoomIn  ())
+      // could add ctrl + Key.K0 to reset?
+
+      //      paneRender = new ScrollPane // (_editor)
 //      paneRender.peer.putClientProperty("styleId", "undecorated")
 
-      paneBorder = new BorderPanel1 {
+      paneBorder = new BorderPanelWithAdd {
 //        add(paneRender  , BorderPanel.Position.Center)
         add(panelBottom , BorderPanel.Position.South )
       }

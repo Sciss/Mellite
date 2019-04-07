@@ -268,6 +268,7 @@ object MarkdownRenderViewImpl {
       Util.addGlobalAction(ggZoom, "dec", ctrl + Key.Minus          )(zoomOut ())
       Util.addGlobalAction(ggZoom, "inc", ctrl + Key.Plus           )(zoomIn  ())
       Util.addGlobalAction(ggZoom, "inc", shift + ctrl + Key.Equals )(zoomIn  ())
+      // could add ctrl + Key.K0 to reset?
 
       if (!embedded) {
         import KeyStrokes._
