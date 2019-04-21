@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.34.1-SNAPSHOT"
-lazy val mimaVersion                = "2.34.0"
+lazy val projectVersion             = "2.35.0-SNAPSHOT"
+lazy val mimaVersion                = "2.35.0"
 
 lazy val loggingEnabled             = true
 
@@ -17,49 +17,49 @@ lazy val deps = new {
   val main = new {
     val akka                = "2.5.19"  // "2.5.21" has broken printDebugDump
     val appDirs             = "1.0.3"
-    val audioFile           = "1.5.2"
-    val audioWidgets        = "1.14.0"
-    val desktop             = "0.10.2"
+    val audioFile           = "1.5.3"
+    val audioWidgets        = "1.14.1"
+    val desktop             = "0.10.3"
     val dotterweide         = "0.1.2-SNAPSHOT"
-    val equal               = "0.1.3"
-    val fileCache           = "0.5.0"
+    val equal               = "0.1.4"
+    val fileCache           = "0.5.1"
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.16.0"
-    val fscape              = "2.24.0"
-    val interpreterPane     = "1.10.0"
+    val freesound           = "1.17.0-SNAPSHOT"
+    val fscape              = "2.25.0-SNAPSHOT"
+    val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val lucre               = "3.11.1"
-    val lucreSwing          = "1.15.2"
+    val lucre               = "3.12.0-SNAPSHOT"
+    val lucreSwing          = "1.16.0-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.10.0"
-    val pdflitz             = "1.4.0"
+    val patterns            = "0.11.0-SNAPSHOT"
+    val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val processor           = "0.4.2"
-    val raphaelIcons        = "1.0.5"
-    val scalaCollider       = "1.28.1"
-    val scalaColliderSwing  = "1.41.0"
+    val raphaelIcons        = "1.0.6"
+    val scalaCollider       = "1.28.2"
+    val scalaColliderSwing  = "1.41.1"
     val scalaColliderUGens  = "1.19.3"
     val scalaOSC            = "1.2.0"
-    val scalaSTM            = "0.9"
-    val scalaSwing          = "2.1.0"
-    val scissDSP            = "1.3.1"
+    val scalaSTM            = "0.9.1"
+    val scalaSwing          = "2.1.1"
+    val scissDSP            = "1.3.2"
     val scopt               = "3.7.1"
     val serial              = "1.1.1"
-    val sonogram            = "1.11.0"
-    val soundProcesses      = "3.27.1"
+    val sonogram            = "1.11.1"
+    val soundProcesses      = "3.28.0-SNAPSHOT"
     val span                = "1.4.2"
     val submin              = "0.2.5"
-    val swingPlus           = "0.4.1"
+    val swingPlus           = "0.4.2"
     val syntaxPane          = "1.2.0"
-    val treeTable           = "1.5.0"
-    val topology            = "1.1.1"
+    val treeTable           = "1.5.1"
+    val topology            = "1.1.2"
     val webLaF              = "2.1.5"
-    val wolkenpumpe         = "2.31.0"
+    val wolkenpumpe         = "2.32.0-SNAPSHOT"
   }
 }
 
@@ -80,10 +80,10 @@ lazy val commonSettings = Seq(
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.12.8",
   // 2.13.0 is missing dispatch/reboot at the moment
-  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-M5" */),
+  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-RC1" */),
   scalacOptions ++= {
     val xs = Seq(
-      "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xfuture", "-Xlint:-stars-align,_", "-Xsource:2.13"
+      "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"
     )
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
   },
