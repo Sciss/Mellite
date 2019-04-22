@@ -239,6 +239,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "scalacollider"                  % deps.main.scalaCollider,      // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-api"         % deps.main.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-core"        % deps.main.scalaColliderUGens, // realtime sound synthesis
+      "de.sciss"          %  "scalacolliderugens-spec"        % deps.main.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // UI methods for scala-collider
       "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
       "de.sciss"          %% "dotterweide-ui"                 % deps.main.dotterweide,        // Code editor

@@ -36,6 +36,7 @@ import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
 import scala.swing.{Button, Component, Orientation, TabbedPane}
+import scala.util.control.NonFatal
 
 object CodeFrameImpl {
   // ---- adapter for editing a Proc's source ----
@@ -45,7 +46,13 @@ object CodeFrameImpl {
                         compiler: Code.Compiler): CodeFrame[S] = {
     val codeObj = mkSource(obj = obj, codeId = Code.SynthGraph.id, key = Proc.attrSource,
       init = {
-        val txt     = ProcActions.extractSource(obj.graph.value)
+        val gv: SynthGraph = obj.graph.value
+        val txt     = /*if (gv.isEmpty) "" else*/ try {
+          ProcActions.extractSource(gv)
+        } catch {
+          case NonFatal(ex) =>
+            s"// $ex"
+        }
         val comment = if (txt.isEmpty)
             "SoundProcesses graph function source code"
           else

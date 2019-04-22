@@ -17,6 +17,7 @@ package gui.impl.widget
 import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
+import de.sciss.lucre.expr.Ex
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.stm.TxnLike.peer
@@ -28,10 +29,11 @@ import de.sciss.model.Change
 import de.sciss.numbers
 import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.synth.proc.{ExprContext, Universe, Widget}
 import javax.swing.JComponent
 
 import scala.collection.immutable.{Seq => ISeq}
+import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
 import scala.swing.event.Key
@@ -54,7 +56,8 @@ object WidgetRenderViewImpl {
 
     private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]
     private[this] val graphRef    = Ref.make[Widget.Graph]
-    private[this] val viewRef     = Ref(Option.empty[Disposable[S#Tx]])
+    private[this] val viewRef     = Ref(Option.empty[View[S]])
+//    private[this] val viewInit    = Ref(-2) // -2 is special code for "no previous view"
     private[this] var zoomFactor  = 1.0f
 
     //    private[this] var paneRender: Component   = _
@@ -63,6 +66,7 @@ object WidgetRenderViewImpl {
 
     def dispose()(implicit tx: S#Tx): Unit = {
       widgetRef()._2.dispose()
+//      universe.scheduler.cancel(viewInit.swap(-1))
       viewRef.swap(None).foreach(_.dispose())
     }
 
@@ -97,32 +101,55 @@ object WidgetRenderViewImpl {
         super.add(c, l)
     }
 
-    private def setZoom(top: JComponent /*, done: mutable.Set[JComponent] = mutable.Set.empty*/): Unit =
+    private[this] val fontSizeMap = mutable.Map.empty[JComponent, Float]
+
+    private def setZoom(top: JComponent, factor: Float): Unit =
       /*if (done.add(top))*/ {
         top.getFont match {
           case f: Font =>
-            val fN = f.deriveFont(f.getSize2D * zoomFactor)
+            val sz0 = fontSizeMap.getOrElseUpdate(top, f.getSize2D)
+            val fN  = f.deriveFont(sz0 * factor)
             top.setFont(fN)
           case _ =>
         }
 
         top.getComponents.foreach {
-          case c: JComponent => setZoom(c)
+          case c: JComponent => setZoom(c, factor)
           case _ =>
         }
       }
 
-    def setGraph(g: Graph)(implicit tx: S#Tx): Unit = setGraphForce(g, force = false)
-
-    private def setGraphForce(g: Graph, force: Boolean)(implicit tx: S#Tx): Unit = {
+    def setGraph(g: Graph)(implicit tx: S#Tx): Unit = {
       val old = graphRef.swap(g)
-      if (force || g != old) {
+      if (g != old) {
+//        val sch = universe.scheduler
+//        val oldToken  = viewInit()
+//        val hadOld    = oldToken != -2
+//        if (hadOld) sch.cancel(oldToken) // cancel previous `initControls`
+
         // N.B. we have to use `try` instead of `Try` because
         // `MissingIn` is a `ControlThrowable` which would not be caught.
         val vTry = try {
-          import universe.workspace
-          val res = g.expand[S](self = Some(widget))
+          implicit val ctx: Ex.Context[S] = ExprContext(Some(tx.newHandle(widget)))
+          val res   = g.expand[S]
+
+//          if (hadOld) {
+//            // we give it a delay in order to work-around problems
+//            // we reallocating IO resources such as OSC sockets... Not elegant, but...
+//            val t     = sch.time + (4.0 * TimeRef.SampleRate).toLong
+//            println("DELAY")
+//            val token = sch.schedule(t) { implicit tx =>
+//              println("INIT")
+////              res.initControl()
+//            }
+//            viewInit() = token
+//          } else {
+//            println("INIT DIRECT")
+////            res.initControl()
+//            viewInit() = -1 // not scheduled, but now have view
+//          }
           Success(res)
+
         } catch {
           case ex @ MissingIn(_)  => Failure(ex)
           case NonFatal(ex)       => Failure(ex)
@@ -134,11 +161,21 @@ object WidgetRenderViewImpl {
               ex.printStackTrace()
               Swing.HGlue
           }
-          if (zoomFactor != 1f) setZoom(comp.peer)
+          fontSizeMap.clear()
+          if (zoomFactor != 1f) setZoom(comp.peer, zoomFactor)
           paneBorder.add(comp, BorderPanel.Position.Center)
           paneBorder.revalidate()
         }
-        viewRef.swap(vTry.toOption).foreach(_.dispose())
+        viewRef.swap(vTry.toOption).foreach { vOld =>
+//          println("DISPOSE OLD")
+          vOld.dispose()
+        }
+        // we call `initControl` only after the disposal
+        // of the old view, so we can re-use resources (such as OSC sockets)
+        vTry.foreach { vNew =>
+//          println("INIT 1")
+          vNew.initControl()
+        }
       }
     }
 
@@ -157,28 +194,31 @@ object WidgetRenderViewImpl {
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)
 
       val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400)
-      var zoomIdx   = zoomItems.indexOf(100)
+      val zoom100   = zoomItems.indexOf(100)
+      var zoomIdx   = zoom100
 
-      def zoom(dir: Int): Unit = {
+      def zoom(newIdx0: Int): Unit = {
         import numbers.Implicits._
-        val newIdx = (zoomIdx + dir).clip(0, zoomItems.size - 1)
+        val newIdx = newIdx0.clip(0, zoomItems.size - 1)
         if (zoomIdx != newIdx) {
           zoomIdx     = newIdx
           zoomFactor  = zoomItems(newIdx) * 0.01f
-          cursor.step { implicit tx =>
-            setGraphForce(graphRef(), force = true)
+          viewRef.single.get.foreach { view =>
+            setZoom(view.component.peer, zoomFactor)
+            paneBorder.revalidate()
           }
         }
       }
 
-      def zoomIn  (): Unit = zoom(+1)
-      def zoomOut (): Unit = zoom(-1)
+      def zoomIn    (): Unit = zoom(zoomIdx + 1)
+      def zoomOut   (): Unit = zoom(zoomIdx - 1)
+      def zoomReset (): Unit = zoom(zoom100)
 
       import KeyStrokes._
-      Util.addGlobalAction(panelBottom, "dec", ctrl + Key.Minus          )(zoomOut ())
-      Util.addGlobalAction(panelBottom, "inc", ctrl + Key.Plus           )(zoomIn  ())
-      Util.addGlobalAction(panelBottom, "inc", shift + ctrl + Key.Equals )(zoomIn  ())
-      // could add ctrl + Key.K0 to reset?
+      Util.addGlobalAction(panelBottom, "dec-zoom", ctrl + Key.Minus          )(zoomOut   ())
+      Util.addGlobalAction(panelBottom, "inc-zoom", ctrl + Key.Plus           )(zoomIn    ())
+      Util.addGlobalAction(panelBottom, "inc-zoom", shift + ctrl + Key.Equals )(zoomIn    ())
+      Util.addGlobalAction(panelBottom, "reset-zoom", ctrl + Key.Key0         )(zoomReset ())
 
       //      paneRender = new ScrollPane // (_editor)
 //      paneRender.peer.putClientProperty("styleId", "undecorated")

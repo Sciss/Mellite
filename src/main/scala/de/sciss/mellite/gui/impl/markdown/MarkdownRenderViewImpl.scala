@@ -30,7 +30,7 @@ import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
-import org.pegdown.PegDownProcessor
+import org.pegdown.{Extensions, PegDownProcessor}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
@@ -159,7 +159,7 @@ object MarkdownRenderViewImpl {
 
     private def setText(text: String): Unit = {
       requireEDT()
-      val mdp       = new PegDownProcessor
+      val mdp       = new PegDownProcessor(Extensions.SMARTYPANTS | Extensions.HARDWRAPS | Extensions.TABLES)
       val html      = mdp.markdownToHtml(text)
       _editor.text  = html
       _editor.peer.setCaretPosition(0)
@@ -243,6 +243,8 @@ object MarkdownRenderViewImpl {
 
       val ggBwd  = GUI.toolButton(actionBwd, raphael.Shapes.Backward)
       val ggFwd  = GUI.toolButton(actionFwd, raphael.Shapes.Forward )
+
+      // XXX TODO --- DRY with WidgetRenderViewImpl
       val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400).map(Percent)
       val ggZoom = new ComboBox(zoomItems) {
         selection.item = Percent(100)
@@ -261,14 +263,15 @@ object MarkdownRenderViewImpl {
         ggZoom.selection.index = (ggZoom.selection.index + dir).clip(0, zoomItems.size - 1)
       }
 
-      def zoomIn  (): Unit = zoom(+1)
-      def zoomOut (): Unit = zoom(-1)
+      def zoomIn    (): Unit = zoom(+1)
+      def zoomOut   (): Unit = zoom(-1)
+      def zoomReset (): Unit = ggZoom.selection.item = Percent(100)
 
       import KeyStrokes._
-      Util.addGlobalAction(ggZoom, "dec", ctrl + Key.Minus          )(zoomOut ())
-      Util.addGlobalAction(ggZoom, "inc", ctrl + Key.Plus           )(zoomIn  ())
-      Util.addGlobalAction(ggZoom, "inc", shift + ctrl + Key.Equals )(zoomIn  ())
-      // could add ctrl + Key.K0 to reset?
+      Util.addGlobalAction(ggZoom, "dec-zoom", ctrl + Key.Minus         )(zoomOut   ())
+      Util.addGlobalAction(ggZoom, "inc-zoom", ctrl + Key.Plus          )(zoomIn    ())
+      Util.addGlobalAction(ggZoom, "inc-zoom", shift + ctrl + Key.Equals)(zoomIn    ())
+      Util.addGlobalAction(ggZoom, "reset-zoom", ctrl + Key.Key0        )(zoomReset ())
 
       if (!embedded) {
         import KeyStrokes._
