@@ -4,7 +4,7 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sciss/Mellite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=master)](https://travis-ci.org/Sciss/Mellite)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite_2.11)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite_2.12)
 
 ## statement
 
@@ -69,7 +69,7 @@ The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite" % v
 
-The current version `v` is `"2.34.1"`.
+The current version `v` is `"2.35.0"`.
 
 ## building from source
 
