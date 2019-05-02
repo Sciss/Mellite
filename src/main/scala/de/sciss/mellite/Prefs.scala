@@ -13,10 +13,11 @@
 
 package de.sciss.mellite
 
+import java.io.File
+
 import javax.swing.UIManager
 import javax.swing.plaf.metal.MetalLookAndFeel
-
-import de.sciss.desktop.Preferences
+import de.sciss.desktop.{Desktop, Preferences}
 import de.sciss.desktop.Preferences.{Entry, Type}
 import de.sciss.file._
 import de.sciss.osc
@@ -42,7 +43,7 @@ object Prefs {
   final val defaultDbLockTimeout = 500
   def dbLockTimeout: Entry[Int] = userPrefs("lock-timeout")
 
-  // ---- gui ----
+  // ---- general ----
 
   object LookAndFeel {
     implicit object Type extends Preferences.Type[LookAndFeel] {
@@ -92,6 +93,26 @@ object Prefs {
   def lookAndFeel: Entry[LookAndFeel] = userPrefs("look-and-feel")
 
   def nativeWindowDecoration: Entry[Boolean] = userPrefs("native-window-decoration")
+
+//  def defaultRevealFileCmd: String = {
+//    if (Desktop.isLinux) {
+//      val dirs = sys.env.getOrElse("PATH", "").split(File.pathSeparator)
+//      // note: Raspberry will also have `pcmanfm` but it doesn't allow to select a file
+//      // and thus we can simply fall back to `xdg-open` with the parent directory.
+//      dirs.collectFirst {
+//        case dir if new File(dir, "nautilus").exists() => "nautilus %p"
+//      } .getOrElse("xdg-open %d")
+//
+//    } else if (Desktop.isMac) {
+//      "open -R %p"
+//
+//    } else {
+//      "explorer.exe /select,%p"
+//    }
+//  }
+//
+//  /** Placeholders: %p path, %d parent directory %f file-name; upper case for URLs. */
+//  def revealFileCmd: Entry[String] = userPrefs("reveal-file")
 
   // ---- audio ----
 

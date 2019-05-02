@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.gui.impl.audiocue
 
+import java.awt.datatransfer.Transferable
+
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
@@ -27,7 +29,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, GUI, ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, DragAndDrop, GUI, ListObjView, MessageException, ObjView}
 import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
@@ -242,6 +244,11 @@ object AudioCueObjView extends ListObjView.Factory {
     }
 
     def isViewable = true
+
+    override def createTransferable(): Option[Transferable] = {
+      val t = DragAndDrop.Transferable.files(value.artifact)
+      Some(t)
+    }
 
     def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       val frame = AudioFileFrame(obj)

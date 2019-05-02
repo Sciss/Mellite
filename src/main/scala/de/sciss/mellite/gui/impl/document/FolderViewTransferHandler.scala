@@ -55,10 +55,14 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
         new FolderView.SelectionDnDData[S](fv.universe, sel)
       }
       val trans1 = if (sel.size == 1) {
-        val _res = DragAndDrop.Transferable(ListObjView.Flavor) {
-          new ListObjView.Drag[S](fv.universe, sel.head.renderData)
+        val listView = sel.head.renderData
+        val tmp0  = DragAndDrop.Transferable(ListObjView.Flavor) {
+          new ListObjView.Drag[S](fv.universe, listView)
         }
-        DragAndDrop.Transferable.seq(trans0, _res)
+        val tmp1  = listView.createTransferable().toList
+        val tmp   = trans0 :: tmp0 :: tmp1
+
+        DragAndDrop.Transferable.seq(tmp: _*)
       } else trans0
 
       trans1

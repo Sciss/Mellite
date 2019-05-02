@@ -15,7 +15,11 @@ package de.sciss
 package mellite
 package gui
 
-import java.awt.datatransfer.{UnsupportedFlavorException, Transferable, DataFlavor}
+import java.awt.datatransfer.{DataFlavor, Transferable, UnsupportedFlavorException}
+
+import de.sciss.file.File
+
+import scala.collection.JavaConverters._
 
 object DragAndDrop {
   sealed trait Flavor[A] extends DataFlavor
@@ -39,6 +43,15 @@ object DragAndDrop {
         if (!isDataFlavorSupported(_flavor)) throw new UnsupportedFlavorException(_flavor)
         data  /* .getOrElse(throw new IOException()) */ .asInstanceOf[AnyRef]
       }
+    }
+
+    def files(f: File*): Transferable = new Transferable {
+      private[this] val data: java.util.List[File] = f.asJava
+
+      def getTransferDataFlavors: Array[DataFlavor] = Array(DataFlavor.javaFileListFlavor)
+
+      def isDataFlavorSupported (flavor: DataFlavor): Boolean = flavor == DataFlavor.javaFileListFlavor
+      def getTransferData       (flavor: DataFlavor): AnyRef  = data
     }
 
     /** Creates a transferable by wrapping a sequence of existing transferables. */

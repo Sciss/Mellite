@@ -150,11 +150,12 @@ object ViewImpl {
           }
           spOpt.map { sp =>
             val drag  = timeline.DnD.AudioDrag(universe, holder, selection = sp)
-            val t     = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
-            t
+            val t1    = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
+            val t2    = DragAndDrop.Transferable.files(snapshot.artifact)
+            DragAndDrop.Transferable.seq(t1, t2)
           }
         }
-        tooltip = "Drag Selected Region"
+        tooltip = "Drag Selected Region or File"
       }
 
       val topPane = new BoxPanel(Orientation.Horizontal) {

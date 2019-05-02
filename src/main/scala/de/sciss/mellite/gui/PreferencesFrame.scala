@@ -15,14 +15,15 @@ package de.sciss.mellite
 package gui
 
 import de.sciss.desktop.KeyStrokes.menu1
-import de.sciss.desktop.{Desktop, PrefsGUI, Window, WindowHandler}
+import de.sciss.desktop.{Desktop, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
+import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
 import javax.swing.JComponent
 
-import scala.swing.{Action, Component}
 import scala.swing.event.Key
+import scala.swing.{Action, Component, Label, TabbedPane}
 
 final class PreferencesFrame extends desktop.impl.WindowImpl {
 
@@ -33,17 +34,27 @@ final class PreferencesFrame extends desktop.impl.WindowImpl {
   private[this] val box: Component = {
     import PrefsGUI._
 
-    // ---- appearance ----
+    def comboL[A](prefs: Preferences.Entry[A], default: => A, values: Seq[A])
+                 (implicit view: A => String): Component = {
+      val c = combo(prefs, default, values)
+      c.maximumSize = c.preferredSize
+      c
+    }
+
+    // ---- general ----
 
     val lbLookAndFeel   = label("Look-and-Feel")
-    val ggLookAndFeel   = combo(Prefs.lookAndFeel, Prefs.LookAndFeel.default,
+    val ggLookAndFeel   = comboL(Prefs.lookAndFeel, Prefs.LookAndFeel.default,
       Prefs.LookAndFeel.all)(_.description)
 
     val lbNativeDecoration = label("Native Window Decoration")
     val ggNativeDecoration = checkBox(Prefs.nativeWindowDecoration, default = true)
 
+//    val lbRevealFileCmd = label("Reveal File Command")
+//    val ggRevealFileCmd = textField(Prefs.revealFileCmd, Prefs.defaultRevealFileCmd)
+//    ggRevealFileCmd.tooltip = "Use placeholders %p (full path), %d (directory) %f (file name)"
+
     // ---- audio ----
-    val sepAudio = Separator()
 
     val lbSuperCollider = label("SuperCollider (scsynth)")
     val ggSuperCollider = pathField(Prefs.superCollider, Prefs.defaultSuperCollider,
@@ -68,8 +79,6 @@ final class PreferencesFrame extends desktop.impl.WindowImpl {
     val lbSampleRate    = label("Sample Rate")
     val ggSampleRate    = intField(Prefs.audioSampleRate , Prefs.defaultAudioSampleRate, max = 384000)
 
-    val sepAudioAdvanced = Separator()
-
     val lbBlockSize     = label("Block Size")
     val ggBlockSize     = intField(Prefs.audioBlockSize  , Prefs.defaultAudioBlockSize, min = 1)
     val lbNumPrivate    = label("Private Channels")
@@ -78,21 +87,18 @@ final class PreferencesFrame extends desktop.impl.WindowImpl {
     val ggNumAudioBufs  = intField(Prefs.audioNumAudioBufs, Prefs.defaultAudioNumAudioBufs, min = 4)
     val lbNumWireBufs   = label("Wire Buffers")
     val ggNumWireBufs   = intField(Prefs.audioNumWireBufs, Prefs.defaultAudioNumWireBufs, min = 4, max = 262144)
-    val lbMemorySize    = label("Real-Time Memory [MB]")
+    val lbMemorySize    = label("Real-Time Memory [MiB]")
     val ggMemorySize    = intField(Prefs.audioMemorySize , Prefs.defaultAudioMemorySize , min = 1, max = 8388608)
     val lbLatency       = label("OSC Latency [ms]")
     val ggLatency       = intField(Prefs.audioLatency, Prefs.defaultAudioLatency, min = 0, max = 10000)
 
-    val sepAudioHeadphones = Separator()
-
     val lbHeadphones    = label("Headphones Bus")
     val ggHeadphones    = intField(Prefs.headphonesBus   , Prefs.defaultHeadphonesBus   )
 
-    // ---- sensor ----
-    val sepSensor = Separator()
+    // ---- sensors ----
 
     val lbSensorProtocol  = label("Sensor Protocol")
-    val ggSensorProtocol  = combo(Prefs.sensorProtocol, Prefs.defaultSensorProtocol, Seq(osc.UDP, osc.TCP))(_.name)
+    val ggSensorProtocol  = comboL(Prefs.sensorProtocol, Prefs.defaultSensorProtocol, Seq(osc.UDP, osc.TCP))(_.name)
 
     val lbSensorPort      = label("Sensor Port")
     val ggSensorPort      = intField(Prefs.sensorPort, Prefs.defaultSensorPort)
@@ -107,54 +113,103 @@ final class PreferencesFrame extends desktop.impl.WindowImpl {
     val ggSensorChannels  = intField(Prefs.sensorChannels, Prefs.defaultSensorChannels)
 
     // ---- system ----
-    val sepDatabase = Separator()
 
     val lbLockTimeout   = label("Database Lock Timeout [ms]")
     val ggLockTimeout   = intField(Prefs.dbLockTimeout, Prefs.defaultDbLockTimeout)
 
     // ---- panel ----
 
-    val _box = new GroupPanel {
-      // val lbValue = new Label("Value:", EmptyIcon, Alignment.Right)
-      horizontal = Par(sepAudio, sepSensor, sepAudioAdvanced, sepAudioHeadphones, sepDatabase, Seq(
-        Par(lbLookAndFeel, lbNativeDecoration, lbSuperCollider, lbAudioAutoBoot, lbAudioDevice, lbNumInputs, lbNumOutputs,
-          lbSampleRate, lbBlockSize, lbNumPrivate, lbNumAudioBufs, lbNumWireBufs, lbMemorySize, lbLatency, lbHeadphones, lbSensorProtocol, lbSensorPort,
-          lbSensorAutoStart, lbSensorCommand, lbSensorChannels, lbLockTimeout),
-        Par(ggLookAndFeel, ggNativeDecoration, ggSuperCollider, ggAudioAutoBoot, ggAudioDevice, ggNumInputs, ggNumOutputs,
-          ggSampleRate, ggNumPrivate, ggBlockSize, ggNumAudioBufs, ggNumWireBufs, ggMemorySize, ggLatency, ggHeadphones, ggSensorProtocol, ggSensorPort,
-          ggSensorAutoStart, ggSensorCommand, ggSensorChannels, ggLockTimeout)
-      ))
-      vertical = Seq(
-        Par(Baseline)(lbLookAndFeel     , ggLookAndFeel     ),
-        Par(Baseline)(lbNativeDecoration, ggNativeDecoration),
-        sepAudio,
-        Par(Baseline)(lbSuperCollider   , ggSuperCollider   ),
-        Par(Baseline)(lbAudioAutoBoot   , ggAudioAutoBoot   ),
-        Par(Baseline)(lbAudioDevice     , ggAudioDevice     ),
-        Par(Baseline)(lbNumInputs       , ggNumInputs       ),
-        Par(Baseline)(lbNumOutputs      , ggNumOutputs      ),
-        Par(Baseline)(lbSampleRate      , ggSampleRate      ),
-        sepAudioAdvanced,
-        Par(Baseline)(lbBlockSize       , ggBlockSize       ),
-        Par(Baseline)(lbNumPrivate      , ggNumPrivate      ),
-        Par(Baseline)(lbNumAudioBufs    , ggNumAudioBufs    ),
-        Par(Baseline)(lbNumWireBufs     , ggNumWireBufs     ),
-        Par(Baseline)(lbMemorySize      , ggMemorySize      ),
-        Par(Baseline)(lbLatency         , ggLatency         ),
-        sepAudioHeadphones,
-        Par(Baseline)(lbHeadphones      , ggHeadphones      ),
-        sepSensor,
-        Par(Baseline)(lbSensorProtocol  , ggSensorProtocol  ),
-        Par(Baseline)(lbSensorPort      , ggSensorPort      ),
-        Par(Baseline)(lbSensorAutoStart , ggSensorAutoStart ),
-        Par(Baseline)(lbSensorCommand   , ggSensorCommand   ),
-        Par(Baseline)(lbSensorChannels  , ggSensorChannels  ),
-        sepDatabase,
-        Par(Baseline)(lbLockTimeout     , ggLockTimeout     )
-      )
+    val tabbed = new TabbedPane
+    tabbed.peer.putClientProperty("styleId", "attached")
+
+//    def interleave[A](a: List[A], b: List[A]): List[A] = {
+//      val aIt = a.iterator
+//      val bIt = b.iterator
+//      val res = List.newBuilder[A]
+//      while (aIt.hasNext) {
+//        res += aIt.next()
+//        if (bIt.hasNext) res += bIt.next()
+//      }
+//      res.result()
+//    }
+
+    def mkPage(name: String)(entries: List[(Label, Component)]*): Unit = {
+      val sepPar    = List.newBuilder[Element.Par]
+      val labelsPar = List.newBuilder[Element.Par]
+      val fieldsPar = List.newBuilder[Element.Par]
+      val collSeq   = List.newBuilder[Element.Seq]
+
+      val _box = new GroupPanel {
+        {
+          val eIt = entries.iterator
+          while (eIt.hasNext) {
+            val pairs = eIt.next()
+            pairs.foreach { case (lb, f) =>
+              labelsPar += lb
+              fieldsPar += f
+              collSeq   += Par(Baseline)(lb, f)
+            }
+            if (eIt.hasNext) {
+              val sep    = Separator()
+              sepPar    += sep
+              collSeq   += sep
+            }
+          }
+        }
+
+        horizontal  = Par(sepPar.result() :+ Seq(Par(labelsPar.result(): _*), Par(fieldsPar.result(): _*)): _*)
+        vertical    = Seq(collSeq.result(): _*)
+      }
+      val page = new TabbedPane.Page(name, _box, null) // cf. https://github.com/scala/scala-swing/issues/105
+      tabbed.pages += page
     }
 
-    _box
+    mkPage("General")(
+      List(
+        (lbLookAndFeel      , ggLookAndFeel     ),
+        (lbNativeDecoration , ggNativeDecoration)
+//      ),
+//      List(
+//        (lbRevealFileCmd    , ggRevealFileCmd   )
+      )
+    )
+    mkPage("Audio")(
+      List(
+        (lbSuperCollider    , ggSuperCollider   ),
+        (lbAudioAutoBoot    , ggAudioAutoBoot   ),
+        (lbAudioDevice      , ggAudioDevice     ),
+        (lbNumInputs        , ggNumInputs       ),
+        (lbNumOutputs       , ggNumOutputs      ),
+        (lbSampleRate       , ggSampleRate      )
+      ),
+      List(
+        (lbBlockSize        , ggBlockSize       ),
+        (lbNumPrivate       , ggNumPrivate      ),
+        (lbNumAudioBufs     , ggNumAudioBufs    ),
+        (lbNumWireBufs      , ggNumWireBufs     ),
+        (lbMemorySize       , ggMemorySize      ),
+        (lbLatency          , ggLatency         )
+      ),
+      List(
+        (lbHeadphones       , ggHeadphones      )
+      )
+    )
+    mkPage("Sensors")(
+      List(
+        (lbSensorProtocol   , ggSensorProtocol  ),
+        (lbSensorPort       , ggSensorPort      ),
+        (lbSensorAutoStart  , ggSensorAutoStart ),
+        (lbSensorCommand    , ggSensorCommand   ),
+        (lbSensorChannels   , ggSensorChannels  )
+      )
+    )
+    mkPage("System")(
+      List(
+        (lbLockTimeout      , ggLockTimeout     )
+      )
+    )
+
+    tabbed
   }
 
   contents = box

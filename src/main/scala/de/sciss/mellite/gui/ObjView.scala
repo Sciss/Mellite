@@ -14,6 +14,8 @@
 package de.sciss.mellite
 package gui
 
+import java.awt.datatransfer.Transferable
+
 import de.sciss.desktop
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.stm
@@ -114,6 +116,8 @@ trait ObjView[S <: stm.Sys[S]]
 
   /** Whether a dedicated view/editor window exists for this type of object. */
   def isViewable: Boolean
+
+  def createTransferable(): Option[Transferable] = None
 
   /** If the object is viewable, this method is invoked when the user pressed the eye button.
     * The method should return an appropriate view for this object, or `None` if no editor or viewer window

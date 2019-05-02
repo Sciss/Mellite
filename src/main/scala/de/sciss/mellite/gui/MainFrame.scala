@@ -241,7 +241,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       }).sum
       size
     } { sz =>
-      cacheSize = s"(using ${((sz + 1023)/1024 + 1023)/1024} MB)"
+      cacheSize = s"(using ${(sz + 500000)/1000000} MB)"
     } {
       cacheSize = "(unknown size)"
     }
