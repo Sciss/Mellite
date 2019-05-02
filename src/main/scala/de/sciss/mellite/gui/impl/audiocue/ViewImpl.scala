@@ -19,13 +19,16 @@ package audiocue
 import java.awt.datatransfer.Transferable
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.desktop.Util
+import de.sciss.desktop.{Desktop, Util}
 import de.sciss.file._
+import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.GUI.iconNormal
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
@@ -36,7 +39,7 @@ import de.sciss.synth.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Time
 import de.sciss.{sonogram, synth}
 
 import scala.swing.Swing._
-import scala.swing.{BorderPanel, BoxPanel, Component, Orientation}
+import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, Label, Orientation, Swing}
 
 object ViewImpl {
   def apply[S <: Sys[S]](obj0: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioFileView[S] = {
@@ -175,10 +178,27 @@ object ViewImpl {
         )
       }
 
+      val ggReveal: Button = new Button(Action(null)(Desktop.revealFile(snapshot.artifact))) {
+//        peer.setUI(new BasicButtonUI())
+        peer.putClientProperty("styleId", "icon-hover")
+        icon          = iconNormal(raphael.Shapes.Inbox)
+        // disabledIcon  = iconDisabled(iconFun)
+        tooltip       = s"Reveal in ${if (Desktop.isMac) "Finder" else "File Manager"}"
+      }
+
+      val lbSpec = new Label(AudioFileIn.specToString(snapshot.spec))
+
+      val bottomPane = new BoxPanel(Orientation.Horizontal) {
+        contents += ggReveal
+        contents += Swing.HStrut(4)
+        contents += lbSpec
+      }
+
       val pane = new BorderPanel {
         layoutManager.setVgap(2)
-        add(topPane,                BorderPanel.Position.North )
-        add(sonogramView.component, BorderPanel.Position.Center)
+        add(topPane,                BorderPanel.Position.North  )
+        add(sonogramView.component, BorderPanel.Position.Center )
+        add(bottomPane,             BorderPanel.Position.South  )
       }
 
       component = pane
