@@ -11,16 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{BooleanCheckBoxView, View, deferTx}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{ActionBounce, EnsembleView, FolderEditorView, FolderView, PlayToggleButton}
 import de.sciss.swingplus.Separator
 import de.sciss.synth.proc.{Ensemble, Transport, Universe}
 

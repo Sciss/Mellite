@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.markdown
+package de.sciss.mellite.gui.impl.markdown
 
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
@@ -25,10 +24,10 @@ import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.impl.component.NavigationHistory
 import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRenderView}
-import de.sciss.{desktop, numbers}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.{desktop, numbers}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
 import org.pegdown.{Extensions, PegDownProcessor}
 

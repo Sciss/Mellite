@@ -11,13 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl
+package de.sciss.mellite.gui.impl
 
 import java.awt.geom.Path2D
 import java.awt.image.{BufferedImage, ImageObserver}
 import java.awt.{BasicStroke, LinearGradientPaint, Paint, Rectangle, Stroke, TexturePaint, Color => JColor}
 
+import de.sciss.mellite.gui
 import de.sciss.mellite.gui.BasicRendering
 
 import scala.swing.Component

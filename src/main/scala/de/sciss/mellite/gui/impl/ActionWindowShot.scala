@@ -11,13 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
-import scala.swing.{Dimension, Graphics2D, Action}
-import scala.swing.event.Key
 import de.sciss.{desktop, pdflitz}
+
+import scala.swing.event.Key
+import scala.swing.{Action, Dimension, Graphics2D}
 
 class ActionWindowShot(w: desktop.Window) extends Action("Window Screen-Shot") {
 

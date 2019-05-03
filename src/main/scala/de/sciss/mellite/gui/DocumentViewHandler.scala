@@ -11,11 +11,11 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing._
+import de.sciss.mellite.DocumentHandler
 import de.sciss.mellite.gui.impl.document.{ViewHandlerImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.synth.proc.Universe

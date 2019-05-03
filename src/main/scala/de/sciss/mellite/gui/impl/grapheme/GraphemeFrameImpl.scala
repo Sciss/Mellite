@@ -11,16 +11,15 @@
  *  contact@sciss.de
  */
 
-
-package de.sciss.mellite
-package gui
-package impl
-package grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.Application
+import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.{GraphemeFrame, GraphemeView}
 import de.sciss.synth.proc.{Grapheme, Universe}
 
 import scala.swing.event.Key

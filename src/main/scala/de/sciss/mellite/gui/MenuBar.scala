@@ -11,15 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-
-import javax.swing.KeyStroke
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.KeyStrokes.{menu1, shift}
 import de.sciss.desktop.{Desktop, KeyStrokes, Menu}
 import de.sciss.lucre.synth.Txn
+import de.sciss.mellite.{Application, Mellite}
 import de.sciss.osc
+import javax.swing.KeyStroke
 
 import scala.concurrent.stm.TxnExecutor
 import scala.swing.event.Key

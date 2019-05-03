@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package edit
+package de.sciss.mellite.gui.edit
 
 import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm

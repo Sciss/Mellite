@@ -11,15 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
-
-import javax.swing.undo.UndoableEdit
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
+import javax.swing.undo.UndoableEdit
 
 final class LinkTargetOutput[S <: Sys[S]](val attr: InputAttrOutput[S])
   extends LinkTarget[S] {

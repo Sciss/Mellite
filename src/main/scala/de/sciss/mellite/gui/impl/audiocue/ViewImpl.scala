@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package audiocue
+package de.sciss.mellite.gui.impl.audiocue
 
 import java.awt.datatransfer.Transferable
 
@@ -28,8 +25,11 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.GUI.iconNormal
 import de.sciss.mellite.gui.impl.component.DragSourceButton
+import de.sciss.mellite.gui.impl.timeline
+import de.sciss.mellite.gui.{AudioFileView, DragAndDrop, GUI, SonogramManager}
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.AudioCue.Obj

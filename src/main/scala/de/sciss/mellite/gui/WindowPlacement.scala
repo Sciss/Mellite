@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 object WindowPlacement {
   final val default = WindowPlacement(0.5f, 0.5f)

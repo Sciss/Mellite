@@ -15,8 +15,8 @@ package de.sciss.mellite.gui
 
 import java.awt.GraphicsEnvironment
 
-import de.sciss.desktop.{Window, WindowHandler}
 import de.sciss.desktop.impl.WindowImpl
+import de.sciss.desktop.{Window, WindowHandler}
 import de.sciss.lucre
 import de.sciss.mellite.Mellite
 import dotterweide.ide.{AbstractDocBrowser, DocBrowser}

@@ -18,8 +18,8 @@ import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.expr.{DoubleObj, LongObj}
 import de.sciss.lucre.stm.{Folder, Sys}
 import de.sciss.synth.io.AudioFileSpec
-import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.AudioCue
+import de.sciss.synth.proc.Implicits._
 
 object ObjectActions {
   def mkAudioFile[S <: Sys[S]](loc: ArtifactLocation[S], f: File, spec: AudioFileSpec, offset: Long = 0L,

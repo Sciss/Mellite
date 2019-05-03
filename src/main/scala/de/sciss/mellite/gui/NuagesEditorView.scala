@@ -11,17 +11,16 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.gui.impl.document.{NuagesEditorViewImpl => Impl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
 import de.sciss.synth.proc.gui.UniverseView
-import impl.document.{NuagesEditorViewImpl => Impl}
 
 import scala.swing.Action
 

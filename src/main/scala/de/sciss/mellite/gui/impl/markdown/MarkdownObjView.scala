@@ -11,10 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.markdown
+package de.sciss.mellite.gui.impl.markdown
 
-import javax.swing.Icon
 import de.sciss.desktop
 import de.sciss.lucre.expr.Type
 import de.sciss.lucre.stm
@@ -26,6 +24,7 @@ import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Markdown, Universe}
+import javax.swing.Icon
 
 object MarkdownObjView extends ListObjView.Factory {
   type E[~ <: stm.Sys[~]] = Markdown[~]

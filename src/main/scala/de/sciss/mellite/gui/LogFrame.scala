@@ -11,14 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.awt.Font
 
 import de.sciss.desktop
 import de.sciss.desktop.impl.LogWindowImpl
 import de.sciss.desktop.{LogPane, Window, WindowHandler}
+import de.sciss.mellite.Application
 
 object LogFrame {
   val horizontalPlacement   = 1.0f

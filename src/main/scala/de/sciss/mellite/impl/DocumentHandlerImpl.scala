@@ -11,12 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package impl
+package de.sciss.mellite.impl
 
 import de.sciss.file._
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
+import de.sciss.mellite.DocumentHandler
 import de.sciss.mellite.DocumentHandler.Document
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.Universe

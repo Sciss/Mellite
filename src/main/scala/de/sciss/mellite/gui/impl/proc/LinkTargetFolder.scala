@@ -11,16 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
-
-import javax.swing.undo.UndoableEdit
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderRemoveObj
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
+import javax.swing.undo.UndoableEdit
 
 final class LinkTargetFolder[S <: Sys[S]](val attr: InputAttrFolder[S],
                                           objH : stm.Source[S#Tx, Obj[S]])

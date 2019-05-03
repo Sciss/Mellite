@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Identifiable, IdentifierMap, Obj, TxnLike}

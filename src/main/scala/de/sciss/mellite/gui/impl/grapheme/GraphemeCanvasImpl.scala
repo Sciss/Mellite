@@ -11,16 +11,15 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import de.sciss.audiowidgets.Axis
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.GraphemeTool.EmptyRubber
 import de.sciss.mellite.gui.GraphemeTools.ToolChanged
+import de.sciss.mellite.gui.impl.TimelineCanvas2DImpl
+import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeObjView, GraphemeTools}
 import de.sciss.numbers
 
 import scala.swing.Orientation

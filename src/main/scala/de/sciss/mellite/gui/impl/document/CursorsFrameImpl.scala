@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
@@ -24,9 +21,12 @@ import de.sciss.desktop.Window
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Disposable
-import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{confluent, stm}
+import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, WindowPlacement}
+import de.sciss.mellite.{Mellite, log}
 import de.sciss.model.Change
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
@@ -83,7 +83,7 @@ object CursorsFrameImpl {
 
 //    def workspace: Workspace[S] = view.workspace
 
-    import view.{workspace, universe}
+    import view.{universe, workspace}
 
     object WorkspaceClosed extends Disposable[S#Tx] {
       def dispose()(implicit tx: S#Tx): Unit = impl.dispose()(workspace.system.durableTx(tx))

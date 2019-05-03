@@ -2,13 +2,12 @@ package de.sciss.mellite.gui.impl
 
 import de.sciss.file._
 import de.sciss.lucre.swing.defer
-import de.sciss.mellite.Mellite
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.mellite.gui.WebBrowser
-import de.sciss.mellite.executionContext
 import de.sciss.synth.proc.Code
 import dotterweide.build.{Module, Version}
-import dotterweide.editor.{Action, Editor}
 import dotterweide.editor.controller.LookUpTypeAction
+import dotterweide.editor.{Action, Editor}
 import dotterweide.ide.DocUtil
 import dotterweide.languages.scala.ScalaLanguage
 import dotterweide.languages.scala.node.ScalaType

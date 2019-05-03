@@ -30,12 +30,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.PrimitiveConfig
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{FolderEditorView, GUI, ListObjView, MarkdownRenderFrame, MessageException, ObjView, Shapes}
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile
@@ -254,7 +254,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
       }
 
       val name    = CellView.name[S](r)
-      val locH    = tx.newHandle(r.downloadLocation)
+      val locH    = tx.newHandle(r.downloadLocation)  // IntelliJ highlight bug
       val folderH = tx.newHandle(r.downloads)
 
       def mkLegalFor(f: Folder[S], root: Obj[S])(implicit tx: S#Tx): UndoableEdit = {
@@ -286,7 +286,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
         cont.insert(0, ggInfo, ggLegal, Swing.HStrut(4))
       }
 
-      val w = new WindowImpl[S](name) {
+      val w:  WindowImpl[S] = new WindowImpl[S](name) {
         val view: View[S] = new EditorImpl[S](rv, downloadsView, locH, folderH).init()
       }
       w.init()

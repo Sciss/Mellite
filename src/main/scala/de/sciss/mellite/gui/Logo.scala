@@ -11,11 +11,11 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
-import java.awt.{RenderingHints, Graphics, Component, Color}
 import java.awt.geom.Path2D
+import java.awt.{Color, Component, Graphics, RenderingHints}
+
 import javax.swing.Icon
 
 import scala.swing.Graphics2D

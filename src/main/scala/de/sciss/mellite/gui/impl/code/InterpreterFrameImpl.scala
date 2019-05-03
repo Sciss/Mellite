@@ -11,18 +11,18 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package code
+package de.sciss.mellite.gui.impl.code
 
-import de.sciss.desktop
-import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import java.io.{File, FileInputStream, IOException}
 
-import scala.swing.event.Key
+import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, Window, WindowHandler}
+import de.sciss.mellite.gui.InterpreterFrame
+import de.sciss.mellite.{Application, Mellite}
+import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import de.sciss.synth.proc.Workspace
+
+import scala.swing.event.Key
 
 // careful... tripping over SI-3809 "illegal cyclic reference involving class Array"...
 // actually SI-7481

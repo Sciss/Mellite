@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.util.concurrent.TimeUnit
 
@@ -22,6 +21,7 @@ import de.sciss.file._
 import de.sciss.lucre.stm.DataStore
 import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.synth.{InMemory, Sys}
+import de.sciss.mellite.{Application, Mellite, Prefs}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, Universe, Workspace}
 import javax.swing.JDialog

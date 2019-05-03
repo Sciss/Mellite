@@ -21,9 +21,7 @@ import scala.collection.immutable.{Seq => ISeq}
 /** A proxy for a swing application. */
 object Application extends SwingApplicationProxy[Universe[_], Application] { me =>
 
-//  type Document = Workspace[_ <: Sys[_]]
-//  type Document = Workspace[_ <: Sys[_]]
-  type Document = Universe[_] // [_ <: Sys[_]]
+  type Document = Universe[_]
 
   def topLevelObjects : ISeq[String]      = peer.topLevelObjects
   def objectFilter    : String => Boolean = peer.objectFilter

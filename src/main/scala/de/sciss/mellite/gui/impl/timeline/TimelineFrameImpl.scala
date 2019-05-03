@@ -11,17 +11,17 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.desktop.{Menu, OptionPane, UndoManager, Window}
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.Application
+import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.{TimelineFrame, TimelineView}
 import de.sciss.synth.proc.{Timeline, Universe}
 
 import scala.swing.Action

@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys

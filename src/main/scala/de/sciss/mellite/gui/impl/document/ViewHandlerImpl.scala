@@ -11,22 +11,21 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop.Desktop
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing._
+import de.sciss.mellite.DocumentHandler
+import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.Universe
 
 import scala.concurrent.stm.TMap
 
 object ViewHandlerImpl {
-  import DocumentHandler.Document
-  import DocumentViewHandler.WorkspaceWindow  // MMM
+  import DocumentViewHandler.WorkspaceWindow
+  import de.sciss.mellite.DocumentHandler.Document  // MMM
 
   def instance: DocumentViewHandler = impl
 

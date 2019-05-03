@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.patterns
+package de.sciss.mellite.gui.impl.patterns
 
 import de.sciss.desktop.UndoManager
 import de.sciss.icons.raphael
@@ -48,7 +47,7 @@ object PatternObjView extends NoArgsListObjViewFactory {
       val _vr = Pattern.newVar[S](obj)
       _vr
     }
-    new Impl(tx.newHandle(vr)).initAttrs(obj)
+    new Impl(tx.newHandle(vr)).initAttrs(obj) // IntelliJ highlight bug
   }
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -92,7 +91,7 @@ object PatternObjView extends NoArgsListObjViewFactory {
       init = "// Pattern graph function source code\n\n")
 
     val codeEx0 = codeObj
-    val objH    = tx.newHandle(obj)
+    val objH    = tx.newHandle(obj) // IntelliJ highlight bug
     val code0   = codeEx0.value match {
       case cs: Pattern.Code => cs
       case other => sys.error(s"Pattern source code does not produce patterns.Graph: ${other.tpe.humanName}")

@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import java.awt.datatransfer.Transferable
 
@@ -27,9 +24,11 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.objview.IntObjView
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ListObjView, SelectionModel, TimelineObjView}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
 import de.sciss.synth.proc
@@ -272,7 +271,7 @@ object GlobalProcsViewImpl {
 
           selRows.headOption.map { row =>
             val pv = procSeq(row)
-            DragAndDrop.Transferable(timeline.DnD.flavor)(timeline.DnD.GlobalProcDrag(universe, pv.objH))
+            DragAndDrop.Transferable(DnD.flavor)(DnD.GlobalProcDrag(universe, pv.objH))
           } .orNull
         }
 

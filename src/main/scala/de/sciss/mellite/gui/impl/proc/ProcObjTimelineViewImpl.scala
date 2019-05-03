@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.file._
 import de.sciss.lucre.expr.{CellView, SpanLikeObj}
@@ -20,6 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.???!
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
 import de.sciss.mellite.gui.{ObjView, SonogramManager, TimelineObjView, TimelineRendering, TimelineView}

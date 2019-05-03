@@ -11,12 +11,11 @@
  *  contact@sciss.de
  */
 
-package de.sciss
-package mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.awt.datatransfer.{DataFlavor, Transferable, UnsupportedFlavorException}
 
+import de.sciss.equal
 import de.sciss.file.File
 
 import scala.collection.JavaConverters._

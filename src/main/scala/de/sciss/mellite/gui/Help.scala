@@ -11,10 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm.InMemory
+import de.sciss.mellite.Mellite
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Markdown
 

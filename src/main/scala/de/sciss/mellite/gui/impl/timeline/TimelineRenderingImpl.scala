@@ -11,11 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.timeline
+package de.sciss.mellite.gui.impl.timeline
 
-import de.sciss.mellite.gui.{TimelineRendering, TimelineTool}
 import de.sciss.mellite.gui.impl.RenderingImpl
+import de.sciss.mellite.gui.{TimelineRendering, TimelineTool}
 
 import scala.swing.Component
 

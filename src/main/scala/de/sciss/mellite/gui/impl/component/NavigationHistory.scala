@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.component
+package de.sciss.mellite.gui.impl.component
 
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.event.impl.ObservableImpl

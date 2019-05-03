@@ -11,16 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package edit
-
-import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
+package de.sciss.mellite.gui.edit
 
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.synth.proc.Timeline
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
 private[edit] class EditTimelineInsertRemoveObj[S <: Sys[S]](direction: Boolean,

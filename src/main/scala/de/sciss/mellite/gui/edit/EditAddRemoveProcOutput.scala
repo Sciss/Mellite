@@ -11,15 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package edit
-
-import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
+package de.sciss.mellite.gui.edit
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.synth.proc.Proc
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
 // XXX TODO - should disconnect links and restore them in undo

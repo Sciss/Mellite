@@ -11,12 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.{Desktop, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
+import de.sciss.mellite.{Application, Prefs}
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}

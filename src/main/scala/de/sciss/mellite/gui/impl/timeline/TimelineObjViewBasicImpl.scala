@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.lucre.expr.{CellView, IntObj, SpanLikeObj}
@@ -22,6 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl
+import de.sciss.mellite.gui.{FadeViewMode, ObjView, RegionViewMode, TimelineObjView, TimelineRendering, TimelineTool, TimelineView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 

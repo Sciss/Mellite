@@ -119,7 +119,7 @@ object EnsembleObjView extends ListObjView.Factory {
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    import config.{name, const}
+    import config.{const, name}
     val folder    = Folder[S] // XXX TODO - can we ask the user to pick one?
     val offset0   = LongObj   .newConst[S](config.offset )
     val offset    = if (const) offset0 else LongObj.newVar(offset0)

@@ -11,13 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
-package impl.component
+package de.sciss.mellite.gui.impl.component
 
 import java.awt.datatransfer
+import java.awt.event.{MouseAdapter, MouseEvent}
+
+import de.sciss.mellite.gui.{GUI, Shapes}
+import javax.swing.TransferHandler.COPY
 import javax.swing.{JComponent, TransferHandler}
-import java.awt.event.{MouseEvent, MouseAdapter}
-import TransferHandler.COPY
 
 abstract class DragSourceButton(actions: Int = TransferHandler.COPY) extends swing.Button { button =>
   protected def createTransferable(): Option[datatransfer.Transferable]

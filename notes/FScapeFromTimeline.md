@@ -149,7 +149,6 @@ val (tr, tl) = DnD.select[DnD.Timeline]
 val timed = tl.selectedObjects.collect[Proc]
 // or?
 // val timed = tl.selectedObjects[Proc]
-
 ```
 
 We can easily give "default" values for all of these.
@@ -204,6 +203,48 @@ and likewise `Map` ? What was the problem in `Pat`? We need one internal monad l
 val cueOpt1: Ex[Option[AudioCue]] = timed.applyOption(0).flatMap(_.value.attr[AudioCue]("sig"))
 ```
 
-? I don't see why this can't be done.
+? I don't see why this can't be done. In any case, we need an 'empty' element for `AudioCue` at
+some point, so we could as well add `Timed.Empty` and implement `map` and `flatMap` later.
 
+--------
 
+So let's assume we get to the one or or two input audio cue's. So we have a `Runner` for FScape,
+initiate that, either automatically or through a UI, and upon completion, we create a new audio cue
+object (T.B.D. -- see previous discussions on Koerper); and assuming that we know how to do that,
+we need to delete and insert object from and into the timeline.
+
+We will want to "latch" the data from drop to render-finish, i.e. region to remove and insertion
+position. Something like
+
+```
+val run     = Runner("fsc")
+val stopped = ??? : Trig
+val trOk    = tr.filter(!running) // this was always implied above
+val tlL     = trOk.latch(tl)
+val p1L     = trOk.latch(p1)
+
+val cue     = AudioCue.make(stopped) // T.B.D.
+stopped ---> tlL.timeline.remove(p1L)
+stopped ---> tlL.timeline.insert(???)
+```
+
+Another possibility would be to introduce edits, and assembly an edit operation which is
+triggered (probably a better idea, a bit more "functional" than imperative).
+
+```
+val edit = Edit("bla")(
+  tlL.timeline.remove(p1L)
+  tlL.timeline.insert(???)
+)
+stopped ---> edit
+```
+
+> This will become a general question for `.attr` as well, should we be able to undo the edits
+in the UI, and if so, where is the undoable edit recorded. Probably the widgets should open an
+edit context, and the attr update would automatically detect if it is present or not.
+
+> We should also be able to dispose the cue / underlying artifact if the edit is undone and
+disposed (history purged because window closes, or new edit appended).
+
+Stuff like `timeline.remove` could as well be a `Trig` (for execution outside undo context) and a
+reference to an undoable edit.

@@ -11,12 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.markdown
+package de.sciss.mellite.gui.impl.markdown
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -33,6 +31,7 @@ import de.sciss.swingplus.Implicits._
 import de.sciss.syntaxpane.SyntaxDocument
 import de.sciss.syntaxpane.syntaxkits.MarkdownSyntaxKit
 import de.sciss.synth.proc.{Markdown, Universe}
+import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref

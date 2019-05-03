@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.fscape
+package de.sciss.mellite.gui.impl.fscape
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.fscape.lucre.FScape
@@ -21,8 +20,8 @@ import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.{View, Window, defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.swing.{View, Window, defer, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}

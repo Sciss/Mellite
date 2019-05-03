@@ -11,15 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.EnsembleFrame
+import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.synth.proc.{Ensemble, Universe}
 
 object EnsembleFrameImpl {

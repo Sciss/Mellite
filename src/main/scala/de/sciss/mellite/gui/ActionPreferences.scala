@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss
-package mellite.gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.KeyStrokes
 

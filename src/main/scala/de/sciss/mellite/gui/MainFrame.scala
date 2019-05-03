@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.awt.{Color, Font}
 import java.net.{URI, URL}
@@ -20,7 +19,6 @@ import java.nio.file.Path
 import java.util.function.ToLongFunction
 
 import de.sciss.audiowidgets.PeakMeter
-import de.sciss.desktop
 import de.sciss.desktop.{Desktop, Menu, OptionPane, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.TxnLike
@@ -28,16 +26,17 @@ import de.sciss.lucre.swing.{defer, deferTx}
 import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
 import de.sciss.mellite.Mellite.applyAudioPreferences
 import de.sciss.mellite.gui.impl.ApiBrowser
+import de.sciss.mellite.{Application, Mellite, Prefs, executionContext, log, showTimelineLog}
 import de.sciss.numbers.Implicits._
-import de.sciss.osc
+import de.sciss.{desktop, osc}
 import de.sciss.synth.proc.gui.AudioBusMeter
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{Client, SynthGraph, addAfter, addBefore, addToHead, addToTail, proc, Server => SServer}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
-import scala.concurrent.{Future, blocking}
 import scala.concurrent.stm.{Ref, atomic}
+import scala.concurrent.{Future, blocking}
 import scala.swing.Swing._
 import scala.swing.event.{ButtonClicked, MouseClicked, ValueChanged}
 import scala.swing.{Action, Alignment, BoxPanel, Button, CheckBox, Component, FlowPanel, Label, Orientation, Slider, ToggleButton}
@@ -308,8 +307,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
     val graph = SynthGraph {
       import de.sciss.synth._
-      import ugen._
       import Ops.stringToControl
+      import ugen._
       val in        = In.ar(0, numOuts)
       val mainAmp   = Lag.ar("amp".kr(0f))
       val mainIn    = in * mainAmp

@@ -11,13 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss
-package mellite
-package gui
+package de.sciss.mellite.gui
 
-import impl.document.{CursorsFrameImpl => Impl}
-import synth.proc
+import de.sciss.lucre
 import de.sciss.lucre.swing.View
+import de.sciss.mellite.gui.impl.document.{CursorsFrameImpl => Impl}
+import de.sciss.synth.proc
 import de.sciss.synth.proc.{Universe, Workspace}
 
 object DocumentCursorsFrame {

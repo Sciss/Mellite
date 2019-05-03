@@ -28,11 +28,11 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
 import de.sciss.mellite.gui.{GUI, ObjView}
 import de.sciss.mellite.{Cf, Mellite}
-import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Color, Confluent, ObjKeys, TimeRef, Universe, Workspace}
+import de.sciss.{desktop, numbers}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

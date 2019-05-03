@@ -19,7 +19,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.timeline.ToolsImpl
-import de.sciss.mellite.gui.impl.timeline.tool.{AuditionImpl, CursorImpl, FadeImpl, AddImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
+import de.sciss.mellite.gui.impl.timeline.tool.{AddImpl, AuditionImpl, CursorImpl, FadeImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}
 import de.sciss.mellite.gui.impl.tool.ToolPaletteImpl
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span

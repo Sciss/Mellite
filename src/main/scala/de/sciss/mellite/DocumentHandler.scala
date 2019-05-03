@@ -20,7 +20,7 @@ import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
 
 object DocumentHandler {
-//  type Document = Workspace[_ <: Sys[_]]
+
   type Document = Universe[_ <: Sys[_]]
 
   lazy val instance: DocumentHandler = Impl()
@@ -39,7 +39,6 @@ trait DocumentHandler extends Model[DocumentHandler.Update] {
 
   def addDocument[S <: Sys[S]](universe: Universe[S])(implicit tx: S#Tx): Unit
 
-  // def openRead(path: String): Document
   def allDocuments: Iterator[Document]
   def getDocument(folder: File): Option[Document]
 

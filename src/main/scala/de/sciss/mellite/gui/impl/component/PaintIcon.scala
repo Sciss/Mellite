@@ -13,7 +13,8 @@
 
 package de.sciss.mellite.gui.impl.component
 
-import java.awt.{Paint, Graphics, Component}
+import java.awt.{Component, Graphics, Paint}
+
 import javax.swing.Icon
 
 import scala.swing.Graphics2D

@@ -11,10 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.lucre.swing.View
@@ -22,6 +20,7 @@ import de.sciss.mellite.gui.impl.code.{CodeViewImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Code, Universe}
+import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.Future

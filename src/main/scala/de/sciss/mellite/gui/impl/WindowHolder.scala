@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
 import de.sciss.desktop
 import de.sciss.lucre.swing.requireEDT

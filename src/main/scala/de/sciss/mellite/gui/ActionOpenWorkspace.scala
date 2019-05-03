@@ -11,12 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.util.concurrent.TimeUnit
 
-import javax.swing.SwingUtilities
 import de.sciss.desktop
 import de.sciss.desktop.{FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
@@ -25,8 +23,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.{Application, Mellite, Prefs}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
+import javax.swing.SwingUtilities
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
@@ -102,7 +102,7 @@ object ActionOpenWorkspace extends Action("Open...") {
 //    config.readOnly     = true
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
-    val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {
+    val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {  // IntelliJ highlight bug
       val w = blocking(Workspace.read(folder, ds))
       Mellite.mkUniverse(w)
     }

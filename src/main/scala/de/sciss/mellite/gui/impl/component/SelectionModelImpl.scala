@@ -11,11 +11,10 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.component
+package de.sciss.mellite.gui.impl.component
 
 import de.sciss.lucre.stm.Sys
+import de.sciss.mellite.gui.SelectionModel
 import de.sciss.model.impl.ModelImpl
 
 final class SelectionModelImpl[S <: Sys[S], Repr]

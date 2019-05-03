@@ -11,11 +11,11 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop
 import de.sciss.lucre.stm.Workspace
+import de.sciss.mellite.Application
 import de.sciss.mellite.gui.impl.code.{InterpreterFrameImpl => Impl}
 import de.sciss.synth.proc
 

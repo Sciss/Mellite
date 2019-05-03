@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
-
-import javax.swing.undo.UndoableEdit
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
@@ -22,6 +19,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
+import javax.swing.undo.UndoableEdit
 
 final class LinkTargetTimeline[S <: Sys[S]](val attr: InputAttrTimeline[S],
                                             spanH: stm.Source[S#Tx, SpanLikeObj[S]],

@@ -11,26 +11,25 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package audiocue
+package de.sciss.mellite.gui.impl.audiocue
 
 import java.awt.{Color, Graphics2D}
-import javax.swing.JComponent
 
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
+import de.sciss.desktop
 import de.sciss.lucre.swing._
+import de.sciss.mellite.executionContext
+import de.sciss.sonogram.{Overview, PaintController}
 import de.sciss.synth.proc.TimeRef
-import de.sciss.{desktop, sonogram}
+import javax.swing.JComponent
 
 import scala.swing.Component
 import scala.swing.Swing._
 import scala.swing.event.MousePressed
 import scala.util.{Failure, Success}
 
-final class ViewJ(sono: sonogram.Overview, val timelineModel: TimelineModel)
+final class ViewJ(sonogram: Overview, val timelineModel: TimelineModel)
   extends TimelineCanvasImpl {
 
   import TimelineCanvasImpl._
@@ -51,9 +50,9 @@ final class ViewJ(sono: sonogram.Overview, val timelineModel: TimelineModel)
     canvasComponent.repaint()
   }
 
-  object canvasComponent extends Component with sonogram.PaintController {
+  object canvasComponent extends Component with PaintController {
     private[this] var paintFun: Graphics2D => Unit = paintChecker("Calculating...")
-    private[this] val srRatio = sono.inputSpec.sampleRate / TimeRef.SampleRate
+    private[this] val srRatio = sonogram.inputSpec.sampleRate / TimeRef.SampleRate
 
     private[ViewJ] var sonogramBoost: Float = 1f
 
@@ -82,7 +81,7 @@ final class ViewJ(sono: sonogram.Overview, val timelineModel: TimelineModel)
       val visSpan   = timelineModel.visible
       val fileStart = visSpan.start * srRatio
       val fileStop  = visSpan.stop  * srRatio
-      sono.paint(spanStart = fileStart, spanStop = fileStop, g, 0, 0, width, height, this)
+      sonogram.paint(spanStart = fileStart, spanStop = fileStop, g, 0, 0, width, height, this)
     }
 
     def adjustGain(amp: Float, pos: Double): Float = amp * sonogramBoost
@@ -102,7 +101,7 @@ final class ViewJ(sono: sonogram.Overview, val timelineModel: TimelineModel)
 
     // ---- constructor ----
 
-    sono.onComplete {
+    sonogram.onComplete {
       case Success(_) => /* println("SUCCESS"); */ defer(ready())
       case Failure(e) => /* println("FAILURE"); */ defer(failed(e))
     }

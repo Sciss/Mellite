@@ -15,14 +15,14 @@ package de.sciss.mellite
 
 import java.io.File
 
-import javax.swing.UIManager
-import javax.swing.plaf.metal.MetalLookAndFeel
-import de.sciss.desktop.{Desktop, Preferences}
+import de.sciss.desktop.Preferences
 import de.sciss.desktop.Preferences.{Entry, Type}
 import de.sciss.file._
 import de.sciss.osc
 import de.sciss.submin.Submin
 import de.sciss.synth.proc.SensorSystem
+import javax.swing.UIManager
+import javax.swing.plaf.metal.MetalLookAndFeel
 
 import scala.util.{Success, Try}
 

@@ -11,17 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.timeline
-
-import javax.swing.SpinnerNumberModel
+package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.lucre.stm.Sys
 import de.sciss.swingplus.Spinner
 import de.sciss.synth
 import de.sciss.synth.proc.{Code, Proc, SynthGraphObj}
 import de.sciss.synth.{GE, SynthGraph}
+import javax.swing.SpinnerNumberModel
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.{Component, FlowPanel, Label, Swing}

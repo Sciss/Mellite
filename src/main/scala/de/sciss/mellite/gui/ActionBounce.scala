@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.awt
 import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEvent}
@@ -30,6 +29,7 @@ import de.sciss.lucre.swing.{View, defer}
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Sys}
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain
+import de.sciss.mellite.{Mellite, Prefs, executionContext}
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid

@@ -11,13 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
 import de.sciss.synth.proc.{Proc, Universe}
 
 trait ProcObjViewImpl[S <: Sys[S]]

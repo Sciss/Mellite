@@ -11,14 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.document
+package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop
 import de.sciss.desktop.{Desktop, DocumentHandler => DH}
 import de.sciss.lucre.swing.defer
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.ActionCloseAllWorkspaces
+import de.sciss.mellite.{DocumentHandler, Mellite}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.Universe
 

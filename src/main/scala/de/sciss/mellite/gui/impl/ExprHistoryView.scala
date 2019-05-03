@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
@@ -24,6 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Identifiable, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{defer, deferTx}
+import de.sciss.mellite.executionContext
 import de.sciss.processor.Processor
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.serial.Serializer

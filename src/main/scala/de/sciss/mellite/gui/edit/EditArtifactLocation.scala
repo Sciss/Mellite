@@ -11,16 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package edit
-
-import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
+package de.sciss.mellite.gui.edit
 
 import de.sciss.file.File
 import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm
+import de.sciss.lucre.stm.Sys
+import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditArtifactLocation {
   def apply[S <: Sys[S]](obj: ArtifactLocation.Var[S], directory: File)

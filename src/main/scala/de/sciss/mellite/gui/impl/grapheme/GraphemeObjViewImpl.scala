@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import de.sciss.lucre.expr.{Expr, LongObj}
 import de.sciss.lucre.stm
@@ -21,6 +19,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.GraphemeObjView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.objview.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
+import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView}
 import de.sciss.synth.proc.Grapheme
 import de.sciss.synth.proc.Grapheme.Entry
 

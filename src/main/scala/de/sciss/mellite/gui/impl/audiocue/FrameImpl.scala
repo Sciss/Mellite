@@ -11,14 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package audiocue
+package de.sciss.mellite.gui.impl.audiocue
 
 import de.sciss.file._
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.gui.{AudioFileFrame, AudioFileView}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
 object FrameImpl {

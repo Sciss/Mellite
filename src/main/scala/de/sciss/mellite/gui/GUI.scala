@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.{AffineTransform, Area, Path2D}
@@ -25,6 +24,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.{defer, requireEDT}
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses

@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl.document
+package de.sciss.mellite.gui.impl.document
 
 import java.awt.datatransfer.{DataFlavor, Transferable}
 import java.io.File
@@ -23,7 +21,9 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
+import de.sciss.mellite.ObjectActions
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
+import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, FolderView, ListObjView}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport

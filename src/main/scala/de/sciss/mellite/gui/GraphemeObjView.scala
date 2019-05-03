@@ -11,13 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.IdentifierMap
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeObjViewImpl => Impl}
 import de.sciss.model.Change

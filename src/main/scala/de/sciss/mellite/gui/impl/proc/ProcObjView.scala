@@ -11,14 +11,14 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui
 import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineObjView}
 import de.sciss.synth.proc.Implicits._

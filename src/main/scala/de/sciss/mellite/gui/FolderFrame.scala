@@ -11,10 +11,9 @@
  *  contact@sciss.de
  */
 
-package de.sciss
-package mellite
-package gui
+package de.sciss.mellite.gui
 
+import de.sciss.lucre
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
@@ -26,7 +25,6 @@ import scala.swing.{Component, SequentialContainer}
 object FolderFrame {
   /** Creates a new frame for a folder view.
     *
-    * @param workspace        the workspace whose root to display
     * @param name             optional window name
     * @param isWorkspaceRoot  if `true`, closes the workspace when the window closes; if `false` does nothing
     *                         upon closing the window

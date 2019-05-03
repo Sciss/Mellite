@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.widget
+package de.sciss.mellite.gui.impl.widget
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
@@ -21,6 +20,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.executionContext
 import de.sciss.mellite.gui.impl.code.CodeFrameImpl
 import de.sciss.mellite.gui.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl

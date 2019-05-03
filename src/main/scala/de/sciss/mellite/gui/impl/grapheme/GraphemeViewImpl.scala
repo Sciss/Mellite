@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package grapheme
+package de.sciss.mellite.gui.impl.grapheme
 
 import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
@@ -31,7 +28,10 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.Mellite
 import de.sciss.mellite.gui.GraphemeView.Mode
+import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
+import de.sciss.mellite.gui.{BasicTool, GraphemeObjView, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjView, SelectionModel}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span

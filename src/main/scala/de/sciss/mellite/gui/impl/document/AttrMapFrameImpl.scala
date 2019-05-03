@@ -11,12 +11,8 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
-package impl
-package document
+package de.sciss.mellite.gui.impl.document
 
-import javax.swing.JComponent
-import javax.swing.undo.UndoableEdit
 import de.sciss.desktop
 import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.UndoManager
@@ -26,8 +22,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
+import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
+import de.sciss.mellite.gui.{AttrMapFrame, AttrMapView, MenuBar, ObjView}
 import de.sciss.synth.proc.Universe
+import javax.swing.JComponent
+import javax.swing.undo.UndoableEdit
 
 import scala.swing.event.Key
 import scala.swing.{Action, Component}

@@ -11,9 +11,9 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package impl
+package de.sciss.mellite.impl
 
+import de.sciss.mellite.executionContext
 import de.sciss.scalainterpreter.Interpreter
 
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -21,16 +21,8 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 object InterpreterSingleton {
   private val sync = new AnyRef
 
-  private var funs  = Vec   .empty[Interpreter => Unit]
-  private var inOpt = Option.empty[Interpreter]
-
-  //   object Result {
-  //      var value : Any = ()
-  //   }
-  //
-  //   def wrap( code: String ) : String = {
-  //      "de.sciss.mellite.gui.impl.InterpreterSingleton.Result.value = {" + code + "}"
-  //   }
+  private var functions = Vec   .empty[Interpreter => Unit]
+  private var inOpt     = Option.empty[Interpreter]
 
   def apply(fun: Interpreter => Unit): Unit =
     sync.synchronized {
@@ -39,7 +31,7 @@ object InterpreterSingleton {
           fun(in)
         case _ =>
           makeOne
-          funs :+= fun
+          functions :+= fun
       }
     }
 
@@ -50,12 +42,11 @@ object InterpreterSingleton {
       "synth._",
       "ugen._"
     )
-    //      cfg.bindings += NamedParam( Result )
     Interpreter.async(cfg).foreach { in =>
       sync.synchronized {
         inOpt = Some(in)
-        val f = funs
-        funs  = Vector.empty
+        val f = functions
+        functions  = Vector.empty
         f.foreach(_.apply(in))
       }
     }

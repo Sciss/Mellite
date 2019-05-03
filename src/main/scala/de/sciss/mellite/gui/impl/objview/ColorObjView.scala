@@ -13,21 +13,20 @@
 
 package de.sciss.mellite.gui.impl.objview
 
-import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{CellView, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
-import de.sciss.numbers
-import de.sciss.mellite.gui.{ListObjView, MessageException, ObjView}
-import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.synth.proc.{Color, Universe}
+import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
+import de.sciss.mellite.gui.{ListObjView, MessageException, ObjView}
+import de.sciss.{desktop, numbers}
 import de.sciss.synth.proc.Implicits._
+import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Action, BorderPanel, Button, ColorChooser, Component, FlowPanel, GridPanel, Label, Swing}

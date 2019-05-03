@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.widget
+package de.sciss.mellite.gui.impl.widget
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.{BooleanObj, CellView}

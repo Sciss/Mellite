@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import java.awt.datatransfer.Transferable
 

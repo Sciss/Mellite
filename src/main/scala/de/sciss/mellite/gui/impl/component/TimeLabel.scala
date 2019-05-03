@@ -11,14 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package component
+package de.sciss.mellite.gui.impl.component
 
-import javax.swing.JComponent
-import java.awt.{Graphics, Graphics2D, Dimension}
+import java.awt.{Dimension, Graphics, Graphics2D}
+
 import de.sciss.audiowidgets.LCDFont
+import javax.swing.JComponent
 
 object TimeLabel {
   private val prefSz = new Dimension(112, 16)

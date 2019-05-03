@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.fingertree.RangedSeq
 import de.sciss.lucre.stm.{Disposable, IdentifierMap}

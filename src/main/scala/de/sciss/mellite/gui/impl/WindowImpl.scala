@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
 import de.sciss.desktop
 import de.sciss.desktop.WindowHandler
@@ -23,7 +21,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.mellite.gui.{CanBounce, DocumentViewHandler, WindowPlacement}
 import de.sciss.mellite.util.Veto
+import de.sciss.mellite.{Application, DependentMayVeto, executionContext}
 import de.sciss.synth.proc.gui.UniverseView
 
 import scala.concurrent.Future

@@ -11,16 +11,12 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
-package timeline
+package de.sciss.mellite.gui.impl.timeline
 
 import java.awt.Point
 import java.awt.datatransfer.{DataFlavor, Transferable}
 import java.awt.dnd.{DropTarget, DropTargetAdapter, DropTargetDragEvent, DropTargetDropEvent, DropTargetEvent}
 
-import javax.swing.TransferHandler._
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.Desktop
 import de.sciss.equal.Implicits._
@@ -29,9 +25,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
+import de.sciss.mellite.gui.{DragAndDrop, ListObjView, ObjView}
 import de.sciss.span.Span
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}
+import javax.swing.TransferHandler._
 
 import scala.swing.Component
 import scala.util.Try

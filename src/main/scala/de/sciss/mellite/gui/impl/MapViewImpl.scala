@@ -11,26 +11,25 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
-package impl
+package de.sciss.mellite.gui.impl
 
 import java.awt.datatransfer.Transferable
 import java.awt.event.MouseEvent
 import java.util.EventObject
 
-import javax.swing.TransferHandler.TransferSupport
-import javax.swing.table.{AbstractTableModel, DefaultTableCellRenderer, TableCellEditor}
-import javax.swing.undo.UndoableEdit
-import javax.swing.{AbstractCellEditor, JComponent, JLabel, JTable, TransferHandler}
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.{DragAndDrop, ListObjView, MapView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe
+import javax.swing.TransferHandler.TransferSupport
+import javax.swing.table.{AbstractTableModel, DefaultTableCellRenderer, TableCellEditor}
+import javax.swing.undo.UndoableEdit
+import javax.swing.{AbstractCellEditor, JComponent, JLabel, JTable, TransferHandler}
 
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}

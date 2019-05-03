@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.audiocue.{ViewImpl => Impl}

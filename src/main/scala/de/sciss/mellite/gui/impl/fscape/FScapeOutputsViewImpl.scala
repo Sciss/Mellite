@@ -11,8 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.fscape
+package de.sciss.mellite.gui.impl.fscape
 
 import java.awt.datatransfer.Transferable
 

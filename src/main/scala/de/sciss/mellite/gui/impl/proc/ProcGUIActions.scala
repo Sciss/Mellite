@@ -11,10 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui.impl.proc
-
-import javax.swing.undo.UndoableEdit
+package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
@@ -23,6 +20,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.TimelineObjView
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.synth.proc.Timeline
+import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 

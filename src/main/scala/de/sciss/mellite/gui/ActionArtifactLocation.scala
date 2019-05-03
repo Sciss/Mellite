@@ -11,9 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss
-package mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.desktop.{FileDialog, OptionPane, Window}
 import de.sciss.file._
@@ -21,13 +19,13 @@ import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.swingplus.Labeled
-import de.sciss.synth.proc
+import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
+import de.sciss.{desktop, equal, swingplus}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Dialog
 import scala.util.Try
-import proc.Implicits._
 
 object ActionArtifactLocation {
   //  sealed trait QueryResult

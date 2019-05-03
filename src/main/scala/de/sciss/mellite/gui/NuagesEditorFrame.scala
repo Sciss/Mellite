@@ -11,14 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite
-package gui
+package de.sciss.mellite.gui
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.document.{NuagesEditorFrameImpl => Impl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
-import impl.document.{NuagesEditorFrameImpl => Impl}
 
 object NuagesEditorFrame {
   def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S]): NuagesEditorFrame[S] =
