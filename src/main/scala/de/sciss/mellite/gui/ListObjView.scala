@@ -14,22 +14,14 @@
 package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.objview.ListObjViewImpl
-import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Component, Label}
 
 object ListObjView {
-  // XXX TODO --- should be in `ObjView`
-  final case class Drag[S <: Sys[S]](universe: Universe[S], view: ObjView[S])
-
-  // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
-  val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
-
   trait Factory extends ObjView.Factory {
     def mkListView[S <: SSys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S]
   }

@@ -274,8 +274,8 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
       override def createTransferable(c: JComponent): Transferable = {
         val sel     = selection
         val trans1 = if (sel.size == 1) {
-          val _res = DragAndDrop.Transferable(ListObjView.Flavor) {
-            ListObjView.Drag(universe, sel.head._2)
+          val _res = DragAndDrop.Transferable(ObjView.Flavor) {
+            ObjView.Drag(universe, sel.head._2)
           }
           _res
         } else null
@@ -292,7 +292,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
             modelCol >= 1   // should drop on the 'type' or 'value' column
           }
           // println(s"locOk? $locOk")
-          val allOk = locOk && support.isDataFlavorSupported(ListObjView.Flavor)
+          val allOk = locOk && support.isDataFlavorSupported(ObjView.Flavor)
           if (allOk) support.setDropAction(TransferHandler.LINK)
           allOk
         }
@@ -303,7 +303,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
         val res = support.isDrop && {
           val dl        = support.getDropLocation.asInstanceOf[JTable.DropLocation]
           val isInsert  = dl.isInsertRow
-          val data      = support.getTransferable.getTransferData(ListObjView.Flavor).asInstanceOf[ListObjView.Drag[_]]
+          val data      = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
           require(data.universe == universe, "Cross-session list copy not yet implemented")
           val view      = data.view.asInstanceOf[ObjView[S]]
 

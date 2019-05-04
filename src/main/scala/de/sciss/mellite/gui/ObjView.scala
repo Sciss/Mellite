@@ -21,6 +21,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
 
@@ -39,6 +40,11 @@ object ObjView {
   final val categMisc         = "Miscellaneous"
 
   final val Unnamed = "<unnamed>"
+
+  final case class Drag[S <: stm.Sys[S]](universe: Universe[S], view: ObjView[S])
+
+  // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
+  val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 
   trait Factory {
     def prefix    : String

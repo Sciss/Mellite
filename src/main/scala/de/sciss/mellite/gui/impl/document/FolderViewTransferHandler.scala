@@ -18,12 +18,13 @@ import java.io.File
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.equal.Implicits._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.ObjectActions
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
-import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, FolderView, ListObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, FolderView, ListObjView, ObjView}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
@@ -54,10 +55,10 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
       val trans0  = DragAndDrop.Transferable(FolderView.SelectionFlavor) {
         new FolderView.SelectionDnDData[S](fv.universe, sel)
       }
-      val trans1 = if (sel.size == 1) {
+      val trans1 = if (sel.size === 1) {
         val listView = sel.head.renderData
-        val tmp0  = DragAndDrop.Transferable(ListObjView.Flavor) {
-          new ListObjView.Drag[S](fv.universe, listView)
+        val tmp0  = DragAndDrop.Transferable(ObjView.Flavor) {
+          new ObjView.Drag[S](fv.universe, listView)
         }
         val tmp1  = listView.createTransferable().toList
         val tmp   = trans0 :: tmp0 :: tmp1
@@ -72,7 +73,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     override def canImport(support: TransferSupport): Boolean =
       treeView.dropLocation.exists { tdl =>
-        val locOk = tdl.index >= 0 || (tdl.column == 0 && !tdl.path.lastOption.exists(_.isLeaf))
+        val locOk = tdl.index >= 0 || (tdl.column === 0 && !tdl.path.lastOption.exists(_.isLeaf))
         val res = locOk && {
           if (support.isDataFlavorSupported(FolderView.SelectionFlavor)) {
             val data = support.getTransferable.getTransferData(FolderView.SelectionFlavor)
@@ -82,9 +83,9 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
               support.setDropAction(TransferHandler.COPY)
             }
             true
-          } else if (support.isDataFlavorSupported(ListObjView.Flavor)) {
-            val data = support.getTransferable.getTransferData(ListObjView.Flavor)
-              .asInstanceOf[ListObjView.Drag[_]]
+          } else if (support.isDataFlavorSupported(ObjView.Flavor)) {
+            val data = support.getTransferable.getTransferData(ObjView.Flavor)
+              .asInstanceOf[ObjView.Drag[_]]
             if (data.universe != universe) {
               // no linking between sessions
               support.setDropAction(TransferHandler.COPY)
@@ -103,7 +104,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
         // println("importData")
         val editOpt: Option[UndoableEdit] = {
           val isFolder  = support.isDataFlavorSupported(FolderView.SelectionFlavor)
-          val isList    = support.isDataFlavorSupported(ListObjView.Flavor)
+          val isList    = support.isDataFlavorSupported(ObjView.Flavor)
 
           // println(s"importData -- isFolder $isFolder, isList $isList")
           // println(support.getTransferable.getTransferDataFlavors.mkString("flavors: ", ", ", ""))
@@ -112,8 +113,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
             (support.getTransferable.getTransferData(FolderView.SelectionFlavor)
               .asInstanceOf[FolderView.SelectionDnDData[_]].universe != universe)
           val crossSessionList = !crossSessionFolder && isList &&
-            (support.getTransferable.getTransferData(ListObjView.Flavor)
-              .asInstanceOf[ListObjView.Drag[_]].universe != universe)
+            (support.getTransferable.getTransferData(ObjView.Flavor)
+              .asInstanceOf[ObjView.Drag[_]].universe != universe)
 
           // println(s"importData -- crossSession ${crossSessionFolder | crossSessionList}")
 
@@ -271,8 +272,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     private def insertListData(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
                                index: Int): Option[UndoableEdit] = {
-      val data = support.getTransferable.getTransferData(ListObjView.Flavor)
-        .asInstanceOf[ListObjView.Drag[S]]
+      val data = support.getTransferable.getTransferData(ObjView.Flavor)
+        .asInstanceOf[ObjView.Drag[S]]
 
       val edit = universe.cursor.step { implicit tx =>
         val parent = parentH()
@@ -282,7 +283,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     }
 
     // XXX TODO: not sure whether removal should be in exportDone or something
-    private def insertListData1(data: ListObjView.Drag[S], parent: Folder[S], idx: Int, dropAction: Int)
+    private def insertListData1(data: ObjView.Drag[S], parent: Folder[S], idx: Int, dropAction: Int)
                                (implicit tx: S#Tx): UndoableEdit = {
       val idx1    = if (idx >= 0) idx else parent.size
       val nv      = data.view
@@ -296,12 +297,12 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     private def copyListData(support: TransferSupport): Option[UndoableEdit] = {
       // cf. https://stackoverflow.com/questions/20982681
-      val data  = support.getTransferable.getTransferData(ListObjView.Flavor)
-        .asInstanceOf[ListObjView.Drag[In] forSome { type In <: Sys[In] }]
+      val data  = support.getTransferable.getTransferData(ObjView.Flavor)
+        .asInstanceOf[ObjView.Drag[In] forSome { type In <: Sys[In] }]
       copyListData1(data)
     }
 
-    private def copyListData1[In <: Sys[In]](data: ListObjView.Drag[In]): Option[UndoableEdit] =
+    private def copyListData1[In <: Sys[In]](data: ObjView.Drag[In]): Option[UndoableEdit] =
       Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: S#Tx) =>
         parentOption(tx).map { case (parent, idx) =>
           implicit val txIn0 : In#Tx = txIn

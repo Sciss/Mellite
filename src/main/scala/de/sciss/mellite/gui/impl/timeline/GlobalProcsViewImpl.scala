@@ -28,7 +28,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.objview.IntObjView
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ListObjView, SelectionModel, TimelineObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
 import de.sciss.synth.proc
@@ -277,14 +277,14 @@ object GlobalProcsViewImpl {
 
         // ---- import ----
         override def canImport(support: TransferSupport): Boolean =
-          support.isDataFlavorSupported(ListObjView.Flavor)
+          support.isDataFlavorSupported(ObjView.Flavor)
 
         override def importData(support: TransferSupport): Boolean =
-          support.isDataFlavorSupported(ListObjView.Flavor) && {
+          support.isDataFlavorSupported(ObjView.Flavor) && {
             Option(jt.getDropLocation).fold(false) { dl =>
               val pv    = procSeq(dl.getRow)
-              val drag  = support.getTransferable.getTransferData(ListObjView.Flavor)
-                .asInstanceOf[ListObjView.Drag[S]]
+              val drag  = support.getTransferable.getTransferData(ObjView.Flavor)
+                .asInstanceOf[ObjView.Drag[S]]
               import de.sciss.equal.Implicits._
               drag.universe === universe && {
                 drag.view match {
@@ -317,7 +317,6 @@ object GlobalProcsViewImpl {
 
       val actionAdd = Action(null)(addItemWithDialog())
       val ggAdd: Button = GUI.addButton(actionAdd, "Add Global Process")
-      // ggAdd.peer.putClientProperty("JButton.buttonType", "roundRect")
 
       val actionDelete = Action(null) {
         val pvs = table.selection.rows.map(procSeq)
@@ -325,7 +324,6 @@ object GlobalProcsViewImpl {
       }
       val ggDelete: Button = GUI.toolButton(actionDelete, raphael.Shapes.Minus, "Delete Global Process")
       actionDelete.enabled = false
-      // ggDelete.peer.putClientProperty("JButton.buttonType", "roundRect")
 
       val actionAttr: Action = Action(null) {
         if (selectionModel.nonEmpty) cursor.step { implicit tx =>

@@ -25,7 +25,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.DragAndDrop.Flavor
-import de.sciss.mellite.gui.{DragAndDrop, ListObjView, ObjView}
+import de.sciss.mellite.gui.{DragAndDrop, ObjView}
 import de.sciss.span.Span
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}
@@ -130,7 +130,7 @@ trait DnD[S <: SSys[S]] {
 
     private def isSupported(t: Transferable): Boolean =
       t.isDataFlavorSupported(DnD.flavor) ||
-      t.isDataFlavorSupported(ListObjView.Flavor) ||
+      t.isDataFlavorSupported(ObjView.Flavor) ||
       t.isDataFlavorSupported(DataFlavor.stringFlavor)
 
     private def mkDrag(t: Transferable, isDragging: Boolean): Option[Drag[S]] =
@@ -139,9 +139,9 @@ trait DnD[S <: SSys[S]] {
           case d: DnD.Drag[_] if d.universe == universe => Some(d.asInstanceOf[DnD.Drag[S]])
           case _ => None
         }
-      } else if (t.isDataFlavorSupported(ListObjView.Flavor)) {
-        t.getTransferData(ListObjView.Flavor) match {
-          case ListObjView.Drag(u, view) if u == universe =>
+      } else if (t.isDataFlavorSupported(ObjView.Flavor)) {
+        t.getTransferData(ObjView.Flavor) match {
+          case ObjView.Drag(u, view) if u == universe =>
             Some(DnD.ObjectDrag(universe, view.asInstanceOf[ObjView[S]]))
           case _ => None
         }
