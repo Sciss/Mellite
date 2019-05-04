@@ -47,7 +47,7 @@ object ArtifactObjView extends ListObjView.Factory {
     val peer      = obj
     val value     = peer.value  // peer.child.path
     val editable  = false // XXX TODO -- peer.modifiableOption.isDefined
-    new Impl[S](tx.newHandle(obj), value, isEditable = editable).init(obj)
+    new Impl[S](tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
   type LocationConfig[S <: stm.Sys[S]] = ActionArtifactLocation.QueryResult[S]
@@ -126,7 +126,7 @@ object ArtifactObjView extends ListObjView.Factory {
   }
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Artifact[S]],
-                                        var file: File, val isEditable: Boolean)
+                                        var file: File, val isListCellEditable: Boolean)
     extends ArtifactObjView[S]
       with ListObjView[S]
       with ObjViewImpl.Impl[S]
@@ -151,9 +151,9 @@ object ArtifactObjView extends ListObjView.Factory {
       this
     }
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None // XXX TODO
+    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None // XXX TODO
   }
 }
 trait ArtifactObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Artifact[S]
+  type Repr = Artifact[S]
 }

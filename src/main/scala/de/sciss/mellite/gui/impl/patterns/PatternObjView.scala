@@ -140,5 +140,5 @@ object PatternObjView extends NoArgsListObjViewFactory {
   }
 }
 trait PatternObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Pattern[S]
+  type Repr = Pattern[S]
 }

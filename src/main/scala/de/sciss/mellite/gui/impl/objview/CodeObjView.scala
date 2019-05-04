@@ -120,8 +120,6 @@ object CodeObjView extends ListObjView.Factory {
     with ObjViewImpl.Impl[S]
     with ListObjViewImpl.NonEditable[S] {
 
-    type E[~ <: stm.Sys[~]] = Code.Obj[~]
-
     override def obj(implicit tx: S#Tx): Code.Obj[S] = objH()
 
     def factory: ObjView.Factory = CodeObjView
@@ -137,12 +135,12 @@ object CodeObjView extends ListObjView.Factory {
       Some(frame)
     }
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       label.text = value.tpe.humanName
       label
     }
   }
 }
 trait CodeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Code.Obj[S]
+  type Repr = Code.Obj[S]
 }

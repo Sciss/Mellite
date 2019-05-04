@@ -17,12 +17,13 @@ import java.awt.Cursor
 import java.awt.event.MouseEvent
 
 import de.sciss.desktop.OptionPane
+import de.sciss.equal.Implicits._
 import de.sciss.lucre.expr.{SpanLikeObj, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.{BasicTool, GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{BasicTool, GUI, ObjView, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
@@ -40,16 +41,16 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
   private def renameName = "Rename Region"
 
   protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit =
-    if (e.getClickCount == 2) {
+    if (e.getClickCount === 2) {
       val ggText  = new TextField(region.name, 24)
       val panel   = new FlowPanel(new Label("Name:"), ggText)
 
       val pane    = OptionPane(panel, OptionPane.Options.OkCancel, OptionPane.Message.Question, focus = Some(ggText))
       pane.title  = renameName
       val res     = pane.show(None) // XXX TODO: search for window source
-      if (res == OptionPane.Result.Ok && ggText.text != region.name) {
+      if (res === OptionPane.Result.Ok && ggText.text != region.name) {
         val text    = ggText.text
-        val nameOpt = if (text == "" || text == TimelineObjView.Unnamed) None else Some(text)
+        val nameOpt = if (text === "" || text === ObjView.Unnamed) None else Some(text)
         dispatch(BasicTool.Adjust(TimelineTool.Cursor(nameOpt)))
       }
 

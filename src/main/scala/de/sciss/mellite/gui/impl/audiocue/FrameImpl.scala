@@ -17,13 +17,13 @@ import de.sciss.file._
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{AudioFileFrame, AudioFileView}
+import de.sciss.mellite.gui.{AudioFileFrame, AudioCueView}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
 object FrameImpl {
   def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
                         (implicit tx: S#Tx, universe: Universe[S]): AudioFileFrame[S] = {
-    val afv       = AudioFileView(obj)
+    val afv       = AudioCueView(obj)
     val name0     = CellView.name(obj)
     val file      = obj.value.artifact
     val fileName  = file.base
@@ -36,7 +36,7 @@ object FrameImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](/* val document: Workspace[S], */ val view: AudioFileView[S],
+  private final class Impl[S <: Sys[S]](/* val document: Workspace[S], */ val view: AudioCueView[S],
                                         name: CellView[S#Tx, String], _file: File)
     extends WindowImpl[S](name)
     with AudioFileFrame[S] {

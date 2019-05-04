@@ -38,6 +38,8 @@ object ObjView {
   final val categOrganisation = "Organisation"
   final val categMisc         = "Miscellaneous"
 
+  final val Unnamed = "<unnamed>"
+
   trait Factory {
     def prefix    : String
     def humanName : String
@@ -90,28 +92,31 @@ trait ObjView[S <: stm.Sys[S]]
   with Observable[S#Tx, ObjView.Update[S]] /* Model[ObjView.Update[S]] */ {
 
   def factory: ObjView.Factory
+
   def humanName: String
 
   /** The contents of the `"name"` attribute of the object. This is directly
     * set by the table tree view. The object view itself must only make sure that
     * an initial value is provided.
     */
-  var nameOption: Option[String]
+  def nameOption: Option[String]
 
-  var colorOption: Option[Color]
+  def colorOption: Option[Color]
 
   /** Convenience method that returns an "unnamed" string if no name is set. */
-  def name: String = nameOption.getOrElse(TimelineObjView.Unnamed)
+  def name: String = nameOption.getOrElse(ObjView.Unnamed)
 
   /** A view must provide an icon for the user interface. It should have a dimension of 32 x 32 and ideally
     * be drawn as vector graphics in order to look good when applying scaling.
     */
-  def icon  : Icon
+  def icon: Icon
 
-  def objH: stm.Source[S#Tx, Obj[S]]
+  type Repr <: Obj[S]
+
+  def objH: stm.Source[S#Tx, Repr]
 
   /** The view must store a handle to its underlying model. */
-  def obj(implicit tx: S#Tx): Obj[S]
+  def obj(implicit tx: S#Tx): Repr
 
   /** Whether a dedicated view/editor window exists for this type of object. */
   def isViewable: Boolean

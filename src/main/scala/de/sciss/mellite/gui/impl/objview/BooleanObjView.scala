@@ -45,7 +45,7 @@ object BooleanObjView extends ListObjView.Factory {
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new Impl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
+    new Impl[S](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Boolean, const: Boolean = false)
@@ -87,13 +87,13 @@ object BooleanObjView extends ListObjView.Factory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, BooleanObj[S]],
                                 var value: Boolean,
-                                override val isEditable: Boolean, val isViewable: Boolean)
+                                override val isListCellEditable: Boolean, val isViewable: Boolean)
     extends ListObjView /* .Boolean */[S]
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.BooleanExprLike[S]
       with ListObjViewImpl.SimpleExpr[S, Boolean, BooleanObj] {
 
-    type E[~ <: stm.Sys[~]] = BooleanObj[~]
+    type Repr = BooleanObj[S]
 
     def factory: ObjView.Factory = BooleanObjView
 

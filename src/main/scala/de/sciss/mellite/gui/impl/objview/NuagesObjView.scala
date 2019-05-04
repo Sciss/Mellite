@@ -50,7 +50,7 @@ object NuagesObjView extends NoArgsListObjViewFactory {
       with ListObjViewImpl.NonEditable[S]
       with ListObjViewImpl.EmptyRenderer[S] {
 
-    type E[~ <: stm.Sys[~]] = Nuages[~]
+    type Repr = Nuages[S]
 
     def factory: ObjView.Factory = NuagesObjView
 

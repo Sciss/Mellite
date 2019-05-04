@@ -17,7 +17,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
-import de.sciss.synth.proc.{Proc, Universe}
+import de.sciss.synth.proc.Universe
 
 trait ProcObjViewImpl[S <: Sys[S]]
   extends ListObjView[S]
@@ -25,8 +25,6 @@ trait ProcObjViewImpl[S <: Sys[S]]
     with ListObjViewImpl.EmptyRenderer[S]
     with ListObjViewImpl.NonEditable[S]
     with ProcObjView[S] {
-
-  override def obj(implicit tx: S#Tx): Proc[S] = objH()
 
   final def factory   : ObjView.Factory = ProcObjView
   final def isViewable: Boolean         = true

@@ -43,11 +43,9 @@ object OutputObjView extends NoMakeListObjViewFactory {
       with ObjViewImpl    .NonViewable[S]
       with ListObjViewImpl.NonEditable[S] {
 
-    override def obj(implicit tx: S#Tx): Output[S] = objH()
-
     def factory: ObjView.Factory = OutputObjView
   }
 }
 trait OutputObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Output[S]
+  type Repr = Output[S]
 }

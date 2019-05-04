@@ -47,7 +47,7 @@ object TimelineObjViewFactory extends NoArgsListObjViewFactory {
       with ListObjViewImpl.EmptyRenderer[S]
       with ListObjViewImpl.NonEditable[S] {
 
-    type E[~ <: stm.Sys[~]] = Timeline[~]
+    type Repr = Timeline[S]
 
     def factory: ObjView.Factory = TimelineObjViewFactory
 

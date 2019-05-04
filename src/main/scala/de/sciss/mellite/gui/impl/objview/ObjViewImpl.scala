@@ -135,9 +135,7 @@ object ObjViewImpl {
 
     override def toString = s"ElementView.${factory.prefix}(name = $name)"
 
-    def objH: stm.Source[S#Tx, Obj[S]]
-
-    def obj(implicit tx: S#Tx): Obj[S] = objH()
+    def obj(implicit tx: S#Tx): Repr = objH()
 
     /** Forwards to factory. */
     def humanName: String = factory.humanName
@@ -146,9 +144,9 @@ object ObjViewImpl {
     def icon: Icon = factory.icon
 
     var nameOption : Option[String] = None
-    var colorOption: Option[Color] = None
+    var colorOption: Option[Color ] = None
 
-    protected var disposables: List[Disposable[S#Tx]] = Nil
+    protected final var disposables: List[Disposable[S#Tx]] = Nil
 
     def dispose()(implicit tx: S#Tx): Unit = disposables.foreach(_.dispose())
 
@@ -203,6 +201,8 @@ object ObjViewImpl {
   }
 
   trait ExprLike[S <: stm.Sys[S], A, Ex[~ <: stm.Sys[~]] <: Expr[~, A]] extends ObjView[S] {
+//    type Repr = Ex[S]
+
     protected var exprValue: A
 
     protected def expr(implicit tx: S#Tx): Ex[S]

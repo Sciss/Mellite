@@ -85,13 +85,13 @@ object ListObjViewImpl {
 
   /** A trait that when mixed in provides `isEditable` and `tryEdit` as non-op methods. */
   trait NonEditable[S <: stm.Sys[S]] extends ListObjView[S] {
-    def isEditable: Boolean = false
+    override def isListCellEditable: Boolean = false
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None
+    override def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None
   }
 
   trait EmptyRenderer[S <: stm.Sys[S]] {
-    def configureRenderer(label: Label): Component = label
+    def configureListCellRenderer(label: Label): Component = label
     // def isUpdateVisible(update: Any)(implicit tx: S#Tx): Boolean = false
     def value: Any = ()
   }
@@ -99,7 +99,7 @@ object ListObjViewImpl {
   trait StringRenderer {
     def value: Any
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       label.text = value.toString.replace('\n', ' ')
       label
     }
@@ -112,7 +112,7 @@ object ListObjViewImpl {
     // protected def testValue       (v: Any): Option[A]
     protected def convertEditValue(v: Any): Option[A]
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
       val tpe = exprType  // make IntelliJ happy
       convertEditValue(value).flatMap { newValue =>
         expr match {
@@ -152,7 +152,7 @@ object ListObjViewImpl {
       case _            => None
     }
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       ggCheckBox.selected   = exprValue
       ggCheckBox.background = label.background
       ggCheckBox

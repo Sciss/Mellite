@@ -88,15 +88,13 @@ object MarkdownObjView extends ListObjView.Factory {
 
   // XXX TODO make private
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Markdown[S]], var value: String)
-    extends MarkdownObjView[S]
-      with ListObjView[S]
+    extends ListObjView[S]
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.SimpleExpr[S, Markdown.Value, Markdown]
-      with ListObjViewImpl.StringRenderer {
+      with ListObjViewImpl.StringRenderer
+      with MarkdownObjView[S] {
 
     override def obj(implicit tx: S#Tx): Markdown[S] = objH()
-
-    type E[~ <: stm.Sys[~]] = Markdown[~]
 
     def factory: ObjView.Factory = MarkdownObjView
 
@@ -104,7 +102,7 @@ object MarkdownObjView extends ListObjView.Factory {
 
     def expr(implicit tx: S#Tx): Markdown[S] = obj
 
-    def isEditable: Boolean = false // never within the list view
+    def isListCellEditable: Boolean = false // never within the list view
 
     def isViewable: Boolean = true
 
@@ -117,5 +115,5 @@ object MarkdownObjView extends ListObjView.Factory {
   }
 }
 trait MarkdownObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Markdown[S]
+  override type Repr = Markdown[S]
 }

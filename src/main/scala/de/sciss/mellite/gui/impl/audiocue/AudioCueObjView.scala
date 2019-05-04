@@ -219,29 +219,10 @@ object AudioCueObjView extends ListObjView.Factory {
     res.reverse
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
-                                var value: AudioCue)
-    extends AudioCueObjView[S]
-    with ListObjView /* .AudioGrapheme */[S]
-    with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.NonEditable[S] {
+  trait Basic[S <: Sys[S]] extends ObjViewImpl.Impl[S] with AudioCueObjView[S] {
+    final override def obj(implicit tx: S#Tx): AudioCue.Obj[S] = objH()
 
-    override def obj(implicit tx: S#Tx): AudioCue.Obj[S] = objH()
-
-    type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
-
-    def factory: ObjView.Factory = AudioCueObjView
-
-    def init(obj: AudioCue.Obj[S])(implicit tx: S#Tx): this.type = {
-      initAttrs(obj)
-      disposables ::= obj.changed.react { implicit tx => upd =>
-        deferTx {
-          value = upd.now
-        }
-        fire(ObjView.Repaint(this))
-      }
-      this
-    }
+    final def factory: ObjView.Factory = AudioCueObjView
 
     def isViewable = true
 
@@ -254,8 +235,27 @@ object AudioCueObjView extends ListObjView.Factory {
       val frame = AudioFileFrame(obj)
       Some(frame)
     }
+  }
 
-    def configureRenderer(label: Label): Component = {
+  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
+                                var value: AudioCue)
+    extends ListObjViewImpl.NonEditable[S]
+    with Basic[S] {
+
+    type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
+
+    def init(obj: AudioCue.Obj[S])(implicit tx: S#Tx): this.type = {
+      initAttrs(obj)
+      disposables ::= obj.changed.react { implicit tx => upd =>
+        deferTx {
+          value = upd.now
+        }
+        fire(ObjView.Repaint(this))
+      }
+      this
+    }
+
+    def configureListCellRenderer(label: Label): Component = {
       val txt     = AudioFileIn.specToString(value.spec)
       // XXX TODO: add offset and gain information if they are non-default
       label.text  = txt
@@ -264,9 +264,7 @@ object AudioCueObjView extends ListObjView.Factory {
   }
 }
 trait AudioCueObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): AudioCue.Obj[S]
-
-  override def objH: stm.Source[S#Tx, AudioCue.Obj[S]]
+  type Repr = AudioCue.Obj[S]
 
   def value: AudioCue
 }

@@ -51,13 +51,11 @@ object WidgetObjView extends NoArgsListObjViewFactory {
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.StringRenderer {
 
-    override def obj(implicit tx: S#Tx): Widget[S] = objH()
-
     def factory: ObjView.Factory = WidgetObjView
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: Cursor[S]): Option[UndoableEdit] = None
+    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: Cursor[S]): Option[UndoableEdit] = None
 
-    def isEditable: Boolean = false // never within the list view
+    def isListCellEditable: Boolean = false // never within the list view
 
     def isViewable: Boolean = true
 
@@ -68,5 +66,5 @@ object WidgetObjView extends NoArgsListObjViewFactory {
   }
 }
 trait WidgetObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Widget[S]
+  type Repr = Widget[S]
 }

@@ -47,7 +47,7 @@ object FolderObjView extends NoArgsListObjViewFactory {
       with ListObjViewImpl.EmptyRenderer[S]
       with ListObjViewImpl.NonEditable[S] {
 
-    type E[~ <: stm.Sys[~]] = Folder[~]
+    type Repr = Folder[S]
 
     def factory: ObjView.Factory = FolderObjView
 

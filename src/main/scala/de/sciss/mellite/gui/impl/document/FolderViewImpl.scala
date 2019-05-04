@@ -189,7 +189,7 @@ object FolderViewImpl {
           }
           res // component
         } else {
-          data.configureRenderer(component)
+          data.configureListCellRenderer(component)
         }
       }
 
@@ -214,7 +214,7 @@ object FolderViewImpl {
                   valueOpt)
                 Some(ed)
               } else {
-                objView.tryEdit(text)
+                objView.tryEditListCell(text)
               }
             }
             editOpt.foreach(undoManager.add)
@@ -224,7 +224,7 @@ object FolderViewImpl {
       }
       private lazy val defaultEditorC = Component.wrap(defaultEditorJ)
 
-      def isEditable(data: Data, column: Int): Boolean = column == 0 || data.isEditable
+      def isEditable(data: Data, column: Int): Boolean = column == 0 || data.isListCellEditable
 
       val columnNames: Vec[String] = Vector("Name", "Value")
 

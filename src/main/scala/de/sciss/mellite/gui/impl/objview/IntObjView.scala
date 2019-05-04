@@ -44,7 +44,7 @@ object IntObjView extends ListObjView.Factory {
       case _              => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new ListImpl(tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
+    new ListImpl(tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Int, const: Boolean = false)
@@ -87,17 +87,13 @@ object IntObjView extends ListObjView.Factory {
   }
 
   private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, IntObj[S]],
-                                var value: Int,
-                                override val isEditable: Boolean, val isViewable: Boolean)
+                                            var value: Int,
+                                            override val isListCellEditable: Boolean, val isViewable: Boolean)
     extends IntObjView[S]
     with ListObjView[S]
     with ObjViewImpl.Impl[S]
     with ListObjViewImpl.SimpleExpr[S, Int, IntObj]
     with ListObjViewImpl.StringRenderer {
-
-    override def obj(implicit tx: S#Tx): IntObj[S] = objH()
-
-    type E[~ <: stm.Sys[~]] = IntObj[~]
 
     def factory: ObjView.Factory = IntObjView
 
@@ -112,5 +108,5 @@ object IntObjView extends ListObjView.Factory {
   }
 }
 trait IntObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): IntObj[S]
+  type Repr = IntObj[S]
 }

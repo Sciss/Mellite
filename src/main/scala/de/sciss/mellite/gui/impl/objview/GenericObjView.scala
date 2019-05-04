@@ -52,11 +52,14 @@ object GenericObjView extends NoMakeListObjViewFactory with GraphemeObjView.Fact
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   private trait Impl[S <: stm.Sys[S]] extends ObjViewImpl.Impl[S] {
+
+    type Repr = Obj[S]
+
     def factory: ObjView.Factory = GenericObjView
 
     final def value: Any = ()
 
-    final def configureRenderer(label: Label): Component = label
+    final def configureListCellRenderer(label: Label): Component = label
   }
 
   private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Obj[S]])

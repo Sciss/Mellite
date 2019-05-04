@@ -50,7 +50,7 @@ object EnsembleObjView extends ListObjView.Factory {
       case BooleanObj.Var(_)  => true
       case _            => false
     }
-    new Impl[S](tx.newHandle(obj), playing = playing, isEditable = isEditable).init(obj)
+    new Impl[S](tx.newHandle(obj), playing = playing, isListCellEditable = isEditable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, offset: Long = 0L,
@@ -130,12 +130,12 @@ object EnsembleObjView extends ListObjView.Factory {
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Ensemble[S]],
-                                var playing: Boolean, val isEditable: Boolean)
+                                var playing: Boolean, val isListCellEditable: Boolean)
     extends ListObjView /* .Ensemble */[S]
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.BooleanExprLike[S] {
 
-    type E[~ <: stm.Sys[~]] = Ensemble[~]
+    override type Repr = Ensemble[S]
 
     def factory: ObjView.Factory = EnsembleObjView
 

@@ -24,6 +24,6 @@ object AudioFileFrame {
 }
 
 trait AudioFileFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  def view: AudioFileView[S]
+  def view: AudioCueView[S]
   // def document : Workspace[S]
 }

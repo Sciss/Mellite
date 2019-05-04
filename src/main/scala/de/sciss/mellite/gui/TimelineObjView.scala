@@ -28,8 +28,6 @@ import scala.swing.Graphics2D
 object TimelineObjView {
   type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, TimelineObjView[S]]
 
-  final val Unnamed = "<unnamed>"
-
   /** A useful view for `RangedSeq`. It gives (start, stop) of the view's span */
   implicit def viewToPoint[S <: stm.Sys[S]](view: TimelineObjView[S]): (Long, Long) = spanToPoint(view.spanValue)
 

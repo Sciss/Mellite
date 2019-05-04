@@ -207,7 +207,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     }
 
   override def name: String = nameOption.getOrElse {
-    audio.fold(TimelineObjView.Unnamed)(_./* value. */artifact.base)
+    audio.fold(ObjView.Unnamed)(_./* value. */artifact.base)
   }
 
   private[this] def acquireSonogram(): Option[SonoOverview] = {

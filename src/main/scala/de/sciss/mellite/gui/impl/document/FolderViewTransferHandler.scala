@@ -309,7 +309,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
           val idx1    = if (idx >= 0) idx else parent.size
           val context = Copy[In, S]
           val nv      = data.view
-          val in      = nv.obj
+          val in: Obj[In] = nv.obj
           val out     = context(in)
           import universe.cursor
           val edit    = EditFolderInsertObj[S](nv.name, parent, idx1, child = out)

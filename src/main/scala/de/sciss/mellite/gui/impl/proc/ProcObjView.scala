@@ -115,7 +115,5 @@ object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory
   }
 }
 trait ProcObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Proc[S]
-
-  def objH: stm.Source[S#Tx, Proc[S]]
+  type Repr = Proc[S]
 }

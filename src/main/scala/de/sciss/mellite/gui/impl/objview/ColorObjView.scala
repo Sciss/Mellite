@@ -289,9 +289,9 @@ object ColorObjView extends ListObjView.Factory {
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.SimpleExpr[S, Color, Color.Obj] {
 
-    type E[~ <: stm.Sys[~]] = Color.Obj[~]
+    type Repr = Color.Obj[S]
 
-    def isEditable = false    // not until we have proper editing components
+    def isListCellEditable = false    // not until we have proper editing components
 
     def factory: ObjView.Factory = ColorObjView
 
@@ -299,7 +299,7 @@ object ColorObjView extends ListObjView.Factory {
 
     def expr(implicit tx: S#Tx): Color.Obj[S] = objH()
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       // renderers are used for "stamping", so we can reuse a single object.
       label.icon = ListIcon
       ListIcon.paint = toAWT(value)

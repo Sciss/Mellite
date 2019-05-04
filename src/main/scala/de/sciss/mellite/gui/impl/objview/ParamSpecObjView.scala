@@ -58,7 +58,7 @@ object ParamSpecObjView extends ListObjView.Factory {
   def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ListObjView[S] = {
     val value     = obj.value
     val editable  = ParamSpec.Obj.Var.unapply(obj).isDefined
-    new Impl(tx.newHandle(obj), value, isEditable = editable).init(obj)
+    new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
@@ -455,16 +455,12 @@ object ParamSpecObjView extends ListObjView.Factory {
   }
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ParamSpec.Obj[S]],
-                                        var value: ParamSpec, val isEditable: Boolean)
+                                        var value: ParamSpec, val isListCellEditable: Boolean)
     extends ParamSpecObjView[S]
       with ListObjView[S]
       with ObjViewImpl.Impl[S]
       with ListObjViewImpl.SimpleExpr[S, ParamSpec, ParamSpec.Obj]
       with ListObjViewImpl.StringRenderer { listObjView =>
-
-    override def obj(implicit tx: S#Tx): ParamSpec.Obj[S] = objH()
-
-    type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
 
     def factory: ObjView.Factory = ParamSpecObjView
 
@@ -479,7 +475,7 @@ object ParamSpecObjView extends ListObjView.Factory {
     override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       implicit val undo: UndoManager = UndoManager()
       val _obj  = obj
-      val view  = new ViewImpl[S](objH, editable = isEditable).init(_obj)
+      val view  = new ViewImpl[S](objH, editable = isListCellEditable).init(_obj)
       val nameView = CellView.name(_obj)
       val fr    = new FrameImpl[S](view, nameView).init()
       Some(fr)
@@ -487,5 +483,5 @@ object ParamSpecObjView extends ListObjView.Factory {
   }
 }
 trait ParamSpecObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): ParamSpec.Obj[S]
+  type Repr = ParamSpec.Obj[S]
 }

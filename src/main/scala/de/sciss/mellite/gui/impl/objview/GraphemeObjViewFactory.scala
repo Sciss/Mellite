@@ -47,7 +47,7 @@ object GraphemeObjViewFactory extends NoArgsListObjViewFactory {
       with ListObjViewImpl.EmptyRenderer[S]
       with ListObjViewImpl.NonEditable[S] {
 
-    type E[~ <: stm.Sys[~]] = Grapheme[~]
+    type Repr = Grapheme[S]
 
     def factory: ObjView.Factory = GraphemeObjViewFactory
 

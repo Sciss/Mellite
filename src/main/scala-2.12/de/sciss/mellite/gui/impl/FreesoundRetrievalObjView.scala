@@ -574,5 +574,5 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
   )
 }
 trait FreesoundRetrievalObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Retrieval[S]
+  type Repr = Retrieval[S]
 }

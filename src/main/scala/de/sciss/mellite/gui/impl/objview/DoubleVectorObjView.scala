@@ -51,7 +51,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new ListImpl[S](tx.newHandle(obj), value, isEditable = isEditable, isViewable = isViewable).init(obj)
+    new ListImpl[S](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: V, const: Boolean = false)
@@ -108,6 +108,8 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
     extends ObjViewImpl.Impl[S]
       with ObjViewImpl.ExprLike[S, V, E] {
 
+    type Repr = DoubleVector[S]
+
     final def factory: ObjView.Factory = DoubleVectorObjView
 
     final def exprType: Type.Expr[V, E] = DoubleVector
@@ -118,7 +120,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
   // ---- ListObjView ----
 
   private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: V,
-                                    override val isEditable: Boolean, isViewable: Boolean)
+                                            override val isListCellEditable: Boolean, isViewable: Boolean)
     extends Impl(objH, isViewable = isViewable) with ListObjView[S]
       with ListObjViewImpl.SimpleExpr[S, V, E] {
 
@@ -130,7 +132,7 @@ object DoubleVectorObjView extends ListObjView.Factory with GraphemeObjView.Fact
       case s: String  => parseString(s).toOption
     }
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       label.text = value.iterator.map(_.toFloat).mkString(",")  // avoid excessive number of digits!
       label
     }

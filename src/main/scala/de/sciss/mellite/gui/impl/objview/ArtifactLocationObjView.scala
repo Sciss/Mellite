@@ -42,7 +42,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
     val peer      = obj
     val value     = peer.directory
     val editable  = ArtifactLocation.Var.unapply(peer).isDefined // .modifiableOption.isDefined
-    new Impl(tx.newHandle(obj), value, isEditable = editable).init(obj)
+    new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, directory: File, const: Boolean = false)
@@ -83,7 +83,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ArtifactLocation[S]],
-                                var directory: File, val isEditable: Boolean)
+                                var directory: File, val isListCellEditable: Boolean)
     extends ArtifactLocationObjView[S]
     with ListObjView /* .ArtifactLocation */[S]
     with ObjViewImpl.Impl[S]
@@ -109,7 +109,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
       this
     }
 
-    def tryEdit(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
       val dirOpt = value match {
         case s: String  => Some(file(s))
         case f: File    => Some(f)
@@ -126,9 +126,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   }
 }
 trait ArtifactLocationObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): ArtifactLocation[S]
-
-  def objH: stm.Source[S#Tx, ArtifactLocation[S]]
+  type Repr = ArtifactLocation[S]
 
   def directory: File
 }

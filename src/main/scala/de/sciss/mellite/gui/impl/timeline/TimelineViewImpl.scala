@@ -13,6 +13,7 @@
 
 package de.sciss.mellite.gui.impl.timeline
 
+import java.awt.datatransfer.Transferable
 import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
 
@@ -31,6 +32,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
+import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
@@ -218,8 +220,29 @@ object TimelineViewImpl {
       canvas = new View
       val ggVisualBoost = GUI.boostRotary()(canvas.timelineTools.visualBoost = _)
 
-      val transportPane = new BoxPanel(Orientation.Horizontal) {
+      val ggDragObject = new DragSourceButton() {
+        protected def createTransferable(): Option[Transferable] = {
+          None
+//          val spOpt = timelineModel.selection match {
+//            case sp0: Span if sp0.nonEmpty => Some(sp0)
+//            case _ => timelineModel.bounds match {
+//              case sp0: Span => Some(sp0)
+//              case _ => None
+//            }
+//          }
+//          spOpt.map { sp =>
+//            val drag  = timeline.DnD.AudioDrag(universe, holder, selection = sp)
+//            val t1    = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
+//            val t2    = DragAndDrop.Transferable.files(snapshot.artifact)
+//            DragAndDrop.Transferable.seq(t1, t2)
+//          }
+        }
+        tooltip = "Drag Timeline Object or Selection"
+      }
+
+      val topPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
+          ggDragObject,
           HStrut(4),
           TimelineTools.palette(canvas.timelineTools, Vector(
             toolCursor, toolMove, toolResize, toolGain, toolFade /* , toolSlide*/ ,
@@ -278,7 +301,7 @@ object TimelineViewImpl {
         import BorderPanel.Position._
 
         layoutManager.setVgap(2)
-        add(transportPane, North)
+        add(topPane, North)
         add(pane2, Center)
         add(ggTrackPos, East)
         // add(globalView.component, West  )

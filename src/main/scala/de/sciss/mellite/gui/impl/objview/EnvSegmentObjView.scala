@@ -457,11 +457,10 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     extends Impl(objH) with ListObjView[S]
       with ListObjViewImpl.SimpleExpr[S, V, E]
 //      with ListObjViewImpl.NonEditable[S]
-      with ListObjViewImpl.StringRenderer {
+      with ListObjViewImpl.StringRenderer
+      with ListObjViewImpl.NonEditable[S] {
 
     def convertEditValue(v: Any): Option[V] = None
-
-//    def isEditable: Boolean = false
   }
 
   // ---- GraphemeObjView ----
@@ -602,5 +601,5 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   }
 }
 trait EnvSegmentObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): EnvSegment.Obj[S]
+  type Repr = EnvSegment.Obj[S]
 }

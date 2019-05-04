@@ -1,5 +1,5 @@
 /*
- *  AudioFileView.scala
+ *  AudioCueView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -14,16 +14,12 @@
 package de.sciss.mellite.gui
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.audiocue.{ViewImpl => Impl}
+import de.sciss.mellite.gui.impl.audiocue.{AudioCueObjView, ViewImpl => Impl}
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{AudioCue, Universe}
 
-object AudioFileView {
-  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioFileView[S] =
+object AudioCueView {
+  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioCueView[S] =
     Impl(obj)
 }
-trait AudioFileView[S <: Sys[S]] extends UniverseView[S] /* Disposable[S#Tx] */ {
-  // def document: File // Document[S]
-  // def component: Component
-  def obj(implicit tx: S#Tx): AudioCue.Obj[S]
-}
+trait AudioCueView[S <: Sys[S]] extends UniverseView[S] with AudioCueObjView[S]

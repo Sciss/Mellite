@@ -81,5 +81,5 @@ object ActionObjView extends NoArgsListObjViewFactory with TimelineObjView.Facto
     extends Impl[S] with TimelineObjViewImpl.HasMuteImpl[S]
 }
 trait ActionObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): Action[S]
+  type Repr = Action[S]
 }

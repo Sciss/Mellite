@@ -45,7 +45,7 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
       with ListObjViewImpl.NonEditable[S]
       with NonViewable[S] {
 
-    type E[~ <: stm.Sys[~]] = FadeSpec.Obj[~]
+    type Repr = FadeSpec.Obj[S]
 
     def factory: ObjView.Factory = FadeSpecObjView
 
@@ -59,7 +59,7 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
       this
     }
 
-    def configureRenderer(label: Label): Component = {
+    def configureListCellRenderer(label: Label): Component = {
       val sr = TimeRef.SampleRate // 44100.0
       val dur = timeFmt.format(value.numFrames.toDouble / sr)
       label.text = s"$dur, ${value.curve}"

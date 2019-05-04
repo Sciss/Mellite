@@ -54,5 +54,5 @@ object FScapeOutputObjView extends NoMakeListObjViewFactory {
   }
 }
 trait FScapeOutputObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): FScape.Output[S]
+  type Repr = FScape.Output[S]
 }

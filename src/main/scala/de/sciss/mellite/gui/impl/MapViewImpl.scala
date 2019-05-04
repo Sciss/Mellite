@@ -160,7 +160,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
 
     override def isCellEditable(row: Int, col: Int): Boolean = {
-      val res = if (col == 0) keyEditable else modelEDT(row)._2.isEditable
+      val res = if (col == 0) keyEditable else modelEDT(row)._2.isListCellEditable
       // println(s"isCellEditable(row = $row, col = $col) -> $res")
       res
     }
@@ -180,7 +180,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
 
       case 2 =>
         val view    = modelEDT(row)._2
-        val editOpt = cursor.step { implicit tx => view.tryEdit(editValue) }
+        val editOpt = cursor.step { implicit tx => view.tryEditListCell(editValue) }
         editOpt.foreach(undoManager.add)
 
       case _ =>
@@ -235,7 +235,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
           super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column)
           if (getIcon != null) setIcon(null)
           value match {
-            case view: ListObjView[_] => view.configureRenderer(wrap).peer
+            case view: ListObjView[_] => view.configureListCellRenderer(wrap).peer
             case _ => outer
           }
         }

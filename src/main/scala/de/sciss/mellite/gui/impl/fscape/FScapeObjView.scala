@@ -255,5 +255,5 @@ object FScapeObjView extends NoArgsListObjViewFactory {
   }
 }
 trait FScapeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override def obj(implicit tx: S#Tx): FScape[S]
+  type Repr = FScape[S]
 }
