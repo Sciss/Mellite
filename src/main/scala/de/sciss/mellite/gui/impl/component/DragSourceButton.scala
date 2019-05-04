@@ -34,8 +34,8 @@ abstract class DragSourceButton(actions: Int = TransferHandler.COPY) extends swi
   }
 
   focusable     = false
-  icon          = GUI.iconNormal  (Shapes.Share)
-  disabledIcon  = GUI.iconDisabled(Shapes.Share)
+  icon          = GUI.iconNormal  (Shapes.Transfer)
+  disabledIcon  = GUI.iconDisabled(Shapes.Transfer)
   peer.setTransferHandler(Transfer)
 
   private var dndInitX    = 0
@@ -59,6 +59,7 @@ abstract class DragSourceButton(actions: Int = TransferHandler.COPY) extends swi
     override def mouseDragged(e: MouseEvent): Unit =
       if (dndPressed && !dndStarted && ((math.abs(e.getX - dndInitX) > 5) || (math.abs(e.getY - dndInitY) > 5))) {
         Transfer.exportAsDrag(peer, e, COPY)
+        peer.getModel.setPressed(false)
         dndStarted = true
       }
   }

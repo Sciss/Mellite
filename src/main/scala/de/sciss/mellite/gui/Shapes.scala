@@ -776,4 +776,40 @@ object Shapes {
     p.curveTo(32.0f, 20.818562f, 30.31558f, 16.60117f, 27.550781f, 13.519571f)
     p.lineTo(27.550781f, 13.519531f)
   }
+
+  /////////////////////////////////////////////////////////////
+  // the following shapes are adapted from the Noun project
+  // https://thenounproject.com/term/transfer/370305/
+  //
+  // Creative Commons CC BY 3.0 US
+  //
+  // Copyright (c)  Gonzalo Bravo
+
+  def Transfer(p: Path2D): Unit = {
+    p.moveTo(10.537109f, 2.999999f)
+    p.lineTo(1.0f, 12.445311f)
+    p.lineTo(10.537109f, 21.890621f)
+    p.lineTo(10.537109f, 16.97656f)
+    p.lineTo(23.408203f, 16.97656f)
+    p.lineTo(23.408203f, 14.781248f)
+    p.lineTo(28.230467f, 19.554686f)
+    p.lineTo(23.408203f, 24.330074f)
+    p.lineTo(23.408203f, 22.13281f)
+    p.lineTo(16.0f, 22.13281f)
+    p.lineTo(16.0f, 24.087887f)
+    p.lineTo(21.46289f, 24.087887f)
+    p.lineTo(21.46289f, 28.999998f)
+    p.lineTo(31.0f, 19.554688f)
+    p.lineTo(21.46289f, 10.109373f)
+    p.lineTo(21.46289f, 15.023436f)
+    p.lineTo(8.591797f, 15.023436f)
+    p.lineTo(8.591797f, 17.220701f)
+    p.lineTo(3.7695312f, 12.445311f)
+    p.lineTo(8.591797f, 7.6699224f)
+    p.lineTo(8.591797f, 9.867186f)
+    p.lineTo(15.999999f, 9.867186f)
+    p.lineTo(15.999999f, 7.9121094f)
+    p.lineTo(10.537109f, 7.9121094f)
+    p.lineTo(10.537109f, 2.999999f)
+  }
 }
