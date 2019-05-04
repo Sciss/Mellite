@@ -15,15 +15,15 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Universe
 
 trait ProcObjViewImpl[S <: Sys[S]]
-  extends ListObjView[S]
+  extends ObjListView[S]
     with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.EmptyRenderer[S]
-    with ListObjViewImpl.NonEditable[S]
+    with ObjListViewImpl.EmptyRenderer[S]
+    with ObjListViewImpl.NonEditable[S]
     with ProcObjView[S] {
 
   final def factory   : ObjView.Factory = ProcObjView

@@ -25,7 +25,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
-import de.sciss.mellite.gui.{DragAndDrop, GUI, ListObjView, MapView, ProcOutputsView}
+import de.sciss.mellite.gui.{DragAndDrop, GUI, ObjListView, MapView, ProcOutputsView}
 import de.sciss.synth.proc.{Proc, Universe}
 import javax.swing.undo.UndoableEdit
 
@@ -36,7 +36,7 @@ object OutputsViewImpl {
   def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, universe: Universe[S],
                                        undoManager: UndoManager): ProcOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>
-      (out.key, ListObjView(out))
+      (out.key, ObjListView(out))
     }  .toIndexedSeq
 
     new Impl(tx.newHandle(obj)) {

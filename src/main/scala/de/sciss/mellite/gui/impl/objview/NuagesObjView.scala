@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.gui.{ListObjView, ObjView}
+import de.sciss.mellite.gui.{ObjListView, ObjView}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Timeline, Universe}
@@ -34,7 +34,7 @@ object NuagesObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Nuages
   def category      : String   = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx): ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl[S](tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -45,10 +45,10 @@ object NuagesObjView extends NoArgsListObjViewFactory {
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Nuages[S]])
-    extends ListObjView /* .Nuages */[S]
+    extends ObjListView /* .Nuages */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.NonEditable[S]
-      with ListObjViewImpl.EmptyRenderer[S] {
+      with ObjListViewImpl.NonEditable[S]
+      with ObjListViewImpl.EmptyRenderer[S] {
 
     type Repr = Nuages[S]
 

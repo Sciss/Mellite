@@ -20,7 +20,7 @@ import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{GUI, GraphemeCanvas, GraphemeObjView, Shapes}
+import de.sciss.mellite.gui.{GUI, GraphemeCanvas, ObjGraphemeView, Shapes}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
@@ -33,7 +33,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
 
-  protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: GraphemeObjView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: ObjGraphemeView[S]): Unit =
 //    if (e.getClickCount == 2) {
 //      val ggText  = new TextField(region.name, 24)
 //      val panel   = new FlowPanel(new Label("Name:"), ggText)

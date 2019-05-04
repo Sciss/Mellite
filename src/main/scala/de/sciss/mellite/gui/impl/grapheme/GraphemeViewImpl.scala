@@ -31,7 +31,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.{BasicTool, GraphemeObjView, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjView, SelectionModel}
+import de.sciss.mellite.gui.{BasicTool, ObjGraphemeView, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjView, SelectionModel}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
@@ -66,14 +66,14 @@ object GraphemeViewImpl {
     val gr              = obj
     val graphemeH       = tx.newHandle(obj)
     var disposables     = List.empty[Disposable[S#Tx]]
-    val selectionModel  = SelectionModel[S, GraphemeObjView[S]]
+    val selectionModel  = SelectionModel[S, ObjGraphemeView[S]]
     val grView          = new Impl[S](graphemeH, tlm, selectionModel)
 
     // XXX TODO --- this is all horrible; we really need a proper iterator on grapheme
     // that gives time values and full leaf data
     gr.firstEvent.foreach { time0 =>
       @tailrec
-      def populate(pred: List[GraphemeObjView[S]], time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
+      def populate(pred: List[ObjGraphemeView[S]], time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
         val curr = entries.reverseIterator.map { entry =>
           val view = grView.objAddedInit(gr, time = time, entry = entry)
           view
@@ -124,11 +124,11 @@ object GraphemeViewImpl {
 
   private final class Impl[S <: Sys[S]](val graphemeH     : stm.Source[S#Tx, Grapheme[S]],
                                         val timelineModel : TimelineModel,
-                                        val selectionModel: SelectionModel[S, GraphemeObjView[S]])
+                                        val selectionModel: SelectionModel[S, ObjGraphemeView[S]])
                                        (implicit val universe: Universe[S],
                                         val undoManager: UndoManager)
     extends GraphemeView[S]
-      with TimelineViewBaseImpl[S, Double, GraphemeObjView[S]]
+      with TimelineViewBaseImpl[S, Double, ObjGraphemeView[S]]
       with GraphemeActions[S]
       with ComponentHolder[Component] {
 
@@ -136,7 +136,7 @@ object GraphemeViewImpl {
 
     type C = Component
 
-    private type Child    = GraphemeObjView[S]
+    private type Child    = ObjGraphemeView[S]
 
     private final class ViewMapEntry(val key: Long, val value: List[Child]) {
       override def toString: String = s"ViewMapEntry($key, $value)"
@@ -262,7 +262,7 @@ object GraphemeViewImpl {
     // does not invoke EDT code
     private def addObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], updateSucc: Boolean)
                           (implicit tx: S#Tx): Added = {
-      val view = GraphemeObjView(entry = entry, mode = mode)
+      val view = ObjGraphemeView(entry = entry, mode = mode)
       val _viewMapG = viewMapT.transformAndGet { m =>
         val before  = m.get(time)
         before match {
@@ -276,7 +276,7 @@ object GraphemeViewImpl {
       // XXX TODO -- do we need to remember the disposable?
       view.react { implicit tx => {
         case ObjView.Repaint(_) => objUpdated(view)
-        case GraphemeObjView.InsetsChanged(_, Change(before, now)) if before.maxHorizontal != now.maxHorizontal =>
+        case ObjGraphemeView.InsetsChanged(_, Change(before, now)) if before.maxHorizontal != now.maxHorizontal =>
           deferTx {
             removeInsetsEDT(before)
             addInsetsEDT   (now   )
@@ -393,7 +393,7 @@ object GraphemeViewImpl {
       }
     }
 
-    private def objUpdated(view: GraphemeObjView[S]): Unit = {
+    private def objUpdated(view: ObjGraphemeView[S]): Unit = {
       repaintAll() // XXX TODO: optimize dirty rectangle
     }
 
@@ -401,7 +401,7 @@ object GraphemeViewImpl {
       canvasImpl =>
 
       def timelineModel : TimelineModel                         = impl.timelineModel
-      def selectionModel: SelectionModel[S, GraphemeObjView[S]] = impl.selectionModel
+      def selectionModel: SelectionModel[S, ObjGraphemeView[S]] = impl.selectionModel
       def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
 
 //      def findChildView(frame: Long): Option[GraphemeObjView[S]] = {
@@ -409,10 +409,10 @@ object GraphemeViewImpl {
 //        if (it.hasNext) it.next().headOption else None
 //      }
 
-      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[GraphemeObjView[S]] = {
-        val dLeft   = math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[ObjGraphemeView[S]] = {
+        val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
-        val dTop    = screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val dTop    = screenToModelExtent     (ObjGraphemeView.ScreenTolerance)
         val dBottom = dTop // screenToModelExtent     (GraphemeObjView.ScreenTolerance)
         val frame1  = r.span.start  - dLeft
         val frame2  = r.span.stop   + dRight
@@ -421,20 +421,20 @@ object GraphemeViewImpl {
         childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
       }
 
-      def iterator: Iterator[GraphemeObjView[S]] = viewMapG.iterator.flatMap(_.value.headOption)
+      def iterator: Iterator[ObjGraphemeView[S]] = viewMapG.iterator.flatMap(_.value.headOption)
 
-      def intersect(span: Span.NonVoid): Iterator[GraphemeObjView[S]] = {
+      def intersect(span: Span.NonVoid): Iterator[ObjGraphemeView[S]] = {
         ???
       }
 
       private def childIterator(frame1: Long, frame2: Long,
-                                modelY1: Double, modelY2: Double): Iterator[GraphemeObjView[S]] = {
+                                modelY1: Double, modelY2: Double): Iterator[ObjGraphemeView[S]] = {
         val it0 = viewMapG.iteratorFrom(frame1)
           .flatMap  (_.value.headOption)
           .dropWhile(_.timeValue <  frame1)
           .takeWhile(_.timeValue <= frame2)
         val it  = it0.filter {
-          case hs: GraphemeObjView.HasStartLevels[_] =>
+          case hs: ObjGraphemeView.HasStartLevels[_] =>
             hs.startLevels.exists { value =>
               value >= modelY1 && value <= modelY2
             }
@@ -443,10 +443,10 @@ object GraphemeViewImpl {
         it
       }
 
-      def findChildView(frame: Long, modelY: Double): Option[GraphemeObjView[S]] = {
-        val dLeft   = math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
+      def findChildView(frame: Long, modelY: Double): Option[ObjGraphemeView[S]] = {
+        val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
-        val dTop    = screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val dTop    = screenToModelExtent     (ObjGraphemeView.ScreenTolerance)
         val dBottom = dTop // screenToModelExtent     (GraphemeObjView.ScreenTolerance)
         val frame1  = frame  - dLeft
         val frame2  = frame  + dRight
@@ -454,7 +454,7 @@ object GraphemeViewImpl {
         val modelY2 = modelY + dBottom
         val it = childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
         if (!it.hasNext) None else Some(it.minBy {
-          case child: GraphemeObjView.HasStartLevels[_] =>
+          case child: ObjGraphemeView.HasStartLevels[_] =>
             val dy = child.startLevels.iterator.map(value => modelExtentToScreen(value absDif modelY)).min
             val dx = framesToScreen(math.abs(child.timeValue - frame))  // XXX TODO --- Numbers should have absDif for Long
             dx.squared + dy.squared

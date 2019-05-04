@@ -1,5 +1,5 @@
 /*
- *  GraphemeObjView.scala
+ *  ObjGraphemeView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -26,16 +26,16 @@ import de.sciss.synth.proc.Grapheme
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D
 
-object GraphemeObjView {
-  type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, GraphemeObjView[S]]
+object ObjGraphemeView {
+  type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, ObjGraphemeView[S]]
 
-  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, GraphemeObjView[S]]
+  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, ObjGraphemeView[S]]
 
   trait Factory extends ObjView.Factory {
     /** Creates a new grapheme view
       */
     def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], value: E[S], mode: Mode)
-                                   (implicit tx: S#Tx): GraphemeObjView[S]
+                                   (implicit tx: S#Tx): ObjGraphemeView[S]
   }
 
   def addFactory(f: Factory): Unit = Impl.addFactory(f)
@@ -43,13 +43,13 @@ object GraphemeObjView {
   def factories: Iterable[Factory] = Impl.factories
 
   def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
-                        (implicit tx: S#Tx): GraphemeObjView[S] =
+                        (implicit tx: S#Tx): ObjGraphemeView[S] =
     Impl(entry = entry, mode = mode)
 
-  final case class InsetsChanged[S <: stm.Sys[S]](view: GraphemeObjView[S], ch: Change[Insets])
+  final case class InsetsChanged[S <: stm.Sys[S]](view: ObjGraphemeView[S], ch: Change[Insets])
     extends ObjView.Update[S]
 
-  trait HasStartLevels[S <: stm.Sys[S]] extends GraphemeObjView[S] {
+  trait HasStartLevels[S <: stm.Sys[S]] extends ObjGraphemeView[S] {
     def startLevels: Vec[Double]
   }
 
@@ -60,7 +60,7 @@ object GraphemeObjView {
 
   final val ScreenTolerance = 7
 }
-trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ObjGraphemeView[S <: stm.Sys[S]] extends ObjView[S] {
   def entryH: stm.Source[S#Tx, Grapheme.Entry[S]]
 
   def entry(implicit tx: S#Tx): Grapheme.Entry[S]
@@ -76,7 +76,7 @@ trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
 
 //  var succ: Option[GraphemeObjView[S]]
 
-  def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit
+  def succ_=(opt: Option[ObjGraphemeView[S]])(implicit tx: S#Tx): Unit
 
   def insets: Insets
 

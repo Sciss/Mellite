@@ -34,7 +34,7 @@ object FolderView {
                          (implicit tx: S#Tx, universe: Universe[S],
                           undoManager: UndoManager): FolderView[S] = Impl(root)
 
-  type NodeView[S <: Sys[S]] = TreeTableView.NodeView[S, Obj[S], Folder[S], ListObjView[S]]
+  type NodeView[S <: Sys[S]] = TreeTableView.NodeView[S, Obj[S], Folder[S], ObjListView[S]]
 
   /** A selection is a sequence of paths, where a path is a prefix of folders and a trailing element.
     * The prefix is guaranteed to be non-empty.

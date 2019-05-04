@@ -24,14 +24,14 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
 import de.sciss.mellite.gui.impl.tool.RubberBandTool
-import de.sciss.mellite.gui.{GUI, GraphemeCanvas, GraphemeObjView, GraphemeTool}
+import de.sciss.mellite.gui.{GUI, GraphemeCanvas, ObjGraphemeView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class MoveImpl[S <: Sys[S]](protected val canvas: GraphemeCanvas[S])
   extends BasicGraphemeTool[S, GraphemeTool.Move]
-    with RubberBandTool[S, GraphemeTool.Move, Double, GraphemeObjView[S]]{
+    with RubberBandTool[S, GraphemeTool.Move, Double, ObjGraphemeView[S]]{
 
   import GraphemeTool.Move
 

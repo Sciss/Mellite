@@ -23,7 +23,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.{BasicTool, GUI, ObjView, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{BasicTool, GUI, ObjView, Shapes, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
@@ -40,7 +40,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
 
   private def renameName = "Rename Region"
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[S]): Unit =
     if (e.getClickCount === 2) {
       val ggText  = new TextField(region.name, 24)
       val panel   = new FlowPanel(new Label("Name:"), ggText)

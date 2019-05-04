@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
-import de.sciss.mellite.gui.TimelineObjView
+import de.sciss.mellite.gui.ObjTimelineView
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.SpanLike
 
@@ -28,7 +28,7 @@ final class InputElem[S <: stm.Sys[S]](val span: SpanLike, val source: Option[Pr
 
   source.foreach(_.addTarget(target)(tx0))
 
-  def point: (Long, Long) = TimelineObjView.spanToPoint(span)
+  def point: (Long, Long) = ObjTimelineView.spanToPoint(span)
 
   def dispose()(implicit tx: S#Tx): Unit = {
     obs.dispose()

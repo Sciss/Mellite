@@ -20,13 +20,13 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, ObjView, Shapes}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{GUI, ObjListView, MarkdownEditorFrame, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.Icon
 
-object MarkdownObjView extends ListObjView.Factory {
+object MarkdownObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Markdown[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Markdown)
   val prefix        : String    = "Markdown"
@@ -35,7 +35,7 @@ object MarkdownObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categOrganisation
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ObjListView[S] = {
     val ex    = obj
     val value = ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
@@ -88,10 +88,10 @@ object MarkdownObjView extends ListObjView.Factory {
 
   // XXX TODO make private
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Markdown[S]], var value: String)
-    extends ListObjView[S]
+    extends ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, Markdown.Value, Markdown]
-      with ListObjViewImpl.StringRenderer
+      with ObjListViewImpl.SimpleExpr[S, Markdown.Value, Markdown]
+      with ObjListViewImpl.StringRenderer
       with MarkdownObjView[S] {
 
     override def obj(implicit tx: S#Tx): Markdown[S] = objH()

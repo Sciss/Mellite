@@ -19,12 +19,12 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineFrame}
+import de.sciss.mellite.gui.{ObjListView, ObjView, TimelineFrame}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Timeline, Universe}
 import javax.swing.Icon
 
-object TimelineObjViewFactory extends NoArgsListObjViewFactory {
+object TimelineObjView extends NoArgsListObjViewFactory {
   type E[S <: stm.Sys[S]] = Timeline[S]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Ruler)
   val prefix        : String   = "Timeline"
@@ -32,7 +32,7 @@ object TimelineObjViewFactory extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Timeline
   def category      : String   = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Timeline[S])(implicit tx: S#Tx): ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Timeline[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -42,14 +42,13 @@ object TimelineObjViewFactory extends NoArgsListObjViewFactory {
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Timeline[S]])
-    extends ListObjView /* .Timeline */[S]
+    extends ObjListView /* .Timeline */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.EmptyRenderer[S]
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.NonEditable[S]
+      with TimelineObjView[S] {
 
-    type Repr = Timeline[S]
-
-    def factory: ObjView.Factory = TimelineObjViewFactory
+    def factory: ObjView.Factory = TimelineObjView
 
     def isViewable = true
 
@@ -59,4 +58,7 @@ object TimelineObjViewFactory extends NoArgsListObjViewFactory {
       Some(frame)
     }
   }
+}
+trait TimelineObjView[S <: stm.Sys[S]] extends ObjView[S] {
+  type Repr = Timeline[S]
 }

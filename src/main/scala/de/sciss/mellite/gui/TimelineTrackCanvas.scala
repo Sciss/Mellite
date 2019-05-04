@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.lucre.stm.Sys
 import de.sciss.synth.proc.Timeline
 
-trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Int, TimelineObjView[S]] {
+trait TimelineTrackCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Int, ObjTimelineView[S]] {
   def timeline(implicit tx: S#Tx): Timeline[S]
 
   def timelineTools: TimelineTools[S]

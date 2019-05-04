@@ -19,7 +19,7 @@ import java.awt.{Cursor, Point, Toolkit}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, RubberBandTool}
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.gui.{GUI, Shapes, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.span.Span
 import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
 import javax.swing.Icon
@@ -50,8 +50,8 @@ object AuditionImpl {
   * TODO: update -- this is partly fixed now.
   */
 class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionToolLike[S, Unit, Int, TimelineObjView[S]]
-    with RubberBandTool[S, Unit, Int, TimelineObjView[S]]
+  extends CollectionToolLike[S, Unit, Int, ObjTimelineView[S]]
+    with RubberBandTool[S, Unit, Int, ObjTimelineView[S]]
     with TimelineTool[S, Unit] {
 
   // import TrackTool.{Cursor => _}
@@ -60,7 +60,7 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
   val name                  = "Audition"
   val icon: Icon            = GUI.iconNormal(Shapes.Audition)
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineObjView[S]]): Unit = {
+  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[S]]): Unit = {
     handleMouseSelection(e, childOpt = regionOpt)
 
     val selMod = canvas.selectionModel
@@ -78,7 +78,7 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
     val playOpt = cursor.step { implicit tx =>
       universe.auralSystem.serverOption.map { server =>
         implicit val aural: AuralContext[S] = AuralContext(server)
-        val auralTimeline = AuralObj.Timeline /* .empty */(tlv.timeline)
+        val auralTimeline = AuralObj.Timeline /* .empty */(tlv.obj)
 
 //        (/* tlv.globalView.iterator ++ */ selMod.iterator).foreach { view =>
 //          auralTimeline.addObject(view.id, view.span, view.obj)

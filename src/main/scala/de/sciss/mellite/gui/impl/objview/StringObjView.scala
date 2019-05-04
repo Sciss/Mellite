@@ -21,7 +21,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{ListObjView, ObjView}
+import de.sciss.mellite.gui.{ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.Icon
@@ -29,7 +29,7 @@ import javax.swing.Icon
 import scala.swing.TextField
 import scala.util.Success
 
-object StringObjView extends ListObjView.Factory {
+object StringObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = StringObj[~]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Font)
   val prefix        : String   = "String"
@@ -38,7 +38,7 @@ object StringObjView extends ListObjView.Factory {
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: StringObj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: StringObj[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -90,10 +90,10 @@ object StringObjView extends ListObjView.Factory {
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, StringObj[S]],
                                 var value: String,
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends ListObjView[S]
+    extends ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, String, StringObj]
-      with ListObjViewImpl.StringRenderer {
+      with ObjListViewImpl.SimpleExpr[S, String, StringObj]
+      with ObjListViewImpl.StringRenderer {
 
     type Repr = StringObj[S]
 

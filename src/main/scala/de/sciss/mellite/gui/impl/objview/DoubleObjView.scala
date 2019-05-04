@@ -22,7 +22,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeRendering, GraphemeView, Insets, ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
@@ -32,7 +32,7 @@ import javax.swing.{Icon, SpinnerNumberModel}
 import scala.swing.{Component, Graphics2D, Label}
 import scala.util.{Success, Try}
 
-object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
+object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
   type E[S <: stm.Sys[S]]       = DoubleObj[S]
   type V                        = Double
   val icon          : Icon      = raphaelIcon(Shapes.RealNumber)
@@ -42,7 +42,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -92,7 +92,7 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
   }
 
   def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
-                                 (implicit tx: S#Tx): GraphemeObjView[S] = {
+                                 (implicit tx: S#Tx): ObjGraphemeView[S] = {
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
     // assert (entry.value == value)
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = obj.value, isViewable = isViewable)
@@ -118,8 +118,8 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
   private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: Double,
                                             override val isListCellEditable: Boolean, isViewable: Boolean)
-    extends Impl(objH, isViewable = isViewable) with ListObjView[S]
-      with ListObjViewImpl.SimpleExpr[S, V, E] {
+    extends Impl(objH, isViewable = isViewable) with ObjListView[S]
+      with ObjListViewImpl.SimpleExpr[S, V, E] {
 
     def configureListCellRenderer(label: Label): Component = {
       label.text = value.toFloat.toString   // avoid excessive number of digits!
@@ -134,9 +134,9 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
 
   // ---- GraphemeObjView ----
 
-  def graphemePaintFront[S <: Sys[S]](view: GraphemeObjView[S], value: Double, g: Graphics2D,
+  def graphemePaintFront[S <: Sys[S]](view: ObjGraphemeView[S], value: Double, g: Graphics2D,
                                       gv: GraphemeView[S], r: GraphemeRendering): Unit = {
-    import GraphemeObjView.{HandleDiameter, HandleRadius}
+    import ObjGraphemeView.{HandleDiameter, HandleRadius}
     val c         = gv.canvas
     val selected  = gv.selectionModel.contains(view)
     val time0     = view.timeValue
@@ -159,9 +159,9 @@ object DoubleObjView extends ListObjView.Factory with GraphemeObjView.Factory {
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
     with GraphemeObjViewImpl.SimpleExpr[S, V, E]
-    with GraphemeObjView.HasStartLevels[S] {
+    with ObjGraphemeView.HasStartLevels[S] {
 
-    def insets: Insets = GraphemeObjView.DefaultInsets
+    def insets: Insets = ObjGraphemeView.DefaultInsets
 
     def startLevels: Vec[Double] = value +: Vector.empty
 

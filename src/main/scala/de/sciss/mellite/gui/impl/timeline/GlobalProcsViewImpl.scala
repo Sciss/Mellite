@@ -28,7 +28,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.objview.IntObjView
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjView, SelectionModel, TimelineObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjView, SelectionModel, ObjTimelineView}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
 import de.sciss.synth.proc
@@ -48,7 +48,7 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, FlowPanel,
 import scala.util.Try
 
 object GlobalProcsViewImpl {
-  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, TimelineObjView[S]])
+  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
                         (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): GlobalProcsView[S] = {
 
@@ -61,7 +61,7 @@ object GlobalProcsViewImpl {
 
   private final class Impl[S <: Sys[S]](// groupH: stm.Source[S#Tx, Timeline[S]],
                                         groupHOpt: Option[stm.Source[S#Tx, Timeline.Modifiable[S]]],
-                                        tlSelModel: SelectionModel[S, TimelineObjView[S]])
+                                        tlSelModel: SelectionModel[S, ObjTimelineView[S]])
                                        (implicit val universe: Universe[S],
                                         val undoManager: UndoManager)
     extends GlobalProcsView[S] with ComponentHolder[Component] {
@@ -78,7 +78,7 @@ object GlobalProcsViewImpl {
 
     val selectionModel: SelectionModel[S, ProcObjView.Timeline[S]] = SelectionModel.apply
 
-    private[this] val tlSelListener: SelectionModel.Listener[S, TimelineObjView[S]] = {
+    private[this] val tlSelListener: SelectionModel.Listener[S, ObjTimelineView[S]] = {
       case SelectionModel.Update(_, _) =>
         val items: Set[ProcObjView.Timeline[S]] = TxnExecutor.defaultAtomic { implicit itx =>
           tlSelModel.iterator.flatMap {

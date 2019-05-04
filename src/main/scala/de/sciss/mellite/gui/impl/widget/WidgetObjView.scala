@@ -17,8 +17,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes, WidgetEditorFrame}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes, WidgetEditorFrame}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.Icon
@@ -32,7 +32,7 @@ object WidgetObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Widget
   def category      : String    = ObjView.categOrganisation
 
-  def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ObjListView[S] = {
     val value = "" // ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
@@ -47,9 +47,9 @@ object WidgetObjView extends NoArgsListObjViewFactory {
   // XXX TODO make private
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Widget[S]], var value: String)
     extends WidgetObjView[S]
-      with ListObjView[S]
+      with ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.StringRenderer {
+      with ObjListViewImpl.StringRenderer {
 
     def factory: ObjView.Factory = WidgetObjView
 

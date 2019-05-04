@@ -21,9 +21,9 @@ import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.code.CodeFrameImpl
-import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ListObjView, ObjView, PlayToggleButton, Shapes}
+import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{CodeFrame, CodeView, GUI, ObjListView, ObjView, PlayToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
@@ -42,7 +42,7 @@ object PatternObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Pattern
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Pattern[S])(implicit tx: S#Tx): PatternObjView[S] with ObjListView[S] = {
     val vr = Pattern.Var.unapply(obj).getOrElse {
       val _vr = Pattern.newVar[S](obj)
       _vr
@@ -58,9 +58,9 @@ object PatternObjView extends NoArgsListObjViewFactory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Pattern.Var[S]])
     extends PatternObjView[S]
-      with ListObjView /* .Int */[S]
+      with ObjListView /* .Int */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.EmptyRenderer[S]
       with NonEditable[S]
       /* with NonViewable[S] */ {
 

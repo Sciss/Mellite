@@ -25,7 +25,7 @@ import de.sciss.synth.proc.{Timeline, Universe}
 import scala.swing.Table
 
 object GlobalProcsView {
-  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, TimelineObjView[S]])
+  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
                         (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): GlobalProcsView[S] =
       Impl(group, selectionModel)

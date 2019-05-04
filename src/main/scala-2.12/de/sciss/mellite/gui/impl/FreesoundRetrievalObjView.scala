@@ -31,10 +31,10 @@ import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
-import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.PrimitiveConfig
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{FolderEditorView, GUI, ListObjView, MarkdownRenderFrame, MessageException, ObjView, Shapes}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{FolderEditorView, GUI, ObjListView, MarkdownRenderFrame, MessageException, ObjView, Shapes}
 import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
@@ -54,10 +54,10 @@ import scala.swing.{Action, Alignment, Button, Component, Label, ProgressBar, Se
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success, Try}
 
-object FreesoundRetrievalObjView extends ListObjView.Factory {
+object FreesoundRetrievalObjView extends ObjListView.Factory {
   private[this] lazy val _init: Unit = {
     tpe.init()
-    ListObjView.addFactory(this)
+    ObjListView.addFactory(this)
   }
 
   def init(): Unit = _init
@@ -76,7 +76,7 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
 //
 //  def init(): Unit = _init
 
-  def mkListView[S <: Sys[S]](obj: Retrieval[S])(implicit tx: S#Tx): FreesoundRetrievalObjView[S] with ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Retrieval[S])(implicit tx: S#Tx): FreesoundRetrievalObjView[S] with ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   type Config[S <: stm.Sys[S]] = ObjViewImpl.PrimitiveConfig[File]
@@ -215,9 +215,9 @@ object FreesoundRetrievalObjView extends ListObjView.Factory {
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, E[S]])
     extends FreesoundRetrievalObjView   [S]
-      with ListObjView                  [S]
+      with ObjListView                  [S]
       with ObjViewImpl.Impl             [S]
-      with ListObjViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.EmptyRenderer[S]
       with NonEditable                  [S] {
 
     override def obj(implicit tx: S#Tx): E[S] = objH()

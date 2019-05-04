@@ -26,7 +26,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
-import de.sciss.mellite.gui.{DragAndDrop, FScapeOutputsView, GUI, ListObjView, MapView}
+import de.sciss.mellite.gui.{DragAndDrop, FScapeOutputsView, GUI, ObjListView, MapView}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
@@ -39,7 +39,7 @@ object FScapeOutputsViewImpl {
   def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, universe: Universe[S],
                                          undoManager: UndoManager): FScapeOutputsView[S] = {
     val list0 = obj.outputs.iterator.map { out =>
-      (out.key, ListObjView(out))
+      (out.key, ObjListView(out))
     }  .toIndexedSeq
 
     new Impl(tx.newHandle(obj)) {
@@ -71,7 +71,7 @@ object FScapeOutputsViewImpl {
         val key0  = "out"
         val tpe   = s"${title}put"
         // val opt   = OptionPane.textInput(message = s"$tpe Name", initial = key0)
-        val seqTpe: Seq[(Obj.Type, Icon, String)] = ListObjView.factories.iterator.map { fact =>
+        val seqTpe: Seq[(Obj.Type, Icon, String)] = ObjListView.factories.iterator.map { fact =>
           (fact.tpe, fact.icon, fact.humanName)
         } .toList
         val ggTpe = new ComboBox(seqTpe.sortBy(_._3))

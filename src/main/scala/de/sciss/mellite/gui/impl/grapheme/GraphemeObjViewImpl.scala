@@ -16,10 +16,10 @@ package de.sciss.mellite.gui.impl.grapheme
 import de.sciss.lucre.expr.{Expr, LongObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeObjView.Factory
+import de.sciss.mellite.gui.ObjGraphemeView.Factory
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.objview.{DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, GenericObjView, ObjViewImpl}
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView}
+import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeRendering, GraphemeView}
 import de.sciss.synth.proc.Grapheme
 import de.sciss.synth.proc.Grapheme.Entry
 
@@ -38,7 +38,7 @@ object GraphemeObjViewImpl {
   def factories: Iterable[Factory] = map.values
 
   def apply[S <: Sys[S]](entry: Grapheme.Entry[S], mode: Mode)
-                        (implicit tx: S#Tx): GraphemeObjView[S] = {
+                        (implicit tx: S#Tx): ObjGraphemeView[S] = {
     val tid = entry.value.tpe.typeId
     map.get(tid).fold(GenericObjView.mkGraphemeView(entry = entry, value = entry.value, mode = mode)) { f =>
       f.mkGraphemeView(entry = entry, value = entry.value.asInstanceOf[f.E[S]], mode = mode)
@@ -53,12 +53,12 @@ object GraphemeObjViewImpl {
 //    ActionView  .tpe.typeId -> ActionView
   )
 
-  trait BasicImpl[S <: stm.Sys[S]] extends GraphemeObjView[S] with ObjViewImpl.Impl[S] {
+  trait BasicImpl[S <: stm.Sys[S]] extends ObjGraphemeView[S] with ObjViewImpl.Impl[S] {
     final var timeValue: Long = _
 
 //    final var succ = Option.empty[GraphemeObjView[S]]
 
-    def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit = ()
+    def succ_=(opt: Option[ObjGraphemeView[S]])(implicit tx: S#Tx): Unit = ()
 
     final def entry(implicit tx: S#Tx): Grapheme.Entry[S] = entryH()
 

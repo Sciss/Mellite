@@ -22,7 +22,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{TimeArg, raphaelIcon}
-import de.sciss.mellite.gui.{EnsembleFrame, ListObjView, ObjView}
+import de.sciss.mellite.gui.{EnsembleFrame, ObjListView, ObjView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
@@ -33,7 +33,7 @@ import scala.swing.Swing.EmptyIcon
 import scala.swing.{Alignment, CheckBox, Dialog, Label, TextField}
 import scala.util.{Failure, Success}
 
-object EnsembleObjView extends ListObjView.Factory {
+object EnsembleObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Ensemble[~]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Cube2)
   val prefix        : String    = "Ensemble"
@@ -42,7 +42,7 @@ object EnsembleObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categComposition
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Ensemble[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Ensemble[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ens         = obj
     val playingEx   = ens.playing
     val playing     = playingEx.value
@@ -131,9 +131,9 @@ object EnsembleObjView extends ListObjView.Factory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Ensemble[S]],
                                 var playing: Boolean, val isListCellEditable: Boolean)
-    extends ListObjView /* .Ensemble */[S]
+    extends ObjListView /* .Ensemble */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.BooleanExprLike[S] {
+      with ObjListViewImpl.BooleanExprLike[S] {
 
     override type Repr = Ensemble[S]
 

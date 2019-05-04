@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.{CodeFrame, ObjListView, MessageException, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
@@ -29,7 +29,7 @@ import javax.swing.Icon
 import scala.swing.{Component, Label}
 import scala.util.{Failure, Success, Try}
 
-object CodeObjView extends ListObjView.Factory {
+object CodeObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Code.Obj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Code)
   val prefix        : String    = "Code"
@@ -38,7 +38,7 @@ object CodeObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categMisc
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ObjListView[S] = {
     val value   = obj.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
@@ -116,9 +116,9 @@ object CodeObjView extends ListObjView.Factory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Code.Obj[S]], var value: Code)
     extends CodeObjView[S]
-    with ListObjView /* .Code */[S]
+    with ObjListView /* .Code */[S]
     with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.NonEditable[S] {
+    with ObjListViewImpl.NonEditable[S] {
 
     override def obj(implicit tx: S#Tx): Code.Obj[S] = objH()
 

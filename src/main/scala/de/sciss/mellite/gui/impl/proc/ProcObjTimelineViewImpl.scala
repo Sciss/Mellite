@@ -22,7 +22,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.???!
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.mellite.gui.{ObjView, SonogramManager, TimelineObjView, TimelineRendering, TimelineView}
+import de.sciss.mellite.gui.{ObjView, SonogramManager, ObjTimelineView, TimelineRendering, TimelineView}
 import de.sciss.sonogram.{Overview => SonoOverview}
 import de.sciss.span.Span
 import de.sciss.synth.proc
@@ -33,7 +33,7 @@ import scala.swing.Graphics2D
 import scala.util.control.NonFatal
 
 final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc[S]],
-                                                 var busOption : Option[Int], val context: TimelineObjView.Context[S])
+                                                 var busOption : Option[Int], val context: ObjTimelineView.Context[S])
   extends ProcObjViewImpl[S]
     with TimelineObjViewImpl.HasGainImpl[S]
     with TimelineObjViewImpl.HasMuteImpl[S]

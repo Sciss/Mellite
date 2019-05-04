@@ -27,7 +27,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{GUI, ListObjView, ObjView}
+import de.sciss.mellite.gui.{GUI, ObjListView, ObjView}
 import de.sciss.mellite.util.Veto
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
@@ -46,7 +46,7 @@ import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Alignment, BorderPanel, BoxPanel, Component, Dialog, FlowPanel, Label, Orientation, Swing, TextField}
 import scala.util.{Failure, Success}
 
-object ParamSpecObjView extends ListObjView.Factory {
+object ParamSpecObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Thermometer)
   val prefix        : String    = "ParamSpec"
@@ -55,7 +55,7 @@ object ParamSpecObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categOrganisation
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ObjListView[S] = {
     val value     = obj.value
     val editable  = ParamSpec.Obj.Var.unapply(obj).isDefined
     new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
@@ -457,10 +457,10 @@ object ParamSpecObjView extends ListObjView.Factory {
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ParamSpec.Obj[S]],
                                         var value: ParamSpec, val isListCellEditable: Boolean)
     extends ParamSpecObjView[S]
-      with ListObjView[S]
+      with ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, ParamSpec, ParamSpec.Obj]
-      with ListObjViewImpl.StringRenderer { listObjView =>
+      with ObjListViewImpl.SimpleExpr[S, ParamSpec, ParamSpec.Obj]
+      with ObjListViewImpl.StringRenderer { listObjView =>
 
     def factory: ObjView.Factory = ParamSpecObjView
 

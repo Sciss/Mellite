@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
@@ -27,7 +27,7 @@ import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.util.{Success, Try}
 
-object IntObjView extends ListObjView.Factory {
+object IntObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = IntObj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.IntegerNumber)
   val prefix        : String    = "Int"
@@ -36,7 +36,7 @@ object IntObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -90,10 +90,10 @@ object IntObjView extends ListObjView.Factory {
                                             var value: Int,
                                             override val isListCellEditable: Boolean, val isViewable: Boolean)
     extends IntObjView[S]
-    with ListObjView[S]
+    with ObjListView[S]
     with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.SimpleExpr[S, Int, IntObj]
-    with ListObjViewImpl.StringRenderer {
+    with ObjListViewImpl.SimpleExpr[S, Int, IntObj]
+    with ObjListViewImpl.StringRenderer {
 
     def factory: ObjView.Factory = IntObjView
 

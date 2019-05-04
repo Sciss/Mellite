@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.MapViewImpl
-import de.sciss.mellite.gui.{AttrMapView, ListObjView}
+import de.sciss.mellite.gui.{AttrMapView, ObjListView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 
@@ -33,7 +33,7 @@ object AttrMapViewImpl {
 
     val list0 = map.iterator.map {
       case (key, value) =>
-        val view = ListObjView(value)
+        val view = ObjListView(value)
         (key, view)
     } .toIndexedSeq
 

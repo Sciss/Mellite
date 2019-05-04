@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.Adjust
 import de.sciss.mellite.gui.edit.EditGraphemeInsertObj
-import de.sciss.mellite.gui.{BasicTool, GUI, GraphemeCanvas, GraphemeObjView, GraphemeTool, Shapes}
+import de.sciss.mellite.gui.{BasicTool, GUI, GraphemeCanvas, ObjGraphemeView, GraphemeTool, Shapes}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{CurveObj, EnvSegment}
@@ -35,7 +35,7 @@ final class AddImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
   extends GraphemeTool[S, GraphemeTool.Add] with ModelImpl[BasicTool.Update[GraphemeTool.Add]] {
 
   type Y      = Double
-  type Child  = GraphemeObjView[S]
+  type Child  = ObjGraphemeView[S]
 
   def defaultCursor: AWTCursor  = AWTCursor.getPredefinedCursor(AWTCursor.CROSSHAIR_CURSOR)
   def name                      = "Add Envelope Segment"

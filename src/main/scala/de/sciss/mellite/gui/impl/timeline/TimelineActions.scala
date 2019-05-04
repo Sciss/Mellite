@@ -26,7 +26,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{ActionBounce, TimelineObjView, TimelineView}
+import de.sciss.mellite.gui.{ActionBounce, ObjTimelineView, TimelineView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}
@@ -40,7 +40,7 @@ import scala.util.Success
 
 /** Implements the actions defined for the timeline-view. */
 trait TimelineActions[S <: Sys[S]] {
-  view: TimelineView[S] with TimelineViewBaseImpl[S, Int, TimelineObjView[S]] =>
+  view: TimelineView[S] with TimelineViewBaseImpl[S, Int, ObjTimelineView[S]] =>
 
   object actionStopAllSound extends Action("StopAllSound") {
     def apply(): Unit =
@@ -50,14 +50,14 @@ trait TimelineActions[S <: Sys[S]] {
       }
   }
 
-  object actionBounce extends ActionBounce(this, timelineH) {
+  object actionBounce extends ActionBounce(this, objH) {
 
     override protected def prepare(set0: ActionBounce.QuerySettings[S]): ActionBounce.QuerySettings[S] =
       if (timelineModel.selection.isEmpty) set0 else set0.copy(span = timelineModel.selection)
 
     override protected def spanPresets(): SpanPresets = {
       val all = cursor.step { implicit tx =>
-        ActionBounce.presetAllTimeline(timeline)
+        ActionBounce.presetAllTimeline(obj)
       }
       all ::: timelineModel.selection.nonEmptyOption.map(value => ActionBounce.SpanPreset("Selection", value)).toList
     }
@@ -118,9 +118,9 @@ trait TimelineActions[S <: Sys[S]] {
     enabled = false
 
     def apply(): Unit = {
-      type V = TimelineObjView[S]
+      type V = ObjTimelineView[S]
       case class E(sourceVertex: V, targetVertex: V) extends topology.Edge[V]
-      case class Placed(view: TimelineObjView[S], y: Int) {
+      case class Placed(view: ObjTimelineView[S], y: Int) {
         def nextY         : Int     = view.trackHeight + y + 1
         def deltaY        : Int     = y - view.trackIndex
         def isSignificant : Boolean = deltaY != 0
@@ -144,11 +144,11 @@ trait TimelineActions[S <: Sys[S]] {
             case (topIn, _) => topIn
           }
 
-          val range0  = RangedSeq.empty[Placed, Long](pl => TimelineObjView.spanToPoint(pl.view.spanValue), Ordering.Long)
+          val range0  = RangedSeq.empty[Placed, Long](pl => ObjTimelineView.spanToPoint(pl.view.spanValue), Ordering.Long)
           val pl0     = List.empty[Placed]
           val (_, plRes) = top.vertices.indices.foldLeft((range0, pl0)) { case ((rangeIn, plIn), viewIdx) =>
             val view      = top.vertices(viewIdx)
-            val tup       = TimelineObjView.spanToPoint(view.spanValue)
+            val tup       = ObjTimelineView.spanToPoint(view.spanValue)
             val it0       = rangeIn.filterOverlaps(tup).map(_.nextY)
             val it1       = if (viewIdx < top.unconnected || plIn.isEmpty) it0 else it0 ++ Iterator.single(plIn.head.nextY)
             val nextY     = if (it1.isEmpty) 0 else it1.max
@@ -158,7 +158,7 @@ trait TimelineActions[S <: Sys[S]] {
             (rangeOut, plOut)
           }
 
-          val tl = timeline
+          val tl = obj
           plRes.flatMap { pl =>
             if (!pl.isSignificant) None else {
               val move = ProcActions.Move(deltaTime = 0L, deltaTrack = pl.deltaY, copy = false)
@@ -231,7 +231,7 @@ trait TimelineActions[S <: Sys[S]] {
     def apply(): Unit = {
       val pos = timelineModel.position
       val edits = withSelection { implicit tx => views =>
-        val tl    = timeline
+        val tl    = obj
         val list  = views.toIterator.flatMap { _view =>
           val span = _view.span
           span.value match {
@@ -291,8 +291,8 @@ trait TimelineActions[S <: Sys[S]] {
           val spanObj = SpanLikeObj.newVar[S](span)
           val elem: Obj[S] = IntObj.newConst[S](0)  // XXX TODO --- we should add a 'generic' Obj?
           val attr    = elem.attr
-          attr.put(TimelineObjView.attrTrackIndex , IntObj   .newVar[S](trkIdx      ))
-          attr.put(TimelineObjView.attrTrackHeight, IntObj   .newVar[S](trackHeight ))
+          attr.put(ObjTimelineView.attrTrackIndex , IntObj   .newVar[S](trkIdx      ))
+          attr.put(ObjTimelineView.attrTrackHeight, IntObj   .newVar[S](trackHeight ))
           attr.put(ObjKeys.attrName               , StringObj.newVar[S](name        ))
           EditTimelineInsertObj(name = "Drop Marker", timeline = tlMod, span = spanObj, elem = elem)
         }
@@ -319,7 +319,7 @@ trait TimelineActions[S <: Sys[S]] {
   // -----------
 
   protected def timelineMod(implicit tx: S#Tx): Option[Timeline.Modifiable[S]] =
-    timeline.modifiableOption
+    obj.modifiableOption
 
   // ---- clear ----
   // - find the objects that overlap with the selection span
@@ -352,7 +352,7 @@ trait TimelineActions[S <: Sys[S]] {
     CompoundEdit(allEdits, "Clear Span")
   }
 
-  protected def splitObjects(time: Long)(views: TraversableOnce[TimelineObjView[S]])
+  protected def splitObjects(time: Long)(views: TraversableOnce[ObjTimelineView[S]])
                   (implicit tx: S#Tx): Option[UndoableEdit] = timelineMod.flatMap { groupMod =>
     val edits: List[UndoableEdit] = views.toIterator.flatMap { pv =>
       pv.span match {

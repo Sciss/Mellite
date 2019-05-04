@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
@@ -28,7 +28,7 @@ import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.util.{Success, Try}
 
-object LongObjView extends ListObjView.Factory {
+object LongObjView extends ObjListView.Factory {
   type E[S <: stm.Sys[S]] = LongObj[S]
   val icon          : Icon      = raphaelIcon(Shapes.IntegerNumber)  // XXX TODO
   val prefix        : String   = "Long"
@@ -37,7 +37,7 @@ object LongObjView extends ListObjView.Factory {
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: LongObj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: LongObj[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -90,10 +90,10 @@ object LongObjView extends ListObjView.Factory {
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, LongObj[S]],
                                 var value: Long,
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends ListObjView /* .Long */[S]
+    extends ObjListView /* .Long */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, Long, LongObj]
-      with ListObjViewImpl.StringRenderer {
+      with ObjListViewImpl.SimpleExpr[S, Long, LongObj]
+      with ObjListViewImpl.StringRenderer {
 
     type Repr = LongObj[S]
 

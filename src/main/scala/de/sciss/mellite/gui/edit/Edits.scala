@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.ProcActions.{Move, Resize}
-import de.sciss.mellite.gui.{GraphemeTool, TimelineObjView}
+import de.sciss.mellite.gui.{GraphemeTool, ObjTimelineView}
 import de.sciss.mellite.{???!, ProcActions, log}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
@@ -300,9 +300,9 @@ object Edits {
       import amount._
       if (deltaTrack != 0) {
         val newTrack: IntObj[S] = IntObj.newVar[S](
-          obj.attr.$[IntObj](TimelineObjView.attrTrackIndex).map(_.value).getOrElse(0) + deltaTrack
+          obj.attr.$[IntObj](ObjTimelineView.attrTrackIndex).map(_.value).getOrElse(0) + deltaTrack
         )
-        objCopy.attr.put(TimelineObjView.attrTrackIndex, newTrack)
+        objCopy.attr.put(ObjTimelineView.attrTrackIndex, newTrack)
       }
 
       val deltaC  = calcSpanDeltaClipped(span, amount, minStart = minStart)
@@ -347,14 +347,14 @@ object Edits {
 
       import de.sciss.equal.Implicits._
       import expr.Ops._
-      val newTrackOpt: Option[IntObj[S]] = obj.attr.$[IntObj](TimelineObjView.attrTrackIndex) match {
+      val newTrackOpt: Option[IntObj[S]] = obj.attr.$[IntObj](ObjTimelineView.attrTrackIndex) match {
         case Some(IntObj.Var(vr)) => Some(vr() + deltaTrack)
         case other =>
           val v = other.fold(0)(_.value) + deltaTrack
           if (v === 0) None else Some(IntObj.newConst(v)) // default is zero; in that case remove attribute
       }
       val edit = EditAttrMap.expr[S, Int, IntObj]("Adjust Track Placement", obj,
-        TimelineObjView.attrTrackIndex, newTrackOpt)
+        ObjTimelineView.attrTrackIndex, newTrackOpt)
 
       edits ::= edit
     }

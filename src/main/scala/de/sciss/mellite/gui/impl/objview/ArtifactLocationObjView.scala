@@ -23,13 +23,13 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-object ArtifactLocationObjView extends ListObjView.Factory {
+object ArtifactLocationObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = ArtifactLocation[~] // Elem[S]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Location)
   val prefix        : String    = "ArtifactLocation"
@@ -38,7 +38,7 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categResources
   def canMakeObj : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: ArtifactLocation[S])(implicit tx: S#Tx): ArtifactLocationObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: ArtifactLocation[S])(implicit tx: S#Tx): ArtifactLocationObjView[S] with ObjListView[S] = {
     val peer      = obj
     val value     = peer.directory
     val editable  = ArtifactLocation.Var.unapply(peer).isDefined // .modifiableOption.isDefined
@@ -85,9 +85,9 @@ object ArtifactLocationObjView extends ListObjView.Factory {
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ArtifactLocation[S]],
                                 var directory: File, val isListCellEditable: Boolean)
     extends ArtifactLocationObjView[S]
-    with ListObjView /* .ArtifactLocation */[S]
+    with ObjListView /* .ArtifactLocation */[S]
     with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.StringRenderer
+    with ObjListViewImpl.StringRenderer
     with ObjViewImpl.NonViewable[S] {
 
     override def obj(implicit tx: S#Tx): ArtifactLocation[S] = objH()

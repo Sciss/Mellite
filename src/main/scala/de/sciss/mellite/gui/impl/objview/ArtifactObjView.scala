@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ActionArtifactLocation, ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, ObjListView, MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
@@ -34,7 +34,7 @@ import scala.swing.FlowPanel
 import scala.swing.event.SelectionChanged
 import scala.util.{Failure, Success}
 
-object ArtifactObjView extends ListObjView.Factory {
+object ArtifactObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Artifact[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.PagePortrait)
   val prefix        : String    = "Artifact"
@@ -43,7 +43,7 @@ object ArtifactObjView extends ListObjView.Factory {
   def category      : String    = ObjView.categResources
   def canMakeObj : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Artifact[S])(implicit tx: S#Tx): ArtifactObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Artifact[S])(implicit tx: S#Tx): ArtifactObjView[S] with ObjListView[S] = {
     val peer      = obj
     val value     = peer.value  // peer.child.path
     val editable  = false // XXX TODO -- peer.modifiableOption.isDefined
@@ -128,9 +128,9 @@ object ArtifactObjView extends ListObjView.Factory {
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Artifact[S]],
                                         var file: File, val isListCellEditable: Boolean)
     extends ArtifactObjView[S]
-      with ListObjView[S]
+      with ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.StringRenderer
+      with ObjListViewImpl.StringRenderer
       with ObjViewImpl.NonViewable[S] {
 
     type E[~ <: stm.Sys[~]] = Artifact[~]

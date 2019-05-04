@@ -23,7 +23,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.{ObjListView, MessageException, ObjView}
 import de.sciss.{desktop, numbers}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Color, Universe}
@@ -32,7 +32,7 @@ import javax.swing.Icon
 import scala.swing.{Action, BorderPanel, Button, ColorChooser, Component, FlowPanel, GridPanel, Label, Swing}
 import scala.util.{Failure, Success, Try}
 
-object ColorObjView extends ListObjView.Factory {
+object ColorObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Color.Obj[~]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Paint)
   val prefix        : String   = "Color"
@@ -41,7 +41,7 @@ object ColorObjView extends ListObjView.Factory {
   def category      : String   = ObjView.categOrganisation
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Color.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Color.Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -285,9 +285,9 @@ object ColorObjView extends ListObjView.Factory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Color.Obj[S]],
                                 var value: Color, isEditable0: Boolean)
-    extends ListObjView /* .Color */[S]
+    extends ObjListView /* .Color */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, Color, Color.Obj] {
+      with ObjListViewImpl.SimpleExpr[S, Color, Color.Obj] {
 
     type Repr = Color.Obj[S]
 

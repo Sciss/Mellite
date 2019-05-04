@@ -17,7 +17,7 @@ import de.sciss.desktop
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.ListObjView
+import de.sciss.mellite.gui.ObjListView
 import de.sciss.synth.proc.Universe
 
 import scala.util.Failure
@@ -26,7 +26,7 @@ import scala.util.Failure
   * be constructed by the user. It implements `initMakeDialog` and `initMakeCmdLine`
   * by throwing an `UnsupportedOperationException`.
   */
-trait NoMakeListObjViewFactory extends ListObjView.Factory {
+trait NoMakeListObjViewFactory extends ObjListView.Factory {
   override def canMakeObj: Boolean = false
 
   type Config[S <: stm.Sys[S]] = Unit

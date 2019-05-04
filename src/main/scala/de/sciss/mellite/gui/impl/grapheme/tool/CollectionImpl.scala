@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.tool.BasicCollectionTool
-import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeObjView, GraphemeTool}
+import de.sciss.mellite.gui.{GraphemeCanvas, ObjGraphemeView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.UndoableEdit
 
@@ -27,7 +27,7 @@ import javax.swing.undo.UndoableEdit
   * It implements `commit` by aggregating individual view based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Double, GraphemeObjView[S]]
+trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Double, ObjGraphemeView[S]]
   with GraphemeTool[S, A] {
 
   override protected def canvas: GraphemeCanvas[S]

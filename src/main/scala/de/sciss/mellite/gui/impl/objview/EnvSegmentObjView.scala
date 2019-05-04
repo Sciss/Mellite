@@ -28,11 +28,11 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeObjView.{HandleDiameter, HandleRadius, HasStartLevels}
+import de.sciss.mellite.gui.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeRendering, GraphemeView, Insets, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeRendering, GraphemeView, Insets, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
@@ -49,7 +49,7 @@ import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Alignment, Component, Dialog, Graphics2D, Label, Swing, TextField}
 import scala.util.{Failure, Success}
 
-object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factory {
+object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
   type E[S <: stm.Sys[S]]       = EnvSegment.Obj[S]
   type V                        = EnvSegment
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Connect)
@@ -59,7 +59,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S] = {
     val value     = obj.value
     val editable  = EnvSegment.Obj.Var.unapply(obj).isDefined
     new ListImpl[S](tx.newHandle(obj), value = value, isEditable = editable).init(obj)
@@ -330,7 +330,7 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
     }
 
   def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
-                                 (implicit tx: S#Tx): GraphemeObjView[S] = {
+                                 (implicit tx: S#Tx): ObjGraphemeView[S] = {
     val value     = obj.value
     val editable  = detectEditable(obj)
     new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = value, isEditable = editable)
@@ -454,11 +454,11 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
   // ---- ListObjView ----
 
   private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: V, val isEditable: Boolean)
-    extends Impl(objH) with ListObjView[S]
-      with ListObjViewImpl.SimpleExpr[S, V, E]
+    extends Impl(objH) with ObjListView[S]
+      with ObjListViewImpl.SimpleExpr[S, V, E]
 //      with ListObjViewImpl.NonEditable[S]
-      with ListObjViewImpl.StringRenderer
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.StringRenderer
+      with ObjListViewImpl.NonEditable[S] {
 
     def convertEditValue(v: Any): Option[V] = None
   }
@@ -470,18 +470,18 @@ object EnvSegmentObjView extends ListObjView.Factory with GraphemeObjView.Factor
                                                 var value: V, val isEditable: Boolean)
     extends Impl[S](objH)
       with GraphemeObjViewImpl.SimpleExpr[S, V, E]
-      with GraphemeObjView.HasStartLevels[S] {
+      with ObjGraphemeView.HasStartLevels[S] {
 
     private[this] val allSame =
       value.numChannels <= 1 || { val v0 = value.startLevels; val vh = v0.head; v0.forall(_ === vh) }
 
     def startLevels: Vec[Double] = value.startLevels
 
-    def insets: Insets = GraphemeObjView.DefaultInsets
+    def insets: Insets = ObjGraphemeView.DefaultInsets
 
     private[this] var succOpt = Option.empty[HasStartLevels[S]]
 
-    override def succ_=(opt: Option[GraphemeObjView[S]])(implicit tx: S#Tx): Unit = deferTx {
+    override def succ_=(opt: Option[ObjGraphemeView[S]])(implicit tx: S#Tx): Unit = deferTx {
       succOpt = opt.collect {
         case hs: HasStartLevels[S] => hs
       }

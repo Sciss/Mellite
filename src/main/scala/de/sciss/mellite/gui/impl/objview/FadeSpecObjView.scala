@@ -18,7 +18,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes}
 import de.sciss.synth.proc.{FadeSpec, TimeRef}
 import javax.swing.Icon
 
@@ -32,7 +32,7 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
   def tpe           : Obj.Type  = FadeSpec.Obj
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: FadeSpec.Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: FadeSpec.Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
     val value   = obj.value
     new Impl[S](tx.newHandle(obj), value).init(obj)
   }
@@ -40,9 +40,9 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
   private val timeFmt = AxisFormat.Time(hours = false, millis = true)
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FadeSpec.Obj[S]], var value: FadeSpec)
-    extends ListObjView /* .FadeSpec */[S]
+    extends ObjListView /* .FadeSpec */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.NonEditable[S]
+      with ObjListViewImpl.NonEditable[S]
       with NonViewable[S] {
 
     type Repr = FadeSpec.Obj[S]

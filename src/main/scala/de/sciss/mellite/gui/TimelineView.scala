@@ -35,9 +35,10 @@ object TimelineView {
 
   final val DefaultTrackHeight = 8
 }
-trait TimelineView[S <: stm.Sys[S]] extends TimelineViewBase[S, Int, TimelineObjView[S]] with CanBounce {
-  def timelineH: stm.Source[S#Tx , Timeline[S]]
-  def timeline(implicit tx: S#Tx): Timeline[S]
+trait TimelineView[S <: stm.Sys[S]] extends TimelineViewBase[S, Int, ObjTimelineView[S]] with CanBounce {
+
+  def objH: stm.Source[S#Tx , Timeline[S]]
+  def obj(implicit tx: S#Tx): Timeline[S]
 
   override def canvas: TimelineTrackCanvas[S]
 

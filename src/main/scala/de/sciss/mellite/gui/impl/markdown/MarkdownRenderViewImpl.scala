@@ -23,7 +23,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.impl.component.NavigationHistory
-import de.sciss.mellite.gui.{GUI, ListObjView, MarkdownEditorFrame, MarkdownRenderView}
+import de.sciss.mellite.gui.{GUI, ObjListView, MarkdownEditorFrame, MarkdownRenderView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
@@ -63,7 +63,7 @@ object MarkdownRenderViewImpl {
     }
 
     protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = {
-      val listView = ListObjView(obj)
+      val listView = ObjListView(obj)
       if (listView.isViewable) {
         listView.openView(Window.find(impl))
       } else {

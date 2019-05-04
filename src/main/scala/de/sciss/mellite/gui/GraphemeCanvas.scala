@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.lucre.stm.Sys
 import de.sciss.synth.proc.Grapheme
 
-trait GraphemeCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Double, GraphemeObjView[S]] {
+trait GraphemeCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Double, ObjGraphemeView[S]] {
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 
   def graphemeTools: GraphemeTools[S]

@@ -17,7 +17,7 @@ import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
-import de.sciss.mellite.gui.TimelineObjView
+import de.sciss.mellite.gui.ObjTimelineView
 import de.sciss.mellite.gui.impl.tool.DraggingTool
 
 /** Most common implementation of a timeline tool, based on region selection and
@@ -28,9 +28,9 @@ import de.sciss.mellite.gui.impl.tool.DraggingTool
   */
 trait BasicTimelineTool[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Int] {
 
-  protected type Initial = TimelineObjView[S]
+  protected type Initial = ObjTimelineView[S]
 
-  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: TimelineObjView[S]): Unit =
+  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: ObjTimelineView[S]): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {

@@ -19,19 +19,19 @@ import de.sciss.mellite.gui.BasicTool.DragRubber
 import de.sciss.mellite.gui.GraphemeTool.EmptyRubber
 import de.sciss.mellite.gui.GraphemeTools.ToolChanged
 import de.sciss.mellite.gui.impl.TimelineCanvas2DImpl
-import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeObjView, GraphemeTools}
+import de.sciss.mellite.gui.{GraphemeCanvas, ObjGraphemeView, GraphemeTools}
 import de.sciss.numbers
 
 import scala.swing.Orientation
 
-trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvas2DImpl[S, Double, GraphemeObjView[S]]
+trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvas2DImpl[S, Double, ObjGraphemeView[S]]
   with GraphemeCanvas[S] {
 
   final val graphemeTools: GraphemeTools[S] = GraphemeTools(this)
 
   protected def emptyRubber: DragRubber[Double] = EmptyRubber
 
-  def selectionModel: GraphemeObjView.SelectionModel[S]
+  def selectionModel: ObjGraphemeView.SelectionModel[S]
 
   // def intersect(span: Span): Iterator[TimelineObjView[S]]
 

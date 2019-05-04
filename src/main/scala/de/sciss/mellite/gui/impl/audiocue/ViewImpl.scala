@@ -29,7 +29,7 @@ import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.GUI.iconNormal
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.timeline
-import de.sciss.mellite.gui.{AudioCueView, DragAndDrop, GUI, SonogramManager}
+import de.sciss.mellite.gui.{AudioCueView, DragAndDrop, GUI, ObjView, SonogramManager}
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.graph.ScanIn
@@ -147,6 +147,8 @@ object ViewImpl {
       // val ggDragRegion = new DnD.Button(holder, snapshot, timelineModel)
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
+          val t2 = DragAndDrop.Transferable.files(snapshot.artifact)
+          val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
           val spOpt = timelineModel.selection match {
             case sp0: Span if sp0.nonEmpty => Some(sp0)
             case _ => timelineModel.bounds match {
@@ -154,12 +156,12 @@ object ViewImpl {
               case _ => None
             }
           }
-          spOpt.map { sp =>
+          val t1Opt = spOpt.map { sp =>
             val drag  = timeline.DnD.AudioDrag[S](universe, objH, selection = sp)
-            val t1    = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
-            val t2    = DragAndDrop.Transferable.files(snapshot.artifact)
-            DragAndDrop.Transferable.seq(t1, t2)
+            DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
           }
+          val t = t2 :: t3 :: t1Opt.toList
+          Some(DragAndDrop.Transferable.seq(t: _*))
         }
         tooltip = "Drag Selected Region or File"
       }

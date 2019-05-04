@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.tool.BasicCollectionTool
-import de.sciss.mellite.gui.{TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.undo.UndoableEdit
 
@@ -27,7 +27,7 @@ import javax.swing.undo.UndoableEdit
   * It implements `commit` by aggregating individual region based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Int, TimelineObjView[S]]
+trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Int, ObjTimelineView[S]]
   with TimelineTool[S, A]{
 
   override protected def canvas: TimelineTrackCanvas[S]

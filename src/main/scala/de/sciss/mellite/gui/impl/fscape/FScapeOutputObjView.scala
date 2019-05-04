@@ -18,8 +18,8 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, ObjView}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{ObjListView, ObjView}
 import javax.swing.Icon
 
 object FScapeOutputObjView extends NoMakeListObjViewFactory {
@@ -30,23 +30,23 @@ object FScapeOutputObjView extends NoMakeListObjViewFactory {
   def tpe           : Obj.Type  = FScape.Output
   def category      : String    = ObjView.categMisc
 
-  private[this] lazy val _init: Unit = ListObjView.addFactory(this)
+  private[this] lazy val _init: Unit = ObjListView.addFactory(this)
 
   def init(): Unit = _init
 
   def mkListView[S <: Sys[S]](obj: FScape.Output[S])
-                             (implicit tx: S#Tx): FScapeOutputObjView[S] with ListObjView[S] = {
+                             (implicit tx: S#Tx): FScapeOutputObjView[S] with ObjListView[S] = {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FScape.Output[S]], val value: String)
     extends FScapeOutputObjView[S]
-      with ListObjView[S]
+      with ObjListView[S]
       with ObjViewImpl    .Impl[S]
-      with ListObjViewImpl.StringRenderer
+      with ObjListViewImpl.StringRenderer
       with ObjViewImpl    .NonViewable[S]
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.NonEditable[S] {
 
     override def obj(implicit tx: S#Tx): FScape.Output[S] = objH()
 

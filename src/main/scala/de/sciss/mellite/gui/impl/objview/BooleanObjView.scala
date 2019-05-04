@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{ListObjView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.Icon
@@ -28,7 +28,7 @@ import javax.swing.Icon
 import scala.swing.CheckBox
 import scala.util.Success
 
-object BooleanObjView extends ListObjView.Factory {
+object BooleanObjView extends ObjListView.Factory {
   type E[S <: stm.Sys[S]] = BooleanObj[S]
   val icon          : Icon      = raphaelIcon(Shapes.BooleanNumber)
   val prefix        : String   = "Boolean"
@@ -37,7 +37,7 @@ object BooleanObjView extends ListObjView.Factory {
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean  = true
 
-  def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -88,10 +88,10 @@ object BooleanObjView extends ListObjView.Factory {
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, BooleanObj[S]],
                                 var value: Boolean,
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends ListObjView /* .Boolean */[S]
+    extends ObjListView /* .Boolean */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.BooleanExprLike[S]
-      with ListObjViewImpl.SimpleExpr[S, Boolean, BooleanObj] {
+      with ObjListViewImpl.BooleanExprLike[S]
+      with ObjListViewImpl.SimpleExpr[S, Boolean, BooleanObj] {
 
     type Repr = BooleanObj[S]
 

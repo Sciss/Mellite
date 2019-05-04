@@ -23,9 +23,9 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window, defer, deferTx}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.ListObjViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ListObjView, ObjView, Shapes, SplitPaneView}
+import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
@@ -52,7 +52,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 //  def init(): Unit = _init
 
   def mkListView[S <: Sys[S]](obj: FScape[S])
-                             (implicit tx: S#Tx): FScapeObjView[S] with ListObjView[S] =
+                             (implicit tx: S#Tx): FScapeObjView[S] with ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -63,9 +63,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FScape[S]])
     extends FScapeObjView[S]
-      with ListObjView /* .Int */[S]
+      with ObjListView /* .Int */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.EmptyRenderer[S]
       with NonEditable[S]
       /* with NonViewable[S] */ {
 

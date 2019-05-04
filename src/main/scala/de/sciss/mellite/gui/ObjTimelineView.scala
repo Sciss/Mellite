@@ -1,5 +1,5 @@
 /*
- *  TimelineObjView.scala
+ *  ObjTimelineView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -25,11 +25,11 @@ import de.sciss.synth.proc.{AuxContext, FadeSpec, Timeline}
 import scala.language.implicitConversions
 import scala.swing.Graphics2D
 
-object TimelineObjView {
-  type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, TimelineObjView[S]]
+object ObjTimelineView {
+  type SelectionModel[S <: stm.Sys[S]] = gui.SelectionModel[S, ObjTimelineView[S]]
 
   /** A useful view for `RangedSeq`. It gives (start, stop) of the view's span */
-  implicit def viewToPoint[S <: stm.Sys[S]](view: TimelineObjView[S]): (Long, Long) = spanToPoint(view.spanValue)
+  implicit def viewToPoint[S <: stm.Sys[S]](view: ObjTimelineView[S]): (Long, Long) = spanToPoint(view.spanValue)
 
   def spanToPoint(span: SpanLike): (Long, Long) = span match {
     case Span(start, stop)  => (start, stop)
@@ -39,7 +39,7 @@ object TimelineObjView {
     case Span.Void          => (Long.MinValue, Long.MinValue)
   }
 
-  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, TimelineObjView[S]]
+  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, ObjTimelineView[S]]
 
   trait Context[S <: stm.Sys[S]] extends AuxContext[S] {
     /** A map from `TimedProc` ids to their views. This is used to establish scan links. */
@@ -54,14 +54,14 @@ object TimelineObjView {
       * @param obj      the object placed on the timeline
       */
     def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: E[S],
-                                    context: TimelineObjView.Context[S])(implicit tx: S#Tx): TimelineObjView[S]
+                                    context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S]
   }
 
   def addFactory(f: Factory): Unit = Impl.addFactory(f)
 
   def factories: Iterable[Factory] = Impl.factories
 
-  def apply[S <: Sys[S]](timed: Timeline.Timed[S], context: Context[S])(implicit tx: S#Tx): TimelineObjView[S] =
+  def apply[S <: Sys[S]](timed: Timeline.Timed[S], context: Context[S])(implicit tx: S#Tx): ObjTimelineView[S] =
     Impl(timed, context)
 
   // ---- specialization ----
@@ -82,7 +82,7 @@ object TimelineObjView {
     var fadeOut: FadeSpec
   }
 }
-trait TimelineObjView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ObjTimelineView[S <: stm.Sys[S]] extends ObjView[S] {
 
   def spanH: stm.Source[S#Tx, SpanLikeObj[S]]
 

@@ -22,7 +22,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Application
-import de.sciss.mellite.gui.{AttrMapFrame, GUI, ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, ObjListView, MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
 import de.sciss.synth.proc.gui.UniverseView
@@ -158,7 +158,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     val pop     = Popup()
     val tlP     = Application.topLevelObjects
     val flt     = Application.objectFilter
-    val f0      = ListObjView.factories.filter(f => f.canMakeObj && flt(f.prefix)).toSeq.sortBy(_.humanName)
+    val f0      = ObjListView.factories.filter(f => f.canMakeObj && flt(f.prefix)).toSeq.sortBy(_.humanName)
     val (top0, sub) = f0.partition(f => tlP.contains(f.prefix))
     val top     = tlP.flatMap(prefix => top0.find(_.prefix == prefix))
     top.foreach { f =>
@@ -232,7 +232,7 @@ trait CollectionViewImpl[S <: Sys[S]]
         prepOpt match {
           case Some((insConf, cmd :: rest)) =>
             val nameL   = cmd.toLowerCase(Locale.US)
-            val factOpt = ListObjView.factories.find(_.prefix.toLowerCase(Locale.US) == nameL)
+            val factOpt = ObjListView.factories.find(_.prefix.toLowerCase(Locale.US) == nameL)
             factOpt match {
               case Some(f) =>
                 if (f.canMakeObj) {
@@ -264,7 +264,7 @@ trait CollectionViewImpl[S <: Sys[S]]
 
               case None =>
                 val pre     = s"Unknown object type '$cmd'. Available:\n"
-                val avail   = ListObjView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
+                val avail   = ObjListView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
                 val availS  = GUI.formatTextTable(avail, columns = 3)
                 println(pre)
                 println(availS)

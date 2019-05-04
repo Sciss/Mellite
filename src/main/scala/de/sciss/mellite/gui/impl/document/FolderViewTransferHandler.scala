@@ -24,7 +24,7 @@ import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.ObjectActions
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
-import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, FolderView, ListObjView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, FolderView, ObjListView, ObjView}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
@@ -39,7 +39,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
   protected def undoManager       : UndoManager
   protected implicit val universe : Universe[S]
 
-  protected def treeView: TreeTableView[S, Obj[S], Folder[S], ListObjView[S]]
+  protected def treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]]
   protected def selection: FolderView.Selection[S]
 
   protected def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]]

@@ -21,12 +21,12 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
 import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.mellite.gui.{CodeFrame, ListObjView, ObjView, TimelineObjView}
+import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjView, ObjTimelineView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Action, Universe}
 import javax.swing.Icon
 
-object ActionObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory {
+object ActionObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
   type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]
   val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
   val prefix    : String    = "Action"
@@ -34,7 +34,7 @@ object ActionObjView extends NoArgsListObjViewFactory with TimelineObjView.Facto
   def tpe       : Obj.Type  = Action
   def category  : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Action[S])(implicit tx: S#Tx): ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Action[S])(implicit tx: S#Tx): ObjListView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -44,10 +44,10 @@ object ActionObjView extends NoArgsListObjViewFactory with TimelineObjView.Facto
   }
 
   private trait Impl[S <: Sys[S]]
-    extends ListObjView /* .Action */[S]
+    extends ObjListView /* .Action */[S]
     with ObjViewImpl.Impl[S]
-    with ListObjViewImpl.NonEditable[S]
-    with ListObjViewImpl.EmptyRenderer[S]
+    with ObjListViewImpl.NonEditable[S]
+    with ObjListViewImpl.EmptyRenderer[S]
     with ActionObjView[S] {
 
     override def objH: stm.Source[S#Tx, Action[S]]
@@ -72,7 +72,7 @@ object ActionObjView extends NoArgsListObjViewFactory with TimelineObjView.Facto
     extends Impl[S]
 
   def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Action[S],
-                                  context: TimelineObjView.Context[S])(implicit tx: S#Tx): TimelineObjView[S] = {
+                                  context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S] = {
     val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
     res
   }

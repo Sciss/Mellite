@@ -20,13 +20,13 @@ import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui
 import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, ObjView, TimelineObjView}
+import de.sciss.mellite.gui.{ObjListView, ObjView, ObjTimelineView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{ObjKeys, Proc}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory {
+object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
   type E[~ <: stm.Sys[~]] = Proc[~]
 
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Cogs)
@@ -35,7 +35,7 @@ object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory
   def tpe           : Obj.Type  = Proc
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx): ProcObjView[S] with ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx): ProcObjView[S] with ObjListView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -54,7 +54,7 @@ object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory
     * This will automatically add the new view to the map!
     */
   def mkTimelineView[S <: Sys[S]](timedId: S#Id, span: SpanLikeObj[S], obj: Proc[S],
-                                  context: TimelineObjView.Context[S])(implicit tx: S#Tx): ProcObjView.Timeline[S] = {
+                                  context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ProcObjView.Timeline[S] = {
     val attr = obj.attr
     val bus  = attr.$[IntObj](ObjKeys.attrBus    ).map(_.value)
     new ProcObjTimelineViewImpl[S](tx.newHandle(obj), busOption = bus, context = context)
@@ -84,15 +84,15 @@ object ProcObjView extends NoArgsListObjViewFactory with TimelineObjView.Factory
     * in response to observing a change in the model.
     */
   trait Timeline[S <: stm.Sys[S]]
-    extends ProcObjView[S] with TimelineObjView[S]
-    with TimelineObjView.HasMute
-    with TimelineObjView.HasGain
-    with TimelineObjView.HasFade {
+    extends ProcObjView[S] with ObjTimelineView[S]
+    with ObjTimelineView.HasMute
+    with ObjTimelineView.HasGain
+    with ObjTimelineView.HasFade {
 
     /** Convenience check for `span == Span.All` */
     def isGlobal: Boolean
 
-    def context: TimelineObjView.Context[S]
+    def context: ObjTimelineView.Context[S]
 
     def fireRepaint()(implicit tx: S#Tx): Unit
 

@@ -22,7 +22,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
 import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, DraggingTool}
-import de.sciss.mellite.gui.{BasicTools, GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.gui.{BasicTools, GUI, Shapes, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.log
 import de.sciss.span.Span
 import de.sciss.synth.proc.Proc
@@ -30,7 +30,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionToolLike[S, TimelineTool.Add, Int, TimelineObjView[S]]
+  extends CollectionToolLike[S, TimelineTool.Add, Int, ObjTimelineView[S]]
     with DraggingTool[S, TimelineTool.Add, Int]
     with TimelineTool[S, TimelineTool.Add] {
 
@@ -43,7 +43,7 @@ final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], t
 
   protected type Initial = Unit
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[TimelineObjView[S]]): Unit = {
+  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[S]]): Unit = {
     handleMouseSelection(e, regionOpt)
     regionOpt match {
       case Some(region) =>
@@ -72,8 +72,8 @@ final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], t
       val span  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[S]
       val p     = Proc[S]
       val obj   = p // Obj(Proc.Elem(p))
-      obj.attr.put(TimelineObjView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
-      obj.attr.put(TimelineObjView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))
+      obj.attr.put(ObjTimelineView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
+      obj.attr.put(ObjTimelineView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))
       log(s"Add function region $p, span = ${drag.span}, trackIndex = ${drag.modelYOffset}")
       // import SpanLikeObj.serializer
       EditTimelineInsertObj(s"Insert $name", g, span, obj)

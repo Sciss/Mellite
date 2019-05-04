@@ -1,5 +1,5 @@
 /*
- *  GraphemeObjViewFactory.scala
+ *  GraphemeObjView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -19,12 +19,12 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.gui.{GraphemeFrame, ListObjView, ObjView}
+import de.sciss.mellite.gui.{GraphemeFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Grapheme, Universe}
 import javax.swing.Icon
 
-object GraphemeObjViewFactory extends NoArgsListObjViewFactory {
+object GraphemeObjView extends NoArgsListObjViewFactory {
   type E[S <: stm.Sys[S]] = Grapheme[S]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
   val prefix        : String   = "Grapheme"
@@ -32,7 +32,7 @@ object GraphemeObjViewFactory extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Grapheme
   def category      : String   = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Grapheme[S])(implicit tx: S#Tx): ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Grapheme[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -42,14 +42,13 @@ object GraphemeObjViewFactory extends NoArgsListObjViewFactory {
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Grapheme[S]])
-    extends ListObjView /* .Grapheme */[S]
+    extends ObjListView /* .Grapheme */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.EmptyRenderer[S]
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.NonEditable[S]
+      with GraphemeObjView[S] {
 
-    type Repr = Grapheme[S]
-
-    def factory: ObjView.Factory = GraphemeObjViewFactory
+    def factory: ObjView.Factory = GraphemeObjView
 
     def isViewable = true
 
@@ -59,4 +58,7 @@ object GraphemeObjViewFactory extends NoArgsListObjViewFactory {
       Some(frame)
     }
   }
+}
+trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
+  type Repr = Grapheme[S]
 }

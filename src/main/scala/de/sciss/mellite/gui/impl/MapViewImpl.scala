@@ -22,7 +22,7 @@ import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{DragAndDrop, ListObjView, MapView, ObjView}
+import de.sciss.mellite.gui.{DragAndDrop, ObjListView, MapView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe
@@ -59,17 +59,17 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
   protected def showKeyOnly: Boolean = false
   protected def keyEditable: Boolean = true
 
-  private[this] var modelEDT: Vec[(String, ListObjView[S])] = _ // = list0
+  private[this] var modelEDT: Vec[(String, ObjListView[S])] = _ // = list0
 
   private[this] var _table: Table = _
   private[this] var _scroll: ScrollPane = _
 
-  private[this] val viewMap = TMap.empty[String, ListObjView[S]] // TMap(list0: _*)
+  private[this] val viewMap = TMap.empty[String, ObjListView[S]] // TMap(list0: _*)
 
   final protected def table : Table      = _table
   final protected def scroll: ScrollPane = _scroll
 
-  final protected def model: Vec[(String, ListObjView[S])] = {
+  final protected def model: Vec[(String, ObjListView[S])] = {
     requireEDT()
     modelEDT
   }
@@ -92,14 +92,14 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  private[this] def mkValueView(key: String, value: Obj[S])(implicit tx: S#Tx): ListObjView[S] = {
-    val view = ListObjView(value)
+  private[this] def mkValueView(key: String, value: Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
+    val view = ObjListView(value)
     viewMap.put(key, view)(tx.peer).foreach(_.dispose())
     observeView(key, view)
     view
   }
 
-  private def observeView(key: String, view: ListObjView[S])(implicit tx: S#Tx): Unit =
+  private def observeView(key: String, view: ObjListView[S])(implicit tx: S#Tx): Unit =
     view.react { implicit tx => {
       case ObjView.Repaint(_) =>
         withRow(key) { row =>
@@ -187,7 +187,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  final protected def init(list0: Vec[(String, ListObjView[S])])(implicit tx: S#Tx): this.type = {
+  final protected def init(list0: Vec[(String, ObjListView[S])])(implicit tx: S#Tx): this.type = {
     import TxnLike.peer
     modelEDT  = list0
     viewMap ++= list0
@@ -235,7 +235,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
           super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column)
           if (getIcon != null) setIcon(null)
           value match {
-            case view: ListObjView[_] => view.configureListCellRenderer(wrap).peer
+            case view: ObjListView[_] => view.configureListCellRenderer(wrap).peer
             case _ => outer
           }
         }

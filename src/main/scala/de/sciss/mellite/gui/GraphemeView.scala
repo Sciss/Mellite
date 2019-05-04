@@ -31,7 +31,7 @@ object GraphemeView {
     case object TwoDim extends Mode
   }
 }
-trait GraphemeView[S <: stm.Sys[S]] extends TimelineViewBase[S, Double, GraphemeObjView[S]] {
+trait GraphemeView[S <: stm.Sys[S]] extends TimelineViewBase[S, Double, ObjGraphemeView[S]] {
   def graphemeH: stm.Source[S#Tx, Grapheme[S]]
   def grapheme(implicit tx: S#Tx): Grapheme[S]
 

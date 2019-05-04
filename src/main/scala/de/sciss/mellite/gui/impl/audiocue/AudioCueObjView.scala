@@ -28,8 +28,8 @@ import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{GainArg, TimeArg}
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, DragAndDrop, GUI, ListObjView, MessageException, ObjView}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, DragAndDrop, GUI, ObjListView, MessageException, ObjView}
 import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
@@ -40,7 +40,7 @@ import scala.annotation.tailrec
 import scala.swing.{Component, Label}
 import scala.util.{Failure, Success, Try}
 
-object AudioCueObjView extends ListObjView.Factory {
+object AudioCueObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = AudioCue.Obj[~] // Grapheme.Expr.Audio[S]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Music)
   val prefix        : String    = "AudioCue"
@@ -52,7 +52,7 @@ object AudioCueObjView extends ListObjView.Factory {
   private lazy val dirCache = WorkspaceCache[File]()
 
   def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])
-                             (implicit tx: S#Tx): AudioCueObjView[S] with ListObjView[S] = {
+                             (implicit tx: S#Tx): AudioCueObjView[S] with ObjListView[S] = {
     val value = obj.value
     new Impl(tx.newHandle(obj), value).init(obj)
   }
@@ -239,7 +239,7 @@ object AudioCueObjView extends ListObjView.Factory {
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
                                 var value: AudioCue)
-    extends ListObjViewImpl.NonEditable[S]
+    extends ObjListViewImpl.NonEditable[S]
     with Basic[S] {
 
     type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]

@@ -26,7 +26,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.Edits
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.tool.DraggingTool
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{GUI, Shapes, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.{Proc, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -77,7 +77,7 @@ final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     Patch(d.initial, sink)
   }
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: TimelineObjView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[S]): Unit =
     region match {
       case pv: ProcObjView.Timeline[S] => new Drag(e, hitTrack, pos, pv) // region.outputs only carries linked ones!
       case _ =>

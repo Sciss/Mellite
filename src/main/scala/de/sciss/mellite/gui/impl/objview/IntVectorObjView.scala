@@ -21,7 +21,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{ListObjView, MessageException, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, MessageException, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.Icon
@@ -29,7 +29,7 @@ import javax.swing.Icon
 import scala.swing.{Component, Label, TextField}
 import scala.util.{Failure, Try}
 
-object IntVectorObjView extends ListObjView.Factory {
+object IntVectorObjView extends ObjListView.Factory {
   type E[S <: stm.Sys[S]] = IntVector[S]
   val icon          : Icon      = raphaelIcon(Shapes.IntegerNumberVector)
   val prefix        : String   = "IntVector"
@@ -38,7 +38,7 @@ object IntVectorObjView extends ListObjView.Factory {
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: IntVector[S])(implicit tx: S#Tx): ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: IntVector[S])(implicit tx: S#Tx): ObjListView[S] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -92,9 +92,9 @@ object IntVectorObjView extends ListObjView.Factory {
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, IntVector[S]], var value: Vec[Int],
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends ListObjView[S]
+    extends ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.SimpleExpr[S, Vec[Int], IntVector] {
+      with ObjListViewImpl.SimpleExpr[S, Vec[Int], IntVector] {
 
     type Repr = IntVector[S]
 

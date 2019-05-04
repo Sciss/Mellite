@@ -17,8 +17,8 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ListObjViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ListObjView, ObjView}
+import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.{ObjListView, ObjView}
 import de.sciss.synth.proc.Output
 import javax.swing.Icon
 
@@ -30,18 +30,18 @@ object OutputObjView extends NoMakeListObjViewFactory {
   def tpe           : Obj.Type  = Output
   def category      : String    = ObjView.categMisc
 
-  def mkListView[S <: Sys[S]](obj: Output[S])(implicit tx: S#Tx): OutputObjView[S] with ListObjView[S] = {
+  def mkListView[S <: Sys[S]](obj: Output[S])(implicit tx: S#Tx): OutputObjView[S] with ObjListView[S] = {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Output[S]], val value: String)
     extends OutputObjView[S]
-      with ListObjView[S]
+      with ObjListView[S]
       with ObjViewImpl    .Impl[S]
-      with ListObjViewImpl.StringRenderer
+      with ObjListViewImpl.StringRenderer
       with ObjViewImpl    .NonViewable[S]
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.NonEditable[S] {
 
     def factory: ObjView.Factory = OutputObjView
   }

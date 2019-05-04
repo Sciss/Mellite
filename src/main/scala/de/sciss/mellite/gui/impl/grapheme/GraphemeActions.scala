@@ -18,7 +18,7 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditGraphemeRemoveObj
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.{GraphemeObjView, GraphemeView}
+import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeView}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Grapheme
 
@@ -27,7 +27,7 @@ import scala.swing.event.Key
 
 /** Implements the actions defined for the grapheme-view. */
 trait GraphemeActions[S <: Sys[S]] {
-  view: GraphemeView[S] with TimelineViewBaseImpl[S, Double, GraphemeObjView[S]] =>
+  view: GraphemeView[S] with TimelineViewBaseImpl[S, Double, ObjGraphemeView[S]] =>
 
   object actionSelectAll extends Action("Select All") {
     def apply(): Unit = {

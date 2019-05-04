@@ -1,5 +1,5 @@
 /*
- *  TimelineObjViewBasicImpl.scala
+ *  ObjTimelineViewBasicImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -19,13 +19,13 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl
-import de.sciss.mellite.gui.{FadeViewMode, ObjView, RegionViewMode, TimelineObjView, TimelineRendering, TimelineTool, TimelineView}
+import de.sciss.mellite.gui.{FadeViewMode, ObjView, RegionViewMode, ObjTimelineView, TimelineRendering, TimelineTool, TimelineView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 
 import scala.swing.Graphics2D
 
-trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with ObjViewImpl.Impl[S] {
+trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with ObjViewImpl.Impl[S] {
   var trackIndex  : Int = _
   var trackHeight : Int = _
   // var nameOption  : Option[String] = _
@@ -40,7 +40,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
   def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
     val attr      = obj.attr
 
-    val trackIdxView = CellView.attr[S, Int, IntObj](attr, TimelineObjView.attrTrackIndex)
+    val trackIdxView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackIndex)
     disposables ::= trackIdxView.react { implicit tx => opt =>
       deferTx {
         trackIndex = opt.getOrElse(0)
@@ -49,7 +49,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
     }
     trackIndex   = trackIdxView().getOrElse(0)
 
-    val trackHView = CellView.attr[S, Int, IntObj](attr, TimelineObjView.attrTrackHeight)
+    val trackHView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackHeight)
     disposables ::= trackHView.react { implicit tx => opt =>
       deferTx {
         trackHeight = opt.getOrElse(TimelineView.DefaultTrackHeight)
@@ -251,7 +251,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
       }
 
       this match {
-        case fv: TimelineObjView.HasFade if timelineTools.fadeViewMode == FadeViewMode.Curve =>
+        case fv: ObjTimelineView.HasFade if timelineTools.fadeViewMode == FadeViewMode.Curve =>
           def adjustFade(in: Curve, deltaCurve: Float): Curve = in match {
             case Curve.linear                 => Curve.parametric(math.max(-20, math.min(20, deltaCurve)))
             case Curve.parametric(curvature)  => Curve.parametric(math.max(-20, math.min(20, curvature + deltaCurve)))
@@ -302,7 +302,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
         // possible unicodes: 2327 23DB 24DC 25C7 2715 29BB
         // val text  = if (view.muted) "\u23DB " + name else name
         val text: String = this match {
-          case mv: TimelineObjView.HasMute if mv.muted => s"\u25C7 $name"
+          case mv: ObjTimelineView.HasMute if mv.muted => s"\u25C7 $name"
           case _ => name
         }
         val tx    = px + 4
@@ -319,7 +319,7 @@ trait TimelineObjViewBasicImpl[S <: stm.Sys[S]] extends TimelineObjView[S] with 
       }
 
       this match {
-        case mv: TimelineObjView.HasMute if mv.muted =>
+        case mv: ObjTimelineView.HasMute if mv.muted =>
           g.setPaint(pntRegionBackgroundMuted)
           g.fillRoundRect(px, py, pw, ph, 5, 5)
         case _ =>

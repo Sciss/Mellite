@@ -27,7 +27,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
-import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView, ListObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView, ObjListView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{ObjKeys, Universe}
@@ -49,7 +49,7 @@ object FolderViewImpl {
 
     new Impl[S] {
 //      val mapViews: IdentifierMap[S#Id, S#Tx, ObjView[S]]               = tx.newInMemoryIdMap  // folder Ids to renderers
-      val treeView: TreeTableView[S, Obj[S], Folder[S], ListObjView[S]] = TreeTableView(root0, TTHandler)
+      val treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]] = TreeTableView(root0, TTHandler)
 
       deferTx {
         guiInit()
@@ -92,11 +92,11 @@ object FolderViewImpl {
 
     type C = Component
 
-    private type Data     = ListObjView[S]
+    private type Data     = ObjListView[S]
     private type NodeView = FolderView.NodeView[S]
 
     protected object TTHandler
-      extends TreeTableView.Handler[S, Obj[S], Folder[S], ListObjView[S]] {
+      extends TreeTableView.Handler[S, Obj[S], Folder[S], ObjListView[S]] {
 
       def branchOption(node: Obj[S]): Option[Folder[S]] = node match {
         case fe: Folder[S] => Some(fe)
@@ -193,7 +193,7 @@ object FolderViewImpl {
         }
       }
 
-      private var editView    = Option.empty[ListObjView[S]]
+      private var editView    = Option.empty[ObjListView[S]]
       private var editColumn  = 0
 
       private lazy val defaultEditorJ = new javax.swing.JTextField
@@ -238,10 +238,10 @@ object FolderViewImpl {
         (defaultEditorC, defaultEditor)
       }
 
-      def data(node: Obj[S])(implicit tx: S#Tx): Data = ListObjView(node)
+      def data(node: Obj[S])(implicit tx: S#Tx): Data = ObjListView(node)
     }
 
-    protected def treeView: TreeTableView[S, Obj[S], Folder[S], ListObjView[S]]
+    protected def treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]]
 
     def dispose()(implicit tx: S#Tx): Unit = {
       treeView.dispose()

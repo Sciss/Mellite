@@ -1,5 +1,5 @@
 /*
- *  ListObjView.scala
+ *  ObjListView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -16,23 +16,23 @@ package de.sciss.mellite.gui
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.impl.objview.ListObjViewImpl
+import de.sciss.mellite.gui.impl.objview.ObjListViewImpl
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Component, Label}
 
-object ListObjView {
+object ObjListView {
   trait Factory extends ObjView.Factory {
-    def mkListView[S <: SSys[S]](obj: E[S])(implicit tx: S#Tx): ListObjView[S]
+    def mkListView[S <: SSys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S]
   }
 
-  def addFactory(f: Factory): Unit = ListObjViewImpl.addFactory(f)
+  def addFactory(f: Factory): Unit = ObjListViewImpl.addFactory(f)
 
-  def factories: Iterable[Factory] = ListObjViewImpl.factories
+  def factories: Iterable[Factory] = ObjListViewImpl.factories
 
-  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx): ListObjView[S] = ListObjViewImpl(obj)
+  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx): ObjListView[S] = ObjListViewImpl(obj)
 }
-trait ListObjView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ObjListView[S <: stm.Sys[S]] extends ObjView[S] {
   /** The opaque view value passed into the renderer. */
   def value: Any
 

@@ -18,7 +18,7 @@ import de.sciss.desktop.OptionPane
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{GUI, ListObjView}
+import de.sciss.mellite.gui.{GUI, ObjListView}
 import de.sciss.synth.proc.Universe
 
 /** A utility trait for `ListObjView.Factory` that assumes the object is
@@ -26,7 +26,7 @@ import de.sciss.synth.proc.Universe
   * prompting for a name, and `initMakeCmdLine` by simply allowing for the
   * naming of the object.
   */
-trait NoArgsListObjViewFactory extends ListObjView.Factory {
+trait NoArgsListObjViewFactory extends ObjListView.Factory {
   def canMakeObj  : Boolean   = true
 
   type Config[S <: stm.Sys[S]] = String

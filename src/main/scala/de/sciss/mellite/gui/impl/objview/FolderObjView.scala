@@ -18,7 +18,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{FolderFrame, ListObjView, ObjView}
+import de.sciss.mellite.gui.{FolderFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.{Icon, UIManager}
@@ -31,7 +31,7 @@ object FolderObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Folder
   def category      : String   = ObjView.categOrganisation
 
-  def mkListView[S <: Sys[S]](obj: Folder[S])(implicit tx: S#Tx): ListObjView[S] =
+  def mkListView[S <: Sys[S]](obj: Folder[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl[S](tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
@@ -42,10 +42,10 @@ object FolderObjView extends NoArgsListObjViewFactory {
 
   // XXX TODO: could be viewed as a new folder view with this folder as root
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Folder[S]])
-    extends ListObjView /* .Folder */[S]
+    extends ObjListView /* .Folder */[S]
       with ObjViewImpl.Impl[S]
-      with ListObjViewImpl.EmptyRenderer[S]
-      with ListObjViewImpl.NonEditable[S] {
+      with ObjListViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.NonEditable[S] {
 
     type Repr = Folder[S]
 
