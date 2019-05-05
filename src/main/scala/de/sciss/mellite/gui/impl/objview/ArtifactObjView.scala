@@ -143,11 +143,11 @@ object ArtifactObjView extends ObjListView.Factory {
 
     def init(obj: Artifact[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)
-      disposables ::= obj.changed.react { implicit tx => upd =>
+      addDisposable(obj.changed.react { implicit tx =>upd =>
         deferAndRepaint {
           file = upd.now
         }
-      }
+      })
       this
     }
 

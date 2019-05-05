@@ -51,11 +51,11 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
 
     def init(obj: FadeSpec.Obj[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)
-      disposables ::= obj.changed.react { implicit tx => upd =>
+      addDisposable(obj.changed.react { implicit tx =>upd =>
         deferAndRepaint {
           value = upd.now
         }
-      }
+      })
       this
     }
 

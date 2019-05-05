@@ -27,10 +27,10 @@ import javax.swing.Icon
 object TimelineObjView extends NoArgsListObjViewFactory {
   type E[S <: stm.Sys[S]] = Timeline[S]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Ruler)
-  val prefix        : String   = "Timeline"
-  def humanName     : String   = prefix
+  val prefix        : String    = "Timeline"
+  def humanName     : String    = prefix
   def tpe           : Obj.Type  = Timeline
-  def category      : String   = ObjView.categComposition
+  def category      : String    = ObjView.categComposition
 
   def mkListView[S <: Sys[S]](obj: Timeline[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
@@ -41,11 +41,8 @@ object TimelineObjView extends NoArgsListObjViewFactory {
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Timeline[S]])
-    extends ObjListView /* .Timeline */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.EmptyRenderer[S]
-      with ObjListViewImpl.NonEditable[S]
+  trait Basic[S <: Sys[S]]
+    extends ObjViewImpl.Impl[S]
       with TimelineObjView[S] {
 
     def factory: ObjView.Factory = TimelineObjView
@@ -57,6 +54,12 @@ object TimelineObjView extends NoArgsListObjViewFactory {
       val frame = TimelineFrame[S](objH())
       Some(frame)
     }
+  }
+
+  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Timeline[S]])
+    extends Basic[S]
+      with ObjListViewImpl.EmptyRenderer[S]
+      with ObjListViewImpl.NonEditable[S] {
   }
 }
 trait TimelineObjView[S <: stm.Sys[S]] extends ObjView[S] {

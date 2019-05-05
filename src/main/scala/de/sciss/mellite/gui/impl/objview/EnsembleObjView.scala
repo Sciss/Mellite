@@ -149,7 +149,7 @@ object EnsembleObjView extends ObjListView.Factory {
 
     def init(obj: Ensemble[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)
-      disposables ::= obj.changed.react { implicit tx => upd =>
+      addDisposable(obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case Ensemble.Playing(ch) =>
             deferAndRepaint {
@@ -158,7 +158,7 @@ object EnsembleObjView extends ObjListView.Factory {
 
           case _ =>
         }
-      }
+      })
       this
     }
 

@@ -26,17 +26,17 @@ import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, IdentifierMap, Obj}
+import de.sciss.lucre.stm.{IdentifierMap, Obj}
 import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.component.DragSourceButton
-import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView}
+import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, DragAndDrop, GUI, GlobalProcsView, ObjView, SelectionModel, ObjTimelineView, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.mellite.{Mellite, ObjectActions, ProcActions}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
@@ -48,7 +48,7 @@ import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
 import javax.swing.UIManager
 import javax.swing.undo.UndoableEdit
 
-import scala.concurrent.stm.{Ref, TSet}
+import scala.concurrent.stm.TSet
 import scala.math.{max, min}
 import scala.swing.Swing._
 import scala.swing.event.ValueChanged
@@ -82,63 +82,26 @@ object TimelineViewImpl {
     val timeline    = obj
     val timelineH   = tx.newHandle(obj)
 
-    var disposables = List.empty[Disposable[S#Tx]]
-
     // XXX TODO --- should use TransportView now!
-
-    val viewMap = tx.newInMemoryIdMap[ObjTimelineView[S]]
-//    val scanMap = tx.newInMemoryIdMap[(String, stm.Source[S#Tx, S#Id])]
 
     // ugly: the view dispose method cannot iterate over the proc objects
     // (other than through a GUI driven data structure). thus, it
     // only call pv.disposeGUI() and the procMap and scanMap must be
     // freed directly...
-    disposables ::= viewMap
-//    disposables ::= scanMap
+    val viewMap = tx.newInMemoryIdMap[ObjTimelineView[S]]
+
     val transport = Transport[S](universe) // = proc.Transport [S, workspace.I](group, sampleRate = sampleRate)
-    disposables ::= transport
-    // val auralView = proc.AuralPresentation.run[S](transport, Mellite.auralSystem, Some(Mellite.sensorSystem))
-    // disposables ::= auralView
     transport.addObject(obj)
 
     // val globalSelectionModel = SelectionModel[S, ProcView[S]]
     val selectionModel = SelectionModel[S, ObjTimelineView[S]]
     val global = GlobalProcsView(timeline, selectionModel)
-    disposables ::= global
 
     import universe.cursor
     val transportView = TransportView(transport, tlm, hasMillis = true, hasLoop = true)
     val tlView = new Impl[S](timelineH, viewMap, /* scanMap, */ tlm, selectionModel, global, transportView, tx)
 
-    val obsTimeline = timeline.changed.react { implicit tx => upd =>
-      upd.changes.foreach {
-        case BiGroup.Added(span, timed) =>
-          if (DEBUG) println(s"Added   $span, $timed")
-          tlView.objAdded(span, timed, repaint = true)
-
-        case BiGroup.Removed(span, timed) =>
-          if (DEBUG) println(s"Removed $span, $timed")
-          tlView.objRemoved(span, timed)
-
-        case BiGroup.Moved(spanChange, timed) =>
-          if (DEBUG) println(s"Moved   $timed, $spanChange")
-          tlView.objMoved(timed, spanCh = spanChange, trackCh = None)
-      }
-    }
-    disposables ::= obsTimeline
-
-    tlView.disposables.set(disposables)(tx.peer)
-
-    tlView.init()
-
-    // must come after guiInit because views might call `repaint` in the meantime!
-    timeline.iterator.foreach { case (span, seq) =>
-      seq.foreach { timed =>
-        tlView.objAdded(span, timed, repaint = false)
-      }
-    }
-
-    tlView
+    tlView.init(obj)
   }
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Timeline[S]],
@@ -148,7 +111,7 @@ object TimelineViewImpl {
                                         val selectionModel: SelectionModel[S, ObjTimelineView[S]],
                                         val globalView: GlobalProcsView[S],
                                         val transportView: TransportView[S], tx0: S#Tx)
-    extends TimelineView[S]
+    extends TimelineView[S] with TimelineObjView.Basic[S]
       with TimelineViewBaseImpl[S, Int, ObjTimelineView[S]]
       with TimelineActions[S]
       with ComponentHolder[Component]
@@ -157,17 +120,19 @@ object TimelineViewImpl {
 
     impl =>
 
+
     type C = Component
 
     implicit val universe: Universe[S] = globalView.universe
 
     def undoManager: UndoManager = globalView.undoManager
 
+    private def transport: Transport[S] = transportView.transport
+
     private[this] var viewRange = RangedSeq.empty[ObjTimelineView[S], Long]
     private[this] val viewSet   = TSet     .empty[ObjTimelineView[S]]
 
     var canvas      : TimelineTrackCanvasImpl[S]  = _
-    val disposables : Ref[List[Disposable[S#Tx]]] = Ref(Nil)
 
     protected val auxMap      : IdentifierMap[S#Id, S#Tx, Any]                = tx0.newInMemoryIdMap
     protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
@@ -182,20 +147,19 @@ object TimelineViewImpl {
     private[this] lazy val toolPatch    = TimelineTool.patch   [S](canvas)
     private[this] lazy val toolAudition = TimelineTool.audition[S](canvas, this)
 
-    def obj(implicit tx: S#Tx): Timeline[S] = objH()
-
     def plainGroup(implicit tx: S#Tx): Timeline[S] = obj
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    override def dispose()(implicit tx: S#Tx): Unit = {
+      super.dispose()
+      transport .dispose()
+      viewMap   .dispose()
+      globalView.dispose()
+
       deferTx {
         viewRange = RangedSeq.empty
       }
-      disposables.swap(Nil)(tx.peer).foreach(_.dispose())
       viewSet.foreach(_.dispose())(tx.peer)
       clearSet(viewSet)
-      // these two are already included in `disposables`:
-      // viewMap.dispose()
-      // scanMap.dispose()
     }
 
     private def clearSet[A](s: TSet[A])(implicit tx: S#Tx): Unit =
@@ -210,8 +174,34 @@ object TimelineViewImpl {
       }
     }
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init(timeline: Timeline[S])(implicit tx: S#Tx): this.type = {
+      initAttrs(timeline)
+
+      addDisposable(timeline.changed.react { implicit tx => upd =>
+        upd.changes.foreach {
+          case BiGroup.Added(span, timed) =>
+            if (DEBUG) println(s"Added   $span, $timed")
+            objAdded(span, timed, repaint = true)
+
+          case BiGroup.Removed(span, timed) =>
+            if (DEBUG) println(s"Removed $span, $timed")
+            objRemoved(span, timed)
+
+          case BiGroup.Moved(spanChange, timed) =>
+            if (DEBUG) println(s"Moved   $timed, $spanChange")
+            objMoved(timed, spanCh = spanChange, trackCh = None)
+        }
+      })
+
       deferTx(guiInit())
+
+      // must come after guiInit because views might call `repaint` in the meantime!
+      timeline.iterator.foreach { case (span, seq) =>
+        seq.foreach { timed =>
+          objAdded(span, timed, repaint = false)
+        }
+      }
+
       this
     }
 
@@ -223,21 +213,8 @@ object TimelineViewImpl {
 
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
-          val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, ???))
+          val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
           Some(t3)
-//          val spOpt = timelineModel.selection match {
-//            case sp0: Span if sp0.nonEmpty => Some(sp0)
-//            case _ => timelineModel.bounds match {
-//              case sp0: Span => Some(sp0)
-//              case _ => None
-//            }
-//          }
-//          spOpt.map { sp =>
-//            val drag  = timeline.DnD.AudioDrag(universe, holder, selection = sp)
-//            val t1    = DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
-//            val t2    = DragAndDrop.Transferable.files(snapshot.artifact)
-//            DragAndDrop.Transferable.seq(t1, t2)
-//          }
         }
         tooltip = "Drag Timeline Object or Selection"
       }
@@ -315,7 +292,7 @@ object TimelineViewImpl {
 
     private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
-    def objAdded(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]], repaint: Boolean)(implicit tx: S#Tx): Unit = {
+    private def objAdded(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]], repaint: Boolean)(implicit tx: S#Tx): Unit = {
       logT(s"objAdded($span / ${TimeRef.spanToSecs(span)}, $timed)")
       // timed.span
       // val proc = timed.value
@@ -370,7 +347,7 @@ object TimelineViewImpl {
     private def warnViewNotFound(action: String, timed: BiGroup.Entry[S, Obj[S]]): Unit =
       Console.err.println(s"Warning: Timeline - $action. View for object $timed not found.")
 
-    def objRemoved(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]])(implicit tx: S#Tx): Unit = {
+    private def objRemoved(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]])(implicit tx: S#Tx): Unit = {
       logT(s"objRemoved($span, $timed)")
       val id = timed.id
       viewMap.get(id).fold {
@@ -392,7 +369,7 @@ object TimelineViewImpl {
 
     // insignificant changes are ignored, therefore one can just move the span without the track
     // by using trackCh = Change(0,0), and vice versa
-    def objMoved(timed: BiGroup.Entry[S, Obj[S]], spanCh: Change[SpanLike], trackCh: Option[(Int, Int)])
+    private def objMoved(timed: BiGroup.Entry[S, Obj[S]], spanCh: Change[SpanLike], trackCh: Option[(Int, Int)])
                 (implicit tx: S#Tx): Unit = {
       logT(s"objMoved(${spanCh.before} / ${TimeRef.spanToSecs(spanCh.before)} -> ${spanCh.now} / ${TimeRef.spanToSecs(spanCh.now)}, $timed)")
       viewMap.get(timed.id).fold {

@@ -19,7 +19,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.deferTx
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl
-import de.sciss.mellite.gui.{FadeViewMode, ObjView, RegionViewMode, ObjTimelineView, TimelineRendering, TimelineTool, TimelineView}
+import de.sciss.mellite.gui.{FadeViewMode, ObjTimelineView, ObjView, RegionViewMode, TimelineRendering, TimelineTool, TimelineView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 
@@ -41,21 +41,21 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     val attr      = obj.attr
 
     val trackIdxView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackIndex)
-    disposables ::= trackIdxView.react { implicit tx => opt =>
+    addDisposable(trackIdxView.react { implicit tx =>opt =>
       deferTx {
         trackIndex = opt.getOrElse(0)
       }
       fire(ObjView.Repaint(this))
-    }
+    })
     trackIndex   = trackIdxView().getOrElse(0)
 
     val trackHView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackHeight)
-    disposables ::= trackHView.react { implicit tx => opt =>
+    addDisposable(trackHView.react { implicit tx =>opt =>
       deferTx {
         trackHeight = opt.getOrElse(TimelineView.DefaultTrackHeight)
       }
       fire(ObjView.Repaint(this))
-    }
+    })
     trackHeight   = trackHView().getOrElse(TimelineView.DefaultTrackHeight)
 
     spanH         = tx.newHandle(span)

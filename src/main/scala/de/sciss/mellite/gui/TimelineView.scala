@@ -16,6 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.impl.objview.TimelineObjView
 import de.sciss.mellite.gui.impl.timeline.{TimelineViewImpl => Impl}
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.{Timeline, Universe}
@@ -35,10 +36,8 @@ object TimelineView {
 
   final val DefaultTrackHeight = 8
 }
-trait TimelineView[S <: stm.Sys[S]] extends TimelineViewBase[S, Int, ObjTimelineView[S]] with CanBounce {
-
-  def objH: stm.Source[S#Tx , Timeline[S]]
-  def obj(implicit tx: S#Tx): Timeline[S]
+trait TimelineView[S <: stm.Sys[S]] extends TimelineObjView[S]
+  with TimelineViewBase[S, Int, ObjTimelineView[S]] with CanBounce {
 
   override def canvas: TimelineTrackCanvas[S]
 

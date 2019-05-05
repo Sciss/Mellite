@@ -24,7 +24,7 @@ import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.{ObjView, ObjTimelineView, TimelineTool}
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 
-object TimelineObjViewImpl {
+object ObjTimelineViewImpl {
   private val sync = new AnyRef
 
   def addFactory(f: Factory): Unit = sync.synchronized {
@@ -60,12 +60,12 @@ object TimelineObjViewImpl {
       super.initAttrs(id, span, obj)
 
       val gainView = CellView.attr[S, Double, DoubleObj](obj.attr, ObjKeys.attrGain)
-      disposables ::= gainView.react { implicit tx => opt =>
+      addDisposable(gainView.react { implicit tx =>opt =>
         deferTx {
           gain = opt.getOrElse(1.0)
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       gain = gainView().getOrElse(1.0)
       this
     }
@@ -78,12 +78,12 @@ object TimelineObjViewImpl {
       super.initAttrs(id, span, obj)
 
       val muteView = CellView.attr[S, Boolean, BooleanObj](obj.attr, ObjKeys.attrMute)
-      disposables ::= muteView.react { implicit tx => opt =>
+      addDisposable(muteView.react { implicit tx =>opt =>
         deferTx {
           muted = opt.getOrElse(false)
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       muted = muteView().getOrElse(false)
       this
     }
@@ -97,19 +97,19 @@ object TimelineObjViewImpl {
       super.initAttrs(id, span, obj)
 
       val fadeInView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeIn)
-      disposables ::= fadeInView.react { implicit tx => opt =>
+      addDisposable(fadeInView.react { implicit tx =>opt =>
         deferTx {
           fadeIn = opt.getOrElse(TimelineTool.EmptyFade)
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       val fadeOutView = CellView.attr[S, FadeSpec, FadeSpec.Obj](obj.attr, ObjKeys.attrFadeOut)
-      disposables ::= fadeOutView.react { implicit tx => opt =>
+      addDisposable(fadeOutView.react { implicit tx =>opt =>
         deferTx {
           fadeOut = opt.getOrElse(TimelineTool.EmptyFade)
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       fadeIn  = fadeInView ().getOrElse(TimelineTool.EmptyFade)
       fadeOut = fadeOutView().getOrElse(TimelineTool.EmptyFade)
       this

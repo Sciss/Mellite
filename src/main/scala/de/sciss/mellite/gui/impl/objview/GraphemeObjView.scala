@@ -27,10 +27,10 @@ import javax.swing.Icon
 object GraphemeObjView extends NoArgsListObjViewFactory {
   type E[S <: stm.Sys[S]] = Grapheme[S]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
-  val prefix        : String   = "Grapheme"
-  def humanName     : String   = prefix
+  val prefix        : String    = "Grapheme"
+  def humanName     : String    = prefix
   def tpe           : Obj.Type  = Grapheme
-  def category      : String   = ObjView.categComposition
+  def category      : String    = ObjView.categComposition
 
   def mkListView[S <: Sys[S]](obj: Grapheme[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)

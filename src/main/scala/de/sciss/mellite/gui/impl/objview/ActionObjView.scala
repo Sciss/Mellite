@@ -20,7 +20,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
-import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
+import de.sciss.mellite.gui.impl.timeline.ObjTimelineViewImpl
 import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjView, ObjTimelineView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Action, Universe}
@@ -78,7 +78,7 @@ object ActionObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
   }
 
   private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Action[S]])
-    extends Impl[S] with TimelineObjViewImpl.HasMuteImpl[S]
+    extends Impl[S] with ObjTimelineViewImpl.HasMuteImpl[S]
 }
 trait ActionObjView[S <: stm.Sys[S]] extends ObjView[S] {
   type Repr = Action[S]

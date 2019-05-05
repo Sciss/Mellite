@@ -246,12 +246,12 @@ object AudioCueObjView extends ObjListView.Factory {
 
     def init(obj: AudioCue.Obj[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)
-      disposables ::= obj.changed.react { implicit tx => upd =>
+      addDisposable(obj.changed.react { implicit tx =>upd =>
         deferTx {
           value = upd.now
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       this
     }
 

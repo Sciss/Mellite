@@ -21,8 +21,8 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.???!
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
-import de.sciss.mellite.gui.impl.timeline.TimelineObjViewImpl
-import de.sciss.mellite.gui.{ObjView, SonogramManager, ObjTimelineView, TimelineRendering, TimelineView}
+import de.sciss.mellite.gui.impl.timeline.ObjTimelineViewImpl
+import de.sciss.mellite.gui.{ObjTimelineView, ObjView, SonogramManager, TimelineRendering, TimelineView}
 import de.sciss.sonogram.{Overview => SonoOverview}
 import de.sciss.span.Span
 import de.sciss.synth.proc
@@ -35,9 +35,9 @@ import scala.util.control.NonFatal
 final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc[S]],
                                                  var busOption : Option[Int], val context: ObjTimelineView.Context[S])
   extends ProcObjViewImpl[S]
-    with TimelineObjViewImpl.HasGainImpl[S]
-    with TimelineObjViewImpl.HasMuteImpl[S]
-    with TimelineObjViewImpl.HasFadeImpl[S]
+    with ObjTimelineViewImpl.HasGainImpl[S]
+    with ObjTimelineViewImpl.HasMuteImpl[S]
+    with ObjTimelineViewImpl.HasFadeImpl[S]
     with ProcObjView.Timeline[S] { self =>
 
   override def toString = s"ProcView($name, $spanValue, $audio)"
@@ -73,36 +73,36 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
 
     val attr    = obj.attr
     val cueView = CellView.attr[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
-    disposables ::= cueView.react { implicit tx => newAudio =>
+    addDisposable(cueView.react { implicit tx =>newAudio =>
       deferAndRepaint {
         val newSonogram = audio.map(_.artifact) != newAudio.map(_.artifact)
         audio = newAudio
         if (newSonogram) releaseSonogram()
       }
-    }
+    })
     audio = cueView()
 
     // attr.iterator.foreach { case (key, value) => addAttr(key, value) }
     import Proc.mainIn
     attr.get(mainIn).foreach(v => addAttrIn(key = mainIn, value = v, fire = false))
-    disposables ::= attr.changed.react { implicit tx => upd => upd.changes.foreach {
+    addDisposable(attr.changed.react { implicit tx =>upd => upd.changes.foreach {
       case Obj.AttrAdded   (`mainIn`, value) => addAttrIn   (key = mainIn, value = value)
       case Obj.AttrRemoved (`mainIn`, value) => removeAttrIn(value)
       case Obj.AttrReplaced(`mainIn`, before, now) =>
         removeAttrIn(before)
         addAttrIn(key = mainIn, value = now)
       case _ =>
-    }}
+    }})
 
     obj.outputs.iterator.foreach(outputAdded)
 
-    disposables ::= obj.changed.react { implicit tx => upd =>
+    addDisposable(obj.changed.react { implicit tx =>upd =>
       upd.changes.foreach {
         case proc.Proc.OutputAdded  (out) => outputAdded  (out)
         case proc.Proc.OutputRemoved(out) => outputRemoved(out)
         case _ =>
       }
-    }
+    })
 
     this
   }

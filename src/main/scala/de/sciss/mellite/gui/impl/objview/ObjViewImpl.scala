@@ -146,7 +146,13 @@ object ObjViewImpl {
     var nameOption : Option[String] = None
     var colorOption: Option[Color ] = None
 
-    protected final var disposables: List[Disposable[S#Tx]] = Nil
+    private[this] var disposables = List.empty[Disposable[S#Tx]]
+
+    final protected def addDisposable(d: Disposable[S#Tx]): Unit =
+      disposables ::= d
+
+//    final def addDisposables(d: List[Disposable[S#Tx]])(implicit tx: S#Tx): Unit =
+//      disposables :::= d
 
     def dispose()(implicit tx: S#Tx): Unit = disposables.foreach(_.dispose())
 
@@ -160,19 +166,19 @@ object ObjViewImpl {
       val attr      = obj.attr
 
       val nameView  = CellView.attr[S, String, StringObj](attr, ObjKeys.attrName)
-      disposables ::= nameView.react { implicit tx => opt =>
+      addDisposable(nameView.react { implicit tx =>opt =>
         deferAndRepaint {
           nameOption = opt
         }
-      }
+      })
       nameOption   = nameView()
 
       val colorView = CellView.attr[S, Color, Color.Obj](attr, ObjView.attrColor)
-      disposables ::= colorView.react { implicit tx => opt =>
+      addDisposable(colorView.react { implicit tx =>opt =>
         deferAndRepaint {
           colorOption = opt
         }
-      }
+      })
       colorOption  = colorView()
       this
     }
@@ -190,12 +196,12 @@ object ObjViewImpl {
 
     def init(ex: Ex[S])(implicit tx: S#Tx): this.type = {
       initAttrs(ex)
-      disposables ::= ex.changed.react { implicit tx => upd =>
+      addDisposable(ex.changed.react { implicit tx =>upd =>
         deferTx {
           exprValue = upd.now
         }
         fire(ObjView.Repaint(this))
-      }
+      })
       this
     }
   }
