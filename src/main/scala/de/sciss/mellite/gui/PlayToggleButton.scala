@@ -22,6 +22,7 @@ import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.synth.proc.{SoundProcesses, Transport, Universe}
 
+import scala.concurrent.stm.Ref
 import scala.swing.ToggleButton
 import scala.swing.event.{ButtonClicked, Key}
 
@@ -31,8 +32,13 @@ object PlayToggleButton {
 
   def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S]): PlayToggleButton[S] = {
     val t = Transport[S](universe)
+    // We are not simply adding the object here, because if the aural system
+    // is running, this will create an aural object, which in turn may throw
+    // an exception (this is not yet handled well), for example in SysSon
+    // when a Proc contains sonification specific objects that are not supported
+    // by the default AuralProc.
+    // Instead we add the object dynamically when the transport is started.
 //    t.addObject(obj)
-    t.addObject(obj)  // XXX TODO --- what was the reason we had this commented out?
     new Impl[S](t, objH = Some(tx.newHandle(obj)), disposeTransport = true).init()
   }
 
@@ -41,7 +47,7 @@ object PlayToggleButton {
     extends PlayToggleButton[S] with ComponentHolder[ToggleButton] {
 
     private[this] var obs: Disposable[S#Tx] = _
-//    private[this] val added = Ref(false)
+    private[this] val added = Ref(false)
 
     def dispose()(implicit tx: S#Tx): Unit = {
       obs.dispose()
@@ -71,13 +77,13 @@ object PlayToggleButton {
             val sel = selected
             SoundProcesses.atomic[S, Unit] { implicit tx =>
               transport.stop()
-//              if (added.swap(false)(tx.peer)) objH.foreach(h => transport.removeObject(h()))
+              if (added.swap(false)(tx.peer)) objH.foreach(h => transport.removeObject(h()))
               transport.seek(0L)
               if (sel) {
-//                objH.foreach { h =>
-//                  transport.addObject(h())
-//                  added.set(true)(tx.peer)
-//                }
+                objH.foreach { h =>
+                  transport.addObject(h())
+                  added.set(true)(tx.peer)
+                }
                 transport.play()
               }
             } (transport.scheduler.cursor)
