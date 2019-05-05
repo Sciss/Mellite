@@ -1,0 +1,33 @@
+0-999 reserved
+current 16-bit max
+
+    0 IntTop
+    1 IntSeqTop
+    2 DoubleTop
+    3 DoubleSeqTop
+    4 BooleanTop
+    5 BooleanSeqTop
+    6 LongTop
+   10 StringTop
+  255 Widen.idIdentity
+  256 Widen .intSeqSeq
+  257 Widen2.seqIntSeq
+  258 Widen .doubleSeqSeq
+  259 Widen2.seqDoubleSeq
+  260 Widen .intDoubleDouble
+  261 Widen2.doubleIntDouble
+  262 Widen .longDoubleDouble
+  263 Widen2.doubleLongDouble
+  288 WidenToDouble.DoubleImpl
+
+ 1000 Type.Aux              (Lucre)
+
+ 1024 Obj.Extractor.Int     (Patterns)
+ 1026 Obj.Extractor.Double  (Patterns)
+ 1028 Obj.Extractor.Boolean (Patterns)
+ 1030 Obj.Extractor.Long    (Patterns)
+ 1034 Obj.Extractor.String  (Patterns)
+ 1152 Folder                (Patterns)
+ 1153 AudioCue              (Patterns)
+
+ 2000 Artifact.Bridge       (SoundProcesses)

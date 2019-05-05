@@ -103,8 +103,8 @@ Again:
 
 ```
 object Drop {
-  trait Selector[A] {
-    def select[S <: Sys[S]](obj: Drop[S])(implicit tx: S#Tx): Option[A]
+  trait Selector[A] extends Aux {
+    def select[S <: Sys[S]](obj: Drop[S]) /* (implicit tx: S#Tx) */ : Option[A]
   }
 }
 
