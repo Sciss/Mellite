@@ -16,6 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.gui.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.objview.TimelineObjView
 import de.sciss.mellite.gui.impl.timeline.{TimelineViewImpl => Impl}
 import de.sciss.synth.proc.gui.TransportView
@@ -35,6 +36,10 @@ object TimelineView {
   final val MinDur      = 32
 
   final val DefaultTrackHeight = 8
+
+  final case class Drag[S <: stm.Sys[S]](universe: Universe[S], view: TimelineView[S])
+
+  val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 }
 trait TimelineView[S <: stm.Sys[S]] extends TimelineObjView[S]
   with TimelineViewBase[S, Int, ObjTimelineView[S]] with CanBounce {

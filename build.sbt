@@ -32,7 +32,7 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val lucre               = "3.12.1-SNAPSHOT"
-    val lucreSwing          = "1.16.0"
+    val lucreSwing          = "1.16.1-SNAPSHOT"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val patterns            = "0.11.0"
@@ -51,7 +51,7 @@ lazy val deps = new {
     val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.1"
-    val soundProcesses      = "3.28.0"
+    val soundProcesses      = "3.28.1"
     val span                = "1.4.2"
     val submin              = "0.2.5"
     val swingPlus           = "0.4.2"
@@ -215,7 +215,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "audiowidgets-app"               % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-swing"             % deps.main.audioWidgets,       // audio application widgets
-      "de.sciss"          %% "desktop"                        % deps.main.desktop,
+      "de.sciss"          %% "desktop"                        % deps.main.desktop,            // support for desktop applications
       "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
       "de.sciss"          %% "filecache-common"               % deps.main.fileCache,          // caching data to disk
       "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // extension methods for files
@@ -243,7 +243,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "scalacolliderswing-core"        % deps.main.scalaColliderSwing, // UI methods for scala-collider
       "de.sciss"          %% "scalainterpreterpane"           % deps.main.interpreterPane,    // REPL
       "de.sciss"          %% "dotterweide-ui"                 % deps.main.dotterweide,        // Code editor
-      "de.sciss"          %% "dotterweide-doc-browser"        % deps.main.dotterweide,        // Scaladoc browser
+      "de.sciss"          %% "dotterweide-doc-browser"        % deps.main.dotterweide,        // scala-doc browser
       "de.sciss"          %% "dotterweide-scala"              % deps.main.dotterweide,        // Code editor
       "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
       "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing
@@ -257,7 +257,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "topology"                       % deps.main.topology,           // graph sorting
       "de.sciss"          %  "treetable-java"                 % deps.main.treeTable,          // widget
       "de.sciss"          %% "treetable-scala"                % deps.main.treeTable,          // widget
-      "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improv
+      "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.main.appDirs,            // finding cache directory
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit

@@ -26,6 +26,9 @@ object DragAndDrop {
   def internalFlavor[A](implicit ct: reflect.ClassTag[A]): Flavor[A] =
     new DataFlavor(s"""${DataFlavor.javaJVMLocalObjectMimeType};class="${ct.runtimeClass.getName}"""") with Flavor[A]
 
+  def getTransferData[A](t: Transferable, f: Flavor[A]): A =
+    t.getTransferData(f).asInstanceOf[A]
+
   object Transferable {
     /** Creates a transferable for one particular flavor. */
     def apply[A](flavor: Flavor[A])(data: A): Transferable = new Transferable {

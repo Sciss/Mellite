@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.gui.impl.objview
 
+import java.awt.datatransfer.Transferable
+
 import de.sciss.desktop
 import de.sciss.file._
 import de.sciss.icons.raphael
@@ -23,7 +25,7 @@ import de.sciss.lucre.swing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ActionArtifactLocation, GUI, ObjListView, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, DragAndDrop, GUI, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.Icon
@@ -97,6 +99,11 @@ object ArtifactLocationObjView extends ObjListView.Factory {
     def factory: ObjView.Factory = ArtifactLocationObjView
 
     def value: File = directory
+
+    override def createTransferable(): Option[Transferable] = {
+      val t = DragAndDrop.Transferable.files(value)
+      Some(t)
+    }
 
     def init(obj: ArtifactLocation[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)

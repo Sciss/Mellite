@@ -20,14 +20,19 @@ current 16-bit max
   263 Widen2.doubleLongDouble
   288 WidenToDouble.DoubleImpl
 
- 1000 Type.Aux              (Lucre)
+ 1000 Type.Aux                   (Lucre)
 
- 1024 Obj.Extractor.Int     (Patterns)
- 1026 Obj.Extractor.Double  (Patterns)
- 1028 Obj.Extractor.Boolean (Patterns)
- 1030 Obj.Extractor.Long    (Patterns)
- 1034 Obj.Extractor.String  (Patterns)
- 1152 Folder                (Patterns)
- 1153 AudioCue              (Patterns)
+ 1024 Obj.Extractor.Int          (Patterns)
+ 1026 Obj.Extractor.Double       (Patterns)
+ 1028 Obj.Extractor.Boolean      (Patterns)
+ 1030 Obj.Extractor.Long         (Patterns)
+ 1034 Obj.Extractor.String       (Patterns)
+ 1152 Folder                     (Patterns)
+ 1153 AudioCue                   (Patterns)
 
- 2000 Artifact.Bridge       (SoundProcesses)
+ 2000 Artifact.Bridge            (SoundProcesses)
+
+ 3000 DropTarget.Selector.String (LucreSwing)
+ 3001 DropTarget.Selector.File   (LucreSwing)
+
+ 4000 TimelineView.Drop          (Mellite)

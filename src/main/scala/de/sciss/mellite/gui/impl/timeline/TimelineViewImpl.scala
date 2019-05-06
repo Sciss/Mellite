@@ -205,6 +205,11 @@ object TimelineViewImpl {
       this
     }
 
+    override def createTransferable(): Option[Transferable] = Some(mkDefaultTransferable())
+
+    private def mkDefaultTransferable(): Transferable =
+      DragAndDrop.Transferable(TimelineView.Flavor)(TimelineView.Drag(universe, impl))
+
     override protected def guiInit(): Unit = {
       super.guiInit()
 
@@ -213,8 +218,10 @@ object TimelineViewImpl {
 
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
-          val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
-          Some(t3)
+          val t1  = mkDefaultTransferable()
+          val t2  = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
+          val t   = DragAndDrop.Transferable.seq(t1, t2)
+          Some(t)
         }
         tooltip = "Drag Timeline Object or Selection"
       }

@@ -17,6 +17,8 @@ import java.io.File
 
 import de.sciss.filecache.Limit
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
+import de.sciss.lucre.swing.LucreSwing
+import de.sciss.lucre.swing.graph.TimelineView
 import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
@@ -41,6 +43,8 @@ trait Init {
     Pattern       .init()
     FreesoundRetrievalObjView.init()  // indirect through view because it depends on scala-version
     Widget        .init()
+    LucreSwing    .init()
+    TimelineView  .init()
 
     val cacheLim = Limit(count = 8192, space = 2L << 10 << 100)  // 2 GB; XXX TODO --- through user preferences
     FScCache.init(folder = cacheDir, capacity = cacheLim)
