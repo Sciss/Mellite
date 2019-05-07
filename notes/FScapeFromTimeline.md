@@ -248,3 +248,30 @@ disposed (history purged because window closes, or new edit appended).
 
 Stuff like `timeline.remove` could as well be a `Trig` (for execution outside undo context) and a
 reference to an undoable edit.
+
+## "Objects"
+
+What does `Ex[Obj]` mean? Do we hold a reference an an actual `stm.Obj[S]` somewhere? If we _do_,
+we can imagine an `Attr.Bridge[Obj]` without problem.
+
+The "normal" way we use expression graphs is to assume that `S =:= InMemory`; so what happens if we 
+drop a `TimelineView` where `S =:= Durable`, or in general, where that `S` does not match the `S` of
+the expression graph?
+
+We could only imagine that `Ex.Context` actually holds both systems and a bridge. Then the next problem
+is the proliferation of `stm.Cursor`, because if we allow in-memory `step` transactions, we no longer
+can fall back to an outer durable transaction?
+
+So let's say, we can only populate `TimelineView#selectedObjects` if there is a fall back and its main
+system matches the system of the dragged object.
+
+__No, wrong!__ We do use the full `S`, it's just that so far we have used `Ref` for state; in the future,
+we should perhaps better use `S#I#Var`? In this sense, we designed `Ex` differently than Patterns. On the other
+hand, `IEvent` and `ITargets` are already tuned for in-memory operation, so we won't gain anything from such
+change, except perhaps that wrapping a graph inside an Akka Stream stage logic might benefit from dropping
+the transactional context altogether (using `Plain`).
+
+So we can simply check if the DnD system equals the own system (`universe.workspace.system`).
+
+-----------
+

@@ -15,9 +15,11 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.datatransfer.Transferable
 
+import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.impl.IEventImpl
 import de.sciss.lucre.event.{IEvent, IPull, ITargets}
+import de.sciss.lucre.expr.graph.{Obj, Timed}
 import de.sciss.lucre.expr.{Ex, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.mellite.gui.{DragAndDrop, TimelineView => _TimelineView}
@@ -44,6 +46,8 @@ object TimelineView {
     def selection : SpanOrVoid  = Span.Void
     def bounds    : SpanLike    = Span.Void
 //    def virtual   : Span        = emptySpan // good?
+
+    def selectedObjects: ISeq[Timed[Obj]] = Nil
   }
 
   implicit object Drop extends DropTarget.Selector[TimelineView] with Aux.Factory {
@@ -65,7 +69,8 @@ object TimelineView {
         selection  = tlm.selection,
         bounds     = tlm.bounds,
         visible    = tlm.visible,
-        virtual    = tlm.virtual
+        virtual    = tlm.virtual,
+        selectedObjects = ???
       )
     }
   }
@@ -220,6 +225,8 @@ object TimelineView {
     def bounds    : Ex[SpanLike   ] = Bounds    (t)
     def visible   : Ex[SpanOrVoid ] = Visible   (t)
 //    def virtual   : Ex[Span       ] = Virtual   (t)
+
+    def selectedObjects: Ex[ISeq[Timed[Obj]]] = ???
   }
 
   private final class Impl(
@@ -228,7 +235,10 @@ object TimelineView {
     val selection : SpanOrVoid,
     val bounds    : SpanLike,
     val visible   : Span,
-    val virtual   : Span
+    val virtual   : Span,
+
+    val selectedObjects: ISeq[Timed[Obj]]
+
   ) extends TimelineView {
 
     override def toString: String =
@@ -247,4 +257,6 @@ trait TimelineView {
   def visible   : SpanOrVoid
 
   //  def virtual   : Span
+
+  def selectedObjects: ISeq[Timed[Obj]]
 }
