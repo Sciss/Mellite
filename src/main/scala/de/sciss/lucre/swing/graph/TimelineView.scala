@@ -91,25 +91,22 @@ object TimelineView {
     }
   }
 
-  object SampleRate {
-    def apply(t: Ex[TimelineView]): SampleRate = Impl(t)
+  private final class SampleRateExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+    extends MappedIExpr[S, TimelineView, Double](in, tx0) {
 
-    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends MappedIExpr[S, TimelineView, Double](in, tx0) {
+    protected def mapValue(t: TimelineView): Double = t.sampleRate
+  }
 
-      protected def mapValue(t: TimelineView): Double = t.sampleRate
-    }
+  final case class SampleRate(in: Ex[TimelineView]) extends Ex[Double] {
+    type Repr[S <: Sys[S]] = IExpr[S, Double]
 
-    private final case class Impl(in: Ex[TimelineView]) extends SampleRate {
-      override def productPrefix = s"TimelineView$$SampleRate"  // serialization
+    override def productPrefix = s"TimelineView$$SampleRate"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Double] = {
-        import ctx.targets
-        new Expanded(in.expand[S], tx)
-      }
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+      import ctx.targets
+      new SampleRateExpanded(in.expand[S], tx)
     }
   }
-  trait SampleRate extends Ex[Double]
 
   object Position {
     def apply(t: Ex[TimelineView]): Position = Impl(t)
@@ -121,9 +118,11 @@ object TimelineView {
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends Position {
+      type Repr[S <: Sys[S]] = IExpr[S, Long]
+
       override def productPrefix = s"TimelineView$$Position"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Long] = {
+      protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -131,105 +130,74 @@ object TimelineView {
   }
   trait Position extends Ex[Long]
 
-  object Selection {
-    def apply(t: Ex[TimelineView]): Selection = Impl(t)
+  private final class SelectionExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+    extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
 
-    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
+    protected def mapValue(t: TimelineView): SpanOrVoid = t.selection
+  }
 
-      protected def mapValue(t: TimelineView): SpanOrVoid = t.selection
-    }
+  final case class Selection(in: Ex[TimelineView]) extends Ex[SpanOrVoid] {
+    type Repr[S <: Sys[S]] = IExpr[S, SpanOrVoid]
 
-    private final case class Impl(in: Ex[TimelineView]) extends Selection {
-      override def productPrefix = s"TimelineView$$Selection"  // serialization
+    override def productPrefix = s"TimelineView$$Selection"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
-        import ctx.targets
-        new Expanded(in.expand[S], tx)
-      }
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+      import ctx.targets
+      new SelectionExpanded(in.expand[S], tx)
     }
   }
-  trait Selection extends Ex[SpanOrVoid]
 
-  object Bounds {
-    def apply(t: Ex[TimelineView]): Bounds = Impl(t)
+  private final class BoundsExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+    extends MappedIExpr[S, TimelineView, SpanLike](in, tx0) {
 
-    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends MappedIExpr[S, TimelineView, SpanLike](in, tx0) {
+    protected def mapValue(t: TimelineView): SpanLike = t.bounds
+  }
 
-      protected def mapValue(t: TimelineView): SpanLike = t.bounds
-    }
+  final case class Bounds(in: Ex[TimelineView]) extends Ex[SpanLike] {
+    type Repr[S <: Sys[S]] = IExpr[S, SpanLike]
 
-    private final case class Impl(in: Ex[TimelineView]) extends Bounds {
-      override def productPrefix = s"TimelineView$$Bounds"  // serialization
+    override def productPrefix = s"TimelineView$$Bounds"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanLike] = {
-        import ctx.targets
-        new Expanded(in.expand[S], tx)
-      }
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+      import ctx.targets
+      new BoundsExpanded(in.expand[S], tx)
     }
   }
-  trait Bounds extends Ex[SpanLike]
 
-  object Visible {
-    def apply(t: Ex[TimelineView]): Visible = Impl(t)
+  private final class VisibleExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+    extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
 
-    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
+    protected def mapValue(t: TimelineView): SpanOrVoid = t.visible
+  }
 
-      protected def mapValue(t: TimelineView): SpanOrVoid = t.visible
-    }
+  final case class Visible(in: Ex[TimelineView]) extends Ex[SpanOrVoid] {
+    type Repr[S <: Sys[S]] = IExpr[S, SpanOrVoid]
 
-    private final case class Impl(in: Ex[TimelineView]) extends Visible {
-      override def productPrefix = s"TimelineView$$Visible"  // serialization
+    override def productPrefix = s"TimelineView$$Visible"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
-        import ctx.targets
-        new Expanded(in.expand[S], tx)
-      }
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
+      import ctx.targets
+      new VisibleExpanded(in.expand[S], tx)
     }
   }
-  trait Visible extends Ex[SpanOrVoid]
 
-//  object Virtual {
-//    def apply(t: Ex[TimelineView]): Virtual = Impl(t)
-//
-//    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-//      extends ExMap[S, Span](in, tx0) {
-//
-//      protected def map(t: TimelineView): Span = t.virtual
-//    }
-//
-//    private final case class Impl(in: Ex[TimelineView]) extends Virtual {
-//      override def productPrefix = s"TimelineView$$Virtual"  // serialization
-//
-//      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Span] = {
-//        import ctx.targets
-//        new Expanded(in.expand[S], tx)
-//      }
-//    }
-//  }
-//  trait Virtual extends Ex[Span]
 
-  object SelectedObjects {
-    def apply(t: Ex[TimelineView]): SelectedObjects = Impl(t)
+  private final class SelectedObjectsExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+    extends MappedIExpr[S, TimelineView, Seq[Timed[Obj]]](in, tx0) {
 
-    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends MappedIExpr[S, TimelineView, Seq[Timed[Obj]]](in, tx0) {
+    protected def mapValue(t: TimelineView): Seq[Timed[Obj]] = t.selectedObjects
+  }
 
-      protected def mapValue(t: TimelineView): Seq[Timed[Obj]] = t.selectedObjects
-    }
+  final case class SelectedObjects(in: Ex[TimelineView]) extends Ex[Seq[Timed[Obj]]] {
+    type Repr[S <: Sys[S]] = IExpr[S, Seq[Timed[Obj]]]
 
-    private final case class Impl(in: Ex[TimelineView]) extends SelectedObjects {
-      override def productPrefix = s"TimelineView$$SelectedObjects"  // serialization
+    override def productPrefix = s"TimelineView$$SelectedObjects"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Seq[Timed[Obj]]] = {
-        import ctx.targets
-        new Expanded(in.expand[S], tx)
-      }
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Seq[Timed[Obj]]] = {
+      import ctx.targets
+      new SelectedObjectsExpanded(in.expand[S], tx)
     }
   }
-  trait SelectedObjects extends Ex[Seq[Timed[Obj]]]
 
   implicit class Ops[S <: Sys[S]](private val t: Ex[TimelineView]) extends AnyVal {
     def sampleRate: Ex[Double     ] = SampleRate(t)

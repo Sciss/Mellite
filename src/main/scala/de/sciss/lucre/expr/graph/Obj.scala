@@ -90,9 +90,11 @@ object Obj {
   final case class Attr[A](obj: Ex[Obj], key: String)(implicit val bridge: _Attr.Bridge[A])
     extends Ex[Option[A]] with _Attr.Like[A] {
 
+    type Repr[S <: Sys[S]] = IExpr[S, Option[A]]
+
     override def productPrefix: String = s"Obj$$Attr" // serialization
 
-    def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Option[A]] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.targets
       new AttrExpanded(obj.expand[S], key, tx)
     }

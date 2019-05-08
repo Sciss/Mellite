@@ -28,10 +28,12 @@ object Timed {
     protected def mapValue(inValue: Timed[A]): SpanLike = inValue.span
   }
 
-  final case class Span[A](in: Ex[Timed[A]]) extends Ex.Lazy[SpanLike] {
+  final case class Span[A](in: Ex[Timed[A]]) extends Ex[SpanLike] {
+    type Repr[S <: Sys[S]] = IExpr[S, SpanLike]
+
     override def productPrefix = s"Timed$$Span"  // serialization
 
-    protected def mkExpr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanLike] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.targets
       new SpanExpanded(in.expand[S], tx)
     }
@@ -44,10 +46,12 @@ object Timed {
     protected def mapValue(inValue: Timed[A]): A = inValue.value
   }
 
-  final case class Value[A](in: Ex[Timed[A]]) extends Ex.Lazy[A] {
+  final case class Value[A](in: Ex[Timed[A]]) extends Ex[A] {
+    type Repr[S <: Sys[S]] = IExpr[S, A]
+
     override def productPrefix = s"Timed$$Value"  // serialization
 
-    protected def mkExpr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, A] = {
+    protected def mkRepr[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): Repr[S] = {
       import ctx.targets
       new ValueExpanded(in.expand[S], tx)
     }
