@@ -330,3 +330,58 @@ Where would sub-graphs and iteration be used?
 - `Option#map`, `Option#flatMap` -- kind of "sad" for the performance? but would work
 - `If`-`Then`-`Else` etc. although I suspect we won't need this much, as simply selection between two expressions
   should be fine
+
+-------------
+
+A hypothetical next step program:
+
+```
+val tgt     = DropTarget()
+val drop    = tgt.select[TimelineView]
+val tlv     = drop.value
+val timed   = tlv.selectedObjects
+
+val actOpt  = for {
+  t1 <- timed.applyOption(0)
+  t2 <- timed.applyOption(1)
+  c1 <- t1.value.attr[AudioCue]("sig")
+  c2 <- t2.value.attr[AudioCue]("sig")
+} yield {
+  val s1 = t1.span
+  val s2 = t2.span
+  val test = s1 union s2
+  
+  PrintLn(test.toStr)
+}
+
+drop.received ---> actOpt
+
+tgt
+```
+
+So we would need `map` and `flatMap` on `Option[Ex[_]]`, as well as `---> Option[Act]`.
+
+Let's go one step back (not yet require different result types of `flatMap`):
+
+```
+val tgt     = DropTarget()
+val drop    = tgt.select[TimelineView]
+val tlv     = drop.value
+val timed   = tlv.selectedObjects
+
+val textOpt = for {
+  t1 <- timed.applyOption(0)
+  t2 <- timed.applyOption(1)
+  c1 <- t1.value.attr[AudioCue]("sig")
+  c2 <- t2.value.attr[AudioCue]("sig")
+} yield {
+  val s1 = t1.span
+  val s2 = t2.span
+  val test = s1 union s2
+  test.toStr
+}
+
+drop.received ---> PrintLn(textOpt.getOrElse("no match"))
+
+tgt
+```

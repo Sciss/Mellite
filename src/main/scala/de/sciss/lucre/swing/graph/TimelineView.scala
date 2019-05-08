@@ -46,11 +46,6 @@ object TimelineView {
 //    def virtual   : Span        = emptySpan // good?
 
     def selectedObjects: Seq[Timed[Obj]] = Nil
-
-//    Seq(
-//      Timed(Span(2, 3), new Obj {}),
-//      Timed(Span(3, 4), new Obj {})
-//    )
   }
 
   implicit object Drop extends DropTarget.Selector[TimelineView] with Aux.Factory {
@@ -180,7 +175,6 @@ object TimelineView {
       new VisibleExpanded(in.expand[S], tx)
     }
   }
-
 
   private final class SelectedObjectsExpanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
     extends MappedIExpr[S, TimelineView, Seq[Timed[Obj]]](in, tx0) {
