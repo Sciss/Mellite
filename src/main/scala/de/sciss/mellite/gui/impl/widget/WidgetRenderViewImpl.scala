@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.widget
 import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.expr.Ex
+import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.stm.TxnLike.peer
@@ -129,7 +129,7 @@ object WidgetRenderViewImpl {
         // N.B. we have to use `try` instead of `Try` because
         // `MissingIn` is a `ControlThrowable` which would not be caught.
         val vTry = try {
-          implicit val ctx: Ex.Context[S] = ExprContext(Some(tx.newHandle(widget)))
+          implicit val ctx: Context[S] = ExprContext(Some(tx.newHandle(widget)))
           val res   = g.expand[S]
 
 //          if (hadOld) {

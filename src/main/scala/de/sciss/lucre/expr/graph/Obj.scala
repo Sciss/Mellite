@@ -13,8 +13,7 @@
 
 package de.sciss.lucre.expr.graph
 
-import de.sciss.lucre.expr.Ex
-
+// XXX TODO --- this should go into SP
 object Obj {
   implicit class ExOps(private val obj: Ex[Obj]) extends AnyVal {
     def attr[A: Attr.Bridge](key: String): Attr[A] = ???

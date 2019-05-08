@@ -15,15 +15,13 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.datatransfer.Transferable
 
-import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.aux.Aux
-import de.sciss.lucre.event.impl.IEventImpl
-import de.sciss.lucre.event.{IEvent, IPull, ITargets}
-import de.sciss.lucre.expr.graph.{Obj, Timed}
-import de.sciss.lucre.expr.{Ex, IExpr}
+import de.sciss.lucre.event.ITargets
+import de.sciss.lucre.expr.graph.impl.MappedIExpr
+import de.sciss.lucre.expr.graph.{Ex, Obj, Timed}
+import de.sciss.lucre.expr.{Context, IExpr}
 import de.sciss.lucre.stm.Sys
 import de.sciss.mellite.gui.{DragAndDrop, TimelineView => _TimelineView}
-import de.sciss.model.Change
 import de.sciss.serial.DataInput
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
@@ -47,7 +45,12 @@ object TimelineView {
     def bounds    : SpanLike    = Span.Void
 //    def virtual   : Span        = emptySpan // good?
 
-    def selectedObjects: ISeq[Timed[Obj]] = Nil
+    def selectedObjects: Seq[Timed[Obj]] = Nil
+
+//    Seq(
+//      Timed(Span(2, 3), new Obj {}),
+//      Timed(Span(3, 4), new Obj {})
+//    )
   }
 
   implicit object Drop extends DropTarget.Selector[TimelineView] with Aux.Factory {
@@ -57,60 +60,49 @@ object TimelineView {
 
     def defaultData: TimelineView = Empty
 
-    def canImport(t: Transferable): Boolean =
+    def canImport[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): Boolean =
       t.isDataFlavorSupported(_TimelineView.Flavor)
 
-    def importData(t: Transferable): TimelineView = {
-      val tv: _TimelineView[_] = DragAndDrop.getTransferData(t, _TimelineView.Flavor).view
-      val tlm = tv.timelineModel
-      new Impl(
-        sampleRate = tlm.sampleRate,
-        position   = tlm.position,
-        selection  = tlm.selection,
-        bounds     = tlm.bounds,
-        visible    = tlm.visible,
-        virtual    = tlm.virtual,
-        selectedObjects = ???
-      )
-    }
-  }
-
-  private abstract class ExMap[S <: Sys[S], A](in: IExpr[S, TimelineView], tx0: S#Tx)
-                                              (implicit protected val targets: ITargets[S])
-    extends IExpr[S, A] with IEventImpl[S, Change[A]] {
-
-    in.changed.--->(this)(tx0)
-
-    protected def map(t: TimelineView): A
-
-    def value(implicit tx: S#Tx): A = map(in.value)
-
-    private[lucre] def pullUpdate(pull: IPull[S])(implicit tx: S#Tx): Option[Change[A]] =
-      pull(in.changed).flatMap { ch =>
-        val before  = map(ch.before )
-        val now     = map(ch.now    )
-        if (before == now) None else Some(Change(before, now))
+    def importData[S <: Sys[S]](t: Transferable)(implicit ctx: Context[S]): TimelineView = {
+      val tv              = DragAndDrop.getTransferData(t, _TimelineView.Flavor).view
+      val tlm             = tv.timelineModel
+      val sameWorkspace   = tv.universe.workspace == ctx.workspace
+      val selectedObjects = if (!sameWorkspace) Nil else {
+        val tvc = tv.asInstanceOf[_TimelineView[S]]
+        tvc.selectionModel.iterator.map { view =>
+          val span = view.spanValue
+          val value: Obj = new Obj {} // XXX TODO
+          Timed(span, value)
+        } .toIndexedSeq
       }
 
-    def dispose()(implicit tx: S#Tx): Unit =
-      in.changed.-/->(this)
+      // println(s"sameWorkspace = $sameWorkspace; has sel? ${tv.selectionModel.nonEmpty} ; ${selectedObjects.size}")
 
-    def changed: IEvent[S, Change[A]] = this
+      new Impl(
+        sampleRate      = tlm.sampleRate,
+        position        = tlm.position,
+        selection       = tlm.selection,
+        bounds          = tlm.bounds,
+        visible         = tlm.visible,
+        virtual         = tlm.virtual,
+        selectedObjects = selectedObjects
+      )
+    }
   }
 
   object SampleRate {
     def apply(t: Ex[TimelineView]): SampleRate = Impl(t)
 
     private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends ExMap[S, Double](in, tx0) {
+      extends MappedIExpr[S, TimelineView, Double](in, tx0) {
 
-      protected def map(t: TimelineView): Double = t.sampleRate
+      protected def mapValue(t: TimelineView): Double = t.sampleRate
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends SampleRate {
       override def productPrefix = s"TimelineView$$SampleRate"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Double] = {
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Double] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -122,15 +114,15 @@ object TimelineView {
     def apply(t: Ex[TimelineView]): Position = Impl(t)
 
     private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends ExMap[S, Long](in, tx0) {
+      extends MappedIExpr[S, TimelineView, Long](in, tx0) {
 
-      protected def map(t: TimelineView): Long = t.position
+      protected def mapValue(t: TimelineView): Long = t.position
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends Position {
       override def productPrefix = s"TimelineView$$Position"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, Long] = {
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Long] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -142,15 +134,15 @@ object TimelineView {
     def apply(t: Ex[TimelineView]): Selection = Impl(t)
 
     private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends ExMap[S, SpanOrVoid](in, tx0) {
+      extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
 
-      protected def map(t: TimelineView): SpanOrVoid = t.selection
+      protected def mapValue(t: TimelineView): SpanOrVoid = t.selection
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends Selection {
       override def productPrefix = s"TimelineView$$Selection"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -162,15 +154,15 @@ object TimelineView {
     def apply(t: Ex[TimelineView]): Bounds = Impl(t)
 
     private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends ExMap[S, SpanLike](in, tx0) {
+      extends MappedIExpr[S, TimelineView, SpanLike](in, tx0) {
 
-      protected def map(t: TimelineView): SpanLike = t.bounds
+      protected def mapValue(t: TimelineView): SpanLike = t.bounds
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends Bounds {
       override def productPrefix = s"TimelineView$$Bounds"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, SpanLike] = {
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanLike] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -182,15 +174,15 @@ object TimelineView {
     def apply(t: Ex[TimelineView]): Visible = Impl(t)
 
     private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
-      extends ExMap[S, SpanOrVoid](in, tx0) {
+      extends MappedIExpr[S, TimelineView, SpanOrVoid](in, tx0) {
 
-      protected def map(t: TimelineView): SpanOrVoid = t.visible
+      protected def mapValue(t: TimelineView): SpanOrVoid = t.visible
     }
 
     private final case class Impl(in: Ex[TimelineView]) extends Visible {
       override def productPrefix = s"TimelineView$$Visible"  // serialization
 
-      def expand[S <: Sys[S]](implicit ctx: Ex.Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, SpanOrVoid] = {
         import ctx.targets
         new Expanded(in.expand[S], tx)
       }
@@ -218,6 +210,26 @@ object TimelineView {
 //  }
 //  trait Virtual extends Ex[Span]
 
+  object SelectedObjects {
+    def apply(t: Ex[TimelineView]): SelectedObjects = Impl(t)
+
+    private final class Expanded[S <: Sys[S]](in: IExpr[S, TimelineView], tx0: S#Tx)(implicit targets: ITargets[S])
+      extends MappedIExpr[S, TimelineView, Seq[Timed[Obj]]](in, tx0) {
+
+      protected def mapValue(t: TimelineView): Seq[Timed[Obj]] = t.selectedObjects
+    }
+
+    private final case class Impl(in: Ex[TimelineView]) extends SelectedObjects {
+      override def productPrefix = s"TimelineView$$SelectedObjects"  // serialization
+
+      def expand[S <: Sys[S]](implicit ctx: Context[S], tx: S#Tx): IExpr[S, Seq[Timed[Obj]]] = {
+        import ctx.targets
+        new Expanded(in.expand[S], tx)
+      }
+    }
+  }
+  trait SelectedObjects extends Ex[Seq[Timed[Obj]]]
+
   implicit class Ops[S <: Sys[S]](private val t: Ex[TimelineView]) extends AnyVal {
     def sampleRate: Ex[Double     ] = SampleRate(t)
     def position  : Ex[Long       ] = Position  (t)
@@ -226,18 +238,18 @@ object TimelineView {
     def visible   : Ex[SpanOrVoid ] = Visible   (t)
 //    def virtual   : Ex[Span       ] = Virtual   (t)
 
-    def selectedObjects: Ex[ISeq[Timed[Obj]]] = ???
+    def selectedObjects: Ex[Seq[Timed[Obj]]] = SelectedObjects(t)
   }
 
   private final class Impl(
-    val sampleRate: Double,
-    val position  : Long,
-    val selection : SpanOrVoid,
-    val bounds    : SpanLike,
-    val visible   : Span,
-    val virtual   : Span,
+    val sampleRate      : Double,
+    val position        : Long,
+    val selection       : SpanOrVoid,
+    val bounds          : SpanLike,
+    val visible         : Span,
+    val virtual         : Span,
 
-    val selectedObjects: ISeq[Timed[Obj]]
+    val selectedObjects : Seq[Timed[Obj]]
 
   ) extends TimelineView {
 
@@ -258,5 +270,5 @@ trait TimelineView {
 
   //  def virtual   : Span
 
-  def selectedObjects: ISeq[Timed[Obj]]
+  def selectedObjects: Seq[Timed[Obj]]
 }
