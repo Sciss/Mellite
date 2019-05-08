@@ -17,7 +17,7 @@ import java.awt.datatransfer.Transferable
 
 import de.sciss.lucre.aux.Aux
 import de.sciss.lucre.event.ITargets
-import de.sciss.lucre.expr.graph.impl.MappedIExpr
+import de.sciss.lucre.expr.graph.impl.{MappedIExpr, ObjImpl}
 import de.sciss.lucre.expr.graph.{Ex, Obj, Timed}
 import de.sciss.lucre.expr.{Context, IExpr}
 import de.sciss.lucre.stm.Sys
@@ -68,10 +68,11 @@ object TimelineView {
       val tlm             = tv.timelineModel
       val sameWorkspace   = tv.universe.workspace == ctx.workspace
       val selectedObjects = if (!sameWorkspace) Nil else {
-        val tvc = tv.asInstanceOf[_TimelineView[S]]
+        val tvc     = tv.asInstanceOf[_TimelineView[S]]
+        val system  = tvc.universe.workspace.system
         tvc.selectionModel.iterator.map { view =>
           val span = view.spanValue
-          val value: Obj = new Obj {} // XXX TODO
+          val value: Obj = new ObjImpl(view.objH, system)
           Timed(span, value)
         } .toIndexedSeq
       }

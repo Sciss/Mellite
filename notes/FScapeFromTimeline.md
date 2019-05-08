@@ -275,3 +275,58 @@ So we can simply check if the DnD system equals the own system (`universe.worksp
 
 -----------
 
+# map, flatMap
+
+The following is showing a problem (08-May-2019)
+
+```
+obj.map(_.attr[String]("name")).headOption
+```
+
+It throws a NPE because `attr` needs to register a listener on `It` (the object iteration variable), so when
+the outer `obj` is empty, then `It` is uninitialised. I already thought this went to smooth...
+
+Which objects do require calls to `.value` in their initialization?
+
+- `Latch` (could be moved)
+- controls, such as `OscNode`; we should forbid controls to be created within a `.map` graph,
+  this again speaks for wrapping in `Graph {}` so we can control the builder.
+
+Looking at `ExpandedImpl`, there is the uninitialised `Ref`, and actually calling `fire` should _not_ be done
+in value update. This should be the "deal" for mapping -- no events are fired from the iterator, we solely rely
+on `.value` calls bottom up.
+
+The question is, is `Obj.Attr` an outlier, or can it be fixed to avoid the `.value` call?
+It's that `Ex[Obj]` is kind of hollow. The problem does not occur in Patterns, because due to the `reset`
+functionality, we never assume eager initialization.
+
+The safer but more involved way would be to have the inner stuff as an unexpanded `Graph`, and to re-expand it
+for each push of the outer value. More involved, because it means again to distinguish between source elements
+that are inside and outside the graph. Take for example this:
+
+```
+val foo: Ex[Int] = ???
+val seq: Ex[Seq[Int]] = ???
+
+seq.map(bar => bar + foo)
+```
+
+This will (or not?) cause problems when `foo` is expanded inside the closure.
+The main issue is clean up (`dispose`). While controls are registered with the graph builder, which in turn
+can expand them, collect their `IControl` instances, and then free them, this is not the case for expressions.
+So in the above example, the "closure" compiles to `BinaryOp(BinaryOp.Plus, It, foo)`, and the bin-op adds
+event listeners to register changes to `It` and `foo` (which in turn might also be expanded inside the closure and
+thus register more listeners). The result is something like `targets.add(fooEx.changed, binOpEx.changed)`, and
+`targets` comes from the source, so might be _outside_ the closure's graph (if we even want to think about having
+multiple instances of `Context`). 
+
+In summary, it would be much easier if we tracked _all called to `expand`_ that result in `Disposable` objects,
+for example by adding a `final def expand` to `Ex`, forcing the `Lazy` approach. Then it's simple to dispose
+everything that comes out of a sub-graph.
+
+Where would sub-graphs and iteration be used?
+
+- `Seq#map`, `Seq#flatMap` (`Seq#foldLeft`, `Seq#sortWith`) -- they would work very similar to each other
+- `Option#map`, `Option#flatMap` -- kind of "sad" for the performance? but would work
+- `If`-`Then`-`Else` etc. although I suspect we won't need this much, as simply selection between two expressions
+  should be fine
