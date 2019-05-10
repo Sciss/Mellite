@@ -1,18 +1,19 @@
 package de.sciss.mellite
 
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 object Sandbox {
   object CanMap {
     implicit def mapExOpt[B]: CanMap[Option, Ex[B], Ex[Option[B]]]  = new ExOptToExOpt
     implicit def mapExSeq[B]: CanMap[Seq   , Ex[B], Ex[Seq   [B]]]  = new MapExSeq
-    implicit def mapAct     : CanMap[Option, Act  , Option[Act]]    = new ExOptToAct
+//    implicit def mapAct     : CanMap[Option, Act  , Act]            = new ExOptToAct
+    implicit def mapAct     : CanMap[Option, Act  , Ex[Option[Act]]] = new ExOptToAct2
   }
 
   object CanFlatMap {
-    implicit def flatMapExOpt[B]: CanFlatMap[Option, Ex[Option[B]], Ex[Option[B]]]  = new ExOptToExOpt
-    implicit def flatMapExSeq[B]: CanFlatMap[Seq   , Ex[Option[B]], Ex[Seq   [B]]]  = new MapExSeq
-    implicit def flatMapAct     : CanFlatMap[Option, Option[Act]  , Option[Act]]    = new ExOptToAct
+    implicit def flatMapExOpt   [B]: CanFlatMap[Option, Ex[Option[B]], Ex[Option[B]]]  = new ExOptToExOpt
+    implicit def flatMapExSeqOpt[B]: CanFlatMap[Seq   , Ex[Option[B]], Ex[Seq   [B]]]  = new MapExSeqOpt
+    implicit def flatMapExSeq   [B]: CanFlatMap[Seq   , Ex[Seq   [B]], Ex[Seq   [B]]]  = new MapExSeq
   }
 
   private final class ExOptToExOpt[B]
@@ -26,20 +27,32 @@ object Sandbox {
 
   private final class MapExSeq[B]
     extends CanMap[Seq, Ex[B], Ex[Seq[B]]]
-    with CanFlatMap[Seq, Ex[Option[B]], Ex[Seq[B]]] {
+    with CanFlatMap[Seq, Ex[Seq[B]], Ex[Seq[B]]] {
 
     def map[A](from: Ex[Seq[A]], fun: Ex[A] => Ex[B]): Ex[Seq[B]] = ???   // ok, know how to do it
+
+    def flatMap[A](from: Ex[Seq[A]], fun: Ex[A] => Ex[Seq[B]]): Ex[Seq[B]] = ???   // ok, know how to do it
+  }
+
+  private final class MapExSeqOpt[B]
+    extends CanFlatMap[Seq, Ex[Option[B]], Ex[Seq[B]]] {
 
     def flatMap[A](from: Ex[Seq[A]], fun: Ex[A] => Ex[Option[B]]): Ex[Seq[B]] = ???   // ok, know how to do it
   }
 
-  private final class ExOptToAct
-    extends CanMap    [Option, Act        , Option[Act]]
-      with CanFlatMap [Option, Option[Act], Option[Act]] {
+  //  private final class ExOptToAct
+//    extends CanMap    [Option, Act, Act]
+//      with CanFlatMap [Option, Act, Act] {
+//
+//    def map[A](from: Ex[Option[A]], fun: Ex[A] => Act): Act = ???   // ok, know how to do it
+//
+//    def flatMap[A](from: Ex[Option[A]], fun: Ex[A] => Act): Act = ???   // ok, know how to do it
+//  }
 
-    def map[A](from: Ex[Option[A]], fun: Ex[A] => Act): Option[Act] = ???   // ok, know how to do it
+  private final class ExOptToAct2
+    extends CanMap[Option, Act, Ex[Option[Act]]] {
 
-    def flatMap[A](from: Ex[Option[A]], fun: Ex[A] => Option[Act]): Option[Act] = ???   // ok, know how to do it
+    def map[A](from: Ex[Option[A]], fun: Ex[A] => Act): Ex[Option[Act]] = ???   // ok, know how to do it?
   }
 
   trait CanMap[From[_], -B, +To] {
@@ -50,9 +63,20 @@ object Sandbox {
     def flatMap[A](from: Ex[From[A]], fun: Ex[A] => B): To
   }
 
-//  trait Elem
-  trait Ex[+A]  // extends Elem
-  trait Act     // extends Elem
+  trait Ex[+A]
+  trait Act
+  object Act { def Nop: Act = ??? }
+
+  implicit def liftEx[A](a: A): Ex[A] = ??? // make constant
+
+  implicit def lowerAct(a: Ex[Act]): Act = ???  // wrap in auxiliary act
+
+  implicit def flattenAct1(a: Ex[Option[Act]]): Act = ???  // wrap in auxiliary act
+  implicit def flattenAct2(a: Ex[Seq   [Act]]): Act = ???  // wrap in auxiliary act
+
+  trait Trig {
+    def ---> (a: Act): Unit
+  }
 
   implicitly[CanMap[Option, Ex[Int], Ex[Option[Int]]]]
 
@@ -62,6 +86,8 @@ object Sandbox {
 
     def flatMap[B, To](fun: Ex[A] => B)(implicit cbf: CanFlatMap[From, B, To]): To =
       cbf.flatMap(in, fun)
+
+    def getOrElse[B >: A](default: => Ex[A])(implicit ev: From[A] =:= Option[A]): Ex[B] = ???   // ok, know how to do it
   }
 
   trait Test {
@@ -71,6 +97,7 @@ object Sandbox {
     def in4: Ex[Seq[Int]]
     def foo: Ex[Int]
     def bar: Act
+    def tr: Trig
 
     // can map and flat-map options
     val outEx: Ex[Option[Int]] = for {
@@ -88,20 +115,22 @@ object Sandbox {
       foo
     }
 
-//    // can map and flat-map sequences
-//    val outSeqEx2: Ex[Seq[Int]] = for {
-//      _ <- in3
-//      _ <- in4
-//    } yield {
-//      foo
-//    }
+    // can map and flat-map sequences
+    val outSeqEx2: Ex[Seq[Int]] = for {
+      _ <- in3
+      _ <- in4
+    } yield {
+      foo
+    }
 
-    // can map and flat-map from ex[option[_]] to option[act]
-    val outAct: Option[Act] = for {
+    // can map and flat-map from ex[option[_]] to ex[option[act]]
+    val outAct: Ex[Option[Act]] = for {
       _ <- in1
       _ <- in2
     } yield {
       bar
     }
+
+    tr ---> outAct // .getOrElse(Act.Nop) // perhaps shortcut: outAct.get, or: outAct.orNop
   }
 }

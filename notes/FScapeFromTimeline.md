@@ -416,3 +416,27 @@ val p = for {
 drop.received ---> p
 ```
 
+----------
+
+` Ex[Option[Act]].getOrElse(Const(Act.Nop))` - can we actually use this? The necessary
+`case class Lower(in: Ex[Act]) extends Act` would have to use `ctx.nest()` and then `dispose` each time the
+action is called. Is that reasonable?
+
+Say
+
+```
+val actOpt = for {
+  x <- exOpt
+} yield {
+  PrintLn(x.toStr)
+}
+
+LoadBang() ---> actOpt.getOrElse(Nop)
+```
+
+So
+
+```
+LoadBang() ---> ActOptionGetOrElse(MapExToAct(exOpt, It, PrintLn(UnaryOp(ToStr, It)), Nop)
+```
+
