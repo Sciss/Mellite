@@ -201,7 +201,8 @@ object TimelineView {
     def visible   : Ex[SpanOrVoid ] = Visible   (t)
 //    def virtual   : Ex[Span       ] = Virtual   (t)
 
-    def selectedObjects: Ex[Seq[Timed[Obj]]] = SelectedObjects(t)
+    def selectedObjects: Ex[Seq[Timed[Obj]]] =
+      SelectedObjects(t)
   }
 
   private final class Impl(

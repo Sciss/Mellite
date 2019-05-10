@@ -385,3 +385,34 @@ drop.received ---> PrintLn(textOpt.getOrElse("no match"))
 
 tgt
 ```
+
+## Continuation 190510
+
+So `map` and `flatMap` work, let's assume we also have support for reasonable-arity tuple construction and
+deconstruction, we could return an `Option[A, B, C]` with all the data necessary to configure the rendering.
+How would the rendering process look like? Let's assume we don't have `runWith` but just `run`, so stuff
+needs to be pushed into an attribute map (since this already works).
+
+```
+val tgt     = DropTarget()
+val tlv     = tgt.select[TimelineView]
+val timed   = tlv.selectedObjects
+val r       = Runner("fsc")
+val fIn1    = Artifact("fsc:in1")
+
+val p = for {
+  t1 <- timed.applyOption(0)
+  c1 <- t1.value.attr[AudioCue]("sig")
+  s1 <- t1.span.closedOption
+} yield {
+  
+  Act(
+    fIn1 .set(c1),
+    ...
+    r.run
+  )
+}
+
+drop.received ---> p
+```
+
