@@ -55,7 +55,7 @@ object WidgetRenderViewImpl {
 
     private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]
     private[this] val graphRef    = Ref.make[Widget.Graph]
-    private[this] val viewRef     = Ref(Option.empty[View[S]])
+    private[this] val viewRef     = Ref(Option.empty[(View[S], Disposable[S#Tx])])
 //    private[this] val viewInit    = Ref(-2) // -2 is special code for "no previous view"
     private[this] var zoomFactor  = 1.0f
 
@@ -66,7 +66,10 @@ object WidgetRenderViewImpl {
     def dispose()(implicit tx: S#Tx): Unit = {
       widgetRef()._2.dispose()
 //      universe.scheduler.cancel(viewInit.swap(-1))
-      viewRef.swap(None).foreach(_.dispose())
+      viewRef.swap(None).foreach { tup =>
+        tup._1.dispose()
+        tup._2.dispose()
+      }
     }
 
     def widget(implicit tx: S#Tx): Widget[S] = widgetRef()._1.apply()
@@ -147,7 +150,7 @@ object WidgetRenderViewImpl {
 ////            res.initControl()
 //            viewInit() = -1 // not scheduled, but now have view
 //          }
-          Success(res)
+          Success((res, ctx))
 
         } catch {
           case ex @ MissingIn(_)  => Failure(ex)
@@ -155,8 +158,8 @@ object WidgetRenderViewImpl {
         }
         deferTx {
           val comp = vTry match {
-            case Success(v)   => v.component
-            case Failure(ex)  =>
+            case Success((v, _))  => v.component
+            case Failure(ex)      =>
               ex.printStackTrace()
               Swing.HGlue
           }
@@ -165,13 +168,13 @@ object WidgetRenderViewImpl {
           paneBorder.add(comp, BorderPanel.Position.Center)
           paneBorder.revalidate()
         }
-        viewRef.swap(vTry.toOption).foreach { vOld =>
-//          println("DISPOSE OLD")
-          vOld.dispose()
+        viewRef.swap(vTry.toOption).foreach { tupOld =>
+          tupOld._1.dispose()
+          tupOld._2.dispose()
         }
         // we call `initControl` only after the disposal
         // of the old view, so we can re-use resources (such as OSC sockets)
-        vTry.foreach { vNew =>
+        vTry.foreach { case (vNew, _) =>
 //          println("INIT 1")
           vNew.initControl()
         }
@@ -202,7 +205,7 @@ object WidgetRenderViewImpl {
         if (zoomIdx != newIdx) {
           zoomIdx     = newIdx
           zoomFactor  = zoomItems(newIdx) * 0.01f
-          viewRef.single.get.foreach { view =>
+          viewRef.single.get.foreach { case (view, _) =>
             setZoom(view.component.peer, zoomFactor)
             paneBorder.revalidate()
           }

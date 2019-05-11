@@ -3,11 +3,28 @@ package de.sciss.mellite
 import scala.language.{higherKinds, implicitConversions}
 
 object Sandbox {
+  /*
+    the matrix of required support:
+
+    map: Ex[Option[A]] -> Ex[B] -> Ex[Option[B]]
+    map: Ex[Seq[A]]    -> Ex[B] -> Ex[Seq[B]]
+
+    map: Ex[Option[A]] -> Act   -> Ex[Option[Act]]
+    map: Ex[Seq[A]]    -> Act   -> Ex[Seq[Act]]
+
+    flatMap: Ex[Option[A]] -> Ex[Option[B]] -> Ex[Option[B]]
+    flatMap: Ex[Seq[A]] -   > Ex[Option[B]] -> Ex[Seq[B]]
+    flatMap: Ex[Seq[A]] -   > Ex[Seq[B]]    -> Ex[Seq[B]]
+
+    which could be represented by five Aux classes
+
+   */
+
   object CanMap {
     implicit def mapExOpt[B]: CanMap[Option, Ex[B], Ex[Option[B]]]  = new ExOptToExOpt
     implicit def mapExSeq[B]: CanMap[Seq   , Ex[B], Ex[Seq   [B]]]  = new MapExSeq
-//    implicit def mapAct     : CanMap[Option, Act  , Act]            = new ExOptToAct
-    implicit def mapAct     : CanMap[Option, Act  , Ex[Option[Act]]] = new ExOptToAct2
+    implicit def mapOptAct  : CanMap[Option, Act  , Ex[Option[Act]]] = new ExOptToAct2
+    implicit def mapSeqAct  : CanMap[Seq   , Act  , Ex[Seq   [Act]]] = ??? //   // ok, know how to do it
   }
 
   object CanFlatMap {
@@ -131,6 +148,15 @@ object Sandbox {
       bar
     }
 
-    tr ---> outAct // .getOrElse(Act.Nop) // perhaps shortcut: outAct.get, or: outAct.orNop
+    // can map and flat-map from ex[seq[_]] to ex[seq[act]]
+    val outAct2: Ex[Seq[Act]] = for {
+      _ <- in3
+      _ <- in4
+    } yield {
+      bar
+    }
+
+    tr ---> outAct  // .getOrElse(Act.Nop) // perhaps shortcut: outAct.get, or: outAct.orNop
+    tr ---> outAct2 // .getOrElse(Act.Nop) // perhaps shortcut: outAct.get, or: outAct.orNop
   }
 }
