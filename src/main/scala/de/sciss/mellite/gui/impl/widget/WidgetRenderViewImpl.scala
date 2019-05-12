@@ -20,8 +20,9 @@ import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change

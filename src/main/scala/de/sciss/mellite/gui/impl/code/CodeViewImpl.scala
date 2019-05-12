@@ -20,12 +20,13 @@ import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Sys, TxnLike}
+import de.sciss.lucre.swing.LucreSwing.{defer, deferTx, requireEDT}
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, defer, deferTx, requireEDT}
-import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.mellite.gui.impl.ApiBrowser
 import de.sciss.mellite.gui.{CodeView, GUI}
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar

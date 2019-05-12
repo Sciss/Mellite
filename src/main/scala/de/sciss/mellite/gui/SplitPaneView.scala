@@ -14,8 +14,9 @@
 package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx}
 
 import scala.swing.{Orientation, SplitPane}
 

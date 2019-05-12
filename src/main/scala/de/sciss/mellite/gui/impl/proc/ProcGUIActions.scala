@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.requireEDT
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.ObjTimelineView
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj

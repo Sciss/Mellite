@@ -28,13 +28,14 @@ import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.expr.{CellView, DoubleObj, LongObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
-import de.sciss.lucre.swing._
+import de.sciss.lucre.swing.LucreSwing.{defer, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.PrimitiveConfig
 import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{FolderEditorView, GUI, ObjListView, MarkdownRenderFrame, MessageException, ObjView, Shapes}
+import de.sciss.mellite.gui.{FolderEditorView, GUI, MarkdownRenderFrame, MessageException, ObjListView, ObjView, Shapes}
 import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel

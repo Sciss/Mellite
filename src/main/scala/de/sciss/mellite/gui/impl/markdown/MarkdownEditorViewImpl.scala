@@ -19,9 +19,10 @@ import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.{GUI, MarkdownEditorView, MarkdownRenderView}
 import de.sciss.model.impl.ModelImpl

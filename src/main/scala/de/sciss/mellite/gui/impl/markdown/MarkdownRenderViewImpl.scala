@@ -20,7 +20,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.gui.impl.component.NavigationHistory
 import de.sciss.mellite.gui.{GUI, ObjListView, MarkdownEditorFrame, MarkdownRenderView}

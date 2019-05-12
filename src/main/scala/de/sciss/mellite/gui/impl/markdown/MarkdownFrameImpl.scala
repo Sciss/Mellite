@@ -16,7 +16,8 @@ package de.sciss.mellite.gui.impl.markdown
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.{BooleanObj, CellView}
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.{View, deferTx}
+import de.sciss.lucre.swing.View
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}

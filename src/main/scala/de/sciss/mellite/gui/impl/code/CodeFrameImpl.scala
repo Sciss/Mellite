@@ -18,9 +18,10 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IdPeek, Obj}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.impl.WindowImpl

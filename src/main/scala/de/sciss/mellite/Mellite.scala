@@ -18,7 +18,7 @@ import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
 import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
-import de.sciss.lucre.swing.requireEDT
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
 import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame, MainFrame, MenuBar}

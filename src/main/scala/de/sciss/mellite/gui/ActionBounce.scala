@@ -25,7 +25,8 @@ import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.expr.{BooleanObj, DoubleObj, IntObj, LongObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.{View, defer}
+import de.sciss.lucre.swing.LucreSwing.defer
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Sys}
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain

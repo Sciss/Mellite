@@ -17,8 +17,9 @@ import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, deferTx}
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.synth.proc.{SoundProcesses, Transport, Universe}
 

@@ -24,15 +24,16 @@ import de.sciss.kollflitz.Vec
 import de.sciss.lucre.expr.{CellView, DoubleObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeRendering, GraphemeView, Insets, ObjListView, ObjView}
+import de.sciss.mellite.gui.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}

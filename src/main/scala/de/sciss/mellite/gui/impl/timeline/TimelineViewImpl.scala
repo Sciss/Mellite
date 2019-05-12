@@ -27,7 +27,7 @@ import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IdentifierMap, Obj}
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}

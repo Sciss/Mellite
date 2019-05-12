@@ -23,13 +23,14 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
-import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, DragAndDrop, GUI, ObjListView, MessageException, ObjView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, DragAndDrop, GUI, MessageException, ObjListView, ObjView}
 import de.sciss.mellite.{ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}

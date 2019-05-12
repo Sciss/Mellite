@@ -19,10 +19,10 @@ import java.util.EventObject
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
-import de.sciss.lucre.swing._
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{DragAndDrop, ObjListView, MapView, ObjView}
+import de.sciss.mellite.gui.{DragAndDrop, MapView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe

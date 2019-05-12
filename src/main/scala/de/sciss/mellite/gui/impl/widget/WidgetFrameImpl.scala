@@ -15,7 +15,8 @@ package de.sciss.mellite.gui.impl.widget
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.swing.{View, deferTx}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}

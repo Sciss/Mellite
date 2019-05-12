@@ -22,9 +22,10 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{CellView, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.gui.{GUI, ObjListView, ObjView}

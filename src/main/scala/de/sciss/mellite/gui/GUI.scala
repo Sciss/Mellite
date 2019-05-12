@@ -23,7 +23,7 @@ import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing.{defer, requireEDT}
+import de.sciss.lucre.swing.LucreSwing.{defer, requireEDT}
 import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel

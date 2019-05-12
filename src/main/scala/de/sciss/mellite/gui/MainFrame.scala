@@ -22,7 +22,7 @@ import de.sciss.audiowidgets.PeakMeter
 import de.sciss.desktop.{Desktop, Menu, OptionPane, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.TxnLike
-import de.sciss.lucre.swing.{defer, deferTx}
+import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
 import de.sciss.mellite.Mellite.applyAudioPreferences
 import de.sciss.mellite.gui.impl.ApiBrowser

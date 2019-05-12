@@ -20,9 +20,10 @@ import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.expr.{CellView, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Folder, Obj}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{TreeTableView, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap

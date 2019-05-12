@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop.Desktop
 import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.swing._
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.mellite.DocumentHandler
 import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler}
 import de.sciss.model.impl.ModelImpl

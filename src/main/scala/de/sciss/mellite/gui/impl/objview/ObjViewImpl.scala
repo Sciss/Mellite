@@ -22,7 +22,8 @@ import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.{CellView, Expr, StringObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Folder, Obj}
-import de.sciss.lucre.swing.{Window, deferTx}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}

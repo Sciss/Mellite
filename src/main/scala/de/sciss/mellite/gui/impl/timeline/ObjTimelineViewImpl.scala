@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.timeline
 import de.sciss.lucre.expr.{BooleanObj, CellView, DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.ObjTimelineView.{Context, Factory}
 import de.sciss.mellite.gui.impl.objview.{ActionObjView, GenericObjView}

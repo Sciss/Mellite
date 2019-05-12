@@ -21,7 +21,7 @@ import de.sciss.lucre.expr.Expr
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Identifiable, Sys}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{defer, deferTx}
+import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.mellite.executionContext
 import de.sciss.processor.Processor
 import de.sciss.processor.impl.ProcessorImpl

@@ -21,7 +21,7 @@ import de.sciss.file._
 import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys

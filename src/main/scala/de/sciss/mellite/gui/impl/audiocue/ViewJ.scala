@@ -18,7 +18,7 @@ import java.awt.{Color, Graphics2D}
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.desktop
-import de.sciss.lucre.swing._
+import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.executionContext
 import de.sciss.sonogram.{Overview, PaintController}
 import de.sciss.synth.proc.TimeRef

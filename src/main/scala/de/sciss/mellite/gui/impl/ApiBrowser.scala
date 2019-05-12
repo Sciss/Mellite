@@ -1,9 +1,9 @@
 package de.sciss.mellite.gui.impl
 
 import de.sciss.file._
-import de.sciss.lucre.swing.defer
-import de.sciss.mellite.{Mellite, executionContext}
+import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.gui.WebBrowser
+import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.synth.proc.Code
 import dotterweide.build.{Module, Version}
 import dotterweide.editor.controller.LookUpTypeAction

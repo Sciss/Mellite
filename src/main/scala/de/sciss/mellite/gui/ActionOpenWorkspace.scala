@@ -21,7 +21,7 @@ import de.sciss.file._
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.store.BerkeleyDB
-import de.sciss.lucre.swing.defer
+import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.{Application, Mellite, Prefs}
 import de.sciss.synth.proc

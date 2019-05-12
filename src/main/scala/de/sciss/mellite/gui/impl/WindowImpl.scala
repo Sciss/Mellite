@@ -20,7 +20,8 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.mellite.gui.{CanBounce, DocumentViewHandler, WindowPlacement}
 import de.sciss.mellite.util.Veto
 import de.sciss.mellite.{Application, DependentMayVeto, executionContext}

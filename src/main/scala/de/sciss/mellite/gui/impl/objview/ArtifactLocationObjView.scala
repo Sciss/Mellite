@@ -21,7 +21,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.ArtifactLocation
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditArtifactLocation
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser

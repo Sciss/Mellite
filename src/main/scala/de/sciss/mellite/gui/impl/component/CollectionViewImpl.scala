@@ -19,7 +19,8 @@ import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{View, Window, deferTx, requireEDT}
+import de.sciss.lucre.swing.{View, Window}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Application
 import de.sciss.mellite.gui.{AttrMapFrame, GUI, ObjListView, MessageException, ObjView}

@@ -17,7 +17,7 @@ import java.awt.GraphicsEnvironment
 
 import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Window, WindowHandler}
-import de.sciss.lucre
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.mellite.Mellite
 import dotterweide.ide.{AbstractDocBrowser, DocBrowser}
 
@@ -50,7 +50,7 @@ object WebBrowser {
 
     def title: String = frame.title
     def title_=(value: String): Unit = {
-      lucre.swing.requireEDT()
+      requireEDT()
       frame.title = value
       if (!frame.visible) frame.visible = true
     }

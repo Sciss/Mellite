@@ -14,7 +14,7 @@
 package de.sciss.mellite.gui.impl
 
 import de.sciss.desktop
-import de.sciss.lucre.swing.requireEDT
+import de.sciss.lucre.swing.LucreSwing.requireEDT
 
 trait WindowHolder[W <: desktop.Window] {
   private[this] var _window: W = _

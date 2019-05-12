@@ -19,8 +19,9 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{BooleanObj, CellView, IntVector}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Folder
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.swing.{Window, deferTx}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Prefs
 import de.sciss.mellite.gui.impl.WindowImpl

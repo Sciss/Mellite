@@ -20,11 +20,12 @@ import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.{View, Window, defer, deferTx}
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
-import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}

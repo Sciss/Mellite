@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Identifiable, IdentifierMap, Obj, TxnLike}
-import de.sciss.lucre.swing.deferTx
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.gui.impl.proc.ProcObjView.{InputAttr, LinkTarget}
 import de.sciss.mellite.gui.{TimelineRendering, TimelineView}
 import de.sciss.span.{Span, SpanLike}
