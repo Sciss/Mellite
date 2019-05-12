@@ -1,7 +1,6 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.swing.Graph
-import de.sciss.lucre.expr.ExOps._
 import de.sciss.lucre.expr.graph._
 import de.sciss.lucre.swing.graph._
 
