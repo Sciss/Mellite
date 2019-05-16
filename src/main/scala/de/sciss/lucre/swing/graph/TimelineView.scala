@@ -193,7 +193,7 @@ object TimelineView {
     }
   }
 
-  implicit class Ops[S <: Sys[S]](private val t: Ex[TimelineView]) extends AnyVal {
+  implicit class Ops(private val t: Ex[TimelineView]) extends AnyVal {
     def sampleRate: Ex[Double     ] = SampleRate(t)
     def position  : Ex[Long       ] = Position  (t)
     def selection : Ex[SpanOrVoid ] = Selection (t)
