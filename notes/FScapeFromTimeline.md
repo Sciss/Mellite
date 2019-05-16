@@ -440,3 +440,53 @@ So
 LoadBang() ---> ActOptionGetOrElse(MapExToAct(exOpt, It, PrintLn(UnaryOp(ToStr, It)), Nop)
 ```
 
+## Continuation 190516
+
+How to formalise object creation; in particular, how to ensure that we can run an action on
+a newly created object (and only after it has been created)? In imperative code, this is
+straight forward:
+
+```
+val newObj = Proc[S]()
+newObj.attr.put("name", "bla")
+tl.put(Span(0L, 100000L), newObj)
+```
+
+The only (?) logical translation would be to use mapping and for comprehension again.
+
+```
+val aNewObj = Proc.make
+val prog = for {
+  newObj <- aNewObj
+} yield {
+  Act(
+    newObj.attr.set("name", "bla"),
+    tl.put(Span(0L, 100000L), newObj)
+  )
+}
+trOk ---> prog
+```
+
+which means we would have another type apart from `Act` and `Ex`, and perhaps it shows that `IAction`
+should not be a `IPublisher[S, Unit]` but an `IPublisher[S, A]` for some emitted value of type `A`?
+
+Another way would be to throw an exception if the object has not been created yet. A bit ugly, but
+would be easier to implement with what we've got.
+
+```
+val newObj = Proc()
+val prog = Act(
+  newObj.make,
+  newObj.attr.set("name", "bla"),
+  tl.put(Span(0L, 100000L), newObj)
+)
+trOk ---> prog
+```
+
+It's definitely easier to comprehend as a user as well.
+
+```
+// val spec  = AudioFileSpec.read()
+val acOut = AudioCue(artifact, /* spec, */ offset, gain)
+
+```

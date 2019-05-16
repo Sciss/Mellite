@@ -18,8 +18,7 @@
 
 ## Code Editors
 
-We try to use the same keyboard mappings as IntelliJ IDEA, with some additional mappings
-inspired by SuperCollider.
+We try to use the same keyboard mappings as IntelliJ IDEA, with some additional mappings inspired by SuperCollider.
 
 |**Key**            |**Action**                         |
 |:------------------|:----------------------------------|
@@ -42,6 +41,7 @@ inspired by SuperCollider.
 |`ctrl Y`           |Remove line                        |
 |`ctrl Z`           |Undo                               |
 |`ctrl alt S`       |Toggle vertical split              |
+|`ctrl alt D`       |Look up documentation              |
 |`shift TAB`        |Decrease indentation               |
 |`shift ctrl DOWN`  |Move line down                     |
 |`shift ctrl F7`    |Show usages                        |
