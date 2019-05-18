@@ -20,12 +20,13 @@ current 16-bit max
   263 Widen2.doubleLongDouble
   288 WidenToDouble.DoubleImpl
 
- 1000 Type.Aux                   (Lucre)
+ 1000 Type.ObjBridge             (Lucre)
  1001 Ex.CanMapExOption          (Lucre)
  1002 Ex.CanMapExSeq             (Lucre)
  1003 Ex.CanMapActOption         (Lucre)
  1004 Ex.CanFlatMapExOption      (Lucre)
  1005 Obj.Bridge.obj             (Lucre)
+ 1006 Obj.Source.obj             (Lucre)
 
  1024 Obj.Extractor.Int          (Patterns)
  1026 Obj.Extractor.Double       (Patterns)
