@@ -41,8 +41,8 @@ lazy val deps = new {
     val playJSON            = "0.4.0"
     val processor           = "0.4.2"
     val raphaelIcons        = "1.0.6"
-    val scalaCollider       = "1.28.2"
-    val scalaColliderSwing  = "1.41.1"
+    val scalaCollider       = "1.28.3"
+    val scalaColliderSwing  = "1.41.2"
     val scalaColliderUGens  = "1.19.4"
     val scalaOSC            = "1.2.0"
     val scalaSTM            = "0.9.1"
@@ -80,7 +80,7 @@ lazy val commonSettings = Seq(
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.12.8",
   // 2.13.0 is missing dispatch/reboot at the moment
-  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-RC1" */),
+  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-RC2" */),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"
@@ -271,7 +271,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
     // ),
     libraryDependencies ++= {
       // currently disabled until Scala 2.13 version is available
-      if (scalaVersion.value == "2.13.0-M5") Nil else Seq(
+      if (scalaVersion.value == "2.13.0-RC2") Nil else Seq(
         "de.sciss"        %% "scalafreesound"                 % deps.main.freesound           // Freesound support
       )
     },
