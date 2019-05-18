@@ -488,5 +488,80 @@ It's definitely easier to comprehend as a user as well.
 ```
 // val spec  = AudioFileSpec.read()
 val acOut = AudioCue(artifact, /* spec, */ offset, gain)
+```
+
+---------
+
+## Continuation 190518
+
+Back to instantiation; it would make sense to thus use `Ex[Obj]` throughout and never `Obj` directly;
+the expression would fire upon an instantiation. How should we distinguish between expressions and
+other (mutable) objects. For example, `Ex[AudioCue]`, should that remain an expression of a "value" only,
+such that and transition to `stm.Obj` only happens indirectly, in `attr.set` etc.? If we want to access its
+attribute map, how do we state that?
 
 ```
+val ex: Ex[AudioCue] = ???
+val i: Ex[Int] = ???
+val obj: Ex[Obj] ex.makeObj()
+val tr: Trig = ???
+tr ---> obj
+val view = obj.attr[Int]("key")
+i ---> view // ?
+```
+
+But... how would we get an object of audio-cue directly? Perhaps
+
+```
+val obj: Ex[Obj] = "audio-cue".attr[Ob]("x")
+val view = obj.attr[Int]("key")
+i ---> view // ?
+```
+
+The question remains, how to create a new folder, for example? Should we distinguish between a
+not-yet-instantiated and an instantiated folder?
+
+```
+val f  = Folder()
+val fo = f.makeObj()
+tr ---> fo
+tr ---> PrintLn(fo.size)    // or f.size?
+```
+
+versus
+
+```
+val f  = Folder()
+tr ---> f.mkObj
+tr ---> PrintLn(f.size)
+```
+
+versus
+
+```
+val f  = Folder()
+tr ---> f   // slightly confusing?
+tr ---> PrintLn(f.size)
+```
+
+What are the alternative method names to `makeObj`?
+
+```
+f.obj()
+cue.obj()
+
+f.make()
+cue.make()
+
+f.mkObj
+```
+
+In general, the `IPull` implementation is not optimal. If we have `folder.append`, we want to be able to process
+changes to `folder.size` within the same trigger. But an `IEvent` cannot link into an `Event`, and so it's not
+possible to preserve the line `Ex[Folder] ---> stm.Folder ---> Ex[Int]`. The only work around this would be to
+redefine the behaviour of say `Trig & Trig`, in the sense that we keep the information about a trigger having been
+fired for the entire duration of an `IPush` / `IPull` cycle.
+
+I guess the good thing is, the user can control temporal behaviour through `Act.apply`, which is guaranteed to
+use `Observer` instances and the given order, so one can rely on the order of updates of expressions used in the 
+sequence. We should review all uses of `Caching` which potentially undermines the predictable sequence.
