@@ -565,3 +565,44 @@ fired for the entire duration of an `IPush` / `IPull` cycle.
 I guess the good thing is, the user can control temporal behaviour through `Act.apply`, which is guaranteed to
 use `Observer` instances and the given order, so one can rely on the order of updates of expressions used in the 
 sequence. We should review all uses of `Caching` which potentially undermines the predictable sequence.
+
+-----------
+
+The following program does not work:
+
+```
+type S = InMemory
+      
+val g = Graph {
+  val fAttr = "foo".attr[Folder]
+  val m = fAttr.map(_.size)
+  m.changed ---> PrintLn(m.toStr)
+}
+  
+implicit val system: S = InMemory()
+  
+system.step { implicit tx =>
+  val self  = IntObj.newConst(0): IntObj[S]
+  val f     = stm.Folder[S]()
+  self.attr.put("foo", f)
+  val selfH = tx.newHandle(self)
+  g.expand.initControl()
+  val x: stm.Obj[S] = IntObj.newConst(1)
+  f.addLast(x)
+}
+```
+
+The reason being the interaction between mutable objects (`Folder`) and the behaviour of `MapExOption`:
+
+```
+pull(in.changed).flatMap { inCh =>
+  val before  = valueOf(inCh.before )
+  val now     = valueOf(inCh.now    )
+  if (before == now) None else Some(Change(before, now))
+}
+```
+
+where `valueOf` only now expands the sub-graph, and therefore the `Folder.Size` element as well, which will
+"initialize" itself in both cases to the _current_ size. While we don't know yet how to do this correctly for
+mapping over a sequence, it is clear that we should expand the sub-graph as early as possible, i.e. as soon
+as the input is `Some`.
