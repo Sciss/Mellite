@@ -245,6 +245,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "dotterweide-ui"                 % deps.main.dotterweide,        // Code editor
       "de.sciss"          %% "dotterweide-doc-browser"        % deps.main.dotterweide,        // scala-doc browser
       "de.sciss"          %% "dotterweide-scala"              % deps.main.dotterweide,        // Code editor
+      "de.sciss"          %% "scalafreesound"                 % deps.main.freesound,          // Freesound support
       "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
       "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing
       "de.sciss"          %% "serial"                         % deps.main.serial,             // serialization
@@ -272,7 +273,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
     libraryDependencies ++= {
       // currently disabled until Scala 2.13 version is available
       if (scalaVersion.value == "2.13.0-RC2") Nil else Seq(
-        "de.sciss"        %% "scalafreesound"                 % deps.main.freesound           // Freesound support
       )
     },
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
