@@ -268,7 +268,8 @@ object ProcActions {
     // val srRatio = grapheme.spec.sampleRate / Timeline.SampleRate
     val spanV   = time // Span(time, time + (selection.length / srRatio).toLong)
     val span    = SpanLikeObj /* SpanObj */.newVar[S](spanV)
-    val p       = Proc[S]
+    val p       = Proc[S]()
+    val a       = p.attr
 
     // val scanIn  = proc.inputs .add(Proc.graphAudio )
     /*val sOut=*/ p.outputs.add(Proc.mainOut)
@@ -305,8 +306,9 @@ object ProcActions {
     // val bi: Grapheme.TimedElem[S] = (gStart, grapheme) // BiExpr(gStart, grapheme)
     // grIn.add(gStart, audioCue)
     // scanIn add grIn
-    p.attr.put(Proc.graphAudio, audioCueOff /* grIn */)
     p.graph() = SynthGraphObj.tape
+    a.put(Proc.graphAudio, audioCueOff /* grIn */)
+    a.put(Proc.attrSource, SynthGraphObj.tapeSource)
     (span, p)
   }
 
