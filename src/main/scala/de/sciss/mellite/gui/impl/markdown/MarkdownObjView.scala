@@ -66,6 +66,7 @@ object MarkdownObjView extends ObjListView.Factory {
       .action((_, c) => c.copy(const = true))
 
     arg[String]("contents")
+      .optional()
       .text(s"Markdown text")
       .action((v, c) => c.copy(contents = Some(v)))
 

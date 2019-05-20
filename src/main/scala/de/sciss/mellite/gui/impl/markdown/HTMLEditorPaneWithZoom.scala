@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.gui.impl.markdown
 
-import java.awt.{Graphics, Graphics2D, Shape}
+import java.awt.{Graphics, Graphics2D, RenderingHints, Shape}
 
 import de.sciss.swingplus.EditorPane
 import javax.swing.JEditorPane
@@ -98,6 +98,9 @@ class HTMLEditorPaneWithZoom(text0: String) extends EditorPane("text/html", text
         val g2    = g.asInstanceOf[Graphics2D]
         val scale = _zoomFactor
 //        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+        // this is needed for smoothly scaled images:
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+//        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
         val atOld = g2.getTransform
         g2.scale(scale, scale)
         super.paint(g2, allocation)
