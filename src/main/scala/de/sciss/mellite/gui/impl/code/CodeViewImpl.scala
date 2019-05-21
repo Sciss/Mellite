@@ -30,6 +30,7 @@ import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
+import de.sciss.synth.proc.Code.Import
 import de.sciss.synth.proc.{Code, Universe}
 import dotterweide.Span
 import dotterweide.build.Version
@@ -58,7 +59,7 @@ object CodeViewImpl {
     requireEDT()
     intpMap.getOrElse(id, {
       val cfg     = Interpreter.Config()
-      cfg.imports = Code.getImports(id)
+      cfg.imports = Code.getImports(id).map(_.expr)
       val res     = Interpreter.async(cfg)
       intpMap.put(id, res)
       res
@@ -96,11 +97,14 @@ object CodeViewImpl {
 
     private[this] val language = {
       val v = de.sciss.mellite.BuildInfo.scalaVersion
+      val implied = Code.getImports(code.tpe.id).collect {
+        case i if i.selectors.contains(Import.Wildcard) => i.prefix
+      }
       new ScalaLanguage(
         scalaVersion      = Version.parse(v).get,
         prelude           = Code.fullPrelude(code),
         postlude          = code.postlude,
-        examples          = Nil
+        impliedPrefixes   = implied.reverse
       )
     }
 
