@@ -53,7 +53,7 @@ trait CodeView[S <: Sys[S], Out] extends UniverseView[S] with Model[CodeView.Upd
 
   def preview(): Future[Out]
 
-  def currentText: String
+  var currentText: String
 
   // def updateSource(text: String)(implicit tx: S#Tx): Unit
 

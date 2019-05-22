@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.gui.impl.code
 
-import de.sciss.desktop.{Menu, OptionPane, UndoManager, Util}
+import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
@@ -26,16 +26,15 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ProcActions
 import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, GUI, PlayToggleButton, ProcOutputsView, SplitPaneView}
-import de.sciss.mellite.util.Veto
-import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.SynthGraph
+import de.sciss.synth.proc.Code.Example
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.impl.ActionImpl
 import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
-import scala.concurrent.{Future, Promise}
+import scala.swing.event.Key
 import scala.swing.{Button, Component, Orientation, TabbedPane}
 import scala.util.control.NonFatal
 
@@ -108,7 +107,11 @@ object CodeFrameImpl {
           obj.execute(au)
         }
       }
-      GUI.toolButton(actionExecute, raphael.Shapes.Bolt, tooltip = "Run body")
+      val ksPower = KeyStrokes.shift + Key.F10
+      val ggPower = GUI.toolButton(actionExecute, raphael.Shapes.Bolt,
+        tooltip = s"Run body (${GUI.keyStrokeText(ksPower)})")
+      Util.addGlobalKey(ggPower, ksPower)
+      ggPower
     }
 
     val handlerOpt = obj match {
@@ -230,7 +233,7 @@ object CodeFrameImpl {
                                    code0: CodeT[In0, Out0],
                                    handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
                                    rightViewOpt: Option[(String, View[S])] = None,
-                                   debugMenuItems: List[swing.Action] = Nil,
+                                   debugMenuItems: ISeq[swing.Action] = Nil,
                                    canBounce: Boolean)
                                   (implicit tx: S#Tx, universe: Universe[S],
                                    undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
@@ -245,7 +248,7 @@ object CodeFrameImpl {
     view.init()
     val _name = CellView.name(pObj)
     val res = new FrameImpl(codeView = codeView, view = view, name = _name, contextName = code0.tpe.humanName,
-      debugMenuItems = debugMenuItems
+      debugMenuItems = debugMenuItems, examples = code0.tpe.examples
     )
     res.init()
     res
@@ -272,15 +275,16 @@ object CodeFrameImpl {
 
   // ---- frame impl ----
 
-  private final class FrameImpl[S <: Sys[S]](val codeView: CodeView[S, _], val view: View[S],
-                                             name: CellView[S#Tx, String], contextName: String,
-                                             debugMenuItems: List[swing.Action])
-    extends WindowImpl[S](name.map(n => s"$n : $contextName Code")) with CodeFrame[S] with Veto[S#Tx] {
-
-    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
-      if (!codeView.isCompiling && !codeView.dirty) None else Some(this)
-
-    private def _vetoMessage = "The code has been edited."
+  private final class FrameImpl[S <: Sys[S]](val codeView   : CodeView[S, _],
+                                             val view       : View[S],
+                                             name           : CellView[S#Tx, String],
+                                             contextName    : String,
+                                             debugMenuItems : ISeq[swing.Action],
+                                             examples       : ISeq[Example]
+                                            )
+    extends WindowImpl[S](name.map(n => s"$n : $contextName Code"))
+      with CodeFrameBase[S]
+      with CodeFrame[S] {
 
     override protected def initGUI(): Unit = {
       super.initGUI()
@@ -295,33 +299,7 @@ object CodeFrameImpl {
           case _ =>
         }
       }
+      mkExamplesMenu(examples)
     }
-
-    def vetoMessage(implicit tx: S#Tx): String =
-      if (codeView.isCompiling) "Ongoing compilation." else _vetoMessage
-
-    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] =
-      if (codeView.isCompiling) Future.failed(Aborted())
-      else {
-        val p = Promise[Unit]()
-        deferTx {
-          val message = "The code has been edited.\nDo you want to save the changes?"
-          val opt = OptionPane.confirmation(message = message, optionType = OptionPane.Options.YesNoCancel,
-            messageType = OptionPane.Message.Warning)
-          opt.title = s"Close - $title"
-          val res = opt.show(Some(window))
-          res match {
-            case OptionPane.Result.No =>
-              p.success(())
-            case OptionPane.Result.Yes =>
-              /* val fut = */ codeView.save()
-              p.success(())
-
-            case OptionPane.Result.Cancel | OptionPane.Result.Closed =>
-              p.failure(Aborted())
-          }
-        }
-        p.future
-      }
   }
 }

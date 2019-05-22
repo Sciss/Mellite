@@ -128,7 +128,8 @@ object CodeViewImpl {
     def isCompiling(implicit tx: TxnLike): Boolean =
       futCompile.get(tx.peer).isDefined
 
-    def currentText: String = editorPanel.data.text
+    def currentText         : String        = editorPanel.currentEditor.text
+    def currentText_= (value: String): Unit = editorPanel.currentEditor.text = value
 
     def dispose()(implicit tx: S#Tx): Unit = {
       bottom.foreach(_.dispose())
