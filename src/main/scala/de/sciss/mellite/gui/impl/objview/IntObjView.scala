@@ -61,13 +61,13 @@ object IntObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    // cf. https://github.com/scallop/scallop/issues/189
-    val args1 = args match {
-      case ("--help" | "-h") :: Nil => args
-      case _ => "--ignore" +: args
-    }
-    object p extends ObjViewCmdLineParser[Config[S]](this, args1) {
-      val ignore: Opt[Boolean]  = opt(hidden = true)
+//    // cf. https://github.com/scallop/scallop/issues/189
+//    val args1 = args match {
+//      case ("--help" | "-h") :: Nil => args
+//      case _ => "--ignore" +: args
+//    }
+    object p extends ObjViewCmdLineParser[Config[S]](this, args /*args1*/) {
+//      val ignore: Opt[Boolean]  = opt(hidden = true)
       val const: Opt[Boolean]   = opt(descr = s"Make constant instead of variable")
       val value: Opt[Int]       = trailArg(descr = "Initial int value")
     }
