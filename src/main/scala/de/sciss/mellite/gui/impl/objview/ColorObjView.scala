@@ -19,15 +19,19 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
+import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{ObjListView, MessageException, ObjView}
+import de.sciss.mellite.gui.{MessageException, ObjListView, ObjView}
 import de.sciss.{desktop, numbers}
 import de.sciss.synth.proc.Implicits._
+import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
+import org.rogach.scallop
 
 import scala.swing.{Action, BorderPanel, Button, ColorChooser, Component, FlowPanel, GridPanel, Label, Swing}
 import scala.util.{Failure, Success, Try}
@@ -91,28 +95,17 @@ object ColorObjView extends ObjListView.Factory {
     Color.Palette.find(_.rgba == rgba).getOrElse(Color.User(rgba))
   }
 
-  private implicit object ReadColor extends scopt.Read[Color] {
-    def arity: Int = 1
-
-    def reads: String => Color = { s => parseString(s).get }
+  private implicit val ReadColor: scallop.ValueConverter[Color] = scallop.singleArgConverter { s =>
+    parseString(s).get
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(value = null)
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    arg[Color]("value")
-      .text(s"Initial color value (0-${Color.Palette.size - 1}, #rrggbb, red, rgb(), hsl(), ...)")
-      .required()
-      .action((v, c) => c.copy(value = v))
-
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
+      val value: Opt[Color]   = trailArg(
+        descr = s"Initial color value (0-${Color.Palette.size - 1}, #rrggbb, red, rgb(), hsl(), ...)")
+    }
+    p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
@@ -287,7 +280,7 @@ object ColorObjView extends ObjListView.Factory {
                                 var value: Color, isEditable0: Boolean)
     extends ObjListView /* .Color */[S]
       with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.SimpleExpr[S, Color, Color.Obj] {
+      with ObjListViewImpl.SimpleExpr[S, Color, Color.Obj] { listView =>
 
     type Repr = Color.Obj[S]
 
@@ -314,54 +307,62 @@ object ColorObjView extends ObjListView.Factory {
     def isViewable: Boolean = isEditable0
 
     override def openView(parent: Option[Window[S]])
-                         (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+                         (implicit tx: S#Tx, _universe: Universe[S]): Option[Window[S]] = {
       //        val opt = OptionPane.confirmation(message = component, optionType = OptionPane.Options.OkCancel,
       //          messageType = OptionPane.Message.Plain)
       //        opt.show(parent) === OptionPane.Result.Ok
       val title = CellView.name(obj)
       val w: WindowImpl[S] = new WindowImpl[S](title) { self =>
-        val view: View[S] = View.wrap {
-          val (compColor, chooser) = mkColorEditor()
-          chooser.color = toAWT(value)
-          val ggCancel = Button("Cancel") {
-            closeMe() // self.handleClose()
-          }
+        val view: UniverseView[S] = new UniverseView[S] with ComponentHolder[Component] {
+          type C = Component
+          val universe: Universe[S] = _universe
 
-          def apply(): Unit = {
-            val colr = fromAWT(chooser.color)
-            import universe.cursor
-            val editOpt = cursor.step { implicit tx =>
-              objH() match {
-                case Color.Obj.Var(vr) =>
-                  Some(EditVar.Expr[S, Color, Color.Obj]("Change Color", vr, Color.Obj.newConst[S](colr)))
-                case _ => None
-              }
+          deferTx {
+            val (compColor, chooser) = mkColorEditor()
+            chooser.color = toAWT(value)
+            val ggCancel = Button("Cancel") {
+              closeMe() // self.handleClose()
             }
-            editOpt.foreach { edit =>
-              parent.foreach { p =>
-                p.view match {
-                  case e: View.Editable[S] => e.undoManager.add(edit)
+
+            def apply(): Unit = {
+              val colr = fromAWT(chooser.color)
+//              import universe.cursor
+              val editOpt = cursor.step { implicit tx =>
+                objH() match {
+                  case Color.Obj.Var(vr) =>
+                    Some(EditVar.Expr[S, Color, Color.Obj]("Change Color", vr, Color.Obj.newConst[S](colr)))
+                  case _ => None
+                }
+              }
+              editOpt.foreach { edit =>
+                parent.foreach { p =>
+                  p.view match {
+                    case e: View.Editable[S] => e.undoManager.add(edit)
+                  }
                 }
               }
             }
+
+            val ggOk = Button("Ok") {
+              apply()
+              closeMe() // self.handleClose()
+            }
+            val ggApply = Button("Apply") {
+              apply()
+            }
+            val pane = new BorderPanel {
+              add(compColor, BorderPanel.Position.Center)
+              add(new FlowPanel(ggOk, ggApply, Swing.HStrut(8), ggCancel), BorderPanel.Position.South)
+            }
+
+            component = pane
           }
 
-          val ggOk = Button("Ok") {
-            apply()
-            closeMe() // self.handleClose()
-          }
-          val ggApply = Button("Apply") {
-            apply()
-          }
-          val pane = new BorderPanel {
-            add(compColor, BorderPanel.Position.Center)
-            add(new FlowPanel(ggOk, ggApply, Swing.HStrut(8), ggCancel), BorderPanel.Position.South)
-          }
-          pane
+          def dispose()(implicit tx: S#Tx): Unit = ()
         }
 
         def closeMe(): Unit = {
-          import universe.cursor
+          import view.universe.cursor
           cursor.step { implicit tx => self.dispose() }
         }
 

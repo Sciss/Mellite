@@ -15,7 +15,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val main = new {
-    val akka                = "2.5.19"  // "2.5.21" has broken printDebugDump
+    val akka                = "2.5.23"
     val appDirs             = "1.0.3"
     val audioFile           = "1.5.3"
     val audioWidgets        = "1.14.1"
@@ -47,8 +47,9 @@ lazy val deps = new {
     val scalaOSC            = "1.2.0"
     val scalaSTM            = "0.9.1"
     val scalaSwing          = "2.1.1"
+    val scallop             = "3.2.0"
     val scissDSP            = "1.3.2"
-    val scopt               = "3.7.1"
+    // val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.1"
     val soundProcesses      = "3.29.0-SNAPSHOT"
@@ -79,8 +80,7 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.12.8",
-  // 2.13.0 is missing dispatch/reboot at the moment
-  crossScalaVersions := Seq("2.12.8", "2.11.12" /* , "2.13.0-RC2" */),
+  crossScalaVersions := Seq("2.12.8", "2.11.12", "2.13.0-RC2"),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"
@@ -210,7 +210,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
     description := appDescription,
     resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
-      "com.github.scopt"  %% "scopt"                          % deps.main.scopt,              // command line option parsing
+      // "com.github.scopt"  %% "scopt"                          % deps.main.scopt,              // command line option parsing
       "de.sciss"          %% "audiofile"                      % deps.main.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.main.audioWidgets,       // audio application widgets
@@ -261,6 +261,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.main.appDirs,            // finding cache directory
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
+      "org.rogach"        %% "scallop"                        % deps.main.scallop,            // command line option parsing
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
     ),

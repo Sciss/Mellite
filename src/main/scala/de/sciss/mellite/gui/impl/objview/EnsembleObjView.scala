@@ -98,24 +98,15 @@ object EnsembleObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config()
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val playing : Opt[Boolean] = boolOpt(descr = "Initial playing value (0, 1, false, true, F, T)")
+      val offset  : Opt[TimeArg] = opt    (descr = "Offset value (frames, 1.3s, ...)",
+        default = Some(TimeArg.Frames(0L)))
+      val const   : Opt[Boolean] = opt    (descr = "Make constant offset instead of variable")
 
-    opt[Boolean]('p', "playing")
-      .text("Initial playing value (0, 1, false, true)")
-      .action((v, c) => c.copy(playing = v))
-
-    opt[TimeArg]('p', "playing")
-      .text("Offset value (frames, 1.3s, ...)")
-      .action((v, c) => c.copy(offset = v.frames()))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant offset instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    parseConfig(args, default)
+      mainOptions = List(playing, offset)
+    }
+    p.parse(Config(name = p.name(), playing = p.playing(), const = p.const(), offset = p.offset().frames()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

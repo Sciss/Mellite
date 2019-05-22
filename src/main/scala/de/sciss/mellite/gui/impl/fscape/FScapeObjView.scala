@@ -94,12 +94,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
                                     (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
     import de.sciss.mellite.gui.impl.code.CodeFrameImpl.{make, mkSource}
-    val codeObj = mkSource(obj = obj, codeId = FScape.Code.id, key = FScape.attrSource,
-      init = "// FScape graph function source code\n\n")
-
-    val codeEx0 = codeObj
+    val codeObj = mkSource(obj = obj, codeTpe = FScape.Code, key = FScape.attrSource)()
     val objH    = tx.newHandle(obj)
-    val code0   = codeEx0.value match {
+    val code0   = codeObj.value match {
       case cs: FScape.Code => cs
       case other => sys.error(s"FScape source code does not produce fscape.Graph: ${other.tpe.humanName}")
     }

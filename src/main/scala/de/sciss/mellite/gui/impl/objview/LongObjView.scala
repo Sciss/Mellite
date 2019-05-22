@@ -62,21 +62,11 @@ object LongObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(value = 0L)
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    arg[Long]("value")
-      .text("Initial long value")
-      .required()
-      .action((v, c) => c.copy(value = v))
-
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
+      val value: Opt[Long]    = trailArg(descr = "Initial long value")
+    }
+    p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

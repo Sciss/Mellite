@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.gui.impl.objview
 
+import java.util.Locale
+
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -20,14 +22,15 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{CodeFrame, ObjListView, MessageException, ObjView}
+import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
+import org.rogach.scallop
 
 import scala.swing.{Component, Label}
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 object CodeObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Code.Obj[~]
@@ -45,20 +48,8 @@ object CodeObjView extends ObjListView.Factory {
 
   final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Code, const: Boolean = false)
 
-  private def defaultCode(id: Int): Try[Code] = id match {
-    case Code.SynthGraph.id => Success(Code.SynthGraph(
-      """|val in   = ScanIn("in")
-         |val sig  = in
-         |ScanOut("out", sig)
-         |""".stripMargin))
-
-    case Code.Action.id => Success(Code.Action(
-      """|println("bang!")
-         |""".stripMargin))
-
-    case _ =>
-      Failure(MessageException("No code type selected"))
-  }
+  private def defaultCode(tpe: Code.Type): Code =
+    Code(tpe.id, tpe.defaultSource)
 
   // cf. SP #58
   private lazy val codeSeq    = Code.types
@@ -74,36 +65,23 @@ object CodeObjView extends ObjListView.Factory {
                                  (implicit universe: Universe[S]): Unit = {
     val ggValue = new ComboBox(codeNames)
     val res0 = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
-      defaultCode(ggValue.selection.index)
+      Try(defaultCode(Code.getType(ggValue.selection.index)))
     )
     val res = res0.map(c => Config[S](name = c.name, value = c.value))
     done(res)
   }
 
-  private implicit object ReadCode extends scopt.Read[Code] {
-    def arity: Int = 1
-
-    def reads: String => Code = { s =>
-      val tpe = codeMap(s.toLowerCase)
-      defaultCode(tpe.id).get
-    }
+  private implicit val ReadCode: scallop.ValueConverter[Code] = scallop.singleArgConverter { s =>
+    val tpe = codeMap(s.toLowerCase(Locale.US))
+    defaultCode(tpe)
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(value = null)
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant offset instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    arg[Code]("type")
-      .text(codeMap.keysIterator.mkString("Code type (", ",", ")"))
-      .action((v, c) => c.copy(value = v))
-
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
+      val value: Opt[Code]    = trailArg("type", descr = codeMap.keysIterator.mkString("Code type (", ",", ")"))
+    }
+    p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

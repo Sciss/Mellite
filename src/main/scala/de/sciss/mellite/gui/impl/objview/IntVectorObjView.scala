@@ -65,21 +65,11 @@ object IntVectorObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(value = Vec())
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    arg[Seq[Int]]("values")
-      .text("Comma-separated list of int values (, for empty list)")
-      .required()
-      .action((v, c) => c.copy(value = v.toIndexedSeq))
-
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val const: Opt[Boolean]   = opt   (descr = s"Make constant instead of variable")
+      val value: Opt[Vec[Int]]  = vecArg(descr = "Comma-separated list of int values (, for empty list)")
+    }
+    p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

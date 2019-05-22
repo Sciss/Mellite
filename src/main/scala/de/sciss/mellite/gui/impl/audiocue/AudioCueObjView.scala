@@ -129,42 +129,35 @@ object AudioCueObjView extends ObjListView.Factory {
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     // we do not support any number of files except one
     val default = Config2()
-    val p = new ObjViewCmdLineParser[Config2](this)
-    import p._
-    name((v, c) => c.copy(name = Some(v)))
+    object p extends ObjViewCmdLineParser[Config2](this, args) {
+      val location: Opt[File] = opt(
+        descr = "Artifact's base location (directory). If absent, artifact's direct parent is used."
+      )
+      validateFileIsDirectory(location)
 
-    opt[File]('l', "location")
-      .text("Artifact's base location (directory). If absent, artifact's direct parent is used.")
-      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
-      .action((v, c) => c.copy(location = Some((v.name, v))))
+      val const: Opt[Boolean] = opt(descr = "Make constant instead of variable")
 
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
+      val gain: Opt[GainArg] = opt(default = Some(GainArg(default.gain)),
+        descr = s"Gain (linear, -3dB, ...; default: ${default.gain})"
+      )
+      val offset: Opt[TimeArg] = opt(default = Some(default.offset),
+        descr = s"Offset into the file (frames, 1.3s, ...; default: ${default.offset})"
+      )
 
-    opt[GainArg]('g', "gain")
-      .text(s"Gain (linear, -3dB, ...; default ${default.gain})")
-      .action((v, c) => c.copy(gain = v.linear))
+      val file: Opt[File] = trailArg[File](descr = "File")
 
-    opt[TimeArg]('o', "offset")
-      .text(s"Offset into the file (default ${default.offset})")
-      .action((v, c) => c.copy(offset = v))
-
-    arg[File]("file")
-      .text("File")
-      .required()
-      .validate { f =>
+      validate(file) { f: File =>
         val tr = Try(AudioFile.identify(f))
         tr match {
-          case Success(Some(_)) => success
-          case Success(None)    => failure(s"Cannot identify audio file: $f")
-          case Failure(ex)      => failure(s"Cannot identify audio file: ${ex.getMessage}")
+          case Success(Some(_)) => Right(())
+          case Success(None)    => Left(s"Cannot identify audio file: $f")
+          case Failure(ex)      => Left(s"Cannot identify audio file: ${ex.getMessage}")
         }
       }
-      .action { (v, c) => c.copy(file = v) }
+    }
 
     def resolveLoc(f: File, opt: Option[(String, File)]): Try[LocationConfig[S]] = opt match {
-      case Some((name, base)) => Success((Right(name), base))
+      case Some((nm, base)) => Success((Right(nm), base))
       case None =>
         f.absolute.parentOption match {
           case Some(parent) =>
@@ -183,7 +176,8 @@ object AudioCueObjView extends ObjListView.Factory {
     }
 
     for {
-      c     <- parseConfig(args, default)
+      c     <- p.parse(Config2(name = p.nameOption.orElse(p.location.toOption.map(_.name)), file = p.file(),
+        offset = p.offset(), gain = p.gain().linear, const = p.const()))
       loc   <- resolveLoc(c.file, c.location)
       spec  <- Try(AudioFile.readSpec(c.file))
     } yield {

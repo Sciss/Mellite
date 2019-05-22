@@ -316,6 +316,20 @@ object CodeViewImpl {
         stylingName       = Some(if (Mellite.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
+
+      // go to first non-comment line
+      {
+        val doc = editorPanel.document
+        var ln  = 0
+        val nl  = doc.linesCount
+        while ({
+          ln < nl && doc.text(doc.intervalOf(ln)).startsWith(language.lineCommentPrefix)
+        }) ln += 1
+        if (ln > 0) {
+          editorPanel.currentEditor.terminal.offset = doc.startOffsetOf(ln)
+        }
+      }
+
       val intpFut       = interpreter(code.tpe.id)
       intpFut.value match {
         case Some(tr) =>

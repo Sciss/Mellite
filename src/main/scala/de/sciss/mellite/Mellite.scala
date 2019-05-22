@@ -26,6 +26,7 @@ import de.sciss.osc
 import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
 import javax.swing.UIManager
+import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.{TxnExecutor, atomic}
@@ -55,34 +56,36 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  Prefs.useLogFrame = false
 
   override def main(args: Array[String]): Unit = {
-    val default = _config
+    object p extends ScallopConf(args) {
+      printedName = "mellite"
+      version(fullName)
 
-    val p = new scopt.OptionParser[Config]("mellite") {
-      opt[Seq[String]]('r', "auto-run")
-        .text("Run object with given name from root folder's top level. Comma separated list for multiple objects.")
-        .action { (v, c) => c.copy(autoRun = v.toList) }
+      val workspaces: Opt[List[File]] = trailArg(required = false, default = Some(Nil),
+        descr = "Workspaces (.mllt directories) to open"
+      )
+      val noLogFrame: Opt[Boolean] = opt("no-log-frame",
+        descr = "Do not create log frame (post window)."
+      )
+      val autoRun: Opt[List[String]] = opt[String]("auto-run", short = 'r', default = Some(""),
+        descr = "Run object with given name from root folder's top level. Comma separated list for multiple objects."
+      ).map(_.split(',').toList)
 
-      opt[Unit]("no-log-frame")
-        .text("Do not create log frame (post window).")
-        .action { (_, c) => c.copy(logFrame = false) }
-
-      arg[File]("<workspaces>")
-        .unbounded()
-        .optional()
-        .text("Workspaces (.mllt directories) to open")
-        .action { (v, c) => c.copy(open = c.open :+ v) }
-
-      help("help").text("Prints this usage text")
+      verify()
+      val config = Config(
+        open      = workspaces(),
+        autoRun   = autoRun(),
+        logFrame  = !noLogFrame())
     }
-    p.parse(args, default).fold(sys.exit(1)) { config =>
-      _config = config
-      super.main(args)
-    }
+
+    _config = p.config
+//    Console.setErr(System.err)
+    super.main(args)
   }
 
   def version : String = buildInfString("version" )
   def license : String = buildInfString("license" )
   def homepage: String = buildInfString("homepage")
+  def fullName: String = s"$name v$version"
 
   private def buildInfString(key: String): String = try {
     val clazz = Class.forName("de.sciss.mellite.BuildInfo")

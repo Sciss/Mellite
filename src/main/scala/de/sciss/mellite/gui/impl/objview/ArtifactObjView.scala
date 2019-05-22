@@ -86,30 +86,26 @@ object ArtifactObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(name = prefix, file = file(""), location = null)
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val location: Opt[File] = opt(
+        descr = "Artifact's base location (directory). If absent, artifact's direct parent is used."
+      )
+      validateFileIsDirectory(location)
+      val file: Opt[File] = trailArg(descr = "File")
 
-    opt[File]('l', "location")
-      .text("Artifact's base location (directory). If absent, artifact's direct parent is used.")
-      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
-      .action((v, c) => c.copy(location = (Right(v.name), v)))
-
-    arg[File]("file")
-      .text("File")
-      .required()
-      .action((v, c) => c.copy(file = v))
-
-    parseConfig(args, default).flatMap {
-      case c if c.location == null =>
-        c.file.absolute.parentOption match {
-          case Some(parent) => Success(c.copy(location = (Right(parent.name), parent)))
-          case None => Failure(MessageException(s"No parent directory to '${c.file}'"))
-        }
-
-      case other => Success(other)
+      validateOpt(location, file) {
+        case (Some(_), _)     => Right(())
+        case (None, Some(f))  =>
+          if (f.absolute.parentOption.isDefined) Right(()) else Left(s"File $f does not have parent directory")
+        case (None, None)     => Left("File not specified")
+       }
     }
+    p.parse(Config(name = p.name(), file = p.file(), location = p.location.toOption match {
+      case Some(v) => Right(v.name) -> v
+      case None =>
+        val parent = p.file().absolute.parent
+        Right(parent.name) -> parent
+    }))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

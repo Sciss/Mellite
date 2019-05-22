@@ -61,21 +61,17 @@ object IntObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config(value = 0)
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
-
-    arg[Int]("value")
-      .text("Initial int value")
-      .required()
-      .action((v, c) => c.copy(value = v))
-
-    parseConfig(args, default)
+    // cf. https://github.com/scallop/scallop/issues/189
+    val args1 = args match {
+      case ("--help" | "-h") :: Nil => args
+      case _ => "--ignore" +: args
+    }
+    object p extends ObjViewCmdLineParser[Config[S]](this, args1) {
+      val ignore: Opt[Boolean]  = opt(hidden = true)
+      val const: Opt[Boolean]   = opt(descr = s"Make constant instead of variable")
+      val value: Opt[Int]       = trailArg(descr = "Initial int value")
+    }
+    p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

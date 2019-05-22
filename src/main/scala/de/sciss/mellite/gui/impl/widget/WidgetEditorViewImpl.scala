@@ -82,15 +82,8 @@ object WidgetEditorViewImpl {
     }
 
     def init(obj: Widget[S], /* initialText: String, */ showEditor: Boolean)(implicit tx: S#Tx): this.type = {
-      val codeObj = CodeFrameImpl.mkSource(obj = obj, codeId = Widget.Code.id, key = Widget.attrSource,
-        init =
-          """// Widget graph function source code
-            |
-            |Label("Foo")
-            |""".stripMargin)
-
-      val codeEx0   = codeObj
-      val code0   = codeEx0.value match {
+      val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Widget.Code, key = Widget.attrSource)()
+      val code0   = codeObj.value match {
         case cs: Widget.Code => cs
         case other => sys.error(s"Widget source code does not produce Widget.Graph: ${other.tpe.humanName}")
       }

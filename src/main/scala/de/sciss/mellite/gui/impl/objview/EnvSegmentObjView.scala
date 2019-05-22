@@ -44,6 +44,7 @@ import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{CurveObj, EnvSegment, Universe}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
+import org.rogach.scallop
 
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{SelectionChanged, ValueChanged}
@@ -338,30 +339,26 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       .init(obj, entry)
   }
 
-  private implicit object ReadCurve extends scopt.Read[Curve] {
-    def arity: Int = 1
+  private val curveNameMap: Map[String, Curve] = Map(
+    "step"        -> Curve.step,
+    "lin"         -> Curve.linear,
+    "linear"      -> Curve.linear,
+    "exp"         -> Curve.exponential,
+    "exponential" -> Curve.exponential,
+    "sin"         -> Curve.sine,
+    "sine"        -> Curve.sine,
+    "welch"       -> Curve.welch,
+    "sqr"         -> Curve.squared,
+    "squared"     -> Curve.squared,
+    "cub"         -> Curve.cubed,
+    "cubed"       -> Curve.cubed
+  )
 
-    private[this] val map: Map[String, Curve] = Map(
-      "step"        -> Curve.step,
-      "lin"         -> Curve.linear,
-      "linear"      -> Curve.linear,
-      "exp"         -> Curve.exponential,
-      "exponential" -> Curve.exponential,
-      "sin"         -> Curve.sine,
-      "sine"        -> Curve.sine,
-      "welch"       -> Curve.welch,
-      "sqr"         -> Curve.squared,
-      "squared"     -> Curve.squared,
-      "cub"         -> Curve.cubed,
-      "cubed"       -> Curve.cubed
-    )
-
-    def reads: String => Curve = { s =>
-      map.getOrElse(s.toLowerCase, {
-        val p = s.toFloat
-        Curve.parametric(p)
-      })
-    }
+  private implicit val ReadCurve: scallop.ValueConverter[Curve] = scallop.singleArgConverter { s =>
+    curveNameMap.getOrElse(s.toLowerCase, {
+      val p = s.toFloat
+      Curve.parametric(p)
+    })
   }
 
   // XXX TODO DRY with ParamSpecObjView
@@ -383,37 +380,20 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config()
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val startLevel: Opt[Vec[Double]] = vecArg[Double](
+        descr = "Starting level (single double or comma separated doubles)"
+      )
+      val curve: Opt[Curve] = trailArg(required = false,
+        descr = s"Parameter warp or curve (default: ${"lin" /* default.value.curve */})",
+        default = Some(Curve.linear))
+      val const: Opt[Boolean] = opt(descr = "Make constant instead of variable")
+    }
 
-    arg[Seq[Double]]("start-level")
-      .text("Starting level (single double or comma separated doubles)")
-      .required()
-      .action { (v, c) =>
-        val newValue = v match {
-          case Seq(single)  => EnvSegment.Single(single         , c.value.curve)
-          case _            => EnvSegment.Multi (v.toIndexedSeq , c.value.curve)
-        }
-        c.copy(value = newValue)
-      }
-
-    arg[Curve]("curve")
-      .text(s"Parameter warp or curve (default: ${"lin" /* default.value.curve */})")
-      .action { (v, c) =>
-        val newValue = c.value match {
-          case e: EnvSegment.Single => e.copy(curve = v)
-          case e: EnvSegment.Multi  => e.copy(curve = v)
-        }
-        c.copy(value = newValue)
-      }
-
-
-    parseConfig(args, default)
+    p.parse(Config(name = p.name(), const = p.const(), value = (p.startLevel(), p.curve()) match {
+      case (Seq(single), c) => EnvSegment.Single(single , c)
+      case (v, c)           => EnvSegment.Multi (v      , c)
+    }))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

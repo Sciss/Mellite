@@ -204,62 +204,6 @@ object ProcActions {
     }
   }
 
-//  def setSynthGraph[S <: Sys[S]](procs: Iterable[Proc[S]], codeElem: Code.Obj[S])
-//                                (implicit tx: S#Tx, compiler: Code.Compiler): Boolean = {
-//    val code = codeElem.value
-//    code match {
-//      case csg: Code.SynthGraph =>
-//        try {
-//          val sg = csg.execute {}  // XXX TODO: compilation blocks, not good!
-//
-//          var scanInKeys  = Set.empty[String]
-//          var scanOutKeys = Set.empty[String]
-//
-//          sg.sources.foreach {
-//            case proc.graph.ScanIn   (key)    => scanInKeys  += key
-//            case proc.graph.ScanOut  (key, _) => scanOutKeys += key
-//            case proc.graph.ScanInFix(key, _) => scanInKeys  += key
-//            case _ =>
-//          }
-//
-//          // sg.sources.foreach(println)
-//          if (scanInKeys .nonEmpty) log(s"SynthDef has the following scan in  keys: ${scanInKeys .mkString(", ")}")
-//          if (scanOutKeys.nonEmpty) log(s"SynthDef has the following scan out keys: ${scanOutKeys.mkString(", ")}")
-//
-//            ... // SCAN
-////          val attrNameOpt = codeElem.attr.get(ObjKeys.attrName)
-////          procs.foreach { p =>
-////            p.graph() = SynthGraphObj.newConst[S](sg)  // XXX TODO: ideally would link to code updates
-////            attrNameOpt.foreach(attrName => p.attr.put(ObjKeys.attrName, attrName))
-////
-////            def check(scans: Scans.Modifiable[S], keys: Set[String]): Unit = {
-////              val toRemove = scans.iterator.collect {
-////                case (key, scan) if !keys.contains(key) && scan.isEmpty => key
-////              }
-////              toRemove.foreach(scans.remove) // unconnected scans which are not referred to from synth def
-////              val existing = scans.iterator.collect {
-////                  case (key, _) if keys contains key => key
-////                }
-////              val toAdd = keys -- existing.toSet
-////              toAdd.foreach(scans.add)
-////            }
-////
-////            val proc = p
-////            check(proc.inputs , scanInKeys )
-////            check(proc.outputs, scanOutKeys)
-////          }
-//          true
-//
-//        } catch {
-//          case NonFatal(e) =>
-//            e.printStackTrace()
-//            false
-//        }
-//
-//      case _ => false
-//    }
-//  }
-
   def mkAudioRegion[S <: Sys[S]](time      : Span,
                                  audioCue  : AudioCue.Obj[S],
                                  gOffset   : Long)
@@ -347,61 +291,6 @@ object ProcActions {
     group.add(Span.All, obj) // constant span expression
     obj
   }
-
-  // SCAN
-//  private def addLink[S <: Sys[S]](sourceKey: String, source: Scan[S], sinkKey: String, sink: Scan[S])
-//                                  (implicit tx: S#Tx): Unit = {
-//    log(s"Link $sourceKey / $source to $sinkKey / $sink")
-//    source.add(Scan.Link.Scan(sink))
-//  }
-//
-//  def removeLink[S <: Sys[S]](sourceKey: String, source: Scan[S], sinkKey: String, sink: Scan[S])
-//                             (implicit tx: S#Tx): Unit = {
-//    log(s"Unlink $sourceKey / $source from $sinkKey / $sink")
-//    source.remove(Scan.Link.Scan(sink))
-//  }
-
-//  def linkOrUnlink[S <: Sys[S]](out: Proc[S], in: Proc[S])(implicit tx: S#Tx): Boolean = {
-//      ... // SCAN
-////    val outsIt  = out.outputs.iterator // .toList
-////    val insSeq0 = in .inputs .iterator.toIndexedSeq
-////
-////    // if there is already a link between the two, take the drag gesture as a command to remove it
-////    val existIt = outsIt.flatMap { case (srcKey, srcScan) =>
-////      srcScan.iterator.toList.flatMap {
-////        case Scan.Link.Scan(peer) => insSeq0.find(_._2 == peer).map {
-////          case (sinkKey, sinkScan) => (srcKey, srcScan, sinkKey, sinkScan)
-////        }
-////
-////        case _ => None
-////      }
-////    }
-////
-////    if (existIt.hasNext) {
-////      val (srcKey, srcScan, sinkKey, sinkScan) = existIt.next()
-////      removeLink(srcKey, srcScan, sinkKey, sinkScan)
-////      true
-////
-////    } else {
-////      // XXX TODO cheesy way to distinguish ins and outs now :-E ... filter by name
-////      val outsSeq = out.outputs.iterator.filter(_._1.startsWith("out")).toIndexedSeq
-////      val insSeq  = insSeq0                       .filter(_._1.startsWith("in"))
-////
-////      if (outsSeq.isEmpty || insSeq.isEmpty) return false   // nothing to patch
-////
-////      if (outsSeq.size == 1 && insSeq.size == 1) {    // exactly one possible connection, go ahead
-////        val (srcKey , src ) = outsSeq.head
-////        val (sinkKey, sink) = insSeq .head
-////        addLink(srcKey, src, sinkKey, sink)
-////        true
-////
-////      } else {  // present dialog to user
-////        log(s"Possible outs: ${outsSeq.map(_._1).mkString(", ")}; possible ins: ${insSeq.map(_._1).mkString(", ")}")
-////        println(s"Woop. Multiple choice... Dialog not yet implemented...")
-////        false
-////      }
-////    }
-//  }
 
   /** Forwarder to `MkSynthGraphSource`. Can be removed in next major revision. */
   def extractSource(g: SynthGraph): String = MkSynthGraphSource(g)

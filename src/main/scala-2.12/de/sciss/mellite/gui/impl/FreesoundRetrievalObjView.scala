@@ -97,18 +97,13 @@ object FreesoundRetrievalObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = PrimitiveConfig(prefix, file(""))
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, c) => c.copy(name = v))
-
-    opt[File]('d', "download")
-      .text("Download directory")
-      .required()
-      .validate(dir => if (dir.isDirectory) success else failure(s"Not a directory: $dir"))
-      .action((v, c) => c.copy(value = v))
-
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val download: Opt[File] = opt(descr = "Download directory (required)", required = true,
+        validate = { dir: File => dir.isDirectory } // s"Not a directory: $dir"
+      )
+      mainOptions = List(download)
+    }
+    p.parse(PrimitiveConfig(p.name(), p.download()))
   }
 
   def makeObj[S <: Sys[S]](c: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

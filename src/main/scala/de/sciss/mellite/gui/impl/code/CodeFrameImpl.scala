@@ -45,25 +45,22 @@ object CodeFrameImpl {
   def proc[S <: Sys[S]](obj: Proc[S])
                        (implicit tx: S#Tx, universe: Universe[S],
                         compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = mkSource(obj = obj, codeId = Code.SynthGraph.id, key = Proc.attrSource,
-      init = {
-        val gv: SynthGraph = obj.graph.value
-        val txt     = /*if (gv.isEmpty) "" else*/ try {
-          ProcActions.extractSource(gv)
-        } catch {
-          case NonFatal(ex) =>
-            s"// $ex"
-        }
-        val comment = if (txt.isEmpty)
-            "SoundProcesses graph function source code"
-          else
-            "source code automatically extracted"
-        s"// $comment\n\n$txt"
-      })
+    val codeObj = mkSource(obj = obj, codeTpe = Code.SynthGraph, key = Proc.attrSource)({
+      val gv: SynthGraph = obj.graph.value
+      val txt     = /*if (gv.isEmpty) "" else*/ try {
+        ProcActions.extractSource(gv)
+      } catch {
+        case NonFatal(ex) =>
+          s"// $ex"
+      }
+      if (txt.isEmpty)
+        Code.SynthGraph.defaultSource
+      else
+        s"// source code automatically extracted\n\n$txt"
+    })
 
-    val codeEx0 = codeObj
     val objH    = tx.newHandle(obj)
-    val code0   = codeEx0.value match {
+    val code0   = codeObj.value match {
       case cs: Code.SynthGraph => cs
       case other => sys.error(s"Proc source code does not produce SynthGraph: ${other.tpe.humanName}")
     }
@@ -95,11 +92,8 @@ object CodeFrameImpl {
   def action[S <: Sys[S]](obj: Action[S])
                          (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = mkSource(obj = obj, codeId = Code.Action.id, key = Action.attrSource,
-      init = "// Action source code\n\n")
-
-    val codeEx0 = codeObj
-    val code0   = codeEx0.value match {
+    val codeObj = mkSource(obj = obj, codeTpe = Code.Action, key = Action.attrSource)()
+    val code0   = codeObj.value match {
       case cs: Code.Action => cs
       case other => sys.error(s"Action source code does not produce plain function: ${other.tpe.humanName}")
     }
@@ -259,8 +253,8 @@ object CodeFrameImpl {
 
   // ---- util ----
 
-  def mkSource[S <: Sys[S]](obj: Obj[S], codeId: Int, key: String, init: => String)
-                                   (implicit tx: S#Tx): Code.Obj[S] = {
+  def mkSource[S <: Sys[S]](obj: Obj[S], codeTpe: Code.Type, key: String)(init: => String = codeTpe.defaultSource)
+                           (implicit tx: S#Tx): Code.Obj[S] = {
     // if there is no source code attached,
     // create a new code object and add it to the attribute map.
     // let's just do that without undo manager
@@ -268,7 +262,7 @@ object CodeFrameImpl {
       case Some(c: Code.Obj[S]) => c
       case _ =>
         val source  = init
-        val code    = Code(codeId, source)
+        val code    = Code(codeTpe.id, source)
         val c       = Code.Obj.newVar(Code.Obj.newConst[S](code))
         obj.attr.put(key, c)
         c

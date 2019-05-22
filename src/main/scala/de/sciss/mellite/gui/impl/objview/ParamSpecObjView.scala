@@ -39,6 +39,7 @@ import de.sciss.synth.proc.Universe
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.{desktop, numbers}
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
+import org.rogach.scallop
 
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
@@ -271,60 +272,42 @@ object ParamSpecObjView extends ObjListView.Factory {
     done(res1)
   }
 
-  private implicit object ReadWarp extends scopt.Read[Warp] {
-    def arity: Int = 1
+  private val warpNameMap: Map[String, Warp] = Map(
+    "lin"         -> LinearWarp,
+    "linear"      -> LinearWarp,
+    "exp"         -> ExponentialWarp,
+    "exponential" -> ExponentialWarp,
+    "cos"         -> CosineWarp,
+    "cosine"      -> CosineWarp,
+    "sin"         -> SineWarp,
+    "sine"        -> SineWarp,
+    "fader"       -> FaderWarp,
+    "dbfader"     -> DbFaderWarp,
+    "int"         -> IntWarp
+  )
 
-    private[this] val map: Map[String, Warp] = Map(
-      "lin"         -> LinearWarp,
-      "linear"      -> LinearWarp,
-      "exp"         -> ExponentialWarp,
-      "exponential" -> ExponentialWarp,
-      "cos"         -> CosineWarp,
-      "cosine"      -> CosineWarp,
-      "sin"         -> SineWarp,
-      "sine"        -> SineWarp,
-      "fader"       -> FaderWarp,
-      "dbfader"     -> DbFaderWarp,
-      "int"         -> IntWarp
-    )
-
-    def reads: String => Warp = { s =>
-      map.getOrElse(s.toLowerCase, {
-        val p = s.toDouble
-        ParametricWarp(p)
-      })
-    }
+  private implicit val ReadWarp: scallop.ValueConverter[Warp] = scallop.singleArgConverter { s =>
+    warpNameMap.getOrElse(s.toLowerCase(Locale.US), {
+      val p = s.toDouble
+      ParametricWarp(p)
+    })
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     val default: Config[S] = Config()
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    // ParamSpec(lo: Double, hi: Double, warp: Warp, unit: String)
-    name((v, c) => c.copy(name = v))
-    opt[Unit]('c', "const")
-      .text(s"Make constant instead of variable")
-      .action((_, c) => c.copy(const = true))
+    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+      val unit    : Opt[String] = opt(descr = "Unit label", default = Some(default.value.unit))
+      val low     : Opt[Double] = trailArg(descr = "Lowest parameter value" , default = Some(default.value.lo))
+      val high    : Opt[Double] = trailArg(descr = "Highest parameter value", default = Some(default.value.hi))
+      val warp    : Opt[Warp  ] = trailArg(required = false,
+        descr = s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})",
+        default = Some(LinearWarp))
+      val const   : Opt[Boolean] = opt    (descr = "Make constant instead of variable")
+    }
 
-    opt[String]('u', "unit")
-      .text("Unit label")
-      .action { (v, c) => c.copy(value = c.value.copy(unit = v)) }
-
-    arg[Double]("low")
-      .text("Lowest parameter value")
-      .required()
-      .action { (v, c) => c.copy(value = c.value.copy(lo = v)) }
-
-    arg[Double]("high")
-      .text("Highest parameter value")
-      .required()
-      .action { (v, c) => c.copy(value = c.value.copy(hi = v)) }
-
-    arg[Warp]("warp")
-      .text(s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})")
-      .action((v, c) => c.copy(value = c.value.copy(warp = v)))
-
-    parseConfig(args, default)
+    p.parse(Config(name = p.name(), const = p.const(), value = ParamSpec(
+      lo = p.low(), hi = p.high(), warp = p.warp(), unit = p.unit())
+    ))
   }
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {

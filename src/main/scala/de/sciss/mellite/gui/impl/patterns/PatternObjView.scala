@@ -87,12 +87,9 @@ object PatternObjView extends NoArgsListObjViewFactory {
   private def codeFrame[S <: Sys[S]](obj: Pattern.Var[S])
                                     (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = CodeFrameImpl.mkSource(obj = obj, codeId = Pattern.Code.id, key = Pattern.attrSource,
-      init = "// Pattern graph function source code\n\n")
-
-    val codeEx0 = codeObj
+    val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Pattern.Code, key = Pattern.attrSource)()
     val objH    = tx.newHandle(obj) // IntelliJ highlight bug
-    val code0   = codeEx0.value match {
+    val code0   = codeObj.value match {
       case cs: Pattern.Code => cs
       case other => sys.error(s"Pattern source code does not produce patterns.Graph: ${other.tpe.humanName}")
     }

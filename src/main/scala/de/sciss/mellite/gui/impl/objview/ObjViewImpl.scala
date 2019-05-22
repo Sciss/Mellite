@@ -29,13 +29,14 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
 import de.sciss.mellite.gui.{GUI, ObjView}
 import de.sciss.mellite.{Cf, Mellite}
+import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Color, Confluent, ObjKeys, TimeRef, Universe, Workspace}
-import de.sciss.{desktop, numbers}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
+import org.rogach.scallop
 
 import scala.language.higherKinds
 import scala.swing.Component
@@ -44,20 +45,32 @@ import scala.util.{Failure, Try}
 object ObjViewImpl {
   object TimeArg {
     // XXX TODO --- support '[HH:]MM:SS[.mmm]'
-    implicit object Read extends scopt.Read[TimeArg] {
-      def arity: Int = 1
-
-      def reads: String => TimeArg = { s =>
-        val t = s.trim
-        if (t.endsWith("s")) {
-          val n = t.substring(0, t.length - 1).toDouble
-          Sec(n)
-        } else {
-          val n = t.toLong
-          Frames(n)
-        }
+    implicit val Read: scallop.ValueConverter[TimeArg] = scallop.singleArgConverter[TimeArg] { s =>
+      val t = s.trim
+      val res = if (t.endsWith("s")) {
+        val n = t.substring(0, t.length - 1).toDouble
+        Sec(n)
+      } else {
+        val n = t.toLong
+        Frames(n)
       }
+      res
     }
+
+//    implicit object Read extends scopt.Read[TimeArg] {
+//      def arity: Int = 1
+//
+//      def reads: String => TimeArg = { s =>
+//        val t = s.trim
+//        if (t.endsWith("s")) {
+//          val n = t.substring(0, t.length - 1).toDouble
+//          Sec(n)
+//        } else {
+//          val n = t.toLong
+//          Frames(n)
+//        }
+//      }
+//    }
 
     final case class Sec(n: Double) extends TimeArg {
       def frames(sr: Double): Long = (n * TimeRef.SampleRate + 0.5).toLong
@@ -74,21 +87,33 @@ object ObjViewImpl {
   }
 
   object GainArg {
-    implicit object Read extends scopt.Read[GainArg] {
-      def arity: Int = 1
-
-      def reads: String => GainArg = { s =>
-        val t = s.trim
-        val frames = if (t.endsWith("dB")) {
-          val db = t.substring(0, t.length - 2).toDouble
-          import numbers.Implicits._
-          db.dbAmp
-        } else {
-          t.toDouble
-        }
-        GainArg(frames)
+    implicit val Read: scallop.ValueConverter[GainArg] = scallop.singleArgConverter { s =>
+      val t = s.trim
+      val frames = if (t.endsWith("dB")) {
+        val db = t.substring(0, t.length - 2).toDouble
+        import numbers.Implicits._
+        db.dbAmp
+      } else {
+        t.toDouble
       }
+      GainArg(frames)
     }
+
+//    implicit object Read extends scopt.Read[GainArg] {
+//      def arity: Int = 1
+//
+//      def reads: String => GainArg = { s =>
+//        val t = s.trim
+//        val frames = if (t.endsWith("dB")) {
+//          val db = t.substring(0, t.length - 2).toDouble
+//          import numbers.Implicits._
+//          db.dbAmp
+//        } else {
+//          t.toDouble
+//        }
+//        GainArg(frames)
+//      }
+//    }
   }
   final case class GainArg(linear: Double)
 

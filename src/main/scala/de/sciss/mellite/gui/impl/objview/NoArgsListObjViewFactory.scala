@@ -41,10 +41,7 @@ trait NoArgsListObjViewFactory extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = prefix
-    val p = ObjViewCmdLineParser[S](this)
-    import p._
-    name((v, _) => v)
-    parseConfig(args, default)
+    object p extends ObjViewCmdLineParser[Config[S]](this, args)
+    p.parse(p.name())
   }
 }
