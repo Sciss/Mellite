@@ -97,21 +97,8 @@ final class AudioCueViewJ(sonogram: Overview, val timelineModel: TimelineModel)
       val hintOld0  = g.getRenderingHint(RenderingHints.KEY_INTERPOLATION)
       val hintOld   = if (hintOld0 == null) RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR else hintOld0
       g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
-//      g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR)
-      //      val intpOld = g.getRenderingHint(RenderingHints.KEY_INTERPOLATION)
       sonogram.paint(spanStart = fileStart, spanStop = fileStop, g, 0, 0, width, height, this)
       g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hintOld)
-//      g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT)
-//      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_DEFAULT)
-//      g.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_DEFAULT)
-//      g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_DEFAULT)
-//      g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
-//      g.setRenderingHints(hintsOld)
-      //       g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, intpOld)
-//      g.setRenderingHints(hintsOld)
-//      println("HINTS AFTER")
-//      val hintsNow = g.getRenderingHints
-//      hintsNow.values().asScala.foreach(println)
     }
 
     def adjustGain(amp: Float, pos: Double): Float = amp * sonogramBoost

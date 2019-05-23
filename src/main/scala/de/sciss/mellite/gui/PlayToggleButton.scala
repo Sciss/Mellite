@@ -21,7 +21,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.synth.proc.{SoundProcesses, Transport, Universe}
+import de.sciss.synth.proc.{Transport, Universe}
 
 import scala.concurrent.stm.Ref
 import scala.swing.ToggleButton
@@ -76,7 +76,8 @@ object PlayToggleButton {
         reactions += {
           case ButtonClicked(_) =>
             val sel = selected
-            SoundProcesses.atomic[S, Unit] { implicit tx =>
+            transport.scheduler.stepTag
+            /*SoundProcesses.atomic[S, Unit]*/ { implicit tx =>
               transport.stop()
               if (added.swap(false)(tx.peer)) objH.foreach(h => transport.removeObject(h()))
               transport.seek(0L)
@@ -87,7 +88,7 @@ object PlayToggleButton {
                 }
                 transport.play()
               }
-            } (transport.scheduler.cursor)
+            } // (transport.scheduler.cursor)
         }
       }
       val shpPower          = raphael.Shapes.Power _

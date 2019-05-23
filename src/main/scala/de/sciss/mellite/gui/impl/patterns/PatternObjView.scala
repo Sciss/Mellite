@@ -106,7 +106,6 @@ object PatternObjView extends NoArgsListObjViewFactory {
       def dispose()(implicit tx: S#Tx): Unit = ()
     }
 
-    // XXX TODO --- should use custom view so we can cancel upon `dispose`
     val viewEval = View.wrap[S, Button] {
       val actionEval = new swing.Action("Evaluate") { self =>
         import universe.cursor
