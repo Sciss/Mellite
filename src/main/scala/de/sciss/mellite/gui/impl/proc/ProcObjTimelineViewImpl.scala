@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.gui.impl.proc
 
+import java.awt.RenderingHints
+
 import de.sciss.file._
 import de.sciss.lucre.expr.{CellView, SpanLikeObj}
 import de.sciss.lucre.stm
@@ -191,12 +193,16 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
         // println(s"${pv.name}; audio.offset = ${audio.offset}, segm.span.start = ${segm.span.start}, dStart = $dStart, px1C = $px1C, startC = $startC, startP = $startP")
         // println(f"spanStart = $startP%1.2f, spanStop = $stopP%1.2f, tx = $px1c, ty = $pyi, width = $w1, height = $phi, boost = ${r.sonogramBoost}%1.2f")
 
+        val hintOld0  = g.getRenderingHint(RenderingHints.KEY_INTERPOLATION)
+        val hintOld   = if (hintOld0 == null) RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR else hintOld0
         try {
+          g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
           sonogram.paint(spanStart = startP, spanStop = stopP, g2 = g,
             tx = px1c, ty = pyi, width = w1, height = phi, ctrl = r)
         } catch {
           case NonFatal(_) => // XXX TODO
         }
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hintOld)
       }
     }
 
