@@ -15,7 +15,7 @@ package de.sciss.mellite.gui
 
 import de.sciss.lucre
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.audiocue.{FrameImpl => Impl}
+import de.sciss.mellite.gui.impl.audiocue.{AudioCueFrameImpl => Impl}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
 object AudioFileFrame {

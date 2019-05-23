@@ -1,5 +1,5 @@
 /*
- *  ViewJ.scala
+ *  AudioCueViewJ.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -29,7 +29,7 @@ import scala.swing.Swing._
 import scala.swing.event.MousePressed
 import scala.util.{Failure, Success}
 
-final class ViewJ(sonogram: Overview, val timelineModel: TimelineModel)
+final class AudioCueViewJ(sonogram: Overview, val timelineModel: TimelineModel)
   extends TimelineCanvasImpl {
 
   import TimelineCanvasImpl._
@@ -54,7 +54,7 @@ final class ViewJ(sonogram: Overview, val timelineModel: TimelineModel)
     private[this] var paintFun: Graphics2D => Unit = paintChecker("Calculating...")
     private[this] val srRatio = sonogram.inputSpec.sampleRate / TimeRef.SampleRate
 
-    private[ViewJ] var sonogramBoost: Float = 1f
+    private[AudioCueViewJ] var sonogramBoost: Float = 1f
 
     override def paintComponent(g: Graphics2D): Unit = {
       paintFun(g)

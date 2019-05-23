@@ -16,7 +16,9 @@ package de.sciss.mellite.gui
 import java.io.File
 
 import de.sciss.dsp.{ConstQ, Threading}
+import de.sciss.mellite.Mellite
 import de.sciss.sonogram
+import de.sciss.sonogram.Overview.Palette
 
 import scala.concurrent.ExecutionContext
 
@@ -35,6 +37,9 @@ object SonogramManager {
 
   def instance: sonogram.OverviewManager = _instance
 
+  private lazy val _palette: Palette =
+    if (Mellite.isDarkSkin) Palette.Intensity else Palette.reverse(Palette.Intensity)
+
   def acquire(file: File): sonogram.Overview = {
     val cq    = ConstQ.Config()
     cq.bandsPerOct  = 18
@@ -43,7 +48,9 @@ object SonogramManager {
 //    cq.maxTimeRes   = 18 / 4.0f
     cq.threading    = Threading.Single
     val job   = sonogram.OverviewManager.Job(file, cq)
-    _instance.acquire(job)
+    val res   = _instance.acquire(job)
+    res.palette = _palette
+    res
   }
   def release(overview: sonogram.Overview): Unit = _instance.release(overview)
 

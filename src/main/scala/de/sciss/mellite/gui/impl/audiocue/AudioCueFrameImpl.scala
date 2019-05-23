@@ -1,5 +1,5 @@
 /*
- *  FrameImpl.scala
+ *  AudioCueFrameImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -20,7 +20,7 @@ import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{AudioFileFrame, AudioCueView}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
-object FrameImpl {
+object AudioCueFrameImpl {
   def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
                         (implicit tx: S#Tx, universe: Universe[S]): AudioFileFrame[S] = {
     val afv       = AudioCueView(obj)

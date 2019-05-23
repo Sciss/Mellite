@@ -1,5 +1,5 @@
 /*
- *  ViewImpl.scala
+ *  AudioCueViewImpl.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
@@ -40,7 +40,7 @@ import de.sciss.{sonogram, synth}
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, Label, Orientation, Swing}
 
-object ViewImpl {
+object AudioCueViewImpl {
   def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioCueView[S] = {
     val value         = obj.value // .artifact // store.resolve(element.entity.value.artifact)
     // val sampleRate    = f.spec.sampleRate
@@ -141,7 +141,7 @@ object ViewImpl {
       //        case x => println(s"<view> $x")
       //      }
 
-      val sonogramView  = new ViewJ(_sonogram, timelineModel)
+      val sonogramView  = new AudioCueViewJ(_sonogram, timelineModel)
       val ggVisualBoost = GUI.boostRotary()(sonogramView.visualBoost = _)
 
       // val ggDragRegion = new DnD.Button(holder, snapshot, timelineModel)
