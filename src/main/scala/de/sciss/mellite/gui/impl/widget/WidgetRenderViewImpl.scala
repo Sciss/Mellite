@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.gui.impl.widget
 
-import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.Context
@@ -24,9 +23,9 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.gui.impl.component.ZoomSupport
 import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
-import de.sciss.numbers
 import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}
 import de.sciss.synth.proc.{ExprContext, Universe, Widget}
@@ -36,7 +35,6 @@ import scala.collection.immutable.{Seq => ISeq}
 import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.event.Key
 import scala.swing.{Action, BorderPanel, Component, FlowPanel, Font, Swing}
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
@@ -50,7 +48,7 @@ object WidgetRenderViewImpl {
                                         (implicit val universe: Universe[S])
     extends WidgetRenderView[S]
       with ComponentHolder[Component]
-      with ObservableImpl[S, WidgetRenderView.Update[S]] { impl =>
+      with ObservableImpl[S, WidgetRenderView.Update[S]] with ZoomSupport { impl =>
 
     type C = Component
 
@@ -58,7 +56,6 @@ object WidgetRenderViewImpl {
     private[this] val graphRef    = Ref.make[Widget.Graph]
     private[this] val viewRef     = Ref(Option.empty[(View[S], Disposable[S#Tx])])
 //    private[this] val viewInit    = Ref(-2) // -2 is special code for "no previous view"
-    private[this] var zoomFactor  = 1.0f
 
     //    private[this] var paneRender: Component   = _
     private[this] var paneBorder: BorderPanelWithAdd = _
@@ -182,6 +179,13 @@ object WidgetRenderViewImpl {
       }
     }
 
+    protected def setZoomFactor(f: Float): Unit = {
+      viewRef.single.get.foreach { case (view, _) =>
+        setZoom(view.component.peer, f)
+        paneBorder.revalidate()
+      }
+    }
+
     private def guiInit(): Unit = {
       val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = if (embedded) bot1 else {
@@ -196,35 +200,7 @@ object WidgetRenderViewImpl {
       val bot3 = HGlue :: bot2
       val panelBottom = new FlowPanel(FlowPanel.Alignment.Trailing)(bot3: _*)
 
-      val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400)
-      val zoom100   = zoomItems.indexOf(100)
-      var zoomIdx   = zoom100
-
-      def zoom(newIdx0: Int): Unit = {
-        import numbers.Implicits._
-        val newIdx = newIdx0.clip(0, zoomItems.size - 1)
-        if (zoomIdx != newIdx) {
-          zoomIdx     = newIdx
-          zoomFactor  = zoomItems(newIdx) * 0.01f
-          viewRef.single.get.foreach { case (view, _) =>
-            setZoom(view.component.peer, zoomFactor)
-            paneBorder.revalidate()
-          }
-        }
-      }
-
-      def zoomIn    (): Unit = zoom(zoomIdx + 1)
-      def zoomOut   (): Unit = zoom(zoomIdx - 1)
-      def zoomReset (): Unit = zoom(zoom100)
-
-      import KeyStrokes._
-      Util.addGlobalAction(panelBottom, "dec-zoom", ctrl + Key.Minus          )(zoomOut   ())
-      Util.addGlobalAction(panelBottom, "inc-zoom", ctrl + Key.Plus           )(zoomIn    ())
-      Util.addGlobalAction(panelBottom, "inc-zoom", shift + ctrl + Key.Equals )(zoomIn    ())
-      Util.addGlobalAction(panelBottom, "reset-zoom", ctrl + Key.Key0         )(zoomReset ())
-
-      //      paneRender = new ScrollPane // (_editor)
-//      paneRender.peer.putClientProperty("styleId", "undecorated")
+      initZoom(panelBottom)
 
       paneBorder = new BorderPanelWithAdd {
 //        add(paneRender  , BorderPanel.Position.Center)

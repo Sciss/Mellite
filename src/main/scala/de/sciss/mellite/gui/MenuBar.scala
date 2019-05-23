@@ -24,8 +24,11 @@ import scala.concurrent.stm.TxnExecutor
 import scala.swing.event.Key
 
 object MenuBar {
-  def keyUndo: KeyStroke = menu1 + Key.Z
-  def keyRedo: KeyStroke = if (Desktop.isWindows) menu1 + Key.Y else menu1 + shift + Key.Z
+  def keyUndo     : KeyStroke = menu1 + Key.Z
+  def keyRedo     : KeyStroke = if (Desktop.isWindows) menu1 + Key.Y else menu1 + shift + Key.Z
+  def keyClose    : KeyStroke = menu1 + Key.W
+  def keyShowLog  : KeyStroke = menu1 + Key.P
+  def keyClearLog : KeyStroke = menu1 + shift + Key.P
 
   lazy val instance: Menu.Root = {
     import KeyStrokes._
@@ -42,7 +45,7 @@ object MenuBar {
       )
       .add(Item("open", ActionOpenWorkspace))
       .add(ActionOpenWorkspace.recentMenu)
-      .add(Item("close",              proxy(("Close",                   menu1 + Key.W))))
+      .add(Item("close", proxy(("Close", keyClose))))
       .add(Item("close-all", ActionCloseAllWorkspaces))
       .addLine()
       .add(Item("bounce", proxy((s"${ActionBounce.title}...", menu1 + Key.B))))
@@ -70,8 +73,8 @@ object MenuBar {
       .add(Item("window-shot",        proxy("Export Window as PDF...")))
 
     val mView = Group("view", "View")
-      .add(Item("show-log" )("Show Log Window"  -> (menu1         + Key.P))(Mellite.logToFront()))
-      .add(Item("clear-log")("Clear Log Window" -> (menu1 + shift + Key.P))(Mellite.clearLog  ()))
+      .add(Item("show-log" )("Show Log Window"  -> keyShowLog )(Mellite.logToFront()))
+      .add(Item("clear-log")("Clear Log Window" -> keyClearLog)(Mellite.clearLog  ()))
 
     // if (itPrefs.visible && !Desktop.isLinux) mOperation.addLine().add(itPrefs)
 

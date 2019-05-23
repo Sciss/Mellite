@@ -13,29 +13,28 @@
 
 package de.sciss.mellite.gui.impl.markdown
 
+import de.sciss.desktop
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.impl.component.NavigationHistory
-import de.sciss.mellite.gui.{GUI, ObjListView, MarkdownEditorFrame, MarkdownRenderView}
-import de.sciss.swingplus.ComboBox
+import de.sciss.mellite.gui.impl.component.{NavigationHistory, ZoomSupport}
+import de.sciss.mellite.gui.{GUI, MarkdownEditorFrame, MarkdownRenderView, ObjListView}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
-import de.sciss.{desktop, numbers}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
 import org.pegdown.{Extensions, PegDownProcessor}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
-import scala.swing.event.{Key, SelectionChanged}
+import scala.swing.event.Key
 import scala.swing.{Action, BorderPanel, Component, FlowPanel, ScrollPane, Swing}
 
 object MarkdownRenderViewImpl {
@@ -90,6 +89,7 @@ object MarkdownRenderViewImpl {
 
   private abstract class Base[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
     extends MarkdownRenderView.Basic[S]
+      with ZoomSupport
       with ComponentHolder[Component]
       with ObservableImpl[S, MarkdownRenderView.Update[S]] { impl =>
 
@@ -164,6 +164,9 @@ object MarkdownRenderViewImpl {
       _editor.text  = html
       _editor.peer.setCaretPosition(0)
     }
+
+    protected def setZoomFactor(f: Float): Unit =
+      _editor.zoom = f
 
     private def guiInit(): Unit = {
       _editor = new HTMLEditorPaneWithZoom("") {
@@ -244,34 +247,7 @@ object MarkdownRenderViewImpl {
       val ggBwd  = GUI.toolButton(actionBwd, raphael.Shapes.Backward)
       val ggFwd  = GUI.toolButton(actionFwd, raphael.Shapes.Forward )
 
-      // XXX TODO --- DRY with WidgetRenderViewImpl
-      val zoomItems = Vector(25, 50, 75, 100, 125, 150, 200, 250, 300, 350, 400).map(Percent)
-      val ggZoom = new ComboBox(zoomItems) {
-        selection.item = Percent(100)
-        listenTo(selection)
-        reactions += {
-          case SelectionChanged(_) =>
-            _editor.zoom = selection.item.fraction
-//            paneRender.horizontalScrollBarPolicy =
-//              if (_editor.zoom == 1.0)  ScrollPane.BarPolicy.AsNeeded
-//              else                      ScrollPane.BarPolicy.Always  // work around bugs in zoom hack
-        }
-      }
-
-      def zoom(dir: Int): Unit = {
-        import numbers.Implicits._
-        ggZoom.selection.index = (ggZoom.selection.index + dir).clip(0, zoomItems.size - 1)
-      }
-
-      def zoomIn    (): Unit = zoom(+1)
-      def zoomOut   (): Unit = zoom(-1)
-      def zoomReset (): Unit = ggZoom.selection.item = Percent(100)
-
-      import KeyStrokes._
-      Util.addGlobalAction(ggZoom, "dec-zoom", ctrl + Key.Minus         )(zoomOut   ())
-      Util.addGlobalAction(ggZoom, "inc-zoom", ctrl + Key.Plus          )(zoomIn    ())
-      Util.addGlobalAction(ggZoom, "inc-zoom", shift + ctrl + Key.Equals)(zoomIn    ())
-      Util.addGlobalAction(ggZoom, "reset-zoom", ctrl + Key.Key0        )(zoomReset ())
+      val ggZoom = initZoomWithComboBox()
 
       if (!embedded) {
         import KeyStrokes._

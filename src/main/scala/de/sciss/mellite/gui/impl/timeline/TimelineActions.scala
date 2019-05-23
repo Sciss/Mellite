@@ -18,8 +18,9 @@ import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
 import de.sciss.fingertree.RangedSeq
+import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ProcActions
@@ -29,7 +30,7 @@ import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.mellite.gui.{ActionBounce, ObjTimelineView, TimelineView}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{ObjKeys, TimeRef, Timeline}
+import de.sciss.synth.proc.{ObjKeys, Proc, TimeRef, Timeline}
 import de.sciss.topology
 import de.sciss.topology.Topology
 import javax.swing.undo.UndoableEdit
@@ -107,7 +108,9 @@ trait TimelineActions[S <: Sys[S]] {
       val pos     = timelineModel.position
       val pos1    = pos - TimelineView.MinDur
       val pos2    = pos + TimelineView.MinDur
-      val editOpt = withFilteredSelection(pv => pv.spanValue.contains(pos1) && pv.spanValue.contains(pos2)) { implicit tx =>
+      val editOpt = withFilteredSelection(pv =>
+        pv.spanValue.contains(pos1) && pv.spanValue.contains(pos2)) { implicit tx =>
+
         splitObjects(pos)
       }
       editOpt.foreach(undoManager.add)
@@ -366,7 +369,7 @@ trait TimelineActions[S <: Sys[S]] {
     CompoundEdit(edits, "Split Objects")
   }
 
-  private def splitObject(groupMod: proc.Timeline.Modifiable[S], time: Long, oldSpan: SpanLikeObj.Var[S],
+  private def splitObject(tlMod: proc.Timeline.Modifiable[S], time: Long, oldSpan: SpanLikeObj.Var[S],
                           obj: Obj[S])(implicit tx: S#Tx): (List[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
     // val imp = ExprImplicits[S]
     val leftObj   = obj // pv.obj()
@@ -405,12 +408,48 @@ trait TimelineActions[S <: Sys[S]] {
     }
 
     // group.add(rightSpan, rightObj)
-    val editAdd = EditTimelineInsertObj("Split Region", groupMod, rightSpan, rightObj)
+    val editAdd = EditTimelineInsertObj("Split Region", tlMod, rightSpan, rightObj)
+
+    // now try to find targets (tricky! we only scan global procs and their main inputs)
+    val editsLinkOut: List[UndoableEdit] = (leftObj, rightObj) match {
+      case (pLeft: Proc[S], pRight: Proc[S]) =>
+        (pLeft.outputs.get(Proc.mainOut), pRight.outputs.get(Proc.mainOut)) match {
+          case (Some(outLeft), Some(outRight)) =>
+            val (it, _) = tlMod.eventsAt(BiGroup.MinCoordinate)
+            it.flatMap {
+              case (Span.All, vec) =>
+                vec.flatMap { entry =>
+                  entry.value match {
+                    case sink: Proc[S] =>
+                      val hasLink = sink.attr.get(Proc.mainIn).exists {
+                        case `outLeft` => true
+                        case outF: Folder[S] =>
+                          outF.iterator.contains(outLeft)
+                        case _        => false
+                      }
+                      if (hasLink) {
+                        Some(Edits.addLink(outRight, sink))
+                      } else {
+                        None
+                      }
+
+                    case _ => None
+                  }
+                }
+              case _ => None
+            } .toList
+
+          case _ => Nil
+        }
+
+      case _ => Nil
+    }
 
     // debugCheckConsistency(s"Split left = $leftObj, oldSpan = $oldVal; right = $rightObj, rightSpan = ${rightSpan.value}")
-    val list1 = editAdd :: Nil
+    val list1 = editAdd :: editsLinkOut
     val list2 = editLeftSpan.fold(list1)(_ :: list1)
     val list3 = editRemoveFadeOut :: list2
+
     (list3, rightSpan, rightObj)
   }
 }

@@ -14,7 +14,6 @@
 package de.sciss.mellite.gui.impl.document
 
 import de.sciss.desktop
-import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.CellView
@@ -23,13 +22,11 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.impl.component.CollectionViewImpl
-import de.sciss.mellite.gui.{AttrMapFrame, AttrMapView, MenuBar, ObjView}
+import de.sciss.mellite.gui.impl.component.{CollectionViewImpl, NoMenuBarActions}
+import de.sciss.mellite.gui.{AttrMapFrame, AttrMapView, ObjView}
 import de.sciss.synth.proc.Universe
-import javax.swing.JComponent
 import javax.swing.undo.UndoableEdit
 
-import scala.swing.event.Key
 import scala.swing.{Action, Component}
 
 object AttrMapFrameImpl {
@@ -98,7 +95,7 @@ object AttrMapFrameImpl {
                                              name: CellView[S#Tx, String])
                                        (implicit undoManager: UndoManager)
     extends WindowImpl[S](name.map(n => s"$n : Attributes"))
-    with AttrMapFrame[S] {
+    with AttrMapFrame[S] with NoMenuBarActions {
 
     override protected def style: desktop.Window.Style = desktop.Window.Auxiliary
 
@@ -108,23 +105,9 @@ object AttrMapFrameImpl {
 
     protected def selectedObjects: List[ObjView[S]] = contents.selection.map(_._2)
 
-    // XXX TODO --- there should be a general mechanism for
-    // binding actions even if the menu bar is absent.
     override protected def initGUI(): Unit = {
       super.initGUI()
-
-      val c           = component
-      val actionClose = Action(null)(handleClose())
-      val am          = c.peer.getActionMap
-      val im          = c.peer.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-      am.put("file.close", actionClose.peer)
-      im.put(menu1 + Key.W, "file.close")
-      undoRedoActions.foreach { case (undo, redo) =>
-        am.put("edit.undo", undo.peer)
-        im.put(MenuBar.keyUndo, "edit.undo")
-        am.put("edit.redo", redo.peer)
-        im.put(MenuBar.keyRedo, "edit.redo")
-      }
+      initNoMenuBarActions(component)
     }
 
     protected lazy val actionDelete: Action = Action(null) {

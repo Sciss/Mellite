@@ -116,7 +116,7 @@ object Edits {
                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit =
     EditAttrMap.expr[S, String, StringObj]("Rename Object", obj, ObjKeys.attrName, nameOpt)
 
-  def addLink[S <: Sys[S]](source: Output[S], sink: Proc[S], key: String)
+  def addLink[S <: Sys[S]](source: Output[S], sink: Proc[S], key: String = Proc.mainIn)
                           (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
     log(s"Link $source to $sink / $key")
     // source.addSink(Scan.Link.Scan(sink))

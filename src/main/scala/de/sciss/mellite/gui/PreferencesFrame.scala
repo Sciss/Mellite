@@ -13,23 +13,25 @@
 
 package de.sciss.mellite.gui
 
-import de.sciss.desktop.KeyStrokes.menu1
 import de.sciss.desktop.{Desktop, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
+import de.sciss.mellite.gui.impl.component.NoMenuBarActions
 import de.sciss.mellite.{Application, Prefs}
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
-import javax.swing.JComponent
 
-import scala.swing.event.Key
 import scala.swing.{Action, Component, Label, TabbedPane}
 
-final class PreferencesFrame extends desktop.impl.WindowImpl {
+final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
 
   def handler: WindowHandler = Application.windowHandler
 
   override protected def style: Window.Style = Window.Auxiliary
+
+  protected def handleClose(): Unit = dispose()
+
+  protected def undoRedoActions: Option[(Action, Action)] = None
 
   private[this] val box: Component = {
     import PrefsGUI._
@@ -214,14 +216,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl {
 
   contents = box
 
-  {
-    // XXX TODO --- there should be a general mechanism for this
-    val actionClose = Action(null)(dispose())
-    val am          = box.peer.getActionMap
-    val im          = box.peer.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-    am.put("file.close", actionClose.peer)
-    im.put(menu1 + Key.W, "file.close")
-  }
+  initNoMenuBarActions(box)
 
   title           = "Preferences"
   closeOperation  = Window.CloseDispose
