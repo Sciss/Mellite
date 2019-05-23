@@ -1,6 +1,7 @@
 package de.sciss.mellite.gui.impl
 
 import de.sciss.file._
+import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.gui.WebBrowser
 import de.sciss.mellite.{Mellite, executionContext}
@@ -46,27 +47,41 @@ object ApiBrowser {
             futMeta.onComplete { tr =>
               defer {
                 lookUpRefBusy = false
+
+                def checkVersions(versions: ISeq[Version]): Unit = {
+                  val vOpt = versions.find(_ <= bestMod.version).orElse {
+                    val v1 = versions.headOption
+                    v1 match {
+                      case Some(v2) =>
+                        println(s"No matching documentation found. Using newer version $v2")
+                      case None =>
+                        println(s"No documentation found in maven meta data.")
+                    }
+                    v1
+                  }
+                  vOpt.foreach { v =>
+                    if (v < bestMod.version) println(s"No current documentation found. Using older version $v")
+                    val docModule = bestMod.copy(version = v)
+                    finish(docModule)
+                  }
+                }
+
                 tr match {
                   case Success(meta) =>
-                    val vOpt = meta.versions.find(_ <= bestMod.version).orElse {
-                      val v1 = meta.versions.headOption
-                      v1 match {
-                        case Some(v2) =>
-                          println(s"No matching documentation found. Using newer version $v2")
-                        case None =>
-                          println(s"No documentation found in maven meta data.")
-                      }
-                      v1
-                    }
-                    vOpt.foreach { v =>
-                      if (v < bestMod.version) println(s"No current documentation found. Using older version $v")
-                      val docModule = bestMod.copy(version = v)
-                      finish(docModule)
-                    }
+                    checkVersions(meta.versions)
 
                   case Failure(ex) =>
-                    println(s"Could not resolve documentation meta data (${DocUtil.mkJavadocMetaDataUrl(bestMod)}:")
-                    ex.printStackTrace()
+                    println(s"Could not resolve documentation meta data (${DocUtil.mkJavadocMetaDataUrl(bestMod)}):")
+                    val msg = if (ex.getMessage == null) "" else s": ${ex.getMessage}"
+                    println(s"${ex.getClass.getName}$msg")
+                    // ex.printStackTrace()
+
+                    // see if we have any local docs yet
+                    val p = mkDocBaseDirParent(bestMod)
+                    val versions = p.children(_.isDirectory).flatMap { vDir =>
+                      Version.parse(vDir.name).toOption
+                    }
+                    checkVersions(versions)
                 }
               }
             }
@@ -130,6 +145,9 @@ object ApiBrowser {
     val path        = if (isPkg) s + "/index.html" else s + ".html"
     path
   }
+
+  private def mkDocBaseDirParent(docModule: Module): File =
+    DocUtil.defaultUnpackDirBase(Mellite.cacheDir / "api", docModule.groupId, docModule.artifactId)
 
   private def mkDocBaseDir(docModule: Module): File =
     DocUtil.defaultUnpackDir(Mellite.cacheDir / "api", docModule)
