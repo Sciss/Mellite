@@ -24,7 +24,7 @@ import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ProcActions
-import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
+import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, EditTimelineRemoveObj, Edits}
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.mellite.gui.{ActionBounce, ObjTimelineView, TimelineView}
@@ -339,9 +339,9 @@ trait TimelineActions[S <: Sys[S]] {
           } else {
             timed.span match {
               case SpanLikeObj.Var(oldSpan) =>
-                val (edits1, span2, obj2) = splitObject(groupMod, selSpan.start, oldSpan, timed.value)
+                val (edits1, span2, obj2) = splitObjectImpl(groupMod, oldSpan , timed.value , selSpan.start )
                 val edits3 = if (selSpan contains span2.value) edits1 else {
-                  val (edits2, _, _) = splitObject(groupMod, selSpan.stop, span2, obj2)
+                  val (edits2, _, _)      = splitObjectImpl(groupMod, span2   , obj2        , selSpan.stop  )
                   edits1 ++ edits2
                 }
                 val edit4 = Edits.unlinkAndRemove(groupMod, span2, obj2)
@@ -360,7 +360,7 @@ trait TimelineActions[S <: Sys[S]] {
     val edits: List[UndoableEdit] = views.toIterator.flatMap { pv =>
       pv.span match {
         case SpanLikeObj.Var(oldSpan) =>
-          val (edits, _, _) = splitObject(groupMod, time, oldSpan, pv.obj)
+          val (edits, _, _) = splitObjectImpl(groupMod, oldSpan, pv.obj, time)
           edits
         case _ => Nil
       }
@@ -369,56 +369,71 @@ trait TimelineActions[S <: Sys[S]] {
     CompoundEdit(edits, "Split Objects")
   }
 
-  private def splitObject(tlMod: proc.Timeline.Modifiable[S], time: Long, oldSpan: SpanLikeObj.Var[S],
-                          obj: Obj[S])(implicit tx: S#Tx): (List[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
-    // val imp = ExprImplicits[S]
-    val leftObj   = obj // pv.obj()
+  protected def splitObject(tlMod: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S], time: Long)
+                           (implicit tx: S#Tx): (Option[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
+    val tup = splitObjectImpl(tlMod, span, obj, time)
+    val opt = CompoundEdit(tup._1, "Split Objects")
+    (opt, tup._2, tup._3)
+  }
+
+  private def splitObjectImpl(tlMod: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S], time: Long)
+                             (implicit tx: S#Tx): (List[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
+    val leftObj   = obj
     val rightObj  = ProcActions.copy[S](leftObj, connectInput = true)
     rightObj.attr.remove(ObjKeys.attrFadeIn)
 
-    val oldVal    = oldSpan.value
-    val rightSpan = oldVal match {
+    val oldVal    = span.value
+    val rightSpan: SpanLikeObj.Var[S] = oldVal match {
       case Span.HasStart(leftStart) =>
-        val _rightSpan  = SpanLikeObj.newVar(oldSpan())
+        val _rightSpan  = SpanLikeObj.newVar[S](oldVal)
         val resize      = ProcActions.Resize(time - leftStart, 0L)
         val minStart    = TimelineNavigation.minStart(timelineModel)
-        // println("----BEFORE RIGHT----")
-        // debugPrintAudioGrapheme(rightObj)
         ProcActions.resize(_rightSpan, rightObj, resize, minStart = minStart)
-        // println("----AFTER RIGHT ----")
-        // debugPrintAudioGrapheme(rightObj)
         _rightSpan
 
-      case Span.HasStop(rightStop) =>
-        SpanLikeObj.newVar[S](Span(time, rightStop))
+      case _ =>
+        val rightSpanV = oldVal.intersect(Span.from(time))
+        SpanLikeObj.newVar[S](rightSpanV)
     }
 
-    val editRemoveFadeOut = EditAttrMap("Remove Fade Out", leftObj, ObjKeys.attrFadeOut, None)
+    var edits = List.empty[UndoableEdit]
 
-    val editLeftSpan: Option[UndoableEdit] = oldVal match {
-      case Span.HasStop(rightStop) =>
-        val minStart  = TimelineNavigation.minStart(timelineModel)
-        val resize    = ProcActions.Resize(0L, time - rightStop)
-        Edits.resize(oldSpan, leftObj, resize, minStart = minStart)
+    edits ::= EditAttrMap("Remove Fade Out", leftObj, ObjKeys.attrFadeOut, None)
 
-      case Span.HasStart(leftStart) =>
-        val leftSpan = Span(leftStart, time)
-        val edit = EditVar.Expr[S, SpanLike, SpanLikeObj]("Resize", oldSpan, leftSpan)
-        Some(edit)
+    span match {
+      case SpanLikeObj.Var(spanVr) =>
+        oldVal match {
+          case Span.HasStop(rightStop) =>
+            val minStart  = TimelineNavigation.minStart(timelineModel)
+            val resize    = ProcActions.Resize(0L, time - rightStop)
+            val editOpt   = Edits.resize(spanVr, leftObj, resize, minStart = minStart)
+            editOpt.foreach(edits ::= _)
+
+          case Span.HasStart(leftStart) =>
+            val leftSpanV = Span(leftStart, time)
+            edits ::= EditVar.Expr[S, SpanLike, SpanLikeObj]("Resize", spanVr, leftSpanV)
+
+          case _ =>
+        }
+
+      case _ =>
+        edits ::= EditTimelineRemoveObj("Split Region", tlMod, span, obj)
+        val leftSpanV = oldVal.intersect(Span.until(time))
+        val leftSpan  = SpanLikeObj.newVar[S](leftSpanV)
+        edits ::= EditTimelineInsertObj("Split Region", tlMod, leftSpan, leftObj)
     }
 
-    // group.add(rightSpan, rightObj)
-    val editAdd = EditTimelineInsertObj("Split Region", tlMod, rightSpan, rightObj)
+    edits ::= EditTimelineInsertObj("Split Region", tlMod, rightSpan, rightObj)
 
     // now try to find targets (tricky! we only scan global procs and their main inputs)
-    val editsLinkOut: List[UndoableEdit] = (leftObj, rightObj) match {
+    (leftObj, rightObj) match {
       case (pLeft: Proc[S], pRight: Proc[S]) =>
         (pLeft.outputs.get(Proc.mainOut), pRight.outputs.get(Proc.mainOut)) match {
           case (Some(outLeft), Some(outRight)) =>
             val (it, _) = tlMod.eventsAt(BiGroup.MinCoordinate)
-            it.flatMap {
+            it.foreach {
               case (Span.All, vec) =>
-                vec.flatMap { entry =>
+                vec.foreach { entry =>
                   entry.value match {
                     case sink: Proc[S] =>
                       val hasLink = sink.attr.get(Proc.mainIn).exists {
@@ -428,28 +443,22 @@ trait TimelineActions[S <: Sys[S]] {
                         case _        => false
                       }
                       if (hasLink) {
-                        Some(Edits.addLink(outRight, sink))
-                      } else {
-                        None
+                        edits ::= Edits.addLink(outRight, sink)
                       }
 
-                    case _ => None
+                    case _ =>
                   }
                 }
-              case _ => None
-            } .toList
+              case _ =>
+            }
 
-          case _ => Nil
+          case _ =>
         }
 
-      case _ => Nil
+      case _ =>
     }
 
     // debugCheckConsistency(s"Split left = $leftObj, oldSpan = $oldVal; right = $rightObj, rightSpan = ${rightSpan.value}")
-    val list1 = editAdd :: editsLinkOut
-    val list2 = editLeftSpan.fold(list1)(_ :: list1)
-    val list3 = editRemoveFadeOut :: list2
-
-    (list3, rightSpan, rightObj)
+    (edits.reverse, rightSpan, rightObj)
   }
 }
