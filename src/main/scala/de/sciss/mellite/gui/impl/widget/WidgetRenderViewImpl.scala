@@ -14,11 +14,10 @@
 package de.sciss.mellite.gui.impl.widget
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.event.impl.ObservableImpl
 import de.sciss.lucre.expr.Context
 import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.stm.TxnLike.peer
+import de.sciss.lucre.stm.{Disposable, UndoManager}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
@@ -41,14 +40,15 @@ import scala.util.{Failure, Success}
 
 object WidgetRenderViewImpl {
   def apply[S <: SSys[S]](init: Widget[S], bottom: ISeq[View[S]], embedded: Boolean)
-                         (implicit tx: S#Tx, universe: Universe[S]): WidgetRenderView[S] =
+                         (implicit tx: S#Tx, universe: Universe[S],
+                          undoManager: UndoManager[S]): WidgetRenderView[S] =
     new Impl[S](bottom, embedded = embedded).init(init)
 
   private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val universe: Universe[S])
+                                        (implicit val universe: Universe[S], val undoManager: UndoManager[S])
     extends WidgetRenderView[S]
       with ComponentHolder[Component]
-      with ObservableImpl[S, WidgetRenderView.Update[S]] with ZoomSupport { impl =>
+      /*with ObservableImpl[S, WidgetRenderView.Update[S]]*/ with ZoomSupport { impl =>
 
     type C = Component
 

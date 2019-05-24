@@ -29,7 +29,7 @@ import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
-import scala.swing.event.Key
+import scala.swing.event.{Key, SelectionChanged}
 import scala.swing.{Action, BorderPanel, Button, Component, TabbedPane}
 
 object WidgetEditorViewImpl {
@@ -41,6 +41,7 @@ object WidgetEditorViewImpl {
 //      case _               => false
 //    }
 
+    implicit val undoManagerTx: stm.UndoManager[S] = stm.UndoManager()
     val renderer  = WidgetRenderView[S](obj, embedded = true)
     val res       = new Impl[S](renderer, tx.newHandle(obj), bottom = bottom)
     res.init(obj, showEditor = showEditor)
@@ -49,7 +50,7 @@ object WidgetEditorViewImpl {
   private final class Impl[S <: SSys[S]](val renderer: WidgetRenderView[S],
                                          widgetH: stm.Source[S#Tx, Widget[S]],
                                          bottom: ISeq[View[S]])
-                                        (implicit undoManager: UndoManager)
+                                        (implicit undoManager: UndoManager, txUndo: stm.UndoManager[S])
     extends ComponentHolder[Component] with WidgetEditorView[S] with ModelImpl[WidgetEditorView.Update] { impl =>
 
     type C = Component
@@ -66,6 +67,7 @@ object WidgetEditorViewImpl {
     def dispose()(implicit tx: S#Tx): Unit = {
       codeView.dispose()
       renderer.dispose()
+      txUndo  .dispose()
     }
 
     def widget(implicit tx: S#Tx): Widget[S] = widgetH()
@@ -118,6 +120,9 @@ object WidgetEditorViewImpl {
       this
     }
 
+    def currentTab: WidgetEditorView.Tab =
+      if (tabs.selection.index == 0) WidgetEditorView.EditorTab else WidgetEditorView.RendererTab
+
     private def guiInit(/* initialText: String, */ showEditor: Boolean): Unit = {
       val paneEdit = new BorderPanel {
         add(codeView.component, BorderPanel.Position.Center)
@@ -133,6 +138,12 @@ object WidgetEditorViewImpl {
       _tabs.pages     += pageRender
       //      _tabs.pages     += pageAttr
       Util.addTabNavigation(_tabs)
+
+      _tabs.listenTo(_tabs.selection)
+      _tabs.reactions += {
+        case SelectionChanged(_) =>
+          impl.dispatch(WidgetEditorView.TabChange(currentTab))
+      }
 
       //      render(initialText)
 

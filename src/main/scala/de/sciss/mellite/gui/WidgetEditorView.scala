@@ -31,12 +31,19 @@ object WidgetEditorView {
     WidgetEditorViewImpl[S](obj, showEditor = showEditor, bottom = bottom)
 
   sealed trait Update
-  final case class DirtyChange(value: Boolean) extends Update
+  final case class DirtyChange(value: Boolean ) extends Update
+  final case class TabChange  (value: Tab     ) extends Update
+
+  sealed trait Tab
+  final case object EditorTab   extends Tab
+  final case object RendererTab extends Tab
 }
 trait WidgetEditorView[S <: Sys[S]] extends UniverseView[S] with Model[WidgetEditorView.Update] {
   def codeView: CodeView[S, Widget.Graph]
 
   def renderer: WidgetRenderView[S]
+
+  def currentTab: WidgetEditorView.Tab
 
 //  def dirty(implicit tx: TxnLike): Boolean
 
