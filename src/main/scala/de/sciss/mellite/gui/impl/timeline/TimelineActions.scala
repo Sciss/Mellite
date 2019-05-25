@@ -369,6 +369,7 @@ trait TimelineActions[S <: Sys[S]] {
     CompoundEdit(edits, "Split Objects")
   }
 
+  @deprecated("Should migrate to SP EditTimeline", since = "2.36.0")
   protected def splitObject(tlMod: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S], time: Long)
                            (implicit tx: S#Tx): (Option[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
     val tup = splitObjectImpl(tlMod, span, obj, time)
@@ -376,6 +377,7 @@ trait TimelineActions[S <: Sys[S]] {
     (opt, tup._2, tup._3)
   }
 
+  @deprecated("Should migrate to SP EditTimeline", since = "2.36.0")
   private def splitObjectImpl(tlMod: proc.Timeline.Modifiable[S], span: SpanLikeObj[S], obj: Obj[S], time: Long)
                              (implicit tx: S#Tx): (List[UndoableEdit], SpanLikeObj.Var[S], Obj[S]) = {
     val leftObj   = obj
