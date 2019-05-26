@@ -8,7 +8,7 @@ image: spoud/oraclejdk
 before_script:
   - uname -a
   - java -version
-  - apt-get -y install openjfx
+  - apt -y install openjfx
   - curl -Ls https://git.io/sbt > sbt && chmod 0755 sbt
   # Enable the usage of sources over https
   # - apt update -yqq
