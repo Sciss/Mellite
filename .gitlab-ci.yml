@@ -3,12 +3,12 @@
 # https://hub.docker.com/r/library/java/tags/ . A Java image is not required
 # but an image with a JVM speeds up the build a bit.
 #image: openjdk:8
-image: spoud/oraclejdk
+#image: spoud/oraclejdk
+image: opalj/sbt_scala_javafx
 
 before_script:
   - uname -a
   - java -version
-  - apt -y install openjfx
   - curl -Ls https://git.io/sbt > sbt && chmod 0755 sbt
   # Enable the usage of sources over https
   # - apt update -yqq
