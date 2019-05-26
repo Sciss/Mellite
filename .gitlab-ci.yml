@@ -7,16 +7,18 @@ image: spoud/oraclejdk
 
 before_script:
   - uname -a
-  # Enable the usage of sources over https
-  - apt update -yqq
-  - apt install apt-transport-https -yqq
-  # Add keyserver for SBT
-  - echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
-  - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
-  # Install SBT
-  - apt update -yqq
-  - apt install sbt -yqq
   - java -version
+  - curl -Ls https://git.io/sbt > sbt && chmod 0755 sbt
+  # Enable the usage of sources over https
+  # - apt update -yqq
+  # - apt install apt-transport-https -yqq
+  # Add keyserver for SBT
+  # - echo "deb http://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
+  # - apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2EE0EA64E40A89B84B2DF73499E82A75642AC823
+  # Install SBT
+  # - apt update -yqq
+  # - apt install sbt -yqq
+  # - java -version
   # Log the sbt version
   # - sbt sbtVersion
   # Install JavaFX
@@ -25,5 +27,5 @@ before_script:
 test:
   script:
     # Execute your project's tests
-    - sbt +clean +test
+    - ./sbt +clean +test
 
