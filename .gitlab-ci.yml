@@ -6,7 +6,7 @@
 image: spoud/oraclejdk
 
 before_script:
-   - uname -a
+  - uname -a
   # Enable the usage of sources over https
   - apt update -yqq
   - apt install apt-transport-https -yqq
