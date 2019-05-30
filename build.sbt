@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.36.0"
-lazy val mimaVersion                = "2.35.0"
+lazy val projectVersion             = "2.36.1-SNAPSHOT"
+lazy val mimaVersion                = "2.36.0"
 
 lazy val loggingEnabled             = true
 
@@ -26,22 +26,22 @@ lazy val deps = new {
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
     val freesound           = "1.18.0"
-    val fscape              = "2.26.0"
+    val fscape              = "2.26.1"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val lucre               = "3.13.0"
-    val lucreSwing          = "1.17.0"
+    val lucre               = "3.13.1"
+    val lucreSwing          = "1.17.1"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
-    val patterns            = "0.12.0"
+    val patterns            = "0.12.1"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val processor           = "0.4.2"
     val raphaelIcons        = "1.0.6"
-    val scalaCollider       = "1.28.3"
+    val scalaCollider       = "1.28.4"
     val scalaColliderSwing  = "1.41.2"
     val scalaColliderUGens  = "1.19.4"
     val scalaOSC            = "1.2.0"
@@ -52,7 +52,7 @@ lazy val deps = new {
     // val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.1"
-    val soundProcesses      = "3.29.0"
+    val soundProcesses      = "3.29.1"
     val span                = "1.4.2"
     val submin              = "0.2.5"
     val swingPlus           = "0.4.2"
@@ -271,11 +271,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
     //   "com.typesafe.akka" %% "akka-stream"          % deps.main.akka,
     //   "com.typesafe.akka" %% "akka-stream-testkit"  % deps.main.akka,
     // ),
-    libraryDependencies ++= {
-      // currently disabled until Scala 2.13 version is available
-      if (scalaVersion.value == "2.13.0-RC2") Nil else Seq(
-      )
-    },
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     mainClass in (Compile,run) := appMainClass,
     initialCommands in console :=

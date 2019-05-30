@@ -21,6 +21,7 @@ import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.equal.Implicits._
 import de.sciss.fingertree.RangedSeq
 import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
@@ -257,7 +258,7 @@ object TimelineViewImpl {
       selectionModel.addListener {
         case _ =>
           val hasSome = selectionModel.nonEmpty
-          if (hadSelectedObjects != hasSome) {
+          if (hadSelectedObjects !== hasSome) {
             hadSelectedObjects = hasSome
             actionSplitObjects        .enabled = hasSome
             actionCleanUpObjects      .enabled = hasSome
@@ -268,9 +269,9 @@ object TimelineViewImpl {
       var hasSelectedSpan = false
 
       timelineModel.addListener {
-        case TimelineModel.Selection(_, span) if span.before.isEmpty != span.now.isEmpty =>
+        case TimelineModel.Selection(_, span) if span.before.isEmpty !== span.now.isEmpty =>
           val hasSome = span.now.nonEmpty
-          if (hasSelectedSpan != hasSome) {
+          if (hasSelectedSpan !== hasSome) {
             hasSelectedSpan = hasSome
             actionClearSpan .enabled = hasSome
             actionRemoveSpan.enabled = hasSome
@@ -331,7 +332,7 @@ object TimelineViewImpl {
                 }
                 case _ => oldBounds
               }
-              if (newBounds != oldBounds) {
+              if (newBounds !== oldBounds) {
                 timelineModel.setBoundsExtendVirtual(newBounds)
               }
               repaintAll()  // XXX TODO: optimize dirty rectangle
@@ -363,6 +364,7 @@ object TimelineViewImpl {
         viewMap.remove(id)
         viewSet.remove(view)(tx.peer)
         deferTx {
+          selectionModel -= view
           view match {
             case pv: ProcObjView.Timeline[S] if pv.isGlobal => globalView.remove(pv)
             case _ =>
@@ -522,6 +524,10 @@ object TimelineViewImpl {
           cursor.step { implicit tx =>
             insertAudioRegion(drop, ad, ad.source())
           }
+
+        // quick fix to forbid that we "drop ourselves onto ourselves"
+        // ; must be stated before the next match case!
+        case DnD.ObjectDrag(_, `impl`) => None
 
         case DnD.ObjectDrag(_, view /* : ObjView.Proc[S] */) => cursor.step { implicit tx =>
           plainGroup.modifiableOption.map { group =>

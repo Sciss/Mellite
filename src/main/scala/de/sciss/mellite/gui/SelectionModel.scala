@@ -23,14 +23,23 @@ object SelectionModel {
   type Listener[S <: Sys[S], Repr] = Model.Listener[Update[S, Repr]]
   final case class Update[S <: Sys[S], Repr](added: Set[Repr], removed: Set[Repr])
 }
+/** An observable unordered set of (visually selected) objects.
+  */
 trait SelectionModel[S <: Sys[S], Repr]
   extends Model[SelectionModel.Update[S, Repr]] {
 
   def contains(view: Repr): Boolean
+
   def +=(view: Repr): Unit
   def -=(view: Repr): Unit
+
   def clear(): Unit
+
+  /** Since conceptually this is an unordered set, so do not rely
+    * on a particular sequence in the `iterator`.
+    */
   def iterator: Iterator[Repr]
+
   def isEmpty : Boolean
   def nonEmpty: Boolean
 }

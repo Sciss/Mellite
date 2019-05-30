@@ -20,8 +20,9 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.ObjTimelineView.{Context, Factory}
 import de.sciss.mellite.gui.impl.objview.{ActionObjView, GenericObjView}
+import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.mellite.gui.{ObjView, ObjTimelineView, TimelineTool}
+import de.sciss.mellite.gui.{ObjTimelineView, ObjView, TimelineTool}
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 
 object ObjTimelineViewImpl {
@@ -48,7 +49,8 @@ object ObjTimelineViewImpl {
 
   private var map = Map[Int, Factory](
     ProcObjView   .tpe.typeId -> ProcObjView,
-    ActionObjView .tpe.typeId -> ActionObjView
+    ActionObjView .tpe.typeId -> ActionObjView,
+    PatternObjView.tpe.typeId -> PatternObjView
   )
 
   // -------- Generic --------

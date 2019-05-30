@@ -1,1 +1,0 @@
-../../../../../../scala-2.12/de/sciss/mellite/gui/impl/FreesoundRetrievalObjView.scala

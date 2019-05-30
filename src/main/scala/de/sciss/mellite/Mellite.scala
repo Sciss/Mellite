@@ -40,14 +40,16 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   def config: Config = _config
 
+//  ServerImpl.USE_COMPRESSION = false
+
   import de.sciss.synth.proc
 //  proc.showLog            = true
-//  showLog                 = true
-//  //  lucre.event    .showLog = true
-//  //  lucre.confluent.showLog = true
 //  proc.showAuralLog       = true
 //  proc.showTransportLog   = true
 //  showTimelineLog         = true
+  //  showLog                 = true
+  //  //  lucre.event    .showLog = true
+  //  //  lucre.confluent.showLog = true
 //  de.sciss.lucre.bitemp.impl.BiGroupImpl.showLog = true
 //  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
 //  de.sciss.lucre.event.showLog = true
@@ -135,6 +137,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   def startAuralSystem(): Boolean = {
     requireEDT()
     val serverCfg = Server.Config()
+//    serverCfg.verbosity = -1
     val clientCfg = Client.Config()
     applyAudioPreferences(serverCfg, clientCfg, useDevice = true, pickPort = true)
     import de.sciss.file._
