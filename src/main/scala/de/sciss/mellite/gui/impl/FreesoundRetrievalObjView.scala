@@ -47,7 +47,7 @@ import de.sciss.{desktop, freesound}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, KeyStroke}
 
-import scala.collection.{breakOut, mutable}
+import scala.collection.mutable
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, blocking}
 import scala.swing.event.Key
@@ -118,9 +118,16 @@ object FreesoundRetrievalObjView extends ObjListView.Factory {
   private[this] val _previewsCache = Ref(Option.empty[PreviewsCache])
 
   private implicit lazy val _client: Client = {
-    val se: String = ak.flatMap { n =>
-      (0 until 64 by 8).map(i => (((n >>> i) & 0xFF) + '0').toChar)
-    } (collection.breakOut)
+    val se: String = {
+      val b = new mutable.StringBuilder(48)
+      ak.foreach { n =>
+        (0 until 64 by 8).foreach { i =>
+          val c = (((n >>> i) & 0xFF) + '0').toChar
+          b.append(c)
+        }
+      }
+      b.result()
+    }
     Client(ClientId, se)
   }
 
@@ -279,7 +286,7 @@ object FreesoundRetrievalObjView extends ObjListView.Factory {
         val menu1   = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
         Util.addGlobalKeyWhenVisible(ggInfo, KeyStroke.getKeyStroke(Key.I.id, menu1))
         val cont    = downloadsView.bottomComponent.contents
-        cont.insert(0, ggInfo, ggLegal, Swing.HStrut(4))
+        cont.insertAll(0, ggInfo :: ggLegal :: Swing.HStrut(4) :: Nil)
       }
 
       val w:  WindowImpl[S] = new WindowImpl[S](name) {
@@ -453,13 +460,13 @@ object FreesoundRetrievalObjView extends ObjListView.Factory {
 
       val sel = selectedSounds
       val dir = cursor.step { implicit tx => locH().value }
-      val dl: List[Download] = sel.flatMap { s =>
+      val dl: List[Download] = sel.iterator.flatMap { s =>
         val n0 = file(s.fileName).base
-        val n1: String = n0.collect {
+        val n1: String = n0.iterator.collect {
           case c if c.isLetterOrDigit   => c
-          case c if c >= ' ' & c < '.'  => c
+          case c if c >= ' ' && c < '.' => c
           case '.' => '-'
-        } (breakOut)
+        } .mkString
 
         val n2: String = n1.take(18)
         val needsConversion = s.fileType.isCompressed
@@ -471,7 +478,7 @@ object FreesoundRetrievalObjView extends ObjListView.Factory {
           Convert(temp, f)
         } else Direct(f)
         if (f.exists()) None else Some(Download(s, m))
-      } (breakOut)
+      } .toList
 
       if (sel.nonEmpty && dl.isEmpty)
         println(s"${if (sel.size > 1) "Files have" else "File has"} already been downloaded.")
