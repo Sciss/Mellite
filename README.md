@@ -69,13 +69,15 @@ The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite" % v
 
-The current version `v` is `"2.36.1"`.
+The current version `v` is `"2.36.2"`.
 
 ## building from source
 
 See the section 'download and installation' for requirements (JDK, JavaFX).
 
-Mellite builds with [sbt](http://scala-sbt.org/) and Scala 2.12. The last version to support Scala 2.10 is 2.10.2.
+Mellite builds with [sbt](http://scala-sbt.org/) and Scala 2.13, 2.12, 2.11. The last version to support Scala 2.10 is 2.10.2.
+The default target and the binary distribution of the application are currently based on Scala 2.12.
+
 The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during
 development. For convenience, the [sbt script by Paul Phillips](https://github.com/paulp/sbt-extras) has been
 included, which is covered by a BSD-3-clause license. Therefore, on Linux and Mac you can just use `./sbt run` or

@@ -159,7 +159,12 @@ object MarkdownRenderViewImpl {
 
     private def setText(text: String): Unit = {
       requireEDT()
-      val mdp       = new PegDownProcessor(Extensions.SMARTYPANTS | Extensions.HARDWRAPS | Extensions.TABLES)
+      // Note: unless we have line wrap in the editor,
+      // we should not use hard wraps in the rendering.
+      // Note: task list items are not correctly rendered
+      // with WebLaF (checkboxes are always unselected)
+      val mdp       = new PegDownProcessor(Extensions.SMARTYPANTS | /*Extensions.HARDWRAPS |*/ Extensions.TABLES |
+        Extensions.FENCED_CODE_BLOCKS /*| Extensions.TASKLISTITEMS*/)
       val html      = mdp.markdownToHtml(text)
       _editor.text  = html
       _editor.peer.setCaretPosition(0)
