@@ -19,7 +19,8 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{BooleanCheckBoxView, View}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{ActionBounce, EnsembleView, FolderEditorView, FolderView, PlayToggleButton}
+import de.sciss.mellite.{FolderEditorView, FolderView}
+import de.sciss.mellite.gui.{ActionBounce, EnsembleView, PlayToggleButton}
 import de.sciss.swingplus.Separator
 import de.sciss.synth.proc.{Ensemble, Transport, Universe}
 

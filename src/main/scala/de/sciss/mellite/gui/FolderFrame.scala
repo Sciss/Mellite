@@ -17,6 +17,7 @@ import de.sciss.lucre
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.{FolderEditorView, FolderView}
 import de.sciss.mellite.gui.impl.document.{FolderFrameImpl => Impl}
 import de.sciss.synth.proc.Universe
 

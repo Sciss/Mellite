@@ -32,14 +32,12 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.edit.EditFolderInsertObj
-import de.sciss.mellite.gui.ActionArtifactLocation
 import de.sciss.mellite.gui.edit.{EditTimelineInsertObj, Edits}
-import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.{BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar

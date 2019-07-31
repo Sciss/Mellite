@@ -24,9 +24,8 @@ import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.{GUI, ObjListView}
+import de.sciss.mellite.{GUI, MarkdownFrame, MarkdownRenderView, ObjListView}
 import de.sciss.mellite.gui.impl.component.{NavigationHistory, ZoomSupport}
-import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownRenderView}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
@@ -38,7 +37,10 @@ import scala.swing.Swing._
 import scala.swing.event.Key
 import scala.swing.{Action, BorderPanel, Component, FlowPanel, ScrollPane, Swing}
 
-object MarkdownRenderViewImpl {
+object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
+  def install(): Unit =
+    MarkdownRenderView.peer = this
+
   def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
                          (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
     new Impl[S](bottom, embedded = embedded).init(init)
@@ -55,7 +57,7 @@ object MarkdownRenderViewImpl {
       if (embedded) None else {
         val actionEdit = Action(null) {
           cursor.step { implicit tx =>
-            MarkdownEditorFrame(markdown)
+            MarkdownFrame.editor(markdown)
           }
         }
         val ggEdit = GUI.toolButton(actionEdit, raphael.Shapes.Edit)

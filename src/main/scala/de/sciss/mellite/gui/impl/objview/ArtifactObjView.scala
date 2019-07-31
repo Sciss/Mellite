@@ -21,8 +21,7 @@ import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{MessageException, ObjListView, ObjView}
-import de.sciss.mellite.gui.ActionArtifactLocation
+import de.sciss.mellite.{ActionArtifactLocation, MessageException, ObjListView, ObjView}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.processor.Processor.Aborted

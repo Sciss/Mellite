@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import java.io.File
 
@@ -20,19 +20,30 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.{TreeTableView, View}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.{DragAndDrop, ObjListView, UniverseView}
 import de.sciss.mellite.DragAndDrop.Flavor
-import de.sciss.mellite.gui.impl.document.{FolderViewImpl => Impl}
-import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
 import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 object FolderView {
+  private[mellite] var peer: Companion = _
+
+  private def companion: Companion = {
+    require (peer != null, "Companion not yet installed")
+    peer
+  }
+
+  private[mellite] trait Companion {
+    def apply[S <: SSys[S]](root: Folder[S])
+                           (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S]
+
+    def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S]
+  }
+
   def apply[S <: SSys[S]](root: Folder[S])
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          undoManager: UndoManager): FolderView[S] = Impl(root)
+                         (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S] =
+    companion(root)
 
   type NodeView[S <: Sys[S]] = TreeTableView.NodeView[S, Obj[S], Folder[S], ObjListView[S]]
 
@@ -41,10 +52,9 @@ object FolderView {
     */
   // type Selection[S <: Sys[S]] = Vec[(Vec[ObjView.FolderLike[S]], ObjView[S])]
   type Selection[S <: Sys[S]] = List[NodeView[S]]
-  // type Selection[S <: Sys[S]] = Vec[stm.Source[S#Tx, Obj[S]]]
 
   /** Removes children from the selection whose parents are already included. */
-  def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S] = Impl.cleanSelection(in)
+  def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S] = companion.cleanSelection(in)
 
   final case class SelectionDnDData[S <: Sys[S]](universe: Universe[S], selection: Selection[S]) {
     type S1 = S

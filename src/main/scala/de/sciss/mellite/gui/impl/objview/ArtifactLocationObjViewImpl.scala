@@ -1,46 +1,26 @@
-/*
- *  ArtifactLocationObjView.scala
- *  (Mellite)
- *
- *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
- *
- *  This software is published under the GNU Affero General Public License v3+
- *
- *
- *  For further information, please contact Hanns Holger Rutz at
- *  contact@sciss.de
- */
-
 package de.sciss.mellite.gui.impl.objview
 
 import java.awt.datatransfer.Transferable
 
 import de.sciss.desktop
-import de.sciss.file._
-import de.sciss.icons.raphael
+import de.sciss.file.{File, file}
 import de.sciss.lucre.artifact.ArtifactLocation
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, GUI, ObjListView, ObjView}
+import de.sciss.mellite.ArtifactLocationObjView.{Config, MakeResult}
 import de.sciss.mellite.gui.edit.EditArtifactLocation
-import de.sciss.mellite.gui.ActionArtifactLocation
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.synth.proc.Implicits._
+import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, DragAndDrop, GUI, ObjListView, ObjView}
+import de.sciss.synth.proc
 import de.sciss.synth.proc.Universe
-import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-object ArtifactLocationObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = ArtifactLocation[~] // Elem[S]
-  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Location)
-  val prefix        : String    = "ArtifactLocation"
-  def humanName     : String    = "File Location"
-  def tpe           : Obj.Type  = ArtifactLocation
-  def category      : String    = ObjView.categResources
-  def canMakeObj : Boolean   = true
+object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
+  def install(): Unit =
+    ArtifactLocationObjView.peer = this
 
   def mkListView[S <: Sys[S]](obj: ArtifactLocation[S])(implicit tx: S#Tx): ArtifactLocationObjView[S] with ObjListView[S] = {
     val peer      = obj
@@ -48,8 +28,6 @@ object ArtifactLocationObjView extends ObjListView.Factory {
     val editable  = ArtifactLocation.Var.unapply(peer).isDefined // .modifiableOption.isDefined
     new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
-
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, directory: File, const: Boolean = false)
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
                                  (done: MakeResult[S] => Unit)
@@ -60,7 +38,7 @@ object ArtifactLocationObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+    object p extends ObjViewCmdLineParser[Config[S]](ArtifactLocationObjView, args) {
       val const   : Opt[Boolean]  = opt     (descr = s"Make constant instead of variable")
       val location: Opt[File]     = trailArg(descr = "Directory")
       validateFileIsDirectory(location)
@@ -72,6 +50,7 @@ object ArtifactLocationObjView extends ObjListView.Factory {
     import config._
     val obj0  = ArtifactLocation.newConst[S](directory)
     val obj   = if (const) obj0 else ArtifactLocation.newVar[S](obj0)
+    import proc.Implicits._
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
@@ -79,10 +58,10 @@ object ArtifactLocationObjView extends ObjListView.Factory {
   final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ArtifactLocation[S]],
                                 var directory: File, val isListCellEditable: Boolean)
     extends ArtifactLocationObjView[S]
-    with ObjListView /* .ArtifactLocation */[S]
-    with ObjViewImpl.Impl[S]
-    with ObjListViewImpl.StringRenderer
-    with ObjViewImpl.NonViewable[S] {
+      with ObjListView /* .ArtifactLocation */[S]
+      with ObjViewImpl.Impl[S]
+      with ObjListViewImpl.StringRenderer
+      with ObjViewImpl.NonViewable[S] {
 
     override def obj(implicit tx: S#Tx): ArtifactLocation[S] = objH()
 
@@ -123,9 +102,4 @@ object ArtifactLocationObjView extends ObjListView.Factory {
       }
     }
   }
-}
-trait ArtifactLocationObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = ArtifactLocation[S]
-
-  def directory: File
 }

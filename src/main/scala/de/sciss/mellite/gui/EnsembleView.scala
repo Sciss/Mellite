@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{CanBounce, UniverseView}
+import de.sciss.mellite.{CanBounce, FolderView, UniverseView}
 import de.sciss.mellite.gui.impl.document.{EnsembleViewImpl => Impl}
 import de.sciss.synth.proc.{Ensemble, Transport, Universe}
 

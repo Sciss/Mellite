@@ -11,27 +11,40 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.UniverseView
-import de.sciss.mellite.gui.impl.markdown.MarkdownRenderViewImpl
 import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object MarkdownRenderView {
+  private[mellite] var peer: Companion = _
+
+  private def companion: Companion = {
+    require (peer != null, "Companion not yet installed")
+    peer
+  }
+
+  private[mellite] trait Companion {
+    def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
+                           (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S]
+
+    def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
+                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S]
+  }
+
   def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
                          (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
-    MarkdownRenderViewImpl[S](init, bottom, embedded = embedded)
+    companion(init, bottom, embedded = embedded)
 
   def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S] =
-    MarkdownRenderViewImpl.basic[S](init, bottom, embedded = embedded)
+    companion.basic(init, bottom, embedded = embedded)
 
   sealed trait Update[S <: Sys[S]] { def view: Basic[S] }
   final case class FollowedLink[S <: Sys[S]](view: Basic[S], now: Markdown[S]) extends Update[S]

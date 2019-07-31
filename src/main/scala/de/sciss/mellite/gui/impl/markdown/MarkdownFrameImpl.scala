@@ -16,21 +16,23 @@ package de.sciss.mellite.gui.impl.markdown
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.{BooleanObj, CellView}
 import de.sciss.lucre.stm
-import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.Veto
-import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.{MarkdownEditorView, MarkdownFrame, MarkdownRenderView, Veto}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}
 
-object MarkdownFrameImpl {
+object MarkdownFrameImpl extends MarkdownFrame.Companion {
+  def install(): Unit =
+    MarkdownFrame.peer = this
+
   def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, universe: Universe[S]): MarkdownEditorFrame[S] = {
+                        (implicit tx: S#Tx, universe: Universe[S]): MarkdownFrame.Editor[S] = {
     implicit val undo: UndoManager = UndoManager()
     val showEditor  = obj.attr.$[BooleanObj](Markdown.attrEditMode).forall(_.value)
     val view        = MarkdownEditorView(obj, showEditor = showEditor, bottom = bottom)
@@ -40,7 +42,7 @@ object MarkdownFrameImpl {
   }
 
   def render[S <: Sys[S]](obj: Markdown[S])
-                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderFrame[S] = {
+                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownFrame.Render[S] = {
     val view  = MarkdownRenderView(obj)
     val res   = new RenderFrameImpl[S](view).init()
     trackTitle(res, view)
@@ -48,7 +50,7 @@ object MarkdownFrameImpl {
   }
 
   def basic[S <: stm.Sys[S]](obj: Markdown[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownRenderFrame.Basic[S] = {
+                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownFrame.Basic[S] = {
     val view  = MarkdownRenderView.basic(obj)
     val res   = new BasicImpl[S](view).init()
     trackTitle(res, view)
@@ -69,13 +71,13 @@ object MarkdownFrameImpl {
   // ---- frame impl ----
 
   private final class RenderFrameImpl[S <: Sys[S]](val view: MarkdownRenderView[S])
-    extends WindowImpl[S] with MarkdownRenderFrame[S] {
+    extends WindowImpl[S] with MarkdownFrame.Render[S] {
   }
   private final class BasicImpl[S <: stm.Sys[S]](val view: MarkdownRenderView.Basic[S])
-    extends WindowImpl[S] with MarkdownRenderFrame.Basic[S]
+    extends WindowImpl[S] with MarkdownFrame.Basic[S]
 
   private final class EditorFrameImpl[S <: Sys[S]](val view: MarkdownEditorView[S])
-    extends WindowImpl[S] with MarkdownEditorFrame[S] with Veto[S#Tx] {
+    extends WindowImpl[S] with MarkdownFrame.Editor[S] with Veto[S#Tx] {
 
     override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
       if (!view.dirty) None else Some(this)

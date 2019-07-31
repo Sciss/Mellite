@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import de.sciss.desktop.{FileDialog, OptionPane, Window}
 import de.sciss.file._
@@ -23,25 +23,12 @@ import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import de.sciss.{desktop, equal, swingplus}
 
+import scala.annotation.tailrec
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Dialog
 import scala.util.Try
 
 object ActionArtifactLocation {
-  //  sealed trait QueryResult
-  //  case class Cancel extends QueryResult
-  //  case clstm.Source[S#Tx, Folder[S]]ass Select(elem: )
-
-  // case class NewConfig(name: String, directory: File)
-
-  //  def queryOrCreate[S <: Sys[S]](
-  //                          root: stm.Source[S#Tx, Folder[S]], file: File,
-  //                          folder: Option[stm.Source[S#Tx, Folder[S]]] = None,
-  //                          window: Option[desktop.Window] = None)
-  //                        (implicit cursor: stm.Cursor[S]): Option[stm.Source[S#Tx, ArtifactLocation[S]]] = {
-  //    query(root = root, file = file, window = window).map { either =>
-  //      either.fold(identity) { case (name, directory) => create(name = name, directory = directory) }
-  //    }
 
   type LocationSource [S <: Sys[S]] = stm.Source[S#Tx, ArtifactLocation[S]]
   type LocationSourceT[S <: Sys[S]] = (stm.Source[S#Tx, ArtifactLocation[S]], File)
@@ -125,6 +112,7 @@ object ActionArtifactLocation {
     options
   }
 
+  @tailrec
   def queryNew(child: Option[File] = None, window: Option[Window] = None, askName: Boolean = false): Option[(String, File)] = {
     val dlg = FileDialog.folder(init = child.flatMap(_.parentOption), title = "Choose Artifact Base Location")
     dlg.show(None) match {

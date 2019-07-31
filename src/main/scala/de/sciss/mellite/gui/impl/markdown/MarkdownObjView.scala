@@ -19,8 +19,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, ObjListView, ObjView}
-import de.sciss.mellite.gui.{MarkdownEditorFrame, Shapes}
+import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView}
+import de.sciss.mellite.gui.Shapes
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Implicits._
@@ -99,7 +99,7 @@ object MarkdownObjView extends ObjListView.Factory {
     def convertEditValue(v: Any): Option[String] = None
 
     override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-      val frame = MarkdownEditorFrame(obj)
+      val frame = MarkdownFrame.editor(obj)
       Some(frame)
     }
   }

@@ -16,17 +16,21 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.filecache.Limit
-import de.sciss.freesound.lucre.Retrieval
+import de.sciss.freesound.lucre.{Retrieval, RetrievalObjView}
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
 import de.sciss.mellite.gui.impl.code.{CodeFrameImpl, CodeViewImpl}
+import de.sciss.mellite.gui.impl.document.{FolderEditorViewImpl, FolderViewImpl}
+import de.sciss.mellite.gui.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownRenderViewImpl}
+import de.sciss.mellite.gui.impl.objview.{ArtifactLocationObjViewImpl, AudioCueObjViewImpl}
+import de.sciss.negatum.Negatum
+import de.sciss.negatum.gui.NegatumObjView
 //import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
-import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
-import de.sciss.mellite.gui.impl.objview.{ActionObjView, ArtifactLocationObjView, ArtifactObjView, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.gui.impl.objview.{ActionObjView, ArtifactObjView, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.patterns.PatternObjView
 import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.gui.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
@@ -53,30 +57,31 @@ trait Init {
       ArtifactLocationObjView,
       ArtifactObjView,
       AudioCueObjView,
+      BooleanObjView,
+      ColorObjView,
       CodeObjView,
       DoubleObjView,
       DoubleVectorObjView,
-      EnvSegmentObjView,
-//      FreesoundRetrievalObjView,
-      FScapeObjView,
-      FScapeOutputObjView,
-      IntObjView,
-      MarkdownObjView,
-      BooleanObjView,
-      ColorObjView,
       EnsembleObjView,
+      EnvSegmentObjView,
       FadeSpecObjView,
       FolderObjView,
+      RetrievalObjView,
+      FScapeObjView,
+      FScapeOutputObjView,
       GraphemeObjView,
+      IntObjView,
       IntVectorObjView,
       LongObjView,
+      MarkdownObjView,
       NuagesObjView,
-      StringObjView,
-      TimelineObjView,
+      NegatumObjView,
       OutputObjView,
       ParamSpecObjView,
       PatternObjView,
       ProcObjView,
+      StringObjView,
+      TimelineObjView,
       WidgetObjView
     )
     obj.foreach(ObjListView.addFactory)
@@ -97,15 +102,22 @@ trait Init {
   }
 
   private[this] lazy val _initCompanionFactories: Unit = {
-    CodeFrameImpl       .install()
-    CodeViewImpl        .install()
-    GlobalProcsViewImpl .install()
-    GraphemeToolImpl    .install()
-    GraphemeToolsImpl   .install()
-    GraphemeViewImpl    .install()
-    TimelineToolImpl    .install()
-    TimelineToolsImpl   .install()
-    TimelineViewImpl    .install()
+    ArtifactLocationObjViewImpl .install()
+    AudioCueObjViewImpl         .install()
+    CodeFrameImpl               .install()
+    CodeViewImpl                .install()
+    FolderEditorViewImpl        .install()
+    FolderViewImpl              .install()
+    GlobalProcsViewImpl         .install()
+    GraphemeToolImpl            .install()
+    GraphemeToolsImpl           .install()
+    GraphemeViewImpl            .install()
+    MarkdownEditorViewImpl      .install()
+    MarkdownFrameImpl           .install()
+    MarkdownRenderViewImpl      .install()
+    TimelineToolImpl            .install()
+    TimelineToolsImpl           .install()
+    TimelineViewImpl            .install()
   }
 
   def initTypes(): Unit = {
@@ -116,6 +128,8 @@ trait Init {
     Retrieval     .init()
     Widget        .init()
     LucreSwing    .init()
+    Negatum       .init()
+
     lucre.swing.graph.TimelineView  .init()
 
     _initObjViews

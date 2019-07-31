@@ -1,17 +1,4 @@
-/*
- *  AudioCueObjView.scala
- *  (Mellite)
- *
- *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
- *
- *  This software is published under the GNU Affero General Public License v3+
- *
- *
- *  For further information, please contact Hanns Holger Rutz at
- *  contact@sciss.de
- */
-
-package de.sciss.mellite.gui.impl.audiocue
+package de.sciss.mellite.gui.impl.objview
 
 import java.awt.datatransfer.Transferable
 
@@ -19,7 +6,6 @@ import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
 import de.sciss.file._
-import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
@@ -27,43 +13,23 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame}
+import de.sciss.mellite.AudioCueObjView.{Config, LocationConfig, MakeResult, SingleConfig}
+import de.sciss.mellite.gui.AudioFileFrame
+import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.{DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
+import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.io.{AudioFile, AudioFileSpec}
+import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}
-import javax.swing.Icon
 
 import scala.annotation.tailrec
 import scala.swing.{Component, Label}
 import scala.util.{Failure, Success, Try}
 
-object AudioCueObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = AudioCue.Obj[~] // Grapheme.Expr.Audio[S]
-  val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Music)
-  val prefix        : String    = "AudioCue"
-  def humanName     : String    = "Audio File"
-  def tpe           : Obj.Type  = AudioCue.Obj // ElemImpl.AudioGrapheme.typeId
-  def category      : String    = ObjView.categResources
-  def canMakeObj    : Boolean   = true
-
-  private lazy val dirCache = WorkspaceCache[File]()
-
-  def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])
-                             (implicit tx: S#Tx): AudioCueObjView[S] with ObjListView[S] = {
-    val value = obj.value
-    new Impl(tx.newHandle(obj), value).init(obj)
-  }
-
-  type LocationConfig[S <: stm.Sys[S]] = ActionArtifactLocation.QueryResult[S]
-
-  final case class Config1[S <: stm.Sys[S]](name: String, file: File, spec: AudioFileSpec,
-                                            location: LocationConfig[S], offset: Long = 0L, gain: Double = 1.0,
-                                            const: Boolean = false)
-  type Config[S <: stm.Sys[S]] = List[Config1[S]]
+object AudioCueObjViewImpl extends AudioCueObjView.Companion {
+  def install(): Unit =
+    AudioCueObjView.peer = this
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
@@ -105,7 +71,7 @@ object AudioCueObjView extends ObjListView.Factory {
                   locOpt match {
                     case Some(loc) =>
                       loop(rem = tail, locSeq = loc :: locSeq, res =
-                        Config1(name = head.base, file = head, spec = spec, location = loc) :: res)
+                        SingleConfig(name = head.base, file = head, spec = spec, location = loc) :: res)
 
                     case None =>
                       Failure(Aborted())
@@ -113,7 +79,7 @@ object AudioCueObjView extends ObjListView.Factory {
               }
 
             case Nil => Success(res.reverse)
-        }
+          }
 
         loop(fs, Nil, Nil)
       }
@@ -121,15 +87,22 @@ object AudioCueObjView extends ObjListView.Factory {
     done(res)
   }
 
+  private lazy val dirCache = WorkspaceCache[File]()
+
+  def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx): AudioCueObjView[S] with ObjListView[S] = {
+    val value = obj.value
+    new Impl(tx.newHandle(obj), value).init(obj)
+  }
+
   private final case class Config2(name: Option[String] = None, file: File = null,
                                    location: Option[(String, File)] = None, offset: TimeArg = TimeArg.Frames(0L),
                                    gain: Double = 1.0,
                                    const: Boolean = false)
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
+  def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
     // we do not support any number of files except one
     val default = Config2()
-    object p extends ObjViewCmdLineParser[Config2](this, args) {
+    object p extends ObjViewCmdLineParser[Config2](AudioCueObjView, args) {
       val location: Opt[File] = opt(
         descr = "Artifact's base location (directory). If absent, artifact's direct parent is used."
       )
@@ -181,7 +154,7 @@ object AudioCueObjView extends ObjListView.Factory {
       loc   <- resolveLoc(c.file, c.location)
       spec  <- Try(AudioFile.readSpec(c.file))
     } yield {
-      val c1 = Config1(name = c.name.getOrElse(c.file.base), file = c.file, spec = spec, location = loc,
+      val c1 = SingleConfig(name = c.name.getOrElse(c.file.base), file = c.file, spec = spec, location = loc,
         offset = c.offset match {
           case TimeArg.Frames(n) => (n * TimeRef.SampleRate / spec.sampleRate + 0.5).toLong
           case other => other.frames()
@@ -233,9 +206,9 @@ object AudioCueObjView extends ObjListView.Factory {
   }
 
   private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
-                                var value: AudioCue)
+                                        var value: AudioCue)
     extends ObjListViewImpl.NonEditable[S]
-    with Basic[S] {
+      with Basic[S] {
 
     type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
 
@@ -257,9 +230,4 @@ object AudioCueObjView extends ObjListView.Factory {
       label
     }
   }
-}
-trait AudioCueObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = AudioCue.Obj[S]
-
-  def value: AudioCue
 }

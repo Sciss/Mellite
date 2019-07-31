@@ -25,11 +25,9 @@ import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjListView
-import de.sciss.mellite.gui.FolderView.Selection
+import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
+import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
-import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{ObjKeys, Universe}
@@ -44,13 +42,15 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Component
 import scala.util.control.NonFatal
 
-object FolderViewImpl {
+object FolderViewImpl extends FolderView.Companion {
+  def install(): Unit =
+    FolderView.peer = this
+
   def apply[S <: Sys[S]](root0: Folder[S])
                         (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S] = {
     implicit val folderSer: Serializer[S#Tx, S#Acc, Folder[S]] = Folder.serializer[S]
 
     new Impl[S] {
-//      val mapViews: IdentifierMap[S#Id, S#Tx, ObjView[S]]               = tx.newInMemoryIdMap  // folder Ids to renderers
       val treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]] = TreeTableView(root0, TTHandler)
 
       deferTx {
@@ -148,7 +148,7 @@ object FolderViewImpl {
           case f: Folder[S] =>
             val res = f.changed.react { implicit tx => u2 =>
               u2.list.modifiableOption.foreach { folder =>
-                val m = updateBranch(folder.asInstanceOf[Folder[S]] /* XXX TODO -- d'oh forgot this one */, u2.changes)
+                val m = updateBranch(folder, u2.changes)
                 m.foreach(dispatch(tx)(_))
               }
             }

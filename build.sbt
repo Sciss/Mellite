@@ -21,7 +21,7 @@ lazy val deps = new {
     val raphaelIcons        = "1.0.6"
     val scallop             = "3.3.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.29.4-SNAPSHOT"
+    val soundProcesses      = "3.30.0"
   }
   val main = new {
     val akka                = "2.5.23"
@@ -32,16 +32,17 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fileUtil            = "1.1.3"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.18.1"
-    val fscape              = "2.27.1-SNAPSHOT"
+    val freesound           = "1.19.0-SNAPSHOT"
+    val fscape              = "2.28.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val lucre               = "3.13.1"
     val model               = "0.3.4"
+    val negatum             = "0.8.0-SNAPSHOT"
     val numbers             = "0.2.0"
-    val patterns            = "0.12.2"
+    val patterns            = "0.13.0"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -62,7 +63,7 @@ lazy val deps = new {
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
     val webLaF              = "2.1.5"
-    val wolkenpumpe         = "2.33.1"
+    val wolkenpumpe         = "2.34.0"
   }
 }
 
@@ -249,6 +250,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "lucre-core"                     % deps.main.lucre,              // object system
       "de.sciss"          %% "lucre-expr"                     % deps.main.lucre,              // object system
       "de.sciss"          %% "model"                          % deps.main.model,              // non-txn MVC
+      "de.sciss"          %% "negatum-views"                  % deps.main.negatum,            // genetic programming of sounds
       "de.sciss"          %% "numbers"                        % deps.main.numbers,            // extension methods for numbers
       "de.sciss"          %% "patterns"                       % deps.main.patterns,           // pattern sequences
       "de.sciss"          %% "processor"                      % deps.main.processor,          // futures with progress and cancel

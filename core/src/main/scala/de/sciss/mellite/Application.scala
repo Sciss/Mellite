@@ -13,6 +13,8 @@
 
 package de.sciss.mellite
 
+import java.io.File
+
 import de.sciss.desktop.{SwingApplication, SwingApplicationProxy}
 import de.sciss.synth.proc.{AuralSystem, Code, Universe}
 
@@ -28,6 +30,8 @@ object Application extends SwingApplicationProxy[Universe[_], Application] { me 
 
   implicit def auralSystem: AuralSystem   = peer.auralSystem
   implicit def compiler   : Code.Compiler = peer.compiler
+
+  def cacheDir: File = peer.cacheDir
 }
 trait Application extends SwingApplication[Application.Document] {
   type Document = Application.Document
@@ -52,4 +56,6 @@ trait Application extends SwingApplication[Application.Document] {
   implicit def auralSystem: AuralSystem
 
   implicit def compiler: Code.Compiler
+
+  def cacheDir: File
 }

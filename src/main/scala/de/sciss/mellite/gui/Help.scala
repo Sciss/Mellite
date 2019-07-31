@@ -14,7 +14,7 @@
 package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm.InMemory
-import de.sciss.mellite.Mellite
+import de.sciss.mellite.{MarkdownFrame, Mellite}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Markdown
 
@@ -25,7 +25,7 @@ object Help {
   def shortcuts(): Unit = {
     system.step { implicit tx =>
       val md = markdownResource("shortcuts.md", "Keyboard Shortcuts")
-      MarkdownRenderFrame.basic(md)
+      MarkdownFrame.basic(md)
     }
   }
 

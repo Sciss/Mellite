@@ -28,6 +28,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.{DragAndDrop, GUI, ObjView, ProcActions}
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.gui.impl.component.DragSourceButton
+import de.sciss.mellite.gui.impl.objview.AudioCueObjViewImpl
 import de.sciss.mellite.gui.impl.timeline
 import de.sciss.mellite.gui.{AudioCueView, SonogramManager}
 import de.sciss.span.Span
@@ -103,7 +104,7 @@ object AudioCueViewImpl {
   private abstract class Impl[S <: Sys[S], I <: Sys[I]](var value: AudioCue, val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
                                                         inMemoryBridge: S#Tx => I#Tx)
                                                        (implicit val universe: Universe[S])
-    extends AudioCueView[S] with AudioCueObjView.Basic[S] with ComponentHolder[Component] { impl =>
+    extends AudioCueView[S] with AudioCueObjViewImpl.Basic[S] with ComponentHolder[Component] { impl =>
 
     type C = Component
 

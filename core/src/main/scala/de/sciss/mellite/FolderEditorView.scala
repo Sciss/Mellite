@@ -11,23 +11,33 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.UniverseView
-import de.sciss.mellite.gui.impl.document.FolderEditorViewImpl
 import de.sciss.synth.proc.Universe
 
 import scala.swing.{Action, Component, SequentialContainer}
 
 object FolderEditorView {
+  private[mellite] var peer: Companion = _
+
+  private def companion: Companion = {
+    require (peer != null, "Companion not yet installed")
+    peer
+  }
+
+  private[mellite] trait Companion {
+    def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
+                                              undoManager: UndoManager = UndoManager()): FolderEditorView[S]
+  }
+
   def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
                                             undoManager: UndoManager = UndoManager()): FolderEditorView[S] =
-    FolderEditorViewImpl(folder)
+    companion(folder)
 }
 trait FolderEditorView[S <: stm.Sys[S]] extends View.Editable[S] with UniverseView[S] {
   def peer: FolderView[S]

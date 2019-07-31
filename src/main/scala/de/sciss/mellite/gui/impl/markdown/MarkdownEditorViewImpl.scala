@@ -24,8 +24,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.GUI
-import de.sciss.mellite.gui.{MarkdownEditorView, MarkdownRenderView}
+import de.sciss.mellite.{GUI, MarkdownEditorView, MarkdownRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Fonts
 import de.sciss.scalainterpreter.impl.CodePaneImpl
@@ -41,7 +40,10 @@ import scala.swing.Swing._
 import scala.swing.event.Key
 import scala.swing.{Action, BorderPanel, Button, Component, EditorPane, FlowPanel, TabbedPane}
 
-object MarkdownEditorViewImpl {
+object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
+  def install(): Unit =
+    MarkdownEditorView.peer = this
+
   def apply[S <: SSys[S]](obj: Markdown[S], showEditor: Boolean, bottom: ISeq[View[S]])
                         (implicit tx: S#Tx, universe: Universe[S],
                          undoManager: UndoManager): MarkdownEditorView[S] = {

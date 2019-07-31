@@ -23,8 +23,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
-import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView}
-import de.sciss.mellite.{DragAndDrop, ObjListView, ObjView, ObjectActions}
+import de.sciss.mellite.{ActionArtifactLocation, DragAndDrop, FolderView, ObjListView, ObjView, ObjectActions}
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport

@@ -20,10 +20,9 @@ import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
+import de.sciss.mellite.{FolderEditorView, FolderView, ObjView}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
-import de.sciss.mellite.gui.{FolderEditorView, FolderView}
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel
@@ -33,7 +32,10 @@ import scala.swing.Swing.EmptyIcon
 import scala.swing.event.Key
 import scala.swing.{Action, Alignment, CheckBox, Dialog, Label, Swing, TextField}
 
-object FolderEditorViewImpl {
+object FolderEditorViewImpl extends FolderEditorView.Companion {
+  def install(): Unit =
+    FolderEditorView.peer = this
+
   def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
                                             undoManager: UndoManager): FolderEditorView[S] = {
     val peer  = FolderView(folder)
