@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.mellite.executionContext
+import de.sciss.mellite.Mellite.executionContext
 import de.sciss.scalainterpreter.Interpreter
 
 import scala.collection.immutable.{IndexedSeq => Vec}

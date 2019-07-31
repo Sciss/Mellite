@@ -20,21 +20,21 @@ import de.sciss.freesound.lucre.{Retrieval, RetrievalObjView}
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
-import de.sciss.mellite.gui.impl.code.{CodeFrameImpl, CodeViewImpl}
-import de.sciss.mellite.gui.impl.document.{FolderEditorViewImpl, FolderViewImpl}
-import de.sciss.mellite.gui.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownRenderViewImpl}
-import de.sciss.mellite.gui.impl.objview.{ArtifactLocationObjViewImpl, AudioCueObjViewImpl}
+import de.sciss.mellite.impl.code.{CodeFrameImpl, CodeViewImpl}
+import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
+import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownRenderViewImpl}
+import de.sciss.mellite.impl.objview.{ArtifactLocationObjViewImpl, AudioCueObjViewImpl}
 import de.sciss.negatum.Negatum
 import de.sciss.negatum.gui.NegatumObjView
-//import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
-import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
-import de.sciss.mellite.gui.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
-import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
-import de.sciss.mellite.gui.impl.objview.{ActionObjView, ArtifactObjView, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
-import de.sciss.mellite.gui.impl.patterns.PatternObjView
-import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
-import de.sciss.mellite.gui.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
-import de.sciss.mellite.gui.impl.widget.WidgetObjView
+//import de.sciss.mellite.impl.FreesoundRetrievalObjView
+import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
+import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
+import de.sciss.mellite.impl.markdown.MarkdownObjView
+import de.sciss.mellite.impl.objview.{ActionObjView, ArtifactObjView, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.impl.patterns.PatternObjView
+import de.sciss.mellite.impl.proc.{OutputObjView, ProcObjView}
+import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
+import de.sciss.mellite.impl.widget.WidgetObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}

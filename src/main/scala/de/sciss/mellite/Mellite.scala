@@ -13,6 +13,9 @@
 
 package de.sciss.mellite
 
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
 import de.sciss.file._
@@ -20,15 +23,17 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.{Server, Sys, Txn}
-import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
-import de.sciss.mellite.gui.{ActionOpenWorkspace, LogFrame, MainFrame, MenuBar}
+import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
 import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
 import javax.swing.UIManager
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
+import scala.annotation.elidable
+import scala.annotation.elidable.CONFIG
 import scala.collection.immutable.{Seq => ISeq}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.stm.{TxnExecutor, atomic}
 import scala.language.existentials
 import scala.swing.Label
@@ -41,6 +46,25 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   def config: Config = _config
 
 //  ServerImpl.USE_COMPRESSION = false
+
+  private lazy val logHeader = new SimpleDateFormat("[d MMM yyyy, HH:mm''ss.SSS] 'mllt' - ", Locale.US)
+  var showLog         = false
+  var showTimelineLog = false
+
+  @elidable(CONFIG) private[mellite] def log(what: => String): Unit =
+    if (showLog) println(logHeader.format(new Date()) + what)
+
+  @elidable(CONFIG) private[mellite] def logTimeline(what: => String): Unit =
+    if (showTimelineLog) println(s"${logHeader.format(new Date())} <timeline> $what")
+
+  implicit val executionContext: ExecutionContext = ExecutionContext.Implicits.global
+
+  /** Exception are sometimes swallowed without printing in a transaction. This ensures a print. */
+  def ???! : Nothing = {
+    val err = new NotImplementedError
+    err.printStackTrace()
+    throw err
+  }
 
   import de.sciss.synth.proc
 //  proc.showLog            = true
