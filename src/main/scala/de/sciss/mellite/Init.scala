@@ -20,6 +20,7 @@ import de.sciss.freesound.lucre.Retrieval
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
+import de.sciss.mellite.gui.impl.code.{CodeFrameImpl, CodeViewImpl}
 //import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
@@ -96,6 +97,8 @@ trait Init {
   }
 
   private[this] lazy val _initCompanionFactories: Unit = {
+    CodeFrameImpl       .install()
+    CodeViewImpl        .install()
     GlobalProcsViewImpl .install()
     GraphemeToolImpl    .install()
     GraphemeToolsImpl   .install()

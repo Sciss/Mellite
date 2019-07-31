@@ -15,8 +15,7 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.mellite.gui.CodeFrame
+import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Universe
 

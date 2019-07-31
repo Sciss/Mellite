@@ -17,7 +17,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.UniverseView
+import de.sciss.mellite.{CodeView, UniverseView}
 import de.sciss.mellite.gui.impl.widget.WidgetEditorViewImpl
 import de.sciss.model.Model
 import de.sciss.synth.proc.{Universe, Widget}

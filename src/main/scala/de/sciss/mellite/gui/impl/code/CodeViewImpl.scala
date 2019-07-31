@@ -24,9 +24,8 @@ import de.sciss.lucre.swing.LucreSwing.{defer, deferTx, requireEDT}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.mellite.gui.CodeView
 import de.sciss.mellite.gui.impl.ApiBrowser
-import de.sciss.mellite.{GUI, executionContext}
+import de.sciss.mellite.{CodeView, GUI, executionContext}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
@@ -51,7 +50,10 @@ import scala.swing.event.Key
 import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.{Failure, Success, Try}
 
-object CodeViewImpl {
+object CodeViewImpl extends CodeView.Companion {
+  def install(): Unit =
+    CodeView.peer = this
+
   private val intpMap = mutable.WeakHashMap.empty[Int, Future[Interpreter]]
 
   /* We use one shared interpreter for all code frames of each context. */

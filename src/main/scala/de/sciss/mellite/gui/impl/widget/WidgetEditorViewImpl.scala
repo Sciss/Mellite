@@ -21,9 +21,9 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.{GUI, executionContext}
+import de.sciss.mellite.{CodeView, GUI, executionContext}
 import de.sciss.mellite.gui.impl.code.CodeFrameImpl
-import de.sciss.mellite.gui.{CodeView, WidgetEditorView, WidgetRenderView}
+import de.sciss.mellite.gui.{WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.undo.UndoableEdit

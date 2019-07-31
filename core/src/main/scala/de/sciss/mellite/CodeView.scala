@@ -11,13 +11,11 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.lucre.swing.View
-import de.sciss.mellite.UniverseView
-import de.sciss.mellite.gui.impl.code.{CodeViewImpl => Impl}
 import de.sciss.model.Model
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.undo.UndoableEdit
@@ -27,6 +25,21 @@ import scala.concurrent.Future
 import scala.swing.Action
 
 object CodeView {
+  private[mellite] var peer: Companion = _
+
+  private def companion: Companion = {
+    require (peer != null, "Companion not yet installed")
+    peer
+  }
+
+  private[mellite] trait Companion {
+    def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
+                          (handler: Option[Handler[S, code0.In, code0.Out]])
+                          (implicit tx: S#Tx, universe: Universe[S],
+                           compiler: Code.Compiler,
+                           undoManager: UndoManager): CodeView[S, code0.Out]
+  }
+
   trait Handler[S <: Sys[S], In, -Out] extends Disposable[S#Tx] {
     def in(): In
     def save(in: In, out: Out)(implicit tx: S#Tx): UndoableEdit
@@ -38,7 +51,7 @@ object CodeView {
                         (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[S, code0.Out] =
-    Impl[S](obj, code0, bottom = bottom)(handler)
+    companion(obj, code0, bottom = bottom)(handler)
 
   sealed trait Update
   case class DirtyChange(value: Boolean) extends Update

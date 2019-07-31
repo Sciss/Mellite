@@ -11,32 +11,52 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import de.sciss.lucre
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.code.{CodeFrameImpl => Impl}
 import de.sciss.synth.proc.{Action, Code, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
 object CodeFrame {
+  private[mellite] var peer: Companion = _
+
+  private def companion: Companion = {
+    require (peer != null, "Companion not yet installed")
+    peer
+  }
+
+  private[mellite] trait Companion {
+    def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
+                          (implicit tx: S#Tx, universe: Universe[S],
+                           compiler: Code.Compiler): CodeFrame[S]
+
+    def proc[S <: Sys[S]](proc: Proc[S])
+                         (implicit tx: S#Tx, universe: Universe[S],
+                          compiler: Code.Compiler): CodeFrame[S]
+
+    def action[S <: Sys[S]](action: Action[S])
+                           (implicit tx: S#Tx, universe: Universe[S],
+                            compiler: Code.Compiler): CodeFrame[S]
+  }
+
   def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
                         (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] =
-    Impl(obj, bottom = bottom)
+    companion(obj, bottom = bottom)
 
   def proc[S <: Sys[S]](proc: Proc[S])
                         (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] =
-    Impl.proc(proc)
+    companion.proc(proc)
 
   def action[S <: Sys[S]](action: Action[S])
                          (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S] =
-    Impl.action(action)
+    companion.action(action)
 
 //  def fscape[S <: Sys[S]](fscape: FScape[S])
 //                       (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],

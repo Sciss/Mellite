@@ -21,10 +21,10 @@ import de.sciss.lucre.stm.{Obj, Plain}
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, ObjListView, ObjTimelineView, ObjView}
+import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView}
 import de.sciss.mellite.gui.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
-import de.sciss.mellite.gui.{CodeFrame, CodeView, PlayToggleButton, Shapes}
+import de.sciss.mellite.gui.{PlayToggleButton, Shapes}
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.patterns

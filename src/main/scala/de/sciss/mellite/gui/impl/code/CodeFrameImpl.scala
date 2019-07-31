@@ -23,8 +23,8 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{CanBounce, GUI, ProcActions, UniverseView}
-import de.sciss.mellite.gui.{ActionBounce, AttrMapView, CodeFrame, CodeView, PlayToggleButton, ProcOutputsView, SplitPaneView}
+import de.sciss.mellite.{CanBounce, CodeFrame, CodeView, GUI, ProcActions, UniverseView}
+import de.sciss.mellite.gui.{ActionBounce, AttrMapView, PlayToggleButton, ProcOutputsView, SplitPaneView}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
@@ -37,7 +37,10 @@ import scala.swing.event.Key
 import scala.swing.{Button, Component, Orientation, TabbedPane}
 import scala.util.control.NonFatal
 
-object CodeFrameImpl {
+object CodeFrameImpl extends CodeFrame.Companion {
+  def install(): Unit =
+    CodeFrame.peer = this
+
   // ---- adapter for editing a Proc's source ----
 
   def proc[S <: Sys[S]](obj: Proc[S])
@@ -149,7 +152,13 @@ object CodeFrameImpl {
 
   // ---- general constructor ----
 
-  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]], canBounce: Boolean = false)
+  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
+                        (implicit tx: S#Tx, universe: Universe[S],
+                         compiler: Code.Compiler): CodeFrame[S] = {
+    apply(obj, bottom, canBounce = false)
+  }
+
+  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]], canBounce: Boolean)
                         (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] = {
     val _codeEx = obj
