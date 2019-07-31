@@ -4,7 +4,7 @@ import de.sciss.file._
 import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.gui.WebBrowser
-import de.sciss.mellite.{Mellite, executionContext}
+import de.sciss.mellite.{GUI, Mellite, executionContext}
 import de.sciss.synth.proc.Code
 import dotterweide.build.{Module, Version}
 import dotterweide.editor.controller.LookUpTypeAction
@@ -169,11 +169,11 @@ object ApiBrowser {
       if (ready.isFile) {
         if (!styleSet) {
           styleSet = true
-          DocUtil.setScalaCssStyle(dark = Mellite.isDarkSkin, baseDir = baseDir)
+          DocUtil.setScalaCssStyle(dark = GUI.isDarkSkin, baseDir = baseDir)
         }
         Future.successful(())
       } else {
-        val (dl, futRes)    = DocUtil.downloadAndExtract(docModule, target = baseDir, darkCss = Mellite.isDarkSkin)
+        val (dl, futRes)    = DocUtil.downloadAndExtract(docModule, target = baseDir, darkCss = GUI.isDarkSkin)
         val progress        = new ProgressBar
         val progressDialog  = new Dialog(null /* frame */) {
           title = "Look up Documentation"

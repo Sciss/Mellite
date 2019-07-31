@@ -24,7 +24,8 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.{GUI, MarkdownEditorView, MarkdownRenderView}
+import de.sciss.mellite.GUI
+import de.sciss.mellite.gui.{MarkdownEditorView, MarkdownRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Fonts
 import de.sciss.scalainterpreter.impl.CodePaneImpl

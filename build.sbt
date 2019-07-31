@@ -17,6 +17,7 @@ lazy val deps = new {
   val core = new {
     val desktop             = "0.10.4"
     val lucreSwing          = "1.17.2"
+    val raphaelIcons        = "1.0.6"
     val soundProcesses      = "3.29.3"
   }
   val main = new {
@@ -43,7 +44,6 @@ lazy val deps = new {
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val processor           = "0.4.2"
-    val raphaelIcons        = "1.0.6"
     val scalaCollider       = "1.28.4"
     val scalaColliderSwing  = "1.41.4"
     val scalaColliderUGens  = "1.19.5"
@@ -207,6 +207,7 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
     libraryDependencies ++= Seq(
       "de.sciss"          %% "desktop"                        % deps.core.desktop,            // support for desktop applications
       "de.sciss"          %% "lucreswing"                     % deps.core.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "raphael-icons"                  % deps.core.raphaelIcons,       // icon set
       "de.sciss"          %% "soundprocesses-core"            % deps.core.soundProcesses,     // computer-music framework
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion)
@@ -249,7 +250,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "patterns"                       % deps.main.patterns,           // pattern sequences
       "de.sciss"          %% "processor"                      % deps.main.processor,          // futures with progress and cancel
       "de.sciss"          %% "pdflitz"                        % deps.main.pdflitz,            // PDF export
-      "de.sciss"          %% "raphael-icons"                  % deps.main.raphaelIcons,       // icon set
       "de.sciss"          %% "scalacollider"                  % deps.main.scalaCollider,      // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-api"         % deps.main.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-core"        % deps.main.scalaColliderUGens, // realtime sound synthesis

@@ -37,8 +37,8 @@ import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, GUI, GlobalProcsView, ObjTimelineView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
-import de.sciss.mellite.{DragAndDrop, Mellite, ObjView, ObjectActions, ProcActions}
+import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, GlobalProcsView, ObjTimelineView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.{DragAndDrop, GUI, Mellite, ObjView, ObjectActions, ProcActions}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
@@ -670,7 +670,7 @@ object TimelineViewImpl {
 
         protected def acceptDnD(drop: DnD.Drop[S]): Boolean = performDrop(drop)
 
-        final val rendering: TimelineRenderingImpl = new TimelineRenderingImpl(this, Mellite.isDarkSkin)
+        final val rendering: TimelineRenderingImpl = new TimelineRenderingImpl(this, GUI.isDarkSkin)
 
         override protected def paintComponent(g: Graphics2D): Unit = {
           super.paintComponent(g)

@@ -22,9 +22,10 @@ import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.GUI
 import de.sciss.mellite.gui.edit.Edits
 import de.sciss.mellite.gui.impl.tool.RubberBandTool
-import de.sciss.mellite.gui.{GUI, GraphemeCanvas, ObjGraphemeView, GraphemeTool}
+import de.sciss.mellite.gui.{GraphemeCanvas, GraphemeTool, ObjGraphemeView}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit

@@ -30,7 +30,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Sys}
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain
-import de.sciss.mellite.{Mellite, Prefs, executionContext}
+import de.sciss.mellite.{GUI, Mellite, Prefs, executionContext}
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid

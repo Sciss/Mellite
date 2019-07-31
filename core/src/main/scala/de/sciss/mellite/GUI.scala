@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import java.awt.event.{ActionEvent, ActionListener}
 import java.awt.geom.{AffineTransform, Area, Path2D}
@@ -24,15 +24,14 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.LucreSwing.{defer, requireEDT}
-import de.sciss.mellite.{Mellite, executionContext}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
 import javax.imageio.ImageIO
-import javax.swing.{Icon, ImageIcon, KeyStroke, SwingUtilities}
+import javax.swing.{Icon, ImageIcon, KeyStroke, SwingUtilities, UIManager}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Reactions.Reaction
 import scala.swing.Swing._
 import scala.swing.event.{Key, SelectionChanged, ValueChanged}
@@ -40,6 +39,8 @@ import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Lab
 import scala.util.{Failure, Success, Try}
 
 object GUI {
+  lazy val isDarkSkin: Boolean = UIManager.getBoolean("dark-skin")
+
   def keyStrokeText(ks: KeyStroke): String = {
     val s0  = ks.toString
     val i   = s0.indexOf("pressed ")
@@ -107,7 +108,7 @@ object GUI {
     val in  = AffineTransform.getScaleInstance(scale, scale).createTransformedShape(in0)
     val out = new Area(sharpStrk.createStrokedShape(in))
     out.add(new Area(in))
-    val scheme = if (Mellite.isDarkSkin) Transport.LightScheme else Transport.DarkScheme
+    val scheme = if (isDarkSkin) Transport.LightScheme else Transport.DarkScheme
     new SharpIcon(extent = extent, scheme = scheme, out, in)
   }
 
@@ -213,6 +214,9 @@ object GUI {
     })
     t.setRepeats(false)
     t.start()
+
+    import ExecutionContext.Implicits.global
+
     res.onComplete { _ =>
       t.stop()
       defer {
@@ -226,7 +230,7 @@ object GUI {
   }
 
   def getImage(name: String): BufferedImage = {
-    val is = Mellite.getClass.getResourceAsStream(name)
+    val is = GUI.getClass.getResourceAsStream(name)
     val image = if (is != null) {
       val res = ImageIO.read(is)
       is.close()

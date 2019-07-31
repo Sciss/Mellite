@@ -25,8 +25,8 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.mellite.gui.impl.ApiBrowser
-import de.sciss.mellite.gui.{CodeView, GUI}
-import de.sciss.mellite.{Mellite, executionContext}
+import de.sciss.mellite.gui.CodeView
+import de.sciss.mellite.{GUI, Mellite, executionContext}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
@@ -314,7 +314,7 @@ object CodeViewImpl {
         language          = language,
         text0             = code.source,
 //        font        = ...,
-        stylingName       = Some(if (Mellite.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
+        stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
 

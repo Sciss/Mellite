@@ -24,8 +24,9 @@ import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.GUI
 import de.sciss.mellite.gui.impl.component.{NavigationHistory, ZoomSupport}
-import de.sciss.mellite.gui.{GUI, MarkdownEditorFrame, MarkdownRenderView, ObjListView}
+import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownRenderView, ObjListView}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}

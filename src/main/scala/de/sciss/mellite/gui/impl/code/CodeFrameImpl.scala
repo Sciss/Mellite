@@ -23,9 +23,9 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ProcActions
+import de.sciss.mellite.{GUI, ProcActions}
 import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, GUI, PlayToggleButton, ProcOutputsView, SplitPaneView}
+import de.sciss.mellite.gui.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, PlayToggleButton, ProcOutputsView, SplitPaneView}
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
 import de.sciss.synth.proc.gui.UniverseView

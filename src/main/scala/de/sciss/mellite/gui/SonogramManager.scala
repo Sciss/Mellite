@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import java.io.File
 
 import de.sciss.dsp.{ConstQ, Threading}
-import de.sciss.mellite.Mellite
+import de.sciss.mellite.{GUI, Mellite}
 import de.sciss.sonogram
 import de.sciss.sonogram.Overview.Palette
 
@@ -38,7 +38,7 @@ object SonogramManager {
   def instance: sonogram.OverviewManager = _instance
 
   private lazy val _palette: Palette =
-    if (Mellite.isDarkSkin) Palette.Intensity else Palette.reverse(Palette.Intensity)
+    if (GUI.isDarkSkin) Palette.Intensity else Palette.reverse(Palette.Intensity)
 
   def acquire(file: File): sonogram.Overview = {
     val cq    = ConstQ.Config()

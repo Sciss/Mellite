@@ -17,8 +17,9 @@ import de.sciss.desktop
 import de.sciss.desktop.OptionPane
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.GUI
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{GUI, ObjListView}
+import de.sciss.mellite.gui.ObjListView
 import de.sciss.synth.proc.Universe
 
 /** A utility trait for `ListObjView.Factory` that assumes the object is

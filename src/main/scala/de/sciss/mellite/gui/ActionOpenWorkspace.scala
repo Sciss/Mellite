@@ -23,7 +23,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{Application, Mellite, Prefs}
+import de.sciss.mellite.{Application, GUI, Mellite, Prefs}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
 import javax.swing.SwingUtilities

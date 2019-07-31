@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
 import de.sciss.mellite.gui.TimelineTool.Update
 import de.sciss.mellite.gui.{BasicTool, SelectionModel, TimelineCanvas2D}
-import de.sciss.mellite.{Mellite, log}
+import de.sciss.mellite.{GUI, Mellite, log}
 import de.sciss.model.Model
 import de.sciss.span.Span
 
@@ -31,7 +31,7 @@ object TimelineCanvas2DImpl {
   final val strokeDropRegion: Stroke = new BasicStroke(3f)
 
   final val colorDropRegionBg: Color =
-    new Color(if (Mellite.isDarkSkin) 0x7FFFFFFF else 0x7F000000, true)
+    new Color(if (GUI.isDarkSkin) 0x7FFFFFFF else 0x7F000000, true)
 }
 trait TimelineCanvas2DImpl[S <: Sys[S], Y, Child]
   extends TimelineCanvasImpl

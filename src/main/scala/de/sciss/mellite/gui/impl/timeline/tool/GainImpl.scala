@@ -19,8 +19,9 @@ import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.lucre.{expr, stm}
+import de.sciss.mellite.GUI
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.{Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon

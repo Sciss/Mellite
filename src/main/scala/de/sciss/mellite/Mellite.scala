@@ -97,8 +97,6 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     case NonFatal(_) => "?"
   }
 
-  lazy val isDarkSkin: Boolean = UIManager.getBoolean("dark-skin")
-
   override lazy val windowHandler: WindowHandler = new WindowHandlerImpl(this, menuFactory) {
     override lazy val usesInternalFrames: Boolean = {
       false // XXX TODO: eventually a preferences entry

@@ -27,8 +27,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
-import de.sciss.mellite.gui.GUI
-import de.sciss.mellite.{Cf, Mellite, ObjView}
+import de.sciss.mellite.{Cf, GUI, Mellite, ObjView}
 import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer
@@ -152,7 +151,7 @@ object ObjViewImpl {
   final val IconExtent = 16
 
   def raphaelIcon(shape: Path2D => Unit): Icon = {
-    val fill = if (Mellite.isDarkSkin) colrIconDark else AWTColor.black
+    val fill = if (GUI.isDarkSkin) colrIconDark else AWTColor.black
     raphael.Icon(extent = IconExtent, fill = fill)(shape)
   }
 

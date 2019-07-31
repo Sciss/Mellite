@@ -22,8 +22,9 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.GUI
 import de.sciss.mellite.gui.impl.component.ZoomSupport
-import de.sciss.mellite.gui.{GUI, WidgetEditorFrame, WidgetRenderView}
+import de.sciss.mellite.gui.{WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
 import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
 import de.sciss.synth.proc.Widget.{Graph, GraphChange}

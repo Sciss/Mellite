@@ -28,11 +28,10 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.Mellite
-import de.sciss.mellite.ObjView
+import de.sciss.mellite.{GUI, Mellite, ObjView}
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.{BasicTool, ObjGraphemeView, GraphemeTool, GraphemeTools, GraphemeView, Insets, SelectionModel}
+import de.sciss.mellite.gui.{BasicTool, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, SelectionModel}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
@@ -518,7 +517,7 @@ object GraphemeViewImpl {
 
         def imageObserver: JComponent = peer
 
-        final val rendering: GraphemeRenderingImpl = new GraphemeRenderingImpl(this, Mellite.isDarkSkin)
+        final val rendering: GraphemeRenderingImpl = new GraphemeRenderingImpl(this, GUI.isDarkSkin)
 
         override protected def paintComponent(g: Graphics2D): Unit = {
           super.paintComponent(g)

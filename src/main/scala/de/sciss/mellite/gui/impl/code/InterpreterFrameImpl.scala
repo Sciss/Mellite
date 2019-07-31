@@ -18,7 +18,7 @@ import java.io.{File, FileInputStream, IOException}
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, Window, WindowHandler}
 import de.sciss.mellite.gui.InterpreterFrame
-import de.sciss.mellite.{Application, Mellite}
+import de.sciss.mellite.{Application, GUI, Mellite}
 import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import de.sciss.synth.proc.Workspace
 
@@ -43,7 +43,7 @@ private[gui] object InterpreterFrameImpl {
   def apply(): InterpreterFrame = {
     val codeCfg = CodePane.Config()
     // XXX TODO - should be a preferences option
-    codeCfg.style = if (Mellite.isDarkSkin) Style.BlueForest else Style.Light
+    codeCfg.style = if (GUI.isDarkSkin) Style.BlueForest else Style.Light
 
     val file = new File(/* new File( "" ).getAbsoluteFile.getParentFile, */ "interpreter.txt")
     if (file.isFile) try {

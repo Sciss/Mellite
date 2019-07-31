@@ -21,6 +21,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.GUI
 import de.sciss.synth.proc.{Transport, Universe}
 
 import scala.concurrent.stm.Ref

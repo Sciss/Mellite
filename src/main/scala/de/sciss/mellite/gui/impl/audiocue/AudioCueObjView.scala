@@ -30,8 +30,8 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, GUI, MessageException, ObjListView}
-import de.sciss.mellite.{DragAndDrop, ObjView, ObjectActions, WorkspaceCache}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, MessageException, ObjListView}
+import de.sciss.mellite.{DragAndDrop, GUI, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}

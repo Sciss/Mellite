@@ -16,7 +16,8 @@ package de.sciss.mellite.gui.impl.component
 import java.awt.datatransfer
 import java.awt.event.{MouseAdapter, MouseEvent}
 
-import de.sciss.mellite.gui.{GUI, Shapes}
+import de.sciss.mellite.GUI
+import de.sciss.mellite.gui.Shapes
 import javax.swing.TransferHandler.COPY
 import javax.swing.{JComponent, TransferHandler}
 
