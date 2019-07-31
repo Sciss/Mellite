@@ -18,8 +18,8 @@ import java.io.File
 import de.sciss.desktop.Preferences
 import de.sciss.desktop.Preferences.{Entry, Type}
 import de.sciss.file._
+import de.sciss.mellite.Application.userPrefs
 import de.sciss.osc
-import de.sciss.submin.Submin
 import de.sciss.synth.proc.SensorSystem
 import javax.swing.UIManager
 import javax.swing.plaf.metal.MetalLookAndFeel
@@ -27,7 +27,6 @@ import javax.swing.plaf.metal.MetalLookAndFeel
 import scala.util.{Success, Try}
 
 object Prefs {
-  import Application.userPrefs
 
   implicit object OSCProtocolType extends Type[osc.Transport.Net] {
     def toString(value: osc.Transport.Net): String = value.name
@@ -65,18 +64,24 @@ object Prefs {
       def install(): Unit = UIManager.setLookAndFeel(classOf[MetalLookAndFeel].getName)
     }
 
+    private def installSubmin(dark: Boolean): Unit = {
+      val cSubmin  = Class.forName("de.sciss.submin.Submin")
+      val mInstall = cSubmin.getMethod("install", classOf[Boolean])
+      mInstall.invoke(null, dark.asInstanceOf[AnyRef])
+    }
+
     case object Light extends LookAndFeel {
       val id          = "light"
       val description = "Submin Light"
 
-      def install(): Unit = Submin.install(false)
+      def install(): Unit = installSubmin(false) // Submin.install(false)
     }
 
     case object Dark extends LookAndFeel {
       val id          = "dark"
       val description = "Submin Dark"
 
-      def install(): Unit = Submin.install(true)
+      def install(): Unit = installSubmin(true) // Submin.install(true)
     }
 
     def all: Seq[LookAndFeel] = Seq(Native, Metal, Light, Dark)

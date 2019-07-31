@@ -28,10 +28,10 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, Mellite, ObjView}
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
 import de.sciss.mellite.gui.{BasicTool, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, SelectionModel}
+import de.sciss.mellite.{GUI, ObjView}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span

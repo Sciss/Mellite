@@ -18,7 +18,7 @@ import java.io.{File, FileInputStream, IOException}
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, Window, WindowHandler}
 import de.sciss.mellite.gui.InterpreterFrame
-import de.sciss.mellite.{Application, GUI, Mellite}
+import de.sciss.mellite.{Application, GUI}
 import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 import de.sciss.synth.proc.Workspace
 

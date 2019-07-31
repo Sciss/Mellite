@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import java.io.File
 
 import de.sciss.dsp.{ConstQ, Threading}
-import de.sciss.mellite.{GUI, Mellite}
+import de.sciss.mellite.GUI
 import de.sciss.sonogram
 import de.sciss.sonogram.Overview.Palette
 
