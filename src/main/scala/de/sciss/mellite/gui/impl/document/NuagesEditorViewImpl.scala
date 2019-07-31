@@ -23,10 +23,9 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, Prefs}
-import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.{GUI, Prefs, Veto}
 import de.sciss.mellite.gui.{ActionBounce, FolderEditorView, FolderFrame, NuagesEditorView, TimelineFrame}
-import de.sciss.mellite.util.Veto
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}

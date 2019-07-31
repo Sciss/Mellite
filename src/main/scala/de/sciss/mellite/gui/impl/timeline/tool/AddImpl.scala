@@ -22,8 +22,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditTimelineInsertObj
 import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, DraggingTool}
-import de.sciss.mellite.gui.{BasicTools, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}
-import de.sciss.mellite.{GUI, log}
+import de.sciss.mellite.gui.Shapes
+import de.sciss.mellite.{BasicTools, GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView, log}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Proc
 import javax.swing.Icon

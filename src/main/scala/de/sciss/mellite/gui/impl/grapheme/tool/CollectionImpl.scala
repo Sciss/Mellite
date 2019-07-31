@@ -18,8 +18,8 @@ import de.sciss.lucre.expr.LongObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.{GraphemeCanvas, GraphemeTool, ObjGraphemeView}
 import de.sciss.mellite.gui.impl.tool.BasicCollectionTool
-import de.sciss.mellite.gui.{GraphemeCanvas, ObjGraphemeView, GraphemeTool}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.UndoableEdit
 

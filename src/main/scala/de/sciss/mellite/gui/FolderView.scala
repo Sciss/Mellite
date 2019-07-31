@@ -20,13 +20,12 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.{TreeTableView, View}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.{DragAndDrop, ObjListView, UniverseView}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.document.{FolderViewImpl => Impl}
 import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
 import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.gui.UniverseView
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 

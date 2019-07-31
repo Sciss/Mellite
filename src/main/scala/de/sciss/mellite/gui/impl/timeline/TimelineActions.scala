@@ -23,11 +23,12 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ProcActions
+import de.sciss.mellite.{ObjTimelineView, ProcActions, TimelineView}
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, EditTimelineRemoveObj, Edits}
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{ActionBounce, ObjTimelineView, TimelineView}
+import de.sciss.mellite.gui.impl.proc.ProcObjView
+import de.sciss.mellite.gui.impl.proc.ProcGUIActions
+import de.sciss.mellite.gui.ActionBounce
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{ObjKeys, Proc, TimeRef, Timeline}

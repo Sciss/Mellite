@@ -14,10 +14,10 @@
 package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.DragRubber
-import de.sciss.mellite.gui.TimelineTool.EmptyRubber
+import de.sciss.mellite.BasicTool.DragRubber
+import de.sciss.mellite.TimelineTool.EmptyRubber
 import de.sciss.mellite.gui.impl.TimelineCanvas2DImpl
-import de.sciss.mellite.gui.{ObjTimelineView, TimelineTools, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.{ObjTimelineView, TimelineTools, TimelineTrackCanvas, TimelineView}
 
 trait TimelineTrackCanvasImpl[S <: Sys[S]]
   extends TimelineCanvas2DImpl[S, Int, ObjTimelineView[S]]

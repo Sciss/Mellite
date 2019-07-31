@@ -19,11 +19,11 @@ import de.sciss.lucre.expr.{DoubleObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.gui.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, Shapes}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView}
+import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
+import de.sciss.mellite.gui.Shapes
+import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser}
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
@@ -155,7 +155,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
                                                 var value: V,
                                                 isViewable: Boolean)
     extends Impl[S](objH, isViewable = isViewable)
-    with GraphemeObjViewImpl.SimpleExpr[S, V, E]
+    with ObjGraphemeViewImpl.SimpleExpr[S, V, E]
     with ObjGraphemeView.HasStartLevels[S] {
 
     def insets: Insets = ObjGraphemeView.DefaultInsets

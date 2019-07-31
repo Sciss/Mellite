@@ -18,9 +18,9 @@ import java.awt.{Cursor, Point, Toolkit}
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.GUI
+import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.gui.impl.tool.{CollectionToolLike, RubberBandTool}
-import de.sciss.mellite.gui.{ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}
+import de.sciss.mellite.gui.Shapes
 import de.sciss.span.Span
 import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
 import javax.swing.Icon

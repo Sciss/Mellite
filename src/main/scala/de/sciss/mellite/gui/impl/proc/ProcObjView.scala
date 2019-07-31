@@ -18,9 +18,9 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{ObjView, gui}
-import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ObjListView, ObjTimelineView}
+import de.sciss.mellite
+import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
+import de.sciss.mellite.{ObjListView, ObjTimelineView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{ObjKeys, Proc}
 import javax.swing.Icon
@@ -48,7 +48,7 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
 //  type ProcMap[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, ProcObjView[S]]
 //  type ScanMap[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, (String, stm.Source[S#Tx, S#Id])]
 
-  type SelectionModel[S <: Sys[S]] = gui.SelectionModel[S, ProcObjView[S]]
+  type SelectionModel[S <: Sys[S]] = mellite.SelectionModel[S, ProcObjView[S]]
 
   /** Constructs a new proc view from a given proc, and a map with the known proc (views).
     * This will automatically add the new view to the map!

@@ -15,9 +15,8 @@ package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
-import de.sciss.mellite.ObjView
+import de.sciss.mellite.{ObjView, UniverseView}
 import de.sciss.model.Model
-import de.sciss.synth.proc.gui.UniverseView
 
 object MapView {
   type Selection[S <: stm.Sys[S]] = List[(String, ObjView[S])]

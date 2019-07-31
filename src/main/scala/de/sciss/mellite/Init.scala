@@ -16,10 +16,20 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.filecache.Limit
+import de.sciss.freesound.lucre.Retrieval
 import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
+import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
-import de.sciss.lucre.swing.graph.TimelineView
-import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
+//import de.sciss.mellite.gui.impl.FreesoundRetrievalObjView
+import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
+import de.sciss.mellite.gui.impl.fscape.{FScapeObjView, FScapeOutputObjView}
+import de.sciss.mellite.gui.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
+import de.sciss.mellite.gui.impl.markdown.MarkdownObjView
+import de.sciss.mellite.gui.impl.objview.{ActionObjView, ArtifactLocationObjView, ArtifactObjView, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.gui.impl.patterns.PatternObjView
+import de.sciss.mellite.gui.impl.proc.{OutputObjView, ProcObjView}
+import de.sciss.mellite.gui.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
+import de.sciss.mellite.gui.impl.widget.WidgetObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}
@@ -36,15 +46,77 @@ trait Init {
     res
   }
 
+  private[this] lazy val _initObjViews: Unit = {
+    val obj = List(
+      ActionObjView,
+      ArtifactLocationObjView,
+      ArtifactObjView,
+      AudioCueObjView,
+      CodeObjView,
+      DoubleObjView,
+      DoubleVectorObjView,
+      EnvSegmentObjView,
+//      FreesoundRetrievalObjView,
+      FScapeObjView,
+      FScapeOutputObjView,
+      IntObjView,
+      MarkdownObjView,
+      BooleanObjView,
+      ColorObjView,
+      EnsembleObjView,
+      FadeSpecObjView,
+      FolderObjView,
+      GraphemeObjView,
+      IntVectorObjView,
+      LongObjView,
+      NuagesObjView,
+      StringObjView,
+      TimelineObjView,
+      OutputObjView,
+      ParamSpecObjView,
+      PatternObjView,
+      ProcObjView,
+      WidgetObjView
+    )
+    obj.foreach(ObjListView.addFactory)
+
+    val gr = List(
+      DoubleObjView,
+      DoubleVectorObjView,
+      EnvSegmentObjView
+    )
+    gr.foreach(ObjGraphemeView.addFactory)
+
+    val tl = List(
+      ProcObjView,
+      ActionObjView,
+      PatternObjView
+    )
+    tl.foreach(ObjTimelineView.addFactory)
+  }
+
+  private[this] lazy val _initCompanionFactories: Unit = {
+    GlobalProcsViewImpl .install()
+    GraphemeToolImpl    .install()
+    GraphemeToolsImpl   .install()
+    GraphemeViewImpl    .install()
+    TimelineToolImpl    .install()
+    TimelineToolsImpl   .install()
+    TimelineViewImpl    .install()
+  }
+
   def initTypes(): Unit = {
     SoundProcesses.init()
     Wolkenpumpe   .init()
     FScape        .init()
     Pattern       .init()
-    FreesoundRetrievalObjView.init()  // indirect through view because it depends on scala-version
+    Retrieval     .init()
     Widget        .init()
     LucreSwing    .init()
-    TimelineView  .init()
+    lucre.swing.graph.TimelineView  .init()
+
+    _initObjViews
+    _initCompanionFactories
 
     val cacheLim = Limit(count = 8192, space = 2L << 10 << 100)  // 2 GB; XXX TODO --- through user preferences
     FScCache.init(folder = cacheDir, capacity = cacheLim)

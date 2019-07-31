@@ -27,11 +27,11 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{GainArg, TimeArg}
-import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame, MessageException, ObjListView}
-import de.sciss.mellite.{DragAndDrop, GUI, ObjView, ObjectActions, WorkspaceCache}
+import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
+import de.sciss.mellite.gui.{ActionArtifactLocation, AudioFileFrame}
+import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.{DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}

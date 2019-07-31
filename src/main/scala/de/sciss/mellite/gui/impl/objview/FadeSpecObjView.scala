@@ -17,9 +17,10 @@ import de.sciss.audiowidgets.AxisFormat
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}
-import de.sciss.mellite.gui.{ObjListView, Shapes}
+import de.sciss.mellite.{ObjListView, ObjView}
+import de.sciss.mellite.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}
+import de.sciss.mellite.gui.Shapes
+import de.sciss.mellite.impl.objview.{NoMakeListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.{FadeSpec, TimeRef}
 import javax.swing.Icon
 

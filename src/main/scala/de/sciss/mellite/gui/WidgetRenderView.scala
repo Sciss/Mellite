@@ -17,8 +17,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Sys, UndoManager}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.UniverseView
 import de.sciss.mellite.gui.impl.widget.WidgetRenderViewImpl
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}

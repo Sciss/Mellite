@@ -16,6 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.lucre
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.GraphemeView
 import de.sciss.mellite.gui.impl.grapheme.{GraphemeFrameImpl => Impl}
 import de.sciss.synth.proc.{Grapheme, Universe}
 

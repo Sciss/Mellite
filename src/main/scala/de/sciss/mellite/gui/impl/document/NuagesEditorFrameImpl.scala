@@ -16,8 +16,8 @@ package de.sciss.mellite.gui.impl.document
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.{NuagesEditorFrame, NuagesEditorView}
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
 

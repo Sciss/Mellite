@@ -70,7 +70,7 @@ object MenuBar {
       .add(Item("debug-print",        proxy(("Debug Print",             menu2 + Key.P))))
       .add(Item("debug-threads")("Debug Thread Dump")(debugThreads()))
       .add(Item("dump-osc")("Dump OSC" -> (ctrl + shift + Key.D))(dumpOSC()))
-      .add(Item("window-shot",        proxy("Export Window as PDF...")))
+//      .add(Item("window-shot",        proxy("Export Window as PDF...")))
 
     val mView = Group("view", "View")
       .add(Item("show-log" )("Show Log Window"  -> keyShowLog )(Mellite.logToFront()))

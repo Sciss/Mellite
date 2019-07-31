@@ -20,10 +20,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{TimeArg, raphaelIcon}
-import de.sciss.mellite.gui.{EnsembleFrame, ObjListView}
+import de.sciss.mellite.{ObjListView, ObjView}
+import de.sciss.mellite.impl.objview.ObjViewImpl.{TimeArg, raphaelIcon}
+import de.sciss.mellite.gui.EnsembleFrame
+import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._

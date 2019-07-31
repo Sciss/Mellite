@@ -14,7 +14,7 @@
 package de.sciss.mellite.gui.impl.timeline
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{FadeViewMode, RegionViewMode, TimelineTool, TimelineTools, TimelineTrackCanvas}
+import de.sciss.mellite.{FadeViewMode, RegionViewMode, TimelineTool, TimelineTools, TimelineTrackCanvas}
 import de.sciss.model.Change
 import de.sciss.model.impl.ModelImpl
 

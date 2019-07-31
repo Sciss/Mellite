@@ -18,8 +18,8 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.{ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.gui.impl.tool.BasicCollectionTool
-import de.sciss.mellite.gui.{ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.undo.UndoableEdit
 

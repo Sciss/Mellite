@@ -21,7 +21,7 @@ import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.gui.impl.document.DocumentHandlerImpl
-import de.sciss.mellite.gui.{ActionOpenWorkspace, DocumentViewHandler, LogFrame, MainFrame, MenuBar}
+import de.sciss.mellite.gui.{ActionOpenWorkspace, LogFrame, MainFrame, MenuBar}
 import de.sciss.osc
 import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
@@ -207,6 +207,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
   }
 
+  // runs on the EDT
   override protected def init(): Unit = {
     Application.init(this)
 
@@ -230,6 +231,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     // early, so error printing in `initTypes` is already captured
     if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
     DocumentViewHandler.instance                                  // init
+
+    ActionOpenWorkspace.install()
 
     // at this point, awt.Toolkit will have loaded Atk
     sys.props.get("javax.accessibility.assistive_technologies") match {

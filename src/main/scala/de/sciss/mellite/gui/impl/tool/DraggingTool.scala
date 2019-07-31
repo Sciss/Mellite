@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.tool
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
+import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
 import javax.swing.event.MouseInputAdapter
 
 /** A mixin trait for region-like timeline tools that enables updates during mouse dragging.

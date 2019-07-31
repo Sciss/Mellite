@@ -19,9 +19,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.impl.code.CodeFrameBase
 import de.sciss.mellite.gui.{CodeView, WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}

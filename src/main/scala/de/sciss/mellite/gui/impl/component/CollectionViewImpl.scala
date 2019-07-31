@@ -22,11 +22,10 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{Application, GUI, ObjView}
-import de.sciss.mellite.gui.{AttrMapFrame, MessageException, ObjListView}
+import de.sciss.mellite.{Application, GUI, MessageException, ObjListView, ObjView, UniverseView}
+import de.sciss.mellite.gui.AttrMapFrame
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
-import de.sciss.synth.proc.gui.UniverseView
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.event.{EditDone, FocusLost, Key, KeyPressed}

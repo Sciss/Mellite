@@ -23,10 +23,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, GUI, ObjView}
+import de.sciss.mellite.{DragAndDrop, GUI, ObjListView, ObjView}
 import de.sciss.mellite.gui.edit.EditArtifactLocation
-import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ActionArtifactLocation, ObjListView}
+import de.sciss.mellite.gui.ActionArtifactLocation
+import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.Icon

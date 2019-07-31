@@ -21,7 +21,7 @@ import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
+import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
 import de.sciss.mellite.gui.{FolderEditorView, FolderView}
 import de.sciss.swingplus.{GroupPanel, Spinner}

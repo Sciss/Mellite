@@ -24,9 +24,9 @@ import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{confluent, stm}
-import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, WindowPlacement}
-import de.sciss.mellite.{GUI, Mellite, log}
+import de.sciss.mellite.gui.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, FolderFrame}
+import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.{DocumentViewHandler, GUI, Mellite, WindowPlacement, log}
 import de.sciss.model.Change
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Cursors, Durable, GenContext, Scheduler, Universe, Workspace}

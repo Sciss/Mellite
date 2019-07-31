@@ -18,11 +18,10 @@ import de.sciss.fscape.lucre.FScape
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.{DragAndDrop, UniverseView}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.fscape.FScapeOutputsViewImpl
 import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.gui.UniverseView
 
 object FScapeOutputsView {
   final case class Drag[S <: Sys[S]](universe: Universe[S], fscape: stm.Source[S#Tx, FScape[S]], key: String)

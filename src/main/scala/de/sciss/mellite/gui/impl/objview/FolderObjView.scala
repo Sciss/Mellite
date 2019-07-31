@@ -18,8 +18,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.{FolderFrame, ObjListView}
+import de.sciss.mellite.{ObjListView, ObjView}
+import de.sciss.mellite.gui.FolderFrame
+import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.{Icon, UIManager}

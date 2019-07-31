@@ -19,9 +19,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{Mellite, ObjView}
-import de.sciss.mellite.gui.impl.timeline.ObjTimelineViewImpl
-import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjTimelineView}
+import de.sciss.mellite.{Mellite, ObjListView, ObjTimelineView, ObjView}
+import de.sciss.mellite.gui.CodeFrame
+import de.sciss.mellite.impl.ObjTimelineViewImpl
+import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Action, Universe}
 import javax.swing.Icon

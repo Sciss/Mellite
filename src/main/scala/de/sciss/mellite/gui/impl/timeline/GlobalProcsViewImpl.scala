@@ -18,20 +18,19 @@ import java.awt.datatransfer.Transferable
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{Menu, OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.IntObj
+import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, GUI, ObjView, ProcActions}
+import de.sciss.mellite.gui.AttrMapFrame
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.objview.IntObjView
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{AttrMapFrame, GlobalProcsView, ObjTimelineView, SelectionModel}
+import de.sciss.mellite.{DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
-import de.sciss.synth.proc
 import de.sciss.synth.proc.{Proc, Timeline, Universe}
 import de.sciss.{desktop, equal}
 import javax.swing.TransferHandler.TransferSupport
@@ -47,7 +46,10 @@ import scala.swing.event.{MouseButtonEvent, MouseEvent, SelectionChanged, TableR
 import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, Swing, Table, TextField}
 import scala.util.Try
 
-object GlobalProcsViewImpl {
+object GlobalProcsViewImpl extends GlobalProcsView.Companion {
+  def install(): Unit =
+    GlobalProcsView.peer = this
+
   def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
                         (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): GlobalProcsView[S] = {
@@ -68,6 +70,7 @@ object GlobalProcsViewImpl {
 
     type C = Component
 
+//    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[S]]
     private[this] var procSeq = Vec.empty[ProcObjView.Timeline[S]]
 
     private def atomic[A](block: S#Tx => A): A = cursor.step(block)
@@ -76,7 +79,8 @@ object GlobalProcsViewImpl {
 
     def tableComponent: Table = table
 
-    val selectionModel: SelectionModel[S, ProcObjView.Timeline[S]] = SelectionModel.apply
+//    val selectionModel: SelectionModel[S, ProcObjView.Timeline[S]] = SelectionModel.apply
+    val selectionModel: SelectionModel[S, ObjView[S]] = SelectionModel.apply
 
     private[this] val tlSelListener: SelectionModel.Listener[S, ObjTimelineView[S]] = {
       case SelectionModel.Update(_, _) =>
@@ -207,8 +211,8 @@ object GlobalProcsViewImpl {
           val name = ggName.text
           val edit = atomic { implicit tx =>
 //            ProcActions.insertGlobalRegion(groupH(), name, bus = None)
+            import de.sciss.synth.proc.Implicits._
             val obj   = presetCtl.make[S]()
-            import proc.Implicits._
             obj.name  = name
             val group = groupH()
             EditTimelineInsertObj[S](objType, group, Span.All, obj)
@@ -356,7 +360,7 @@ object GlobalProcsViewImpl {
           actionAttr  .enabled = hasSel
           actionEdit  .enabled = hasSel
           // println(s"Table range = $range")
-          val newSel = range.map(procSeq(_))
+          val newSel = range.map(procSeq(_): ObjView[S])
           selectionModel.iterator.foreach { v =>
             if (!newSel.contains(v)) {
               // println(s"selectionModel -= $v")
@@ -429,7 +433,8 @@ object GlobalProcsViewImpl {
         val tl = groupH()
         val it = itGlob.map { inView =>
           val inObj   = inView.obj
-          val span    = inView.span   // not necessary to copy
+//          val span    = inView.span   // not necessary to copy
+          val span    = SpanLikeObj.newConst[S](Span.all)
           val outObj  = ProcActions.copy[S](inObj, connectInput = connect)
           EditTimelineInsertObj("Insert Global Proc", tl, span, outObj)
         }
@@ -448,7 +453,7 @@ object GlobalProcsViewImpl {
         val it = for {
           outView <- seqTL
           inView  <- seqGlob
-          in      = inView.obj
+          in      <- inView .obj match { case p: Proc[S] => Some(p); case _ => None }
           out     <- outView.obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
           source  <- out.outputs.get(Proc.mainOut)
           if Edits.findLink(out = out, in = in).isEmpty
@@ -469,7 +474,7 @@ object GlobalProcsViewImpl {
         val it = for {
           outView <- seqTL
           inView  <- seqGlob
-          in      = inView.obj
+          in      <- inView .obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
           out     <- outView.obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
           link    <- Edits.findLink(out = out, in = in)
         } yield Edits.removeLink(link)
@@ -504,23 +509,30 @@ object GlobalProcsViewImpl {
       tlSelModel removeListener tlSelListener
     }
 
-    def add(proc: ProcObjView.Timeline[S]): Unit = {
-      val row   = procSeq.size
-      procSeq :+= proc
-      tm.fireTableRowsInserted(row, row)
+    def add(proc: ObjView[S]): Unit = proc match {
+      case pv: ProcObjView.Timeline[S] =>
+        val row   = procSeq.size
+        procSeq :+= pv
+        tm.fireTableRowsInserted(row, row)
+
+      case _ =>
     }
 
-    def remove(proc: ProcObjView.Timeline[S]): Unit = {
-      val row   = procSeq.indexOf(proc)
-      procSeq   = procSeq.patch(row, Vec.empty, 1)
-      tm.fireTableRowsDeleted(row, row)
+    def remove(proc: ObjView[S]): Unit = {
+      val row = procSeq.indexOf(proc)
+      if (row >= 0) {
+        procSeq = procSeq.patch(row, Vec.empty, 1)
+        tm.fireTableRowsDeleted(row, row)
+      }
     }
 
     def iterator: Iterator[ProcObjView.Timeline[S]] = procSeq.iterator
 
-    def updated(proc: ProcObjView.Timeline[S]): Unit = {
-      val row   = procSeq.indexOf(proc)
-      tm.fireTableRowsUpdated(row, row)
+    def updated(proc: ObjView[S]): Unit = {
+      val row = procSeq.indexOf(proc)
+      if (row >= 0) {
+        tm.fireTableRowsUpdated(row, row)
+      }
     }
   }
 }

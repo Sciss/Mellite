@@ -13,8 +13,8 @@
 
 package de.sciss.mellite.gui.impl.timeline
 
+import de.sciss.mellite.{TimelineRendering, TimelineTool}
 import de.sciss.mellite.gui.impl.RenderingImpl
-import de.sciss.mellite.gui.{TimelineRendering, TimelineTool}
 
 import scala.swing.Component
 
@@ -25,9 +25,9 @@ final class TimelineRenderingImpl(component: Component, isDark: Boolean)
 
 //  import timeline.{TimelineRenderingImpl => Impl}
 
-  var ttMoveState     : TimelineTool.Move      = TimelineTool.NoMove
-  var ttResizeState   : TimelineTool.Resize    = TimelineTool.NoResize
-  var ttGainState     : TimelineTool.Gain      = TimelineTool.NoGain
-  var ttFadeState     : TimelineTool.Fade      = TimelineTool.NoFade
-  var ttFunctionState : TimelineTool.Add  = TimelineTool.NoFunction
+  var ttMoveState     : TimelineTool.Move     = TimelineTool.NoMove
+  var ttResizeState   : TimelineTool.Resize   = TimelineTool.NoResize
+  var ttGainState     : TimelineTool.Gain     = TimelineTool.NoGain
+  var ttFadeState     : TimelineTool.Fade     = TimelineTool.NoFade
+  var ttFunctionState : TimelineTool.Add      = TimelineTool.NoFunction
 }

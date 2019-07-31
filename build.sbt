@@ -15,16 +15,18 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val core = new {
+    val audioWidgets        = "1.14.3"
     val desktop             = "0.10.4"
     val lucreSwing          = "1.17.2"
     val raphaelIcons        = "1.0.6"
-    val soundProcesses      = "3.29.3"
+    val scallop             = "3.3.1"
+    val sonogram            = "1.11.2"
+    val soundProcesses      = "3.29.4-SNAPSHOT"
   }
   val main = new {
     val akka                = "2.5.23"
     val appDirs             = "1.0.3"
     val audioFile           = "1.5.3"
-    val audioWidgets        = "1.14.3"
     val dotterweide         = "0.2.3"
     val equal               = "0.1.4"
     val fileCache           = "0.5.1"
@@ -50,10 +52,8 @@ lazy val deps = new {
     val scalaOSC            = "1.2.0"
     val scalaSTM            = "0.9.1"
     val scalaSwing          = "2.1.1"
-    val scallop             = "3.3.1"
     val scissDSP            = "1.3.2"
     val serial              = "1.1.1"
-    val sonogram            = "1.11.2"
     def soundProcesses      = core.soundProcesses
     val span                = "1.4.2"
     val submin              = "0.2.5"
@@ -205,10 +205,16 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
     name        := s"$baseName-core",
     description := s"$baseName - core library",
     libraryDependencies ++= Seq(
+      "de.sciss"          %% "audiowidgets-app"               % deps.core.audioWidgets,       // audio application widgets
+      "de.sciss"          %% "audiowidgets-core"              % deps.core.audioWidgets,       // audio application widgets
+      "de.sciss"          %% "audiowidgets-swing"             % deps.core.audioWidgets,       // audio application widgets
       "de.sciss"          %% "desktop"                        % deps.core.desktop,            // support for desktop applications
       "de.sciss"          %% "lucreswing"                     % deps.core.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "sonogramoverview"               % deps.core.sonogram,           // sonogram component
       "de.sciss"          %% "raphael-icons"                  % deps.core.raphaelIcons,       // icon set
       "de.sciss"          %% "soundprocesses-core"            % deps.core.soundProcesses,     // computer-music framework
+      "de.sciss"          %% "soundprocesses-views"           % deps.core.soundProcesses,     // computer-music framework
+      "org.rogach"        %% "scallop"                        % deps.core.scallop,            // command line option parsing
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion)
   )
@@ -229,9 +235,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
     libraryDependencies ++= Seq(
       // "com.github.scopt"  %% "scopt"                          % deps.main.scopt,              // command line option parsing
       "de.sciss"          %% "audiofile"                      % deps.main.audioFile,          // reading/writing audio files
-      "de.sciss"          %% "audiowidgets-app"               % deps.main.audioWidgets,       // audio application widgets
-      "de.sciss"          %% "audiowidgets-core"              % deps.main.audioWidgets,       // audio application widgets
-      "de.sciss"          %% "audiowidgets-swing"             % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
       "de.sciss"          %% "filecache-common"               % deps.main.fileCache,          // caching data to disk
       "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // extension methods for files
@@ -263,7 +266,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "scalaosc"                       % deps.main.scalaOSC,           // open sound control
       "de.sciss"          %% "scissdsp"                       % deps.main.scissDSP,           // offline signal processing
       "de.sciss"          %% "serial"                         % deps.main.serial,             // serialization
-      "de.sciss"          %% "sonogramoverview"               % deps.main.sonogram,           // sonogram component
       "de.sciss"          %% "soundprocesses"                 % deps.main.soundProcesses,     // computer-music framework
       "de.sciss"          %% "span"                           % deps.main.span,               // time spans
       "de.sciss"          %  "submin"                         % deps.main.submin,             // dark skin
@@ -275,7 +277,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "wolkenpumpe"                    % deps.main.wolkenpumpe,        // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.main.appDirs,            // finding cache directory
       "org.pegdown"       %  "pegdown"                        % deps.main.pegDown,            // Markdown renderer
-      "org.rogach"        %% "scallop"                        % deps.main.scallop,            // command line option parsing
       "org.scala-lang.modules" %% "scala-swing"               % deps.main.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.main.scalaSTM,           // software transactional memory
     ),

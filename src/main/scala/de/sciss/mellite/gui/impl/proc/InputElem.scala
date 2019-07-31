@@ -15,7 +15,7 @@ package de.sciss.mellite.gui.impl.proc
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Disposable
-import de.sciss.mellite.gui.ObjTimelineView
+import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.SpanLike
 

@@ -18,7 +18,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.EnsembleFrame
-import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.{Ensemble, Universe}
 
 object EnsembleFrameImpl {

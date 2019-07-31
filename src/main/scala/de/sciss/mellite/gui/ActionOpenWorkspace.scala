@@ -16,7 +16,7 @@ package de.sciss.mellite.gui
 import java.util.concurrent.TimeUnit
 
 import de.sciss.desktop
-import de.sciss.desktop.{FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
+import de.sciss.desktop.{Desktop, FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
@@ -46,6 +46,17 @@ object ActionOpenWorkspace extends Action("Open...") {
 
   private def dh = Application.documentHandler
   private def fullTitle = "Open Workspace"
+
+  private[this] lazy val _init: Unit =
+    Desktop.addListener {
+      case Desktop.OpenFiles(_, files) =>
+        // println(s"TODO: $open; EDT? ${java.awt.EventQueue.isDispatchThread}")
+        files.foreach { f =>
+          ActionOpenWorkspace.perform(f)
+        }
+    }
+
+  def install(): Unit = _init
 
   // XXX TODO: should be in another place
   def openGUI[S <: Sys[S]](universe: Universe[S]): Unit = {

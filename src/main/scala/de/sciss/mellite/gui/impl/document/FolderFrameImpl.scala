@@ -17,9 +17,9 @@ import de.sciss.desktop.{Menu, UndoManager}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.Application
-import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.gui.{ActionCloseAllWorkspaces, FolderEditorView, FolderFrame, FolderView, WindowPlacement}
+import de.sciss.mellite.{Application, WindowPlacement}
+import de.sciss.mellite.gui.{ActionCloseAllWorkspaces, FolderEditorView, FolderFrame, FolderView}
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.Universe
 
 import scala.concurrent.Future

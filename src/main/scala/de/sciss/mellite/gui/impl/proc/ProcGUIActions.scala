@@ -17,7 +17,7 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.ObjTimelineView
+import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.gui.edit.EditTimelineRemoveObj
 import de.sciss.synth.proc.Timeline
 import javax.swing.undo.UndoableEdit

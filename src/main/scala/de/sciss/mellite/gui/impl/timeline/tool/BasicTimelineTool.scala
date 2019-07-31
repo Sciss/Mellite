@@ -16,8 +16,8 @@ package de.sciss.mellite.gui.impl.timeline.tool
 import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
-import de.sciss.mellite.gui.ObjTimelineView
+import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragEnd}
+import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.gui.impl.tool.DraggingTool
 
 /** Most common implementation of a timeline tool, based on region selection and

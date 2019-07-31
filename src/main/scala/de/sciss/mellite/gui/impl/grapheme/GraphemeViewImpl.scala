@@ -28,10 +28,9 @@ import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.GraphemeView.Mode
+import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.{BasicTool, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, SelectionModel}
-import de.sciss.mellite.{GUI, ObjView}
+import de.sciss.mellite.{BasicTool, GUI, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
@@ -45,26 +44,28 @@ import scala.concurrent.stm.Ref
 import scala.swing.Swing._
 import scala.swing.{BorderPanel, BoxPanel, Component, Orientation}
 
-object GraphemeViewImpl {
+object GraphemeViewImpl extends GraphemeView.Companion {
+  def install(): Unit =
+    GraphemeView.peer = this
+
   private val DEBUG   = false
 
   import de.sciss.mellite.{logTimeline => logT}
 
 //  private type EntryProc[S <: Sys[S]] = BiGroup.Entry[S, Proc[S]]
 
-  def apply[S <: Sys[S]](obj: Grapheme[S])
+  def apply[S <: Sys[S]](gr: Grapheme[S])
                         (implicit tx: S#Tx, universe: Universe[S],
                          undo: UndoManager): GraphemeView[S] = {
     val sampleRate      = TimeRef.SampleRate
     val visStart        = 0L // obj.firstEvent.getOrElse(0L)
-    val visStop         = obj.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
+    val visStop         = gr.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
     val vis0            = Span(visStart, visStop)
     val bounds0         = Span(0L, (sampleRate * 60 * 60).toLong) // XXX TODO --- dynamically adjust
     val tlm             = TimelineModel(bounds = bounds0, visible = vis0, virtual = bounds0, clipStop = false,
       sampleRate = sampleRate)
     // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
-    val gr              = obj
-    val graphemeH       = tx.newHandle(obj)
+    val graphemeH       = tx.newHandle(gr)
     var disposables     = List.empty[Disposable[S#Tx]]
     val selectionModel  = SelectionModel[S, ObjGraphemeView[S]]
     val grView          = new Impl[S](graphemeH, tlm, selectionModel)

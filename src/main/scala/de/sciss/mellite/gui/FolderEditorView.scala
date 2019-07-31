@@ -18,9 +18,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.UniverseView
 import de.sciss.mellite.gui.impl.document.FolderEditorViewImpl
 import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.gui.UniverseView
 
 import scala.swing.{Action, Component, SequentialContainer}
 

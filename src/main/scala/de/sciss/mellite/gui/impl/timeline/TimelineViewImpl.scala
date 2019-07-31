@@ -31,14 +31,15 @@ import de.sciss.lucre.stm.{IdentifierMap, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
+import de.sciss.mellite.edit.EditFolderInsertObj
+import de.sciss.mellite.gui.ActionArtifactLocation
+import de.sciss.mellite.gui.edit.{EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.audiocue.AudioCueObjView
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, GlobalProcsView, ObjTimelineView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
-import de.sciss.mellite.{DragAndDrop, GUI, Mellite, ObjView, ObjectActions, ProcActions}
+import de.sciss.mellite.{BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
@@ -56,7 +57,10 @@ import scala.swing.event.ValueChanged
 import scala.swing.{BorderPanel, BoxPanel, Component, Orientation, SplitPane}
 import scala.util.Try
 
-object TimelineViewImpl {
+object TimelineViewImpl extends TimelineView.Companion {
+  def install(): Unit =
+    TimelineView.peer = this
+
   private final val LinkArrowLen  = 0   // 10  ; currently no arrow tip painted
   private final val LinkCtrlPtLen = 20
 
@@ -123,6 +127,8 @@ object TimelineViewImpl {
 
 
     type C = Component
+
+    override type Repr = Timeline[S]
 
     implicit val universe: Universe[S] = globalView.universe
 
@@ -733,13 +739,13 @@ object TimelineViewImpl {
             drawPatch(g, patchState)
         }
 
-        private def linkFrame(pv: ProcObjView.Timeline[S]): Long = pv.spanValue match {
+        private def linkFrame(pv: ObjTimelineView[S]): Long = pv.spanValue match {
           case Span(start, stop) => (start + stop) / 2
           case hs: Span.HasStart => hs.start + (timelineModel.sampleRate * 0.1).toLong
           case _ => 0L
         }
 
-        private def linkY(view: ProcObjView.Timeline[S], input: Boolean): Int =
+        private def linkY(view: ObjTimelineView[S], input: Boolean): Int =
           if (input)
             modelPosToScreen(view.trackIndex).toInt + 4
           else

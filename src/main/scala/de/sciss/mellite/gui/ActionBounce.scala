@@ -28,9 +28,9 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Sys}
-import de.sciss.mellite.gui.edit.EditFolderInsertObj
+import de.sciss.mellite.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain
-import de.sciss.mellite.{GUI, Mellite, Prefs, executionContext}
+import de.sciss.mellite.{GUI, Mellite, Prefs, UniverseView, executionContext}
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid
@@ -38,7 +38,6 @@ import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
 import de.sciss.synth.io.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
 import de.sciss.synth.{Client, SynthGraph, addToTail}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}

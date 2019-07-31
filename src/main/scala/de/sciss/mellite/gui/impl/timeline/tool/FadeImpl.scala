@@ -20,9 +20,9 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.GUI
+import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.{Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.Shapes
 import de.sciss.span.Span
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}

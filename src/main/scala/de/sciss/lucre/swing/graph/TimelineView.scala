@@ -21,8 +21,8 @@ import de.sciss.lucre.expr.graph.impl.MappedIExpr
 import de.sciss.lucre.expr.graph.{Ex, Obj, Timed, Timeline => _Timeline}
 import de.sciss.lucre.expr.{Context, IExpr}
 import de.sciss.lucre.stm.Sys
-import de.sciss.mellite.DragAndDrop
-import de.sciss.mellite.gui.{TimelineView => _TimelineView}
+import de.sciss.mellite
+import de.sciss.mellite.{DragAndDrop, TimelineView => _TimelineView}
 import de.sciss.serial.DataInput
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
@@ -66,7 +66,7 @@ object TimelineView {
       val tlm             = tv.timelineModel
       val sameWorkspace   = tv.universe.workspace == ctx.workspace
       val (selectedObjects, timeline /*, edit*/) = if (!sameWorkspace) (Nil, _Timeline.Empty /*, Edit.Empty*/) else {
-        val tvc     = tv.asInstanceOf[_TimelineView[S]]
+        val tvc     = tv.asInstanceOf[mellite.TimelineView[S]]
         val system  = tvc.universe.workspace.system
         val _sel    = tvc.selectionModel.iterator.map { view =>
           val span = view.spanValue

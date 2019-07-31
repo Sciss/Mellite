@@ -18,7 +18,7 @@ import java.awt.event.KeyEvent
 import de.sciss.desktop
 import de.sciss.desktop.FocusType
 import de.sciss.lucre.stm
-import de.sciss.mellite.gui.{BasicTool, BasicTools}
+import de.sciss.mellite.{BasicTool, BasicTools}
 import javax.swing.{ButtonGroup, KeyStroke}
 
 import scala.collection.immutable.{IndexedSeq => Vec}

@@ -17,9 +17,9 @@ import de.sciss.desktop.{Menu, OptionPane}
 import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.mellite.Veto
 import de.sciss.mellite.gui.CodeView
-import de.sciss.mellite.gui.impl.WindowImpl
-import de.sciss.mellite.util.Veto
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.Code.Example
 

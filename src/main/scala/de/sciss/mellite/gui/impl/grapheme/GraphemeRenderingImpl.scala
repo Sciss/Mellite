@@ -15,8 +15,8 @@ package de.sciss.mellite.gui.impl.grapheme
 
 import java.awt.geom.{AffineTransform, Area, Ellipse2D}
 
+import de.sciss.mellite.{GraphemeRendering, GraphemeTool}
 import de.sciss.mellite.gui.impl.RenderingImpl
-import de.sciss.mellite.gui.{GraphemeRendering, GraphemeTool}
 
 import scala.swing.Component
 

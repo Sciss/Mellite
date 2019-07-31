@@ -17,10 +17,10 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.{CanBounce, UniverseView}
 import de.sciss.mellite.gui.impl.document.{NuagesEditorViewImpl => Impl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.gui.UniverseView
 
 import scala.swing.Action
 

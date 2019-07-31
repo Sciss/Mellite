@@ -20,11 +20,11 @@ import de.sciss.lucre.expr.{BooleanObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.GUI
-import de.sciss.mellite.gui.TimelineTool.Mute
+import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, TimelineTrackCanvas}
+import de.sciss.mellite.TimelineTool.Mute
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.tool.RubberBandTool
-import de.sciss.mellite.gui.{BasicTool, ObjTimelineView, Shapes, TimelineTrackCanvas}
+import de.sciss.mellite.gui.Shapes
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit

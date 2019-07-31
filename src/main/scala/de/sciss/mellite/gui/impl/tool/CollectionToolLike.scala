@@ -16,7 +16,7 @@ package de.sciss.mellite.gui.impl.tool
 import java.awt.event.{MouseAdapter, MouseEvent}
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{BasicTool, TimelineCanvas2D}
+import de.sciss.mellite.{BasicTool, TimelineCanvas2D}
 import de.sciss.model.impl.ModelImpl
 
 import scala.swing.Component

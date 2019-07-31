@@ -18,10 +18,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
+import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.gui.impl.document.NuagesEditorFrameImpl
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.gui.ObjListView
+import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
+import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Timeline, Universe}

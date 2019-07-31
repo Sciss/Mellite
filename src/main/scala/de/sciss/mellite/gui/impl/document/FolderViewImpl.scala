@@ -25,10 +25,11 @@ import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjListView
 import de.sciss.mellite.gui.FolderView.Selection
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
-import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView, ObjListView}
+import de.sciss.mellite.gui.{ActionArtifactLocation, FolderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.Serializer
 import de.sciss.synth.proc.{ObjKeys, Universe}

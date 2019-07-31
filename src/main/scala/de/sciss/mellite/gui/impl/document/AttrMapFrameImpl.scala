@@ -22,9 +22,9 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.edit.EditAttrMap
-import de.sciss.mellite.gui.impl.WindowImpl
 import de.sciss.mellite.gui.impl.component.{CollectionViewImpl, NoMenuBarActions}
 import de.sciss.mellite.gui.{AttrMapFrame, AttrMapView}
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 

@@ -27,17 +27,15 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, ObjView}
-import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.ObjListView
-import de.sciss.mellite.util.Veto
+import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
+import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.{desktop, numbers}
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop

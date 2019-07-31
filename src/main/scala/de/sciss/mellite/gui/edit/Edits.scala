@@ -20,8 +20,8 @@ import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.ProcActions.{Move, Resize}
-import de.sciss.mellite.gui.{GraphemeTool, ObjTimelineView}
-import de.sciss.mellite.{???!, ProcActions, log}
+import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
+import de.sciss.mellite.{???!, GraphemeTool, ObjTimelineView, ProcActions, log}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
 import de.sciss.synth.{SynthGraph, proc}

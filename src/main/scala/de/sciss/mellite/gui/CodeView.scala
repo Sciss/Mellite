@@ -16,9 +16,9 @@ package de.sciss.mellite.gui
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.lucre.swing.View
+import de.sciss.mellite.UniverseView
 import de.sciss.mellite.gui.impl.code.{CodeViewImpl => Impl}
 import de.sciss.model.Model
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.undo.UndoableEdit
 

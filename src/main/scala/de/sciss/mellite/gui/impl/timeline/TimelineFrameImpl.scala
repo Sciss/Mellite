@@ -18,10 +18,10 @@ import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.Application
-import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.{Application, TimelineView}
+import de.sciss.mellite.gui.TimelineFrame
 import de.sciss.mellite.gui.impl.proc.ProcObjView
-import de.sciss.mellite.gui.{TimelineFrame, TimelineView}
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.{Timeline, Universe}
 
 import scala.swing.Action

@@ -22,9 +22,9 @@ import de.sciss.lucre.expr.{SpanLikeObj, StringObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, ObjView}
+import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, ObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.gui.edit.Edits
-import de.sciss.mellite.gui.{BasicTool, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.gui.Shapes
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon

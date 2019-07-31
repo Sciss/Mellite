@@ -18,8 +18,7 @@ import de.sciss.desktop.KeyStrokes._
 import de.sciss.desktop.Window
 import de.sciss.lucre.stm.{Sys, Workspace}
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.mellite.util.Veto
-import de.sciss.mellite.{Application, DependentMayVeto, Mellite, executionContext}
+import de.sciss.mellite.{Application, DependentMayVeto, Mellite, Veto, executionContext}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc
 import de.sciss.synth.proc.Universe

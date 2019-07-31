@@ -23,11 +23,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, GUI}
+import de.sciss.mellite.{DragAndDrop, GUI, ObjListView}
 import de.sciss.mellite.gui.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
-import de.sciss.mellite.gui.{FScapeOutputsView, MapView, ObjListView}
+import de.sciss.mellite.gui.{FScapeOutputsView, MapView}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit

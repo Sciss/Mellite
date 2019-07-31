@@ -18,9 +18,10 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjListView
 import de.sciss.mellite.gui.edit.EditAttrMap
 import de.sciss.mellite.gui.impl.MapViewImpl
-import de.sciss.mellite.gui.{AttrMapView, ObjListView}
+import de.sciss.mellite.gui.AttrMapView
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 

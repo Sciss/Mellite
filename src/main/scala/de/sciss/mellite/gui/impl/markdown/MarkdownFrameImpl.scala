@@ -19,9 +19,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.WindowImpl
+import de.sciss.mellite.Veto
 import de.sciss.mellite.gui.{MarkdownEditorFrame, MarkdownEditorView, MarkdownRenderFrame, MarkdownRenderView}
-import de.sciss.mellite.util.Veto
+import de.sciss.mellite.impl.WindowImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.synth.proc.{Markdown, Universe}
 

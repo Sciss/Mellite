@@ -29,19 +29,17 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
-import de.sciss.mellite.gui.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
-import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
-import de.sciss.mellite.gui.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseView}
+import de.sciss.mellite.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
+import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
+import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser, WindowImpl}
+import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.Grapheme.Entry
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{CurveObj, EnvSegment, Universe}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
@@ -451,7 +449,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
                                                 objH: stm.Source[S#Tx, E[S]],
                                                 var value: V, val isEditable: Boolean)
     extends Impl[S](objH)
-      with GraphemeObjViewImpl.SimpleExpr[S, V, E]
+      with ObjGraphemeViewImpl.SimpleExpr[S, V, E]
       with ObjGraphemeView.HasStartLevels[S] {
 
     private[this] val allSame =

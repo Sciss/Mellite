@@ -17,10 +17,9 @@ import java.awt.{BasicStroke, Color, Graphics2D, Stroke}
 
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
-import de.sciss.mellite.gui.TimelineTool.Update
-import de.sciss.mellite.gui.{BasicTool, SelectionModel, TimelineCanvas2D}
-import de.sciss.mellite.{GUI, log}
+import de.sciss.mellite.BasicTool.{DragAdjust, DragCancel, DragEnd, DragRubber}
+import de.sciss.mellite.TimelineTool.Update
+import de.sciss.mellite.{BasicTool, GUI, SelectionModel, TimelineCanvas2D, log}
 import de.sciss.model.Model
 import de.sciss.span.Span
 

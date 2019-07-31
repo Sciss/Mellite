@@ -17,8 +17,7 @@ import java.awt.geom.Path2D
 import java.awt.image.{BufferedImage, ImageObserver}
 import java.awt.{BasicStroke, LinearGradientPaint, Paint, Rectangle, Stroke, TexturePaint, Color => JColor}
 
-import de.sciss.mellite.gui
-import de.sciss.mellite.gui.BasicRendering
+import de.sciss.mellite.{BasicRendering, gui}
 
 import scala.swing.Component
 

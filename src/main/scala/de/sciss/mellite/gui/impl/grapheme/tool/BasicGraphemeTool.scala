@@ -16,8 +16,8 @@ package de.sciss.mellite.gui.impl.grapheme.tool
 import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.BasicTool.{DragAdjust, DragBegin, DragEnd}
-import de.sciss.mellite.gui.ObjGraphemeView
+import de.sciss.mellite.ObjGraphemeView
+import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragEnd}
 import de.sciss.mellite.gui.impl.tool.DraggingTool
 
 /** Most common implementation of a grapheme tool, based on region selection and
