@@ -35,8 +35,8 @@ import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.PrimitiveConfig
 import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{FolderEditorView, GUI, MarkdownRenderFrame, MessageException, ObjListView, ObjView, Shapes}
-import de.sciss.mellite.{Mellite, executionContext}
+import de.sciss.mellite.gui.{FolderEditorView, GUI, MarkdownRenderFrame, MessageException, ObjListView, Shapes}
+import de.sciss.mellite.{Mellite, ObjView, executionContext}
 import de.sciss.processor.Processor
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.io.AudioFile

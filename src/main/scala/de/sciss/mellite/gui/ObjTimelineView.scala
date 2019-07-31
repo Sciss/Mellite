@@ -17,7 +17,7 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.IdentifierMap
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui
+import de.sciss.mellite.{ObjView, gui}
 import de.sciss.mellite.gui.impl.timeline.{ObjTimelineViewImpl => Impl}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.proc.{AuxContext, FadeSpec, Timeline}

@@ -24,9 +24,10 @@ import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
+import de.sciss.mellite.gui.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, Shapes, SplitPaneView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon

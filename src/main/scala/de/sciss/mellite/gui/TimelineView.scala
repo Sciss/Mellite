@@ -16,7 +16,8 @@ package de.sciss.mellite.gui
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.DragAndDrop.Flavor
+import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.objview.TimelineObjView
 import de.sciss.mellite.gui.impl.timeline.{TimelineViewImpl => Impl}
 import de.sciss.synth.proc.gui.TransportView

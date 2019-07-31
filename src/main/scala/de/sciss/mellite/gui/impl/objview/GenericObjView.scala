@@ -18,11 +18,11 @@ import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.???!
+import de.sciss.mellite.{???!, ObjView}
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.grapheme.GraphemeObjViewImpl
 import de.sciss.mellite.gui.impl.timeline.ObjTimelineViewBasicImpl
-import de.sciss.mellite.gui.{ObjGraphemeView, GraphemeRendering, GraphemeView, Insets, ObjListView, ObjView, ObjTimelineView}
+import de.sciss.mellite.gui.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjTimelineView}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 

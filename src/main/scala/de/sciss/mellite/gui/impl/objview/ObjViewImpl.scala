@@ -27,8 +27,8 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.gui.edit.EditFolderInsertObj
 import de.sciss.mellite.gui.impl.{ExprHistoryView, WindowImpl}
-import de.sciss.mellite.gui.{GUI, ObjView}
-import de.sciss.mellite.{Cf, Mellite}
+import de.sciss.mellite.gui.GUI
+import de.sciss.mellite.{Cf, Mellite, ObjView}
 import de.sciss.{desktop, numbers}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.Serializer

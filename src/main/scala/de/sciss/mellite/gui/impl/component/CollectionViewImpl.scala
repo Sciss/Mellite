@@ -22,8 +22,8 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.Application
-import de.sciss.mellite.gui.{AttrMapFrame, GUI, ObjListView, MessageException, ObjView}
+import de.sciss.mellite.{Application, ObjView}
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, MessageException, ObjListView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
 import de.sciss.synth.proc.gui.UniverseView

@@ -21,10 +21,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.???!
+import de.sciss.mellite.{???!, ObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView.LinkTarget
 import de.sciss.mellite.gui.impl.timeline.ObjTimelineViewImpl
-import de.sciss.mellite.gui.{ObjTimelineView, ObjView, SonogramManager, TimelineRendering, TimelineView}
+import de.sciss.mellite.gui.{ObjTimelineView, SonogramManager, TimelineRendering, TimelineView}
 import de.sciss.sonogram.{Overview => SonoOverview}
 import de.sciss.span.Span
 import de.sciss.synth.proc

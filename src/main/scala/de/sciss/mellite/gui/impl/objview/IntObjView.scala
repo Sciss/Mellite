@@ -18,8 +18,9 @@ import de.sciss.lucre.expr.{IntObj, Type}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes}
+import de.sciss.mellite.gui.{ObjListView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}

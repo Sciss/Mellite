@@ -22,10 +22,11 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.DragAndDrop
 import de.sciss.mellite.gui.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.gui.impl.MapViewImpl
 import de.sciss.mellite.gui.impl.component.DragSourceButton
-import de.sciss.mellite.gui.{DragAndDrop, GUI, ObjListView, MapView, ProcOutputsView}
+import de.sciss.mellite.gui.{GUI, MapView, ObjListView, ProcOutputsView}
 import de.sciss.synth.proc.{Proc, Universe}
 import javax.swing.undo.UndoableEdit
 

@@ -15,6 +15,7 @@ package de.sciss.mellite.gui
 
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
+import de.sciss.mellite.ObjView
 import de.sciss.model.Model
 import de.sciss.synth.proc.gui.UniverseView
 

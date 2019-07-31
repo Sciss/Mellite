@@ -15,7 +15,8 @@ package de.sciss.mellite.gui.impl
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{AttrMapFrame, GUI, ObjView, TimelineViewBase}
+import de.sciss.mellite.ObjView
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, TimelineViewBase}
 
 import scala.swing.{Action, Component}
 

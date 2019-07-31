@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import java.awt.datatransfer.{DataFlavor, Transferable, UnsupportedFlavorException}
 

@@ -19,9 +19,10 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
 import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.gui.{GUI, ObjListView, MarkdownEditorFrame, ObjView, Shapes}
+import de.sciss.mellite.gui.{GUI, MarkdownEditorFrame, ObjListView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.Icon

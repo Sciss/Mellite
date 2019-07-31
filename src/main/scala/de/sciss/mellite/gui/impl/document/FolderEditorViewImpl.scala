@@ -20,9 +20,10 @@ import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.gui.impl.component.CollectionViewImpl
-import de.sciss.mellite.gui.{FolderEditorView, FolderView, ObjView}
+import de.sciss.mellite.gui.{FolderEditorView, FolderView}
 import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.synth.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel

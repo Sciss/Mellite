@@ -22,7 +22,8 @@ import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.{DragAndDrop, MapView, ObjListView, ObjView}
+import de.sciss.mellite.{DragAndDrop, ObjView}
+import de.sciss.mellite.gui.{MapView, ObjListView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe

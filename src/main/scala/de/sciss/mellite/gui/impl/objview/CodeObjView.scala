@@ -21,8 +21,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.ObjViewCmdLineParser
-import de.sciss.mellite.gui.{CodeFrame, ObjListView, ObjView}
+import de.sciss.mellite.gui.{CodeFrame, ObjListView}
 import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}

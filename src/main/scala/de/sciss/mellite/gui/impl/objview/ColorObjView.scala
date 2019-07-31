@@ -22,10 +22,11 @@ import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.component.PaintIcon
 import de.sciss.mellite.gui.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.gui.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.gui.{MessageException, ObjListView, ObjView}
+import de.sciss.mellite.gui.{MessageException, ObjListView}
 import de.sciss.{desktop, numbers}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.gui.UniverseView

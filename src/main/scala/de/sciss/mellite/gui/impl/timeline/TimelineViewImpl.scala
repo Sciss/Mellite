@@ -37,8 +37,8 @@ import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.gui.impl.proc.ProcObjView
 import de.sciss.mellite.gui.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
-import de.sciss.mellite.{Mellite, ObjectActions, ProcActions}
+import de.sciss.mellite.gui.{ActionArtifactLocation, BasicTool, GUI, GlobalProcsView, ObjTimelineView, SelectionModel, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.{DragAndDrop, Mellite, ObjView, ObjectActions, ProcActions}
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar

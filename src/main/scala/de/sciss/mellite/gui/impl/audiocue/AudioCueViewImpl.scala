@@ -25,11 +25,11 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ProcActions
+import de.sciss.mellite.{DragAndDrop, ObjView, ProcActions}
 import de.sciss.mellite.gui.GUI.iconNormal
 import de.sciss.mellite.gui.impl.component.DragSourceButton
 import de.sciss.mellite.gui.impl.timeline
-import de.sciss.mellite.gui.{AudioCueView, DragAndDrop, GUI, ObjView, SonogramManager}
+import de.sciss.mellite.gui.{AudioCueView, GUI, SonogramManager}
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.graph.ScanIn

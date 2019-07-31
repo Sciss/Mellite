@@ -24,11 +24,11 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ProcActions
+import de.sciss.mellite.{DragAndDrop, ObjView, ProcActions}
 import de.sciss.mellite.gui.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.gui.impl.objview.IntObjView
 import de.sciss.mellite.gui.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.gui.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjView, SelectionModel, ObjTimelineView}
+import de.sciss.mellite.gui.{AttrMapFrame, GUI, GlobalProcsView, ObjTimelineView, SelectionModel}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
 import de.sciss.synth.proc

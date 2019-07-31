@@ -21,7 +21,8 @@ import de.sciss.lucre.expr.graph.impl.MappedIExpr
 import de.sciss.lucre.expr.graph.{Ex, Obj, Timed, Timeline => _Timeline}
 import de.sciss.lucre.expr.{Context, IExpr}
 import de.sciss.lucre.stm.Sys
-import de.sciss.mellite.gui.{DragAndDrop, TimelineView => _TimelineView}
+import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.gui.{TimelineView => _TimelineView}
 import de.sciss.serial.DataInput
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}

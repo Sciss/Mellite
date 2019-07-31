@@ -29,9 +29,10 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.Mellite
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.GraphemeView.Mode
 import de.sciss.mellite.gui.impl.TimelineViewBaseImpl
-import de.sciss.mellite.gui.{BasicTool, ObjGraphemeView, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjView, SelectionModel}
+import de.sciss.mellite.gui.{BasicTool, ObjGraphemeView, GraphemeTool, GraphemeTools, GraphemeView, Insets, SelectionModel}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span

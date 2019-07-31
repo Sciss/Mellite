@@ -24,8 +24,8 @@ import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.DragAndDrop.Flavor
-import de.sciss.mellite.gui.{DragAndDrop, ObjView}
+import de.sciss.mellite.{DragAndDrop, ObjView}
+import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.span.Span
 import de.sciss.synth.io.AudioFile
 import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}

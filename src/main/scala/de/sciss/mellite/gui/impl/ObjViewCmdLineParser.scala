@@ -15,7 +15,8 @@ package de.sciss.mellite.gui.impl
 
 import de.sciss.kollflitz.{ISeq, Vec}
 import de.sciss.lucre.stm.Sys
-import de.sciss.mellite.gui.{MessageException, ObjView}
+import de.sciss.mellite.ObjView
+import de.sciss.mellite.gui.MessageException
 import de.sciss.processor.Processor.Aborted
 import org.rogach.scallop.exceptions.{Help, ScallopException, ScallopResult, Version}
 import org.rogach.scallop.{ScallopConf, ScallopOption, ValueConverter, throwError}

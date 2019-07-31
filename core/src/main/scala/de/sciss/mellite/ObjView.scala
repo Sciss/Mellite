@@ -11,7 +11,7 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.gui
+package de.sciss.mellite
 
 import java.awt.datatransfer.Transferable
 
@@ -21,7 +21,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.DragAndDrop.Flavor
+import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
 

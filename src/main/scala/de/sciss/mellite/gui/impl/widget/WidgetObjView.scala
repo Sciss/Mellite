@@ -17,8 +17,9 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ObjListView, ObjView, Shapes, WidgetEditorFrame}
+import de.sciss.mellite.ObjView
+import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.{ObjListView, Shapes, WidgetEditorFrame}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Universe, Widget}
 import javax.swing.Icon

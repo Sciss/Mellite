@@ -18,8 +18,9 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.impl.objview.{ObjListViewImpl, NoMakeListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ObjListView, ObjView}
+import de.sciss.mellite.ObjView
+import de.sciss.mellite.gui.impl.objview.{NoMakeListObjViewFactory, ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.gui.ObjListView
 import javax.swing.Icon
 
 object FScapeOutputObjView extends NoMakeListObjViewFactory {

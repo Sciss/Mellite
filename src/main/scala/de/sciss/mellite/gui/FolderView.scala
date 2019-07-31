@@ -20,7 +20,8 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.{TreeTableView, View}
 import de.sciss.lucre.synth.{Sys => SSys}
-import de.sciss.mellite.gui.DragAndDrop.Flavor
+import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.document.{FolderViewImpl => Impl}
 import de.sciss.mellite.gui.impl.objview.ArtifactLocationObjView
 import de.sciss.model.Model

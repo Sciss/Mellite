@@ -17,7 +17,8 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui.DragAndDrop.Flavor
+import de.sciss.mellite.DragAndDrop
+import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.gui.impl.proc.OutputsViewImpl
 import de.sciss.synth.proc.gui.UniverseView
 import de.sciss.synth.proc.{Proc, Universe}

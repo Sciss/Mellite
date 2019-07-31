@@ -18,9 +18,9 @@ import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.gui
+import de.sciss.mellite.{ObjView, gui}
 import de.sciss.mellite.gui.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
-import de.sciss.mellite.gui.{ObjListView, ObjView, ObjTimelineView}
+import de.sciss.mellite.gui.{ObjListView, ObjTimelineView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{ObjKeys, Proc}
 import javax.swing.Icon

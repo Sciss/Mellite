@@ -16,6 +16,7 @@ package de.sciss.mellite.gui
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.mellite.ObjView
 import de.sciss.mellite.gui.impl.objview.ObjListViewImpl
 import javax.swing.undo.UndoableEdit
 

@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.37.1-SNAPSHOT"
-lazy val mimaVersion                = "2.37.0"
+lazy val projectVersion             = "2.38.0-SNAPSHOT"
+lazy val mimaVersion                = "2.38.0"
 
 lazy val loggingEnabled             = true
 
@@ -14,12 +14,16 @@ lazy val authorEMail                = "contact@sciss.de"
 // ---- dependencies ----
 
 lazy val deps = new {
+  val core = new {
+    val desktop             = "0.10.4"
+    val lucreSwing          = "1.17.2"
+    val soundProcesses      = "3.29.3"
+  }
   val main = new {
     val akka                = "2.5.23"
     val appDirs             = "1.0.3"
     val audioFile           = "1.5.3"
     val audioWidgets        = "1.14.3"
-    val desktop             = "0.10.4"
     val dotterweide         = "0.2.3"
     val equal               = "0.1.4"
     val fileCache           = "0.5.1"
@@ -32,7 +36,6 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val lucre               = "3.13.1"
-    val lucreSwing          = "1.17.2"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val patterns            = "0.12.2"
@@ -49,10 +52,9 @@ lazy val deps = new {
     val scalaSwing          = "2.1.1"
     val scallop             = "3.3.1"
     val scissDSP            = "1.3.2"
-    // val scopt               = "3.7.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.29.3"
+    def soundProcesses      = core.soundProcesses
     val span                = "1.4.2"
     val submin              = "0.2.5"
     val swingPlus           = "0.4.2"
@@ -197,9 +199,23 @@ lazy val assemblySettings = Seq(
     }
   )
 
+lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
+  .settings(commonSettings)
+  .settings(
+    name        := s"$baseName-core",
+    description := s"$baseName - core library",
+    libraryDependencies ++= Seq(
+      "de.sciss"          %% "desktop"                        % deps.core.desktop,            // support for desktop applications
+      "de.sciss"          %% "lucreswing"                     % deps.core.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "soundprocesses-core"            % deps.core.soundProcesses,     // computer-music framework
+    ),
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion)
+  )
+
 lazy val root = project.withId(baseNameL).in(file("."))
   .enablePlugins(BuildInfoPlugin)
   .enablePlugins(JavaAppPackaging, DebianPlugin)
+  .dependsOn(core)
   .settings(commonSettings)
   .settings(pkgUniversalSettings)
   .settings(pkgDebianSettings)
@@ -215,7 +231,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "audiowidgets-app"               % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.main.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-swing"             % deps.main.audioWidgets,       // audio application widgets
-      "de.sciss"          %% "desktop"                        % deps.main.desktop,            // support for desktop applications
       "de.sciss"          %% "equal"                          % deps.main.equal,              // type-safe equals
       "de.sciss"          %% "filecache-common"               % deps.main.fileCache,          // caching data to disk
       "de.sciss"          %% "fileutil"                       % deps.main.fileUtil,           // extension methods for files
@@ -229,7 +244,6 @@ lazy val root = project.withId(baseNameL).in(file("."))
       "de.sciss"          %% "lucre-confluent"                % deps.main.lucre,              // object system
       "de.sciss"          %% "lucre-core"                     % deps.main.lucre,              // object system
       "de.sciss"          %% "lucre-expr"                     % deps.main.lucre,              // object system
-      "de.sciss"          %% "lucreswing"                     % deps.main.lucreSwing,         // reactive Swing components
       "de.sciss"          %% "model"                          % deps.main.model,              // non-txn MVC
       "de.sciss"          %% "numbers"                        % deps.main.numbers,            // extension methods for numbers
       "de.sciss"          %% "patterns"                       % deps.main.patterns,           // pattern sequences
