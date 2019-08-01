@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.38.0"
+lazy val projectVersion             = "2.38.1"
 lazy val mimaVersion                = "2.38.0"
 
 lazy val loggingEnabled             = true
@@ -40,7 +40,7 @@ lazy val deps = new {
     val kollFlitz           = "0.2.3"
     val lucre               = "3.13.1"
     val model               = "0.3.4"
-    val negatum             = "0.8.0"
+    val negatum             = "0.8.1"
     val numbers             = "0.2.0"
     val patterns            = "0.13.0"
     val pdflitz             = "1.4.1"

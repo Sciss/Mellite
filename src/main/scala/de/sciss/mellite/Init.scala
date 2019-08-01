@@ -26,7 +26,6 @@ import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl
 import de.sciss.mellite.impl.objview.{ArtifactLocationObjViewImpl, AudioCueObjViewImpl}
 import de.sciss.negatum.Negatum
 import de.sciss.negatum.gui.NegatumObjView
-//import de.sciss.mellite.impl.FreesoundRetrievalObjView
 import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.impl.markdown.MarkdownObjView
