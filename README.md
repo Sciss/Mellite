@@ -16,6 +16,8 @@ All rights reserved. Mellite is released under the
 absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
 The website for Mellite is [www.sciss.de/mellite](https://www.sciss.de/mellite/).
 
+Please consider supporting this project through Liberapay (see badge above) – thank you!
+
 The `licenses` folder contains the license headers for all dependencies and transitive dependencies. See `overview.txt`
 for a dependency overview. For the binary release of Mellite, source code is not included but available via the
 respective OSS project pages, as indicated in the license files, or&mdash;in compliance with GPL/LGPL&mdash;on request
