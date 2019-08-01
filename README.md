@@ -26,7 +26,7 @@ The Mellite icon is based on the file
 [MELLITE Taillée Hongrie.jpg](https://de.wikipedia.org/wiki/Mellit#/media/File:MELLITE_Taill%C3%A9e_Hongrie.jpg), 
 provided by Didier Descouens under CC BY 4.0 license.
 
-<img src="site/src/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
+<img src="https://raw.githubusercontent.com/Sciss/Mellite-website/master/src/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
 
 ## download and installation
 
