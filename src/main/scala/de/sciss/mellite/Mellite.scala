@@ -26,7 +26,7 @@ import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
 import de.sciss.synth.Client
-import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, TimeRef, Universe, Workspace}
+import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe, Workspace}
 import javax.swing.UIManager
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
@@ -326,8 +326,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
           u.mkRunner(obj).fold[Unit] {
             tx.afterCommit(println(s"Warning: no runner for object '$name' of type ${obj.tpe}."))
           } { r =>
-            val timeRef = TimeRef.undefined
-            r.run(timeRef, ())
+            r.run()
           }
         }
       }
