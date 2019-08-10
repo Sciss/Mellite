@@ -45,15 +45,15 @@ object RunnerToggleButton {
       if (disposeRunner) runner.dispose()
     }
 
-    private def select(state: Boolean)(implicit tx: S#Tx): Unit =
+    private def select(selected: Boolean)(implicit tx: S#Tx): Unit =
       deferTx {
-        component.selected = state
+        component.selected = selected
       }
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx(guiInit())
       obs = runner.react { implicit tx => state =>
-        select(state = state.idle)
+        select(selected = !state.idle)
       }
       this
     }

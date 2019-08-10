@@ -231,10 +231,10 @@ trait CollectionViewImpl[S <: Sys[S]]
         val prepOpt   = if (tokenOk) prepareInsertCmdLine(args0) else None
         prepOpt match {
           case Some((insConf, cmd :: rest)) =>
-            val nameL   = cmd.toLowerCase(Locale.US)
-            val factOpt = ObjListView.factories.find(_.prefix.toLowerCase(Locale.US) == nameL)
-            factOpt match {
-              case Some(f) =>
+            val nameL     = cmd.toLowerCase(Locale.US)
+            val factOpts  = ObjListView.factories.filter(_.prefix.toLowerCase(Locale.US).startsWith(nameL)).toList
+            factOpts match {
+              case f :: Nil =>
                 if (f.canMakeObj) {
                   val res = f.initMakeCmdLine[S](rest)
                   res match {
@@ -262,9 +262,16 @@ trait CollectionViewImpl[S <: Sys[S]]
                   clearText()
                 }
 
-              case None =>
+              case Nil =>
                 val pre     = s"Unknown object type '$cmd'. Available:\n"
                 val avail   = ObjListView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
+                val availS  = GUI.formatTextTable(avail, columns = 3)
+                println(pre)
+                println(availS)
+
+              case multiple =>
+                val pre     = s"Multiple object types start with '$cmd':\n"
+                val avail   = multiple.map(_.prefix).sorted
                 val availS  = GUI.formatTextTable(avail, columns = 3)
                 println(pre)
                 println(availS)
