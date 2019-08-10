@@ -19,7 +19,7 @@ import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
-import de.sciss.mellite.{ControlEditorFrame, ObjListView, ObjView}
+import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Control, Universe}
 import javax.swing.Icon
@@ -61,7 +61,9 @@ object ControlObjView extends NoArgsListObjViewFactory {
     def isViewable: Boolean = true
 
     override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-      val frame = ControlEditorFrame(obj)
+      import de.sciss.mellite.Mellite.compiler
+      val frame = CodeFrame.control(obj)
+//      val frame = ControlEditorFrame(obj)
       Some(frame)
     }
   }

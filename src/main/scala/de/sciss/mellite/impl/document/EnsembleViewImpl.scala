@@ -19,10 +19,9 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{BooleanCheckBoxView, View}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{FolderEditorView, FolderView}
-import de.sciss.mellite.{ActionBounce, EnsembleView, PlayToggleButton}
+import de.sciss.mellite.{ActionBounce, EnsembleView, FolderEditorView, FolderView, RunnerToggleButton}
 import de.sciss.swingplus.Separator
-import de.sciss.synth.proc.{Ensemble, Transport, Universe}
+import de.sciss.synth.proc.{Ensemble, Universe}
 
 import scala.swing.Swing._
 import scala.swing.{BoxPanel, Component, Label, Orientation}
@@ -34,12 +33,12 @@ object EnsembleViewImpl {
     val folder1   = FolderEditorView[S](ens.folder)
     import universe.cursor
     val playing   = BooleanCheckBoxView(ens.playing, "Playing State")
-    val viewPower = PlayToggleButton(ensObj)
+    val viewPower = RunnerToggleButton(ensObj)
     new Impl[S](tx.newHandle(ensObj), viewPower, folder1, playing).init()
   }
 
-  final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: PlayToggleButton[S],
-                                        val view: FolderEditorView[S], playing: View[S])
+  final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: RunnerToggleButton[S],
+                                val view: FolderEditorView[S], playing: View[S])
     extends ComponentHolder[Component] with EnsembleView[S] { impl =>
 
     type C = Component
@@ -52,7 +51,7 @@ object EnsembleViewImpl {
 
     def folderView: FolderView[S] = view.peer
 
-    def transport: Transport[S] = viewPower.transport
+//    def transport: Transport[S] = viewPower.transport
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx {

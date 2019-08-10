@@ -24,12 +24,12 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.{CanBounce, CodeFrame, CodeView, GUI, ProcActions, UniverseView}
-import de.sciss.mellite.{ActionBounce, AttrMapView, PlayToggleButton, ProcOutputsView, SplitPaneView}
+import de.sciss.mellite.{ActionBounce, AttrMapView, ProcOutputsView, RunnerToggleButton, SplitPaneView}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
 import de.sciss.synth.proc.impl.ActionImpl
-import de.sciss.synth.proc.{Action, Code, Proc, SynthGraphObj, Universe}
+import de.sciss.synth.proc.{Action, Code, Control, Proc, SynthGraphObj, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -81,7 +81,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     implicit val undo: UndoManager = UndoManager()
     val outputsView = ProcOutputsView [S](obj)
     val attrView    = AttrMapView     [S](obj)
-    val viewPower   = PlayToggleButton[S](obj)
+    val viewPower   = RunnerToggleButton[S](obj)
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
@@ -148,6 +148,47 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
     implicit val undo: UndoManager = UndoManager()
     make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None, canBounce = false)
+  }
+
+  // ---- general constructor ----
+
+  def control[S <: Sys[S]](obj: Control[S])
+                          (implicit tx: S#Tx, universe: Universe[S],
+                           compiler: Code.Compiler): CodeFrame[S] = {
+    val codeObj = mkSource(obj = obj, codeTpe = Code.Control, key = Control.attrSource)({
+      val gv: Control.Graph = obj.graph.value
+      if (gv.controls.isEmpty)
+        Code.SynthGraph.defaultSource
+      else
+        s"// Warning: source code could not be automatically extracted!\n\n"
+    })
+
+    val objH    = tx.newHandle(obj)
+    val code0   = codeObj.value match {
+      case cs: Code.Control => cs
+      case other => sys.error(s"Control source code does not produce Control.Graph: ${other.tpe.humanName}")
+    }
+
+    val handler = new CodeView.Handler[S, Unit, Control.Graph] {
+      def in(): Unit = ()
+
+      def save(in: Unit, out: Control.Graph)(implicit tx: S#Tx): UndoableEdit = {
+        val obj = objH()
+        import universe.cursor
+        EditVar.Expr[S, Control.Graph, Control.GraphObj]("Change Control Graph", obj.graph,
+          Control.GraphObj.newConst[S](out))
+      }
+
+      def dispose()(implicit tx: S#Tx): Unit = ()
+    }
+
+    implicit val undo: UndoManager = UndoManager()
+    val attrView    = AttrMapView     [S](obj)
+    val viewPower   = RunnerToggleButton[S](obj)
+    val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
+
+    make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
   }
 
   // ---- general constructor ----

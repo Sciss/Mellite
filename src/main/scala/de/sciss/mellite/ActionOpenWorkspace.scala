@@ -113,7 +113,9 @@ object ActionOpenWorkspace extends Action("Open...") {
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
     val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {  // IntelliJ highlight bug
-      val w = blocking(Workspace.read(folder, ds))
+      val w = blocking {
+        Workspace.read(folder, ds)
+      }
       Mellite.mkUniverse(w)
     }
 

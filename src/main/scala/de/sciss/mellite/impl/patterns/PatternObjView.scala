@@ -24,7 +24,7 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView}
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
-import de.sciss.mellite.{PlayToggleButton, Shapes}
+import de.sciss.mellite.{RunnerToggleButton, Shapes}
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.patterns
@@ -145,7 +145,7 @@ object PatternObjView extends NoArgsListObjViewFactory with ObjTimelineView.Fact
       GUI.toolButton(actionEval, raphael.Shapes.Quote)
     }
 
-    val viewPower = PlayToggleButton(obj)
+    val viewPower = RunnerToggleButton(obj)
 
     val bottom = viewEval :: viewPower :: Nil
 

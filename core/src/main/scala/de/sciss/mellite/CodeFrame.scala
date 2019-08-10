@@ -17,7 +17,7 @@ import de.sciss.lucre
 import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{Action, Code, Proc, Universe}
+import de.sciss.synth.proc.{Action, Code, Control, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
@@ -38,6 +38,10 @@ object CodeFrame {
                          (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S]
 
+    def control[S <: Sys[S]](control: Control[S])
+                           (implicit tx: S#Tx, universe: Universe[S],
+                            compiler: Code.Compiler): CodeFrame[S]
+
     def action[S <: Sys[S]](action: Action[S])
                            (implicit tx: S#Tx, universe: Universe[S],
                             compiler: Code.Compiler): CodeFrame[S]
@@ -52,6 +56,11 @@ object CodeFrame {
                         (implicit tx: S#Tx, universe: Universe[S],
                          compiler: Code.Compiler): CodeFrame[S] =
     companion.proc(proc)
+
+  def control[S <: Sys[S]](control: Control[S])
+                          (implicit tx: S#Tx, universe: Universe[S],
+                           compiler: Code.Compiler): CodeFrame[S] =
+    companion.control(control)
 
   def action[S <: Sys[S]](action: Action[S])
                          (implicit tx: S#Tx, universe: Universe[S],
