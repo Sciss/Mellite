@@ -21,6 +21,7 @@ import de.sciss.fscape.lucre.{FScape, Cache => FScCache}
 import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
 import de.sciss.mellite.impl.code.{CodeFrameImpl, CodeViewImpl}
+import de.sciss.mellite.impl.control.ControlObjView
 import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownRenderViewImpl}
 import de.sciss.mellite.impl.objview.{ArtifactLocationObjViewImpl, AudioCueObjViewImpl}
@@ -36,7 +37,7 @@ import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, Ti
 import de.sciss.mellite.impl.widget.WidgetObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.patterns.lucre.Pattern
-import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}
+import de.sciss.synth.proc.{Control, GenView, SoundProcesses, Widget}
 import net.harawata.appdirs.AppDirsFactory
 
 trait Init {
@@ -59,6 +60,7 @@ trait Init {
       BooleanObjView,
       ColorObjView,
       CodeObjView,
+      ControlObjView,
       DoubleObjView,
       DoubleVectorObjView,
       EnsembleObjView,
@@ -120,14 +122,15 @@ trait Init {
   }
 
   def initTypes(): Unit = {
-    SoundProcesses.init()
-    Wolkenpumpe   .init()
+    Control       .init()
     FScape        .init()
-    Pattern       .init()
-    Retrieval     .init()
-    Widget        .init()
     LucreSwing    .init()
     Negatum       .init()
+    Pattern       .init()
+    Retrieval     .init()
+    SoundProcesses.init()
+    Widget        .init()
+    Wolkenpumpe   .init()
 
     lucre.swing.graph.TimelineView  .init()
 

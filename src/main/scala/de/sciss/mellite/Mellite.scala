@@ -343,7 +343,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   // ---- Application trait ----
 
   lazy val topLevelObjects: ISeq[String] =
-    List("Folder", "AudioCue", "Proc", "Timeline")
+    List("Folder", "AudioCue", "Proc", "Timeline"/*, "Control"*/)
 
   /** All objects included */
   lazy val objectFilter: String => Boolean = _ => true
