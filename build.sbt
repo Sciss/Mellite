@@ -90,7 +90,7 @@ lazy val commonSettings = Seq(
     )
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
   },
-  javacOptions ++= Seq("-source", "1.6", "-target", "1.6"),
+  javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271
   updateOptions := updateOptions.value.withLatestSnapshots(false),

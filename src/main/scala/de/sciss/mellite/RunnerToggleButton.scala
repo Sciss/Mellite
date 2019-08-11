@@ -13,6 +13,8 @@
 
 package de.sciss.mellite
 
+import java.awt.Color
+
 import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
@@ -20,9 +22,11 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.synth.proc.Runner.{Done, Failed, State}
 import de.sciss.synth.proc.{Runner, Universe}
+import javax.swing.Icon
 
-import scala.swing.ToggleButton
+import scala.swing.{Color, ToggleButton}
 import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
@@ -45,15 +49,36 @@ object RunnerToggleButton {
       if (disposeRunner) runner.dispose()
     }
 
-    private def select(selected: Boolean)(implicit tx: S#Tx): Unit =
+    private def mkIcon(colr: Option[Color]): Icon =
+      raphael.Icon(extent = 20, fill = colr.getOrElse(raphael.TexturePaint(24)),
+        shadow = raphael.WhiteShadow)(raphael.Shapes.Power)
+
+    private[this] lazy val icnNormal  = mkIcon(None)
+    private[this] lazy val icnDone    = mkIcon(Some(new Color(0x00, 0xC0, 0x00)))
+    private[this] lazy val icnFailed  = mkIcon(Some(Color.red))
+
+    private def select(state: State)(implicit tx: S#Tx): Unit = {
+      val selected = !state.idle
       deferTx {
-        component.selected = selected
+        val c = component
+        c.selected = selected
+        c.icon = state match {
+          case Done       => icnDone
+          case Failed(_)  => icnFailed
+          case _          => icnNormal
+        }
       }
+    }
 
     def init()(implicit tx: S#Tx): this.type = {
       deferTx(guiInit())
       obs = runner.react { implicit tx => state =>
-        select(selected = !state.idle)
+        select(state)
+        state match {
+          case Failed(ex) =>
+            ex.printStackTrace()
+          case _ =>
+        }
       }
       this
     }
@@ -75,7 +100,7 @@ object RunnerToggleButton {
         }
       }
       val shpPower          = raphael.Shapes.Power _
-      ggPower.icon          = GUI.iconNormal  (shpPower)
+      ggPower.icon          = icnNormal
       ggPower.disabledIcon  = GUI.iconDisabled(shpPower)
       val ksPower           = KeyStrokes.shift + Key.F10
       ggPower.tooltip       = s"Toggle DSP (${GUI.keyStrokeText(ksPower)})"

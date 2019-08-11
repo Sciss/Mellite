@@ -158,7 +158,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val codeObj = mkSource(obj = obj, codeTpe = Code.Control, key = Control.attrSource)({
       val gv: Control.Graph = obj.graph.value
       if (gv.controls.isEmpty)
-        Code.SynthGraph.defaultSource
+        Code.Control.defaultSource
       else
         s"// Warning: source code could not be automatically extracted!\n\n"
     })
