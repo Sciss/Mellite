@@ -13,8 +13,6 @@
 
 package de.sciss.mellite
 
-import java.awt.Color
-
 import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
@@ -24,9 +22,8 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.synth.proc.Runner.{Done, Failed, State}
 import de.sciss.synth.proc.{Runner, Universe}
-import javax.swing.Icon
 
-import scala.swing.{Color, ToggleButton}
+import scala.swing.ToggleButton
 import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
@@ -49,13 +46,9 @@ object RunnerToggleButton {
       if (disposeRunner) runner.dispose()
     }
 
-    private def mkIcon(colr: Option[Color]): Icon =
-      raphael.Icon(extent = 20, fill = colr.getOrElse(raphael.TexturePaint(24)),
-        shadow = raphael.WhiteShadow)(raphael.Shapes.Power)
-
-    private[this] lazy val icnNormal  = mkIcon(None)
-    private[this] lazy val icnDone    = mkIcon(Some(new Color(0x00, 0xC0, 0x00)))
-    private[this] lazy val icnFailed  = mkIcon(Some(Color.red))
+    private[this] lazy val icnNormal  = GUI.iconNormal  (raphael.Shapes.Power)
+    private[this] lazy val icnDone    = GUI.iconSuccess (raphael.Shapes.Power)
+    private[this] lazy val icnFailed  = GUI.iconFailure (raphael.Shapes.Power)
 
     private def select(state: State)(implicit tx: S#Tx): Unit = {
       val selected = !state.idle

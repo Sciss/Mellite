@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Reactions.Reaction
 import scala.swing.Swing._
 import scala.swing.event.{Key, SelectionChanged, ValueChanged}
-import scala.swing.{Action, Alignment, Button, Component, Dialog, Dimension, Label, RootPanel, TextField}
+import scala.swing.{Action, Alignment, Button, Color, Component, Dialog, Dimension, Label, RootPanel, TextField}
 import scala.util.{Failure, Success, Try}
 
 object GUI {
@@ -72,8 +72,18 @@ object GUI {
     }
   }
 
+  val colorSuccess: Color = new Color(0x00, 0xC0, 0x00)
+  val colorWarning: Color = new Color(0xFF, 0xC8, 0x00)
+  val colorFailure: Color = new Color(0xFF, 0x30, 0x40)
+
   def iconNormal  (fun: Path2D => Unit): Icon = raphael.TexturedIcon        (20)(fun)
   def iconDisabled(fun: Path2D => Unit): Icon = raphael.TexturedDisabledIcon(20)(fun)
+
+  def iconSuccess (fun: Path2D => Unit): Icon =
+    raphael.Icon(extent = 20, fill = colorSuccess, shadow = raphael.WhiteShadow)(fun)
+
+  def iconFailure (fun: Path2D => Unit): Icon =
+    raphael.Icon(extent = 20, fill = colorFailure, shadow = raphael.WhiteShadow)(fun)
 
   private val sharpStrk       = new BasicStroke(1f)
   private val sharpShadowYOff = 1f

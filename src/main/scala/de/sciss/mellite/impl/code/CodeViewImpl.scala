@@ -246,12 +246,12 @@ object CodeViewImpl extends CodeView.Companion {
           val iconColr = res match {
             case Success(_) =>
               clearGreen = true
-              new Color(0x00, 0xC0, 0x00)                           // "\u2713"
-            case Failure(Code.CompilationFailed()) => Color.red     // "error!"
-            case Failure(Code.CodeIncomplete   ()) => Color.orange  // "incomplete!"
+              GUI.colorSuccess  // "\u2713"
+            case Failure(Code.CompilationFailed()) => GUI.colorFailure  // "error!"
+            case Failure(Code.CodeIncomplete   ()) => GUI.colorWarning  // "incomplete!"
             case Failure(e) =>
               e.printStackTrace()
-              Color.red
+              GUI.colorFailure
           }
           ggCompile.icon = compileIcon(Some(iconColr))
         }
