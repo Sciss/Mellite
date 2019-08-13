@@ -17,17 +17,18 @@ import java.util.Locale
 
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
+import de.sciss.equal.Implicits._
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{Application, GUI, MessageException, ObjListView, ObjView, UniverseView}
-import de.sciss.mellite.AttrMapFrame
+import de.sciss.mellite.{Application, AttrMapFrame, GUI, MessageException, ObjListView, ObjView, UniverseView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
 import javax.swing.undo.UndoableEdit
 
+import scala.annotation.tailrec
 import scala.swing.event.{EditDone, FocusLost, Key, KeyPressed}
 import scala.swing.{Action, Alignment, BorderPanel, Button, Component, Dialog, FlowPanel, SequentialContainer, Swing, TextField}
 import scala.tools.cmd.CommandLineParser
@@ -232,50 +233,67 @@ trait CollectionViewImpl[S <: Sys[S]]
         prepOpt match {
           case Some((insConf, cmd :: rest)) =>
             val nameL     = cmd.toLowerCase(Locale.US)
-            val factOpts  = ObjListView.factories.filter(_.prefix.toLowerCase(Locale.US).startsWith(nameL)).toList
-            factOpts match {
-              case f :: Nil =>
-                if (f.canMakeObj) {
-                  val res = f.initMakeCmdLine[S](rest)
-                  res match {
-                    case Success(conf) =>
-                      val editOpt = cursor.step { implicit tx =>
-                        val xs = f.makeObj(conf)
-                        editInsert(f, xs, insConf)
-                      }
-                      editOpt.foreach(undoManager.add)
-                      clearText()
 
-                    case Failure(Aborted()) =>
+            @tailrec
+            def checkOpts(factOpts: Seq[ObjListView.Factory]): Unit =
+              factOpts match {
+                case f :: Nil =>
+                  if (f.canMakeObj) {
+                    val res = f.initMakeCmdLine[S](rest)
+                    res match {
+                      case Success(conf) =>
+                        val editOpt = cursor.step { implicit tx =>
+                          val xs = f.makeObj(conf)
+                          editInsert(f, xs, insConf)
+                        }
+                        editOpt.foreach(undoManager.add)
+                        clearText()
 
-                    case Failure(MessageException(msg)) =>
-                      println()
-                      println(msg)
+                      case Failure(Aborted()) =>
 
-                    case Failure(ex) =>
-                      val msg = Util.formatException(ex)
-                      println(msg)
+                      case Failure(MessageException(msg)) =>
+                        println()
+                        println(msg)
+
+                      case Failure(ex) =>
+                        val msg = Util.formatException(ex)
+                        println(msg)
+                    }
+
+                  } else {
+                    println(s"Object type '$cmd' does not support command line instantiation.")
+                    clearText()
                   }
 
-                } else {
-                  println(s"Object type '$cmd' does not support command line instantiation.")
-                  clearText()
-                }
+                case Nil =>
+                  val pre     = s"Unknown object type '$cmd'. Available:\n"
+                  val avail   = ObjListView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
+                  val availS  = GUI.formatTextTable(avail, columns = 3)
+                  println(pre)
+                  println(availS)
 
-              case Nil =>
-                val pre     = s"Unknown object type '$cmd'. Available:\n"
-                val avail   = ObjListView.factories.iterator.filter(_.canMakeObj).map(_.prefix).toList.sorted
-                val availS  = GUI.formatTextTable(avail, columns = 3)
-                println(pre)
-                println(availS)
+                case multiple =>
+                  // make more attempts first by selecting only those
+                  // supporting command line; then by looking for exact match
+                  val factOpt1 = factOpts.filter(_.canMakeObj)
+                  if (factOpt1 !== factOpts) {
+                    checkOpts(factOpt1)
+                  } else {
+                    val factOps2 = factOpts.filter(_.prefix.toLowerCase(Locale.US) === nameL)
+                    if (factOps2.nonEmpty && (factOps2 !== factOpts)) {
+                      checkOpts(factOps2)
+                    } else {
+                      val pre     = s"Multiple object types start with '$cmd':\n"
+                      val avail   = multiple.map(_.prefix).sorted
+                      val availS  = GUI.formatTextTable(avail, columns = 3)
+                      println(pre)
+                      println(availS)
+                    }
+                  }
+              }
 
-              case multiple =>
-                val pre     = s"Multiple object types start with '$cmd':\n"
-                val avail   = multiple.map(_.prefix).sorted
-                val availS  = GUI.formatTextTable(avail, columns = 3)
-                println(pre)
-                println(availS)
-            }
+            val factOpts0 = ObjListView.factories.filter(_.prefix.toLowerCase(Locale.US).startsWith(nameL)).toList
+            checkOpts(factOpts0)
 
           case _ =>
         }
