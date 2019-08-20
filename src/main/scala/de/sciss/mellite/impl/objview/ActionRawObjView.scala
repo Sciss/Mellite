@@ -22,22 +22,22 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.{CodeFrame, Mellite, ObjListView, ObjTimelineView, ObjView}
 import de.sciss.mellite.impl.ObjTimelineViewImpl
 import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Action, Universe}
+import de.sciss.synth.proc.{ActionRaw, Universe}
 import javax.swing.Icon
 
-object ActionObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
-  type E[~ <: stm.Sys[~]] = Action[~] // .Elem[S]
+object ActionRawObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
+  type E[~ <: stm.Sys[~]] = ActionRaw[~] // .Elem[S]
   val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
   val prefix    : String    = "Action"
   def humanName : String    = prefix
-  def tpe       : Obj.Type  = Action
+  def tpe       : Obj.Type  = ActionRaw
   def category  : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Action[S])(implicit tx: S#Tx): ObjListView[S] =
+  def mkListView[S <: Sys[S]](obj: ActionRaw[S])(implicit tx: S#Tx): ObjListView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj = Action.Var(Action.empty[S])
+    val obj = ActionRaw.Var(ActionRaw.empty[S])
     obj.name = name
     obj :: Nil
   }
@@ -47,38 +47,38 @@ object ActionObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
     with ObjViewImpl.Impl[S]
     with ObjListViewImpl.NonEditable[S]
     with ObjListViewImpl.EmptyRenderer[S]
-    with ActionObjView[S] {
+    with ActionRawObjView[S] {
 
-    override def objH: stm.Source[S#Tx, Action[S]]
+    override def objH: stm.Source[S#Tx, ActionRaw[S]]
 
-    override def obj(implicit tx: S#Tx): Action[S] = objH()
+    override def obj(implicit tx: S#Tx): ActionRaw[S] = objH()
 
-    final type E[~ <: stm.Sys[~]] = Action[~] // .Elem[~]
+    final type E[~ <: stm.Sys[~]] = ActionRaw[~] // .Elem[~]
 
-    final def factory: ObjView.Factory = ActionObjView
+    final def factory: ObjView.Factory = ActionRawObjView
 
     final def isViewable = true
 
     final def openView(parent: Option[Window[S]])
                       (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
       import Mellite.compiler
-      val frame = CodeFrame.action(obj)
+      val frame = CodeFrame.actionRaw(obj)
       Some(frame)
     }
   }
 
-  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Action[S]])
+  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, ActionRaw[S]])
     extends Impl[S]
 
-  def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Action[S],
+  def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: ActionRaw[S],
                                   context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S] = {
     val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
     res
   }
 
-  private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Action[S]])
+  private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, ActionRaw[S]])
     extends Impl[S] with ObjTimelineViewImpl.HasMuteImpl[S]
 }
-trait ActionObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Action[S]
+trait ActionRawObjView[S <: stm.Sys[S]] extends ObjView[S] {
+  type Repr = ActionRaw[S]
 }

@@ -28,8 +28,8 @@ import de.sciss.mellite.{ActionBounce, AttrMapView, ProcOutputsView, RunnerToggl
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
-import de.sciss.synth.proc.impl.ActionImpl
-import de.sciss.synth.proc.{Action, Code, Control, Proc, SynthGraphObj, Universe}
+import de.sciss.synth.proc.impl.ActionRawImpl
+import de.sciss.synth.proc.{ActionRaw, Code, Control, Proc, SynthGraphObj, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -90,12 +90,12 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- adapter for editing a Action's source ----
 
-  def action[S <: Sys[S]](obj: Action[S])
-                         (implicit tx: S#Tx, universe: Universe[S],
+  def actionRaw[S <: Sys[S]](obj: ActionRaw[S])
+                            (implicit tx: S#Tx, universe: Universe[S],
                           compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = mkSource(obj = obj, codeTpe = Code.Action, key = Action.attrSource)()
+    val codeObj = mkSource(obj = obj, codeTpe = Code.ActionRaw, key = ActionRaw.attrSource)()
     val code0   = codeObj.value match {
-      case cs: Code.Action => cs
+      case cs: Code.ActionRaw => cs
       case other => sys.error(s"Action source code does not produce plain function: ${other.tpe.humanName}")
     }
 
@@ -105,7 +105,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
         import universe.cursor
         cursor.step { implicit tx =>
           val obj = objH()
-          val au = Action.Universe(obj)
+          val au = ActionRaw.Universe(obj)
           obj.execute(au)
         }
       }
@@ -117,7 +117,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     }
 
     val handlerOpt = obj match {
-      case Action.Var(vr) =>
+      case ActionRaw.Var(vr) =>
         val varH  = tx.newHandle(vr)
         val handler = new CodeView.Handler[S, String, Array[Byte]] {
           def in(): String = {
@@ -131,9 +131,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
           def save(in: String, out: Array[Byte])(implicit tx: S#Tx): UndoableEdit = {
             val obj = varH()
-            val value = ActionImpl.newConst[S](name = in, jar = out)
+            val value = ActionRawImpl.newConst[S](name = in, jar = out)
             import universe.cursor
-            EditVar[S, Action[S], Action.Var[S]](name = "Change Action Body", expr = obj, value = value)
+            EditVar[S, ActionRaw[S], ActionRaw.Var[S]](name = "Change Action Body", expr = obj, value = value)
           }
 
           def dispose()(implicit tx: S#Tx): Unit = ()

@@ -32,7 +32,8 @@ object WebBrowser {
       override protected def style: Window.Style = Window.Auxiliary
 
       title     = baseTitle
-      contents  = Component.wrap(fxPanel)
+      // XXX TODO yes, we need to get rid of JFX
+//      contents  = Component.wrap(fxPanel)
       bounds    = {
         val gc    = GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
         val r     = gc.getBounds

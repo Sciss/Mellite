@@ -26,7 +26,7 @@ import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
 import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownObjView, MarkdownRenderViewImpl}
-import de.sciss.mellite.impl.objview.{ActionObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.impl.objview.{ActionRawObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
 import de.sciss.mellite.impl.patterns.PatternObjView
 import de.sciss.mellite.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
@@ -51,7 +51,7 @@ trait Init {
 
   private[this] lazy val _initObjViews: Unit = {
     val obj = List(
-      ActionObjView,
+      ActionRawObjView,
       ArtifactLocationObjView,
       ArtifactObjView,
       AudioCueObjView,
@@ -94,7 +94,7 @@ trait Init {
 
     val tl = List(
       ProcObjView,
-      ActionObjView,
+      ActionRawObjView,
       PatternObjView
     )
     tl.foreach(ObjTimelineView.addFactory)
