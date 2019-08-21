@@ -27,11 +27,11 @@ import javax.swing.Icon
 
 object ActionRawObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
   type E[~ <: stm.Sys[~]] = ActionRaw[~] // .Elem[S]
-  val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
-  val prefix    : String    = "Action"
-  def humanName : String    = prefix
+  val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
+  val prefix    : String    = "ActionRaw"
+  def humanName : String    = s"$prefix (obsolete)"
   def tpe       : Obj.Type  = ActionRaw
-  def category  : String    = ObjView.categComposition
+  def category  : String    = ObjView.categMisc // categComposition
 
   def mkListView[S <: Sys[S]](obj: ActionRaw[S])(implicit tx: S#Tx): ObjListView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)

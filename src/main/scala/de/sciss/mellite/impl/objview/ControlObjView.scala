@@ -11,14 +11,13 @@
  *  contact@sciss.de
  */
 
-package de.sciss.mellite.impl.control
+package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Control, Universe}

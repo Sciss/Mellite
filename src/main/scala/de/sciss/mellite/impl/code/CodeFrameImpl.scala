@@ -29,7 +29,7 @@ import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
 import de.sciss.synth.proc.impl.ActionRawImpl
-import de.sciss.synth.proc.{ActionRaw, Code, Control, Proc, SynthGraphObj, Universe}
+import de.sciss.synth.proc.{Action, ActionRaw, Code, Control, Proc, SynthGraphObj, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -88,7 +88,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
       rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
   }
 
-  // ---- adapter for editing a Action's source ----
+  // ---- adapter for editing a ActionRaw's source ----
 
   def actionRaw[S <: Sys[S]](obj: ActionRaw[S])
                             (implicit tx: S#Tx, universe: Universe[S],
@@ -105,7 +105,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
         import universe.cursor
         cursor.step { implicit tx =>
           val obj = objH()
-          val au = ActionRaw.Universe(obj)
+          val au = Action.Universe(obj)
           obj.execute(au)
         }
       }
@@ -150,7 +150,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None, canBounce = false)
   }
 
-  // ---- general constructor ----
+  // ---- adapter for editing a Control.Graph's source ----
 
   def control[S <: Sys[S]](obj: Control[S])
                           (implicit tx: S#Tx, universe: Universe[S],
@@ -177,6 +177,47 @@ object CodeFrameImpl extends CodeFrame.Companion {
         import universe.cursor
         EditVar.Expr[S, Control.Graph, Control.GraphObj]("Change Control Graph", obj.graph,
           Control.GraphObj.newConst[S](out))
+      }
+
+      def dispose()(implicit tx: S#Tx): Unit = ()
+    }
+
+    implicit val undo: UndoManager = UndoManager()
+    val attrView    = AttrMapView     [S](obj)
+    val viewPower   = RunnerToggleButton[S](obj)
+    val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
+
+    make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
+  }
+
+  // ---- adapter for editing a Control.Graph's source ----
+
+  def action[S <: Sys[S]](obj: Action[S])
+                          (implicit tx: S#Tx, universe: Universe[S],
+                           compiler: Code.Compiler): CodeFrame[S] = {
+    val codeObj = mkSource(obj = obj, codeTpe = Code.Action, key = Action.attrSource)({
+      val gv: Action.Graph = obj.graph.value
+      if (gv.controls.isEmpty)
+        Code.Action.defaultSource
+      else
+        s"// Warning: source code could not be automatically extracted!\n\n"
+    })
+
+    val objH    = tx.newHandle(obj)
+    val code0   = codeObj.value match {
+      case cs: Code.Action => cs
+      case other => sys.error(s"Action source code does not produce Action.Graph: ${other.tpe.humanName}")
+    }
+
+    val handler = new CodeView.Handler[S, Unit, Action.Graph] {
+      def in(): Unit = ()
+
+      def save(in: Unit, out: Action.Graph)(implicit tx: S#Tx): UndoableEdit = {
+        val obj = objH()
+        import universe.cursor
+        EditVar.Expr[S, Action.Graph, Action.GraphObj]("Change Action Graph", obj.graph,
+          Action.GraphObj.newConst[S](out))
       }
 
       def dispose()(implicit tx: S#Tx): Unit = ()

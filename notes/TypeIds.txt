@@ -21,7 +21,7 @@
 16  SynthGraph
 17  IncompleteProduct (SoundDesigner)
 18  UGenSource (SoundDesigner)
-19  Action (Function0[Unit])
+19  ActionRaw (Function0[Unit])
 20  Warp
 21  ParamSpec
 22 	Color
@@ -42,6 +42,7 @@
 300 patterns.lucre.Pattern
 400 Widget.Graph
 500 Control.Graph
+600 Action.Graph
 
 :: non-expr elements (mutables) ::
 
@@ -64,6 +65,7 @@
 
 0x1000E     proc.Widget
 0x1000F     proc.Control
+0x10010     proc.ActionRaw
 
 :: indeterminus ::
 
@@ -131,7 +133,7 @@ Code ids
 
 0: FileTransform
 1: SynthGraph
-2: Action
+2: ActionRaw
 
 4: fscape.Graph
 
@@ -139,6 +141,7 @@ Code ids
 
 6: Widget.Code
 7: Control.Code
+8: Control.Action
 
 :: sysson ::
 
