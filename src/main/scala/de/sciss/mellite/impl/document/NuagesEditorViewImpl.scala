@@ -145,12 +145,12 @@ object NuagesEditorViewImpl {
         def showPane[A](opt: OptionPane[A]): A =
           opt.show(desktop.Window.find(component), title = title)
 
-        def perform(genChans: Int, audioFilesFolder: Option[File]): Unit = cursor.step { implicit tx =>
+        def perform(genNumChannels: Int, audioFilesFolder: Option[File]): Unit = cursor.step { implicit tx =>
           val n = nuagesH()
           Nuages.mkCategoryFolders(n)
           val nCfg = buildConfiguration()
           val sCfg = ScissProcs.Config()
-          sCfg.generatorChannels  = genChans
+          sCfg.genNumChannels     = genNumChannels
           sCfg.audioFilesFolder   = audioFilesFolder
           // sCfg.masterGroups       = ...
           ScissProcs[S](n, nCfg, sCfg)
@@ -180,7 +180,7 @@ object NuagesEditorViewImpl {
             messageType = Dialog.Message.Question, focus = Some(ggGenChans))
           val res = showPane(pane)
           if (res === OptionPane.Result.Yes) {
-            perform(genChans = mGenChans.getNumber.intValue(), audioFilesFolder = ggAudioFiles.valueOption)
+            perform(genNumChannels = mGenChans.getNumber.intValue(), audioFilesFolder = ggAudioFiles.valueOption)
           }
         }
 

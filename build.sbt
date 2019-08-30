@@ -67,7 +67,7 @@ lazy val deps = new {
   }
 }
 
-lazy val bdb = "bdb" // one of "bdb" (Java 6+, GPL 2+), "bdb6" (Java 7+, AGPL 3+), "bdb7" (Java 8+, Apache)
+lazy val bdb = "bdb7"
 
 // ---- app packaging ----
 
@@ -233,7 +233,7 @@ lazy val root = project.withId(baseNameL).in(file("."))
   .settings(
     name        := baseName,
     description := appDescription,
-    resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
+    // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
       // "com.github.scopt"  %% "scopt"                          % deps.main.scopt,              // command line option parsing
       "de.sciss"          %% "audiofile"                      % deps.main.audioFile,          // reading/writing audio files

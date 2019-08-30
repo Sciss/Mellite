@@ -70,11 +70,11 @@ object TimelineView {
         val system  = tvc.universe.workspace.system
         val _sel    = tvc.selectionModel.iterator.map { view =>
           val span = view.spanValue
-          val value = Obj.wrap(view.objH, system)
+          val value = Obj.wrapH(view.objH, system)
           Timed(span, value)
         } .toIndexedSeq
 
-        (_sel, _Timeline.wrap(tvc.objH, system) /* , huh */)
+        (_sel, _Timeline.wrapH(tvc.objH, system) /* , huh */)
       }
 
       // println(s"sameWorkspace = $sameWorkspace; has sel? ${tv.selectionModel.nonEmpty} ; ${selectedObjects.size}")
