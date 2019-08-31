@@ -225,7 +225,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
     implicit val undo: UndoManager = UndoManager()
     val attrView    = AttrMapView     [S](obj)
-    val viewPower   = RunnerToggleButton[S](obj)
+    val viewPower   = RunnerToggleButton[S](obj, isAction = true)
     val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,

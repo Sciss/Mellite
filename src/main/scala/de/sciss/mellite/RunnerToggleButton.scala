@@ -27,16 +27,14 @@ import scala.swing.ToggleButton
 import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
-//  def apply[S <: Sys[S]](transport: Transport[S])(implicit tx: S#Tx): PlayToggleButton[S] =
-//    new Impl[S](transport, objH = None, disposeTransport = false).init()
-
   /** A button view toggling between `run` and `stop` an a runner created from the `obj` argument. */
-  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S]): RunnerToggleButton[S] = {
+  def apply[S <: SSys[S]](obj: Obj[S], isAction: Boolean = false)
+                         (implicit tx: S#Tx, universe: Universe[S]): RunnerToggleButton[S] = {
     val r = Runner(obj)
-    new Impl[S](r, disposeRunner = true).init()
+    new Impl[S](r, disposeRunner = true, isAction = isAction).init()
   }
 
-  private final class Impl[S <: Sys[S]](val runner: Runner[S], disposeRunner: Boolean)
+  private final class Impl[S <: Sys[S]](val runner: Runner[S], disposeRunner: Boolean, isAction: Boolean)
     extends RunnerToggleButton[S] with ComponentHolder[ToggleButton] {
 
     private[this] var obs: Disposable[S#Tx] = _
@@ -46,9 +44,11 @@ object RunnerToggleButton {
       if (disposeRunner) runner.dispose()
     }
 
-    private[this] lazy val icnNormal  = GUI.iconNormal  (raphael.Shapes.Power)
-    private[this] lazy val icnDone    = GUI.iconSuccess (raphael.Shapes.Power)
-    private[this] lazy val icnFailed  = GUI.iconFailure (raphael.Shapes.Power)
+    private[this] val shapeFun = if (isAction) raphael.Shapes.Bolt _ else raphael.Shapes.Power _
+
+    private[this] lazy val icnNormal  = GUI.iconNormal  (shapeFun)
+    private[this] lazy val icnDone    = GUI.iconSuccess (shapeFun)
+    private[this] lazy val icnFailed  = GUI.iconFailure (shapeFun)
 
     private def select(state: State)(implicit tx: S#Tx): Unit = {
       val selected = !state.idle
@@ -56,9 +56,11 @@ object RunnerToggleButton {
         val c = component
         c.selected = selected
         c.icon = state match {
-          case Done       => icnDone
-          case Failed(_)  => icnFailed
-          case _          => icnNormal
+          // we don't use green indicator with immediately terminating actions
+          // to avoid visual noise
+          case Done if !isAction  => icnDone
+          case Failed(_)          => icnFailed
+          case _                  => icnNormal
         }
       }
     }
@@ -92,9 +94,8 @@ object RunnerToggleButton {
             } // (transport.scheduler.cursor)
         }
       }
-      val shpPower          = raphael.Shapes.Power _
       ggPower.icon          = icnNormal
-      ggPower.disabledIcon  = GUI.iconDisabled(shpPower)
+      ggPower.disabledIcon  = GUI.iconDisabled(shapeFun)
       val ksPower           = KeyStrokes.shift + Key.F10
       ggPower.tooltip       = s"Toggle DSP (${GUI.keyStrokeText(ksPower)})"
       Util.addGlobalKey(ggPower, ksPower)
