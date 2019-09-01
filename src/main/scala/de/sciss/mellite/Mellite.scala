@@ -237,13 +237,28 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     // ---- look and feel
 
+    // work-around to suppress `java.lang.NoSuchFieldException: AA_TEXT_PROPERTY_KEY` exception
+    // being logged by web-look-and-feel on JDK 11.
+    // (the exception is "harmless" in that it has no side effect)
+    def java11silent(body: => Unit): Unit = {
+      import com.alee.managers.log.Log.setLoggingEnabled
+      val obj = classOf[com.alee.utils.ProprietaryUtils]
+
+      setLoggingEnabled(obj, false)
+      try {
+        body
+      } finally {
+        setLoggingEnabled(obj, true)
+      }
+    }
+
     try {
       val lafInfo = Prefs.lookAndFeel.getOrElse {
         val res = Prefs.LookAndFeel.default
         Prefs.lookAndFeel.put(res)
         res
       }
-      lafInfo.install()
+      java11silent(lafInfo.install())
     } catch {
       case NonFatal(e) => e.printStackTrace()
     }
