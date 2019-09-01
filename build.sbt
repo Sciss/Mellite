@@ -146,15 +146,17 @@ lazy val pkgUniversalSettings = Seq(
   // NOTE: `in Universal` does not work. It therefore
   // also affects debian package building :-/
   // We need this settings for Windows.
-  scriptClasspath /* in Universal */ := Seq("*")
+  scriptClasspath /* in Universal */ := Seq("*"),
+  name                      in Linux     := appName,
+  packageName               in Linux     := appNameL,
+  mainClass                 in Universal := appMainClass,
+  maintainer                in Universal := s"$authorName <$authorEMail>",
 )
 
 //////////////// debian installer
 lazy val pkgDebianSettings = Seq(
   name                      in Debian := appName,
   packageName               in Debian := appNameL,
-  name                      in Linux  := appName,
-  packageName               in Linux  := appNameL,
   packageSummary            in Debian := appDescription,
   mainClass                 in Debian := appMainClass,
   maintainer                in Debian := s"$authorName <$authorEMail>",
@@ -255,9 +257,8 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
   )
 
 lazy val appSettings = Seq(
-  name        := baseName,
   description := appDescription,
-  mainClass in (Compile,run) := appMainClass,
+  mainClass in Compile := appMainClass,
 )
 
 lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
@@ -271,6 +272,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
   .settings(assemblySettings)
   .settings(appSettings)
   .settings(
+    name := s"$baseName-app",
     // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // reading/writing audio files
@@ -357,13 +359,14 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
 
 lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .dependsOn(app)
-  .enablePlugins(JlinkPlugin)
+  .enablePlugins(JavaAppPackaging, JlinkPlugin)
   .settings(commonSettings)
   .settings(pkgUniversalSettings)
-  .settings(pkgDebianSettings)
   .settings(useNativeZip) // cf. https://github.com/sbt/sbt-native-packager/issues/334
-  .settings(assemblySettings)
+  .settings(assemblySettings) // do we need this here?
   .settings(appSettings)
   .settings(
+    name := s"$baseName-full",
+    jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
   )
 
