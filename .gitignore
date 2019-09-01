@@ -5,5 +5,5 @@ project/boot/
 .idea/
 .idea_modules/
 *.app
-dependency-graph.sbt
+*.swp
 Mellite.jar
