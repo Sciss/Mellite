@@ -357,6 +357,17 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     buildInfoPackage := "de.sciss.mellite"
   )
 
+// Determine OS version of JavaFX binaries
+lazy val jfxClassifer = System.getProperty("os.name") match {
+  case n if n.startsWith("Linux")   => "linux"
+  case n if n.startsWith("Mac")     => "mac"
+  case n if n.startsWith("Windows") => "win"
+  case _ => throw new Exception("Unknown platform!")
+}
+
+def jfxDep(name: String) =
+  "org.openjfx" % s"javafx-$name" % "11.0.2" classifier jfxClassifer
+
 lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .dependsOn(app)
   .enablePlugins(JavaAppPackaging, JlinkPlugin)
@@ -369,7 +380,10 @@ lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
     name := s"$baseName-full",
     jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
     jlinkModules := {
-      jlinkModules.value :+ "jdk.unsupported"
+      jlinkModules.value ++ Seq(
+        "jdk.unsupported" /* needed for Akka */,
+      )
     },
+    libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep)
   )
 

@@ -19,13 +19,14 @@ import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Window, WindowHandler}
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import dotterweide.ide.{AbstractDocBrowser, DocBrowser}
+import javax.swing.JComponent
 
 import scala.swing.Component
 
 object WebBrowser {
   def instance: DocBrowser = Impl
 
-  private object Impl extends AbstractDocBrowser {
+  private object Impl extends AbstractDocBrowser { impl =>
     private[this] val frame: WindowImpl = new WindowImpl { w =>
       def handler: WindowHandler = Mellite.windowHandler
 
@@ -33,7 +34,11 @@ object WebBrowser {
 
       title     = baseTitle
       // XXX TODO yes, we need to get rid of JFX
-//      contents  = Component.wrap(fxPanel)
+      contents  = {
+        val mPanel  = impl.getClass.getMethod("fxPanel")
+        val panel   = mPanel.invoke(impl).asInstanceOf[JComponent]
+        Component.wrap(panel)
+      }
       bounds    = {
         val gc    = GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
         val r     = gc.getBounds
