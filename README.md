@@ -85,8 +85,8 @@ The default target and the binary distribution of the application are currently 
 
 The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during
 development. For convenience, the [sbt script by Paul Phillips](https://github.com/paulp/sbt-extras) has been
-included, which is covered by a BSD-3-clause license. Therefore, on Linux and Mac you can just use `./sbt run` or
-`./sbt universal:packageBin` to get going without having to separately install sbt. On Windows, install sbt
+included, which is covered by a BSD-3-clause license. Therefore, on Linux and Mac you can just use `./sbt mellite-app/run` or
+`./sbt mellite-app/universal:packageBin` to get going without having to separately install sbt. On Windows, install sbt
 regularly through its website.
 
 Dependencies not found are all available from their respective
@@ -95,17 +95,23 @@ may need to check out these projects and publish them yourself using `sbt publis
 
 See section 'running' for ways of building and installing standalone bundles.
 
+## building with bundled JDK
+
+We are currently experimenting with a build variant that bundles the JDK using the JLink plugin for sbt-native-packager.
+In order to build this version, run `sbt mellite-full/universal:packageBin`. This must be done on a host JDK 11.
+The produced installation is _platform dependent_, so will create a version that only works on the OS you are building from.
+
 ## contributing
 
 Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## running
 
-The standalone jar, created via `./sbt assembly` produces `Mellite.jar` which is double-clickable and can be run via:
+The standalone jar, created via `./sbt mellite-app/assembly` produces `app/Mellite.jar` which is double-clickable and can be run via:
 
-    $ java -jar Mellite.jar
+    $ java -jar app/Mellite.jar
 
-Runnable packages can be created via `./sbt universal:packageBin` (all platforms) or `./sbt debian:packageBin` (Debian).
+Runnable packages can be created via `./sbt mellite-app/universal:packageBin` (all platforms) or `./sbt mellite-app/debian:packageBin` (Debian).
 
 ## documentation
 

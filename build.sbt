@@ -368,5 +368,8 @@ lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .settings(
     name := s"$baseName-full",
     jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
+    jlinkModules := {
+      jlinkModules.value :+ "jdk.unsupported"
+    },
   )
 
