@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.39.0-SNAPSHOT"
+lazy val projectVersion             = "2.39.0"
 lazy val mimaVersion                = "2.39.0"
 
 lazy val loggingEnabled             = true
@@ -20,8 +20,8 @@ lazy val deps = new {
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.14.0"
-    val lucreSwing          = "1.18.0"
+    val lucre               = "3.15.0"
+    val lucreSwing          = "1.19.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val processor           = "0.4.2"
@@ -34,7 +34,7 @@ lazy val deps = new {
     val scallop             = "3.3.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.31.0"
+    val soundProcesses      = "3.32.0"
     val span                = "1.4.2"
     val swingPlus           = "0.4.2"
   }
@@ -44,14 +44,14 @@ lazy val deps = new {
     val dotterweide         = "0.2.3"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.20.0-SNAPSHOT"
-    val fscape              = "2.29.0"
+    val freesound           = "1.20.0"
+    val fscape              = "2.30.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val negatum             = "0.9.0-SNAPSHOT"
-    val patterns            = "0.14.0"
+    val negatum             = "0.9.0"
+    val patterns            = "0.15.1"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -63,7 +63,7 @@ lazy val deps = new {
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
     val webLaF              = "2.1.5"
-    val wolkenpumpe         = "2.35.0"
+    val wolkenpumpe         = "2.36.0"
   }
 }
 
@@ -148,14 +148,15 @@ lazy val pkgUniversalSettings = Seq(
   // We need this settings for Windows.
   scriptClasspath /* in Universal */ := Seq("*"),
   name                      in Linux     := appName,
-  packageName               in Linux     := appNameL,
+  packageName               in Linux     := appNameL, // XXX TODO -- what was this for?
   mainClass                 in Universal := appMainClass,
   maintainer                in Universal := s"$authorName <$authorEMail>",
+  target      in Universal := (target in Compile).value,
 )
 
 //////////////// debian installer
 lazy val pkgDebianSettings = Seq(
-  name                      in Debian := appName,
+  name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
   packageName               in Debian := appNameL,
   packageSummary            in Debian := appDescription,
   mainClass                 in Debian := appMainClass,
@@ -234,8 +235,8 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
       "de.sciss"          %% "lucre-confluent"                % deps.common.lucre,              // transactional objects
       "de.sciss"          %% "lucre-core"                     % deps.common.lucre,              // transactional objects
       "de.sciss"          %% "lucre-expr"                     % deps.common.lucre,              // transactional objects
-      "de.sciss"          %% "lucresynth"                     % deps.common.soundProcesses,     // computer-music framework
-      "de.sciss"          %% "lucreswing"                     % deps.common.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "lucre-swing"                    % deps.common.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "lucre-synth"                    % deps.common.soundProcesses,     // computer-music framework
       "de.sciss"          %% "model"                          % deps.common.model,              // publisher-subscriber library
       "de.sciss"          %% "numbers"                        % deps.common.numbers,            // extension methods for numbers
       "de.sciss"          %% "processor"                      % deps.common.processor,          // futures with progress and cancel
@@ -295,14 +296,14 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "fscape-views"                   % deps.app.fscape,                // offline audio rendering
       "de.sciss"          %  "jump3r"                         % deps.app.jump3r,                // mp3 export
       "de.sciss"          %% "kollflitz"                      % deps.app.kollFlitz,             // more collections methods
-      "de.sciss"          %% "lucre-aux"                      % deps.common.lucre,              // object system
+      "de.sciss"          %% "lucre-adjunct"                  % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-base"                     % deps.common.lucre,              // object system
       "de.sciss"          %% s"lucre-$bdb"                    % deps.common.lucre,              // object system (database backend)
       "de.sciss"          %% "lucre-confluent"                % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-core"                     % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-expr"                     % deps.common.lucre,              // object system
-      "de.sciss"          %% "lucresynth"                     % deps.common.soundProcesses,     // computer-music framework
-      "de.sciss"          %% "lucreswing"                     % deps.common.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "lucre-swing"                    % deps.common.lucreSwing,         // reactive Swing components
+      "de.sciss"          %% "lucre-synth"                    % deps.common.soundProcesses,     // computer-music framework
       "de.sciss"          %% "model"                          % deps.common.model,              // non-txn MVC
       "de.sciss"          %% "negatum-core"                   % deps.app.negatum,               // genetic programming of sounds
       "de.sciss"          %% "negatum-views"                  % deps.app.negatum,               // genetic programming of sounds
@@ -354,36 +355,42 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       BuildInfoKey.map(homepage) { case (k, opt) => k -> opt.get },
       BuildInfoKey.map(licenses) { case (_, Seq( (lic, _) )) => "license" -> lic }
     ),
-    buildInfoPackage := "de.sciss.mellite"
+    buildInfoPackage := "de.sciss.mellite",
+    packageName in Universal := s"${appNameL}_${version.value}_all",
   )
 
 // Determine OS version of JavaFX binaries
-lazy val jfxClassifer = System.getProperty("os.name") match {
+lazy val jfxClassifier = sys.props("os.name") match {
   case n if n.startsWith("Linux")   => "linux"
   case n if n.startsWith("Mac")     => "mac"
   case n if n.startsWith("Windows") => "win"
   case _ => throw new Exception("Unknown platform!")
 }
 
-def jfxDep(name: String) =
-  "org.openjfx" % s"javafx-$name" % "11.0.2" classifier jfxClassifer
+def jfxDep(name: String): ModuleID =
+  "org.openjfx" % s"javafx-$name" % "11.0.2" classifier jfxClassifier
+
+def archSuffix: String =
+  sys.props("os.arch") match {
+    case "i386"   => "x32"
+    case "amd64"  => "x64"
+    case other    => other
+  }
 
 lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .dependsOn(app)
   .enablePlugins(JavaAppPackaging, JlinkPlugin)
   .settings(commonSettings)
   .settings(pkgUniversalSettings)
-  .settings(useNativeZip) // cf. https://github.com/sbt/sbt-native-packager/issues/334
+  // disabled so we don't need to install zip.exe on wine:
+  // .settings(useNativeZip) // cf. https://github.com/sbt/sbt-native-packager/issues/334
   .settings(assemblySettings) // do we need this here?
   .settings(appSettings)
   .settings(
     name := s"$baseName-full",
     jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
-    jlinkModules := {
-      jlinkModules.value ++ Seq(
-        "jdk.unsupported" /* needed for Akka */,
-      )
-    },
-    libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep)
+    jlinkModules += "jdk.unsupported", // needed for Akka
+    libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep),
+    packageName in Universal := s"${appNameL}-full_${version.value}_${jfxClassifier}_$archSuffix",
   )
 

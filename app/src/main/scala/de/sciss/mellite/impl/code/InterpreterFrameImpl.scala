@@ -99,7 +99,7 @@ private[mellite] object InterpreterFrameImpl {
       "proc.Implicits._",
       "de.sciss.span.Span",
       // "MelliteDSL._",
-      "gui.InterpreterFrame.Bindings._"
+      "InterpreterFrame.Bindings._"
     )
 
     //      intpCfg.bindings = Seq( NamedParam( "replSupport", replSupport ))

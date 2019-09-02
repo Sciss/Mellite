@@ -15,7 +15,7 @@ package de.sciss.lucre.swing.graph
 
 import java.awt.datatransfer.Transferable
 
-import de.sciss.lucre.aux.Aux
+import de.sciss.lucre.adjunct.Adjunct
 import de.sciss.lucre.event.ITargets
 import de.sciss.lucre.expr.graph.impl.MappedIExpr
 import de.sciss.lucre.expr.graph.{Ex, Obj, Timed, Timeline => _Timeline}
@@ -30,7 +30,7 @@ import de.sciss.synth.proc.TimeRef
 
 object TimelineView {
   private lazy val _init: Unit =
-    Aux.addFactory(Drop)
+    Adjunct.addFactory(Drop)
 
   def init(): Unit = _init
 
@@ -51,10 +51,10 @@ object TimelineView {
     def selectedObjects: Seq[Timed[Obj]] = Nil
   }
 
-  implicit object Drop extends DropTarget.Selector[TimelineView] with Aux.Factory {
+  implicit object Drop extends DropTarget.Selector[TimelineView] with Adjunct.Factory {
     final val id = 4000
 
-    def readIdentifiedAux(in: DataInput): Aux = this
+    override def readIdentifiedAdjunct(in: DataInput): Adjunct = this
 
     def defaultData: TimelineView = Empty
 
