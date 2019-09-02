@@ -14,32 +14,28 @@
 package de.sciss.mellite
 
 import java.awt.{Color, Font}
-import java.net.{URI, URL}
-import java.nio.file.Path
-import java.util.function.ToLongFunction
+import java.net.URI
 
 import de.sciss.audiowidgets.PeakMeter
-import de.sciss.desktop.{Desktop, Menu, OptionPane, Preferences, Window, WindowHandler}
+import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.TxnLike
-import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
-import de.sciss.mellite.Mellite.{applyAudioPreferences, executionContext, log, showTimelineLog}
+import de.sciss.mellite.Mellite.{executionContext, log, showTimelineLog}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.numbers.Implicits._
 import de.sciss.synth.proc.gui.AudioBusMeter
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
-import de.sciss.synth.{Client, SynthGraph, addAfter, addBefore, addToHead, addToTail, proc, Server => SServer}
+import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
 import de.sciss.{desktop, osc}
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{Ref, atomic}
-import scala.concurrent.{Future, blocking}
 import scala.swing.Swing._
-import scala.swing.event.{ButtonClicked, MouseClicked, ValueChanged}
+import scala.swing.event.{ButtonClicked, ValueChanged}
 import scala.swing.{Action, Alignment, BoxPanel, Button, CheckBox, Component, FlowPanel, Label, Orientation, Slider, ToggleButton}
-import scala.util.{Failure, Success}
 
 final class MainFrame extends desktop.impl.WindowImpl { me =>
   import de.sciss.mellite.Mellite.{auralSystem, sensorSystem}
@@ -142,7 +138,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     import de.sciss.desktop.Menu.{Group, Item}
     val mf      = handler.menuFactory
     val gHelp   = Group("help", "Help")
-    val itAbout = Item.About(Application)(showAbout())
+    val itAbout = Item.About(Application)(About.show())
     if (itAbout.visible) gHelp.add(itAbout)
 
     gHelp
@@ -166,85 +162,6 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
     val me = Some(this)
     mf.add(me, gHelp)
-  }
-
-  private def showAbout(): Unit = {
-    val url       = Mellite.homepage
-    val addr      = url // url.substring(math.min(url.length, url.indexOf("//") + 2))
-    val cacheDir  = Mellite.cacheDir
-    var scVersion = "..."
-    var cacheSize = "..."
-
-    def html(): String =
-      s"""<html><center>
-         |<font size=+1><b>${Application.name}</b></font><p>
-         |Version ${Mellite.version}<p>
-         |<p>
-         |Copyright (c) 2012&ndash;2019 Hanns Holger Rutz. All rights reserved.<p>
-         |This software is published under the ${Mellite.license}
-         |<p>&nbsp;<p><i>
-         |Scala v${de.sciss.mellite.BuildInfo.scalaVersion}<br>
-         |Java v${sys.props.getOrElse("java.version", "?")}<br>
-         |SuperCollider server $scVersion<br>
-         |Cache directory: $cacheDir $cacheSize
-         |</i>
-         |<p>&nbsp;<p>
-         |<a href="$url">$addr</a>
-         |<p>&nbsp;
-         |""".stripMargin
-
-    val lb = new Label(html()) {
-      // cf. http://stackoverflow.com/questions/527719/how-to-add-hyperlink-in-jlabel
-      // There is no way to directly register a HyperlinkListener, despite hyper links
-      // being rendered... A simple solution is to accept any mouse click on the label
-      // to open the corresponding website.
-      cursor = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR)
-      listenTo(mouse.clicks)
-      reactions += {
-        case MouseClicked(_, _, _, 1, false) => Desktop.browseURI(new URL(url).toURI)
-      }
-    }
-
-    def spawn[A](gen: => A)(success: A => Unit)(failure: => Unit): Unit = {
-      val fut = Future(blocking(gen))
-      fut.onComplete { tr =>
-        defer {
-          tr match {
-            case Success(v) => success(v)
-            case Failure(_) => failure
-          }
-          lb.text = html()
-        }
-      }
-    }
-
-    val serverCfg = Server.Config()
-    // must be on EDT:
-    applyAudioPreferences(serverCfg, Client.Config(), useDevice = false, pickPort = false)
-
-    spawn {
-      SServer.version(serverCfg).get
-    } { case (v, b) =>
-      val bs = if (b.isEmpty) b else s" ($b)"
-      scVersion = s"v$v$bs"
-    } {
-      scVersion = "?"
-    }
-
-    spawn {
-      import java.nio.file.Files
-//      val size: Long = Files.walk(cacheDir.toPath).mapToLong((p: Path) => p.toFile.length).sum
-      val size: Long = Files.walk(cacheDir.toPath).mapToLong(new ToLongFunction[Path] {
-        def applyAsLong(p: Path): Long = p.toFile.length
-      }).sum
-      size
-    } { sz =>
-      cacheSize = s"(using ${(sz + 500000)/1000000} MB)"
-    } {
-      cacheSize = "(unknown size)"
-    }
-
-    OptionPane.message(message = lb.peer, icon = Logo.icon(128)).show(None, title = "About")
   }
 
   private def toggleDebugLog(): Unit = {

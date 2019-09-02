@@ -101,6 +101,12 @@ We are currently experimenting with a build variant that bundles the JDK using t
 In order to build this version, run `sbt mellite-full/universal:packageBin`. This must be done on a host JDK 11.
 The produced installation is _platform dependent_, so will create a version that only works on the OS you are building from.
 
+## creating new releases
+
+License information in `app/src/main/resources/de/sciss/mellite/mellite-app-licenses.csv` is updated by running
+`sbt mellite-app/dumpLicenseReport` via [sbt-license-report](https://github.com/sbt/sbt-license-report) and copying
+the output from `app/target/license-reports`. (This might be automated in the future)
+
 ## contributing
 
 Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)

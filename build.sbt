@@ -20,8 +20,8 @@ lazy val deps = new {
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.14.0-SNAPSHOT"
-    val lucreSwing          = "1.18.0-SNAPSHOT"
+    val lucre               = "3.14.0"
+    val lucreSwing          = "1.18.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val processor           = "0.4.2"
@@ -34,7 +34,7 @@ lazy val deps = new {
     val scallop             = "3.3.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.31.0-SNAPSHOT"
+    val soundProcesses      = "3.31.0"
     val span                = "1.4.2"
     val swingPlus           = "0.4.2"
   }
@@ -45,13 +45,13 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.20.0-SNAPSHOT"
-    val fscape              = "2.29.0-SNAPSHOT"
+    val fscape              = "2.29.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val negatum             = "0.9.0-SNAPSHOT"
-    val patterns            = "0.14.0-SNAPSHOT"
+    val patterns            = "0.14.0"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -63,11 +63,11 @@ lazy val deps = new {
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
     val webLaF              = "2.1.5"
-    val wolkenpumpe         = "2.35.0-SNAPSHOT"
+    val wolkenpumpe         = "2.35.0"
   }
 }
 
-lazy val bdb = "bdb7"
+lazy val bdb = "bdb"
 
 // ---- app packaging ----
 
