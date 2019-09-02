@@ -156,13 +156,10 @@ lazy val pkgUniversalSettings = Seq(
 
 //////////////// debian installer
 lazy val pkgDebianSettings = Seq(
-  name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
-  packageName               in Debian := appNameL,
+  packageName               in Debian := appNameL,  // this is the installed package (e.g. in `apt remove <name>`).
   packageSummary            in Debian := appDescription,
   mainClass                 in Debian := appMainClass,
   maintainer                in Debian := s"$authorName <$authorEMail>",
-  debianPackageDependencies in Debian ++= Seq("java8-runtime"),
-  debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
   packageDescription        in Debian :=
     """Mellite is a computer music environment,
       | a desktop application based on SoundProcesses.
@@ -172,7 +169,7 @@ lazy val pkgDebianSettings = Seq(
       |""".stripMargin,
   // include all files in src/debian in the installed base directory
   linuxPackageMappings      in Debian ++= {
-    val n     = (name            in Debian).value.toLowerCase
+    val n     = appNameL // (name in Debian).value.toLowerCase
     val dir   = (sourceDirectory in Debian).value / "debian"
     val f1    = (dir * "*").filter(_.isFile).get  // direct child files inside `debian` folder
     val f2    = ((dir / "doc") * "*").get
@@ -357,6 +354,9 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     ),
     buildInfoPackage := "de.sciss.mellite",
     packageName in Universal := s"${appNameL}_${version.value}_all",
+    name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
+    debianPackageDependencies in Debian ++= Seq("java11-runtime"),
+    debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
   )
 
 // Determine OS version of JavaFX binaries
@@ -372,16 +372,17 @@ def jfxDep(name: String): ModuleID =
 
 def archSuffix: String =
   sys.props("os.arch") match {
-    case "i386"   => "x32"
-    case "amd64"  => "x64"
-    case other    => other
+    case "i386"  | "x86_32" => "x32"
+    case "amd64" | "x86_64" => "x64"
+    case other              => other
   }
 
 lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .dependsOn(app)
-  .enablePlugins(JavaAppPackaging, JlinkPlugin)
+  .enablePlugins(JavaAppPackaging, DebianPlugin, JlinkPlugin)
   .settings(commonSettings)
   .settings(pkgUniversalSettings)
+  .settings(pkgDebianSettings)
   // disabled so we don't need to install zip.exe on wine:
   // .settings(useNativeZip) // cf. https://github.com/sbt/sbt-native-packager/issues/334
   .settings(assemblySettings) // do we need this here?
@@ -392,5 +393,7 @@ lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
     jlinkModules += "jdk.unsupported", // needed for Akka
     libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep),
     packageName in Universal := s"${appNameL}-full_${version.value}_${jfxClassifier}_$archSuffix",
+    name                in Debian := s"$appNameL-full",  // this is used for .deb file-name; NOT appName,
+    packageArchitecture in Debian := archSuffix,
   )
 
