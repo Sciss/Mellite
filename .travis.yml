@@ -10,4 +10,4 @@ jdk:
   - oraclejdk8
 
 script:
-  - sbt ++$TRAVIS_SCALA_VERSION test assembly
+  - sbt ++$TRAVIS_SCALA_VERSION mellite-app/test mellite-app/assembly
