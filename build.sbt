@@ -3,7 +3,7 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val projectVersion             = "2.39.0"
+lazy val projectVersion             = "2.39.1-SNAPSHOT"
 lazy val mimaVersion                = "2.39.0"
 
 lazy val loggingEnabled             = true
@@ -20,7 +20,7 @@ lazy val deps = new {
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.15.0"
+    val lucre               = "3.15.1-SNAPSHOT"
     val lucreSwing          = "1.19.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -34,7 +34,7 @@ lazy val deps = new {
     val scallop             = "3.3.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.32.0"
+    val soundProcesses      = "3.32.1-SNAPSHOT"
     val span                = "1.4.2"
     val swingPlus           = "0.4.2"
   }
@@ -82,8 +82,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.12.9",
-  crossScalaVersions := Seq("2.13.0", "2.12.9"),
+  scalaVersion       := "2.12.10",
+  crossScalaVersions := Seq("2.13.0", "2.12.10"),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"
