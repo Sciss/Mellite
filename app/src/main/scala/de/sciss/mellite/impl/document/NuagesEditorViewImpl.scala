@@ -232,10 +232,8 @@ object NuagesEditorViewImpl {
         val view = NuagesView(n, nCfg)
         override val undecorated = true
 
-        override protected def initGUI(): Unit = window.component match {
-          case w: scala.swing.Window => view.installFullScreenKey(w)
-          case _ =>
-        }
+        override protected def initGUI(): Unit =
+          view.installFullScreenKey(window.component)
 
         override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
           if (!view.panel.transport.isPlaying) None else Some(this)

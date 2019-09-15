@@ -63,7 +63,7 @@ lazy val deps = new {
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
     val webLaF              = "2.1.5"
-    val wolkenpumpe         = "2.36.0"
+    val wolkenpumpe         = "2.36.1-SNAPSHOT"
   }
 }
 
