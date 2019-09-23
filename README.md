@@ -70,9 +70,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite" % v
-
-The current version `v` is `"2.39.0"`.
+    "de.sciss" %% "mellite-core" % "2.39.1"
+    "de.sciss" %% "mellite-app"  % "2.40.0"
 
 ## building from source
 
@@ -100,6 +99,10 @@ See section 'running' for ways of building and installing standalone bundles.
 We are currently experimenting with a build variant that bundles the JDK using the JLink plugin for sbt-native-packager.
 In order to build this version, run `sbt mellite-full/universal:packageBin`. This must be done on a host JDK 11.
 The produced installation is _platform dependent_, so will create a version that only works on the OS you are building from.
+
+Note that should probably specify an explicit java-home, otherwise the bundled package might be unreasonably large:
+
+    sbt ++2.13.1 -java-home ~/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11/jdk-11.0.4+11 clean update mellite-full/debian:packageBin
 
 ## creating new releases
 
