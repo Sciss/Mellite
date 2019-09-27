@@ -27,6 +27,8 @@ current 16-bit max
  1004 Ex.CanFlatMapExOption      (Lucre)
  1005 Obj.Bridge.obj             (Lucre)
  1006 Obj.Source.obj             (Lucre)
+ 1007 Ex.SpanLikeTop             (Lucre)
+ 1008 Ex.SpanTop                 (Lucre)
 
  1024 Obj.Extractor.Int          (Patterns)
  1026 Obj.Extractor.Double       (Patterns)
