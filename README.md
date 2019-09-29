@@ -177,10 +177,22 @@ To build for Linux:
  3. `java-use-11`
  4. `sbt -java-home '/home/hhrutz/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11/jdk-11.0.4+11' mellite-full/universal:packageBin mellite-full/debian:packageBin`
  
+Copy the artifacts to a safe location now.
 To build for Mac and Windows, we need to publish all libraries now to Maven Central (use JDK 8 again!).
+Then Windows can be built on Linux using wine:
  
- 5. `wine cmd.exe` and
+ 1. `rm -r full/target` (otherwise Jlink fails)
+ 2. `wine cmd.exe` and
  `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11\jdk-11.0.4+11\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.2.8\sbt\bin\sbt-launch.jar` then in sbt console:
  `project mellite-full` and `universal:packageBin`
  
- 
+For Mac we need a bloody fruit company machine:
+
+ 1. `git fetch; git merge origin/work`
+ 2. `./sbt -java-home /Users/naya/Downloads/jdk-11.0.4+11/Contents/Home clean update mellite-full/universal:packageBin`
+ 3. We need to set the execution bits on Linux after copying the zip to the Linux machine, and unpacking it:
+ `rm mellite-full_<version>_mac_x64/bin/mellite.bat` then
+ `rm mellite-full_<version>_mac_x64.zip` then
+ `chmod a+x mellite-full_<version>_mac_x64/bin/mellite` then
+ `chmod a+x mellite-full_<version>_mac_x64/jre/bin/*`
+ 4. Repackage: `zip -y -r -9 mellite-full_<version>_mac_x64.zip mellite-full_<version>_mac_x64`
