@@ -270,7 +270,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     private def guiInit(): Unit = {
       component = rightViewOpt.fold[C](codeView.component) { case (rightTitle, rightView) =>
         val _tabs = new TabbedPane
-        _tabs.peer.putClientProperty("styleId", "attached")
+        _tabs.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
         _tabs.focusable  = false
         val pageEdit    = new TabbedPane.Page("Editor"  , codeView  .component, null)
         val pageRender  = new TabbedPane.Page(rightTitle, rightView .component, null)

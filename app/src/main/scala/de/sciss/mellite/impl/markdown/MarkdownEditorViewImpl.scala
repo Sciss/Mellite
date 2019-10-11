@@ -181,7 +181,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
       }
 
       val _tabs = new TabbedPane
-      _tabs.peer.putClientProperty("styleId", "attached")
+      _tabs.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
       _tabs.focusable  = false
       val pageEdit    = new TabbedPane.Page("Editor"  , paneEdit          , null)
       val pageRender  = new TabbedPane.Page("Rendered", renderer.component, null)

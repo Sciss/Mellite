@@ -130,7 +130,7 @@ object WidgetEditorViewImpl {
       }
 
       val _tabs = new TabbedPane
-      _tabs.peer.putClientProperty("styleId", "attached")
+      _tabs.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
       _tabs.focusable  = false
       val pageEdit    = new TabbedPane.Page("Editor"   , paneEdit          , null)
       val pageRender  = new TabbedPane.Page("Interface", renderer.component, null)

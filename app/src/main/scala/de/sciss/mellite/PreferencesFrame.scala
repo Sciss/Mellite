@@ -121,7 +121,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     // ---- panel ----
 
     val tabbed = new TabbedPane
-    tabbed.peer.putClientProperty("styleId", "attached")
+    tabbed.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
 
 //    def interleave[A](a: List[A], b: List[A]): List[A] = {
 //      val aIt = a.iterator

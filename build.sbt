@@ -3,8 +3,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.40.0"
-lazy val appVersion                 = "2.40.0"
+lazy val commonVersion              = "2.40.1-SNAPSHOT"
+lazy val appVersion                 = "2.40.1-SNAPSHOT"
 lazy val mimaVersion                = "2.40.0"
 
 lazy val loggingEnabled             = true
@@ -21,7 +21,7 @@ lazy val deps = new {
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.15.2"
+    val lucre               = "3.15.3-SNAPSHOT"
     val lucreSwing          = "1.19.1"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -59,7 +59,7 @@ lazy val deps = new {
     val raphael             = "1.0.6"
     val scalaColliderSwing  = "1.41.4"
     val scissDSP            = "1.3.2"
-    val submin              = "0.2.5"
+    val submin              = "0.3.0-SNAPSHOT"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
@@ -275,6 +275,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     name    := s"$baseName-app",
     version := appVersion,
     // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
+    resolvers           += Resolver.sonatypeRepo("snapshots"),  // XXX TODO temporary
     libraryDependencies ++= Seq(
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.common.audioWidgets,       // audio application widgets
