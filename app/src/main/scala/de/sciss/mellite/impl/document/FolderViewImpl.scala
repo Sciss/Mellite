@@ -35,7 +35,7 @@ import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.undo.UndoableEdit
-import javax.swing.{CellEditor, DropMode}
+import javax.swing.{CellEditor, DropMode, UIManager}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -172,15 +172,25 @@ object FolderViewImpl extends FolderView.Companion {
           case Folder.Removed(idx, obj) => Vec(TreeTableView.NodeRemoved(parent, idx, obj): MUpdate)
         }
 
-      private lazy val component = TreeTableCellRenderer.Default
+//      private lazy val isWebLaF = UIManager.getLookAndFeel.getID == "submin"
+
+      private lazy val component = {
+        val res = TreeTableCellRenderer.Default
+        // XXX TODO: somehow has no effect?
+//        res.peer.putClientProperty("styleId", "renderer")
+        res
+      }
 
       def renderer(tt: TreeTableView[S, Obj[S], Folder[S], Data], node: NodeView, row: Int, column: Int,
                    state: TreeTableCellRenderer.State): Component = {
         val data    = node.renderData
-        val value1  = if (column == 0) data.name else "" // data.value
+        val isFirst = column == 0
+        val value1  = if (isFirst) data.name else "" // data.value
         // val value1  = if (value != {}) value else null
-        val res = component.getRendererComponent(tt.treeTable, value1, row = row, column = column, state = state)
-        if (column == 0) {
+        // XXX TODO --- a bit ugly work-around for web-laf renderer
+        val state1 = if (!isFirst /*isWebLaF*/ && state.selected) state.copy(selected = false) else state
+        val res = component.getRendererComponent(tt.treeTable, value1, row = row, column = column, state = state1)
+        if (isFirst) {
           if (row >= 0 && node.isLeaf) {
             try {
               // val node = t.getNode(row)
@@ -191,6 +201,8 @@ object FolderViewImpl extends FolderView.Companion {
           }
           res // component
         } else {
+          // XXX TODO --- this doesn't work yet
+//          if (isWebLaF) component.opaque = false
           data.configureListCellRenderer(component)
         }
       }

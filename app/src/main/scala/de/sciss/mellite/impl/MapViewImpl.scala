@@ -22,15 +22,14 @@ import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, ObjListView, ObjView}
-import de.sciss.mellite.MapView
+import de.sciss.mellite.{DragAndDrop, MapView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, DefaultTableCellRenderer, TableCellEditor}
 import javax.swing.undo.UndoableEdit
-import javax.swing.{AbstractCellEditor, JComponent, JLabel, JTable, TransferHandler}
+import javax.swing.{AbstractCellEditor, JComponent, JLabel, JTable, TransferHandler, UIManager}
 
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}
@@ -216,8 +215,22 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
       colTpe  .setPreferredWidth( 96)
       colValue.setPreferredWidth(208)
 
+      val isWebLaF = UIManager.getLookAndFeel.getID == "submin"
+
       colTpe.setCellRenderer(new DefaultTableCellRenderer {
         outer =>
+
+        // trick for WebLookAndFeel (and Submin): the selection
+        // rendering is done by the table UI, and this conflicts with
+        // opaque labels which unfortunately come out of DefaultTableCellRenderer
+        if (isWebLaF) setOpaque(false)
+
+        // XXX TODO: somehow has no effect?
+//        outer.putClientProperty("styleId", "renderer")
+
+        // XXX TODO: we should also set a styleId to handle the different
+        // padding between default web-laf renderer and this one (2px)
+
         private val wrap: Label = new Label { override lazy val peer: JLabel = outer }
 
         override def setValue(value: Any): Unit = value match {
@@ -228,19 +241,51 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
           case _ =>
         }
       })
+
+//      val defaultRenderer: TableCellRenderer = if (UIManager.getLookAndFeel.getID == "submin") {
+//        classOf[WebTableCellRenderer[_, _, _]].newInstance()
+//      } else {
+//        new DefaultTableCellRenderer
+//      }
+//
+//      colValue.setCellRenderer(new TableCellRenderer {
+//        override def getTableCellRendererComponent(table: JTable, value: Any, isSelected: Boolean,
+//                                                   hasFocus: Boolean, row: Int, column: Int): java.awt.Component = {
+//          val res = defaultRenderer.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column)
+//          res match {
+//            case jl: javax.swing.JLabel =>
+//              if (jl.getIcon != null) jl.setIcon(null)
+//              value match {
+//                case view: ObjListView[_] =>
+//                  val w = scala.swing.LabelWrap(jl) // UIElement.cachedWrapper[Label](jl)
+//                  val wrapL = if (w != null) w
+//                  else new Label { override lazy val peer: JLabel = jl }
+//                  view.configureListCellRenderer(wrapL).peer
+//                case _ =>
+//                  jl
+//              }
+//          }
+//        }
+//      })
+
       colValue.setCellRenderer(new DefaultTableCellRenderer {
         outer =>
-        private val wrap: Label = new Label { override lazy val peer: JLabel = outer }
+
+        if (isWebLaF) setOpaque(false)
+
+        private val wrapL: Label = new Label { override lazy val peer: JLabel = outer }
+
         override def getTableCellRendererComponent(table: JTable, value: Any, isSelected: Boolean,
                                                    hasFocus: Boolean, row: Int, column: Int): java.awt.Component = {
           super.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column)
           if (getIcon != null) setIcon(null)
           value match {
-            case view: ObjListView[_] => view.configureListCellRenderer(wrap).peer
+            case view: ObjListView[_] => view.configureListCellRenderer(wrapL).peer
             case _ => outer
           }
         }
       })
+
       colValue.setCellEditor(new AbstractCellEditor with TableCellEditor {
         // private var currentValue: Any = null
         private val editor = new TextField(10)
