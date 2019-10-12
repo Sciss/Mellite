@@ -241,15 +241,15 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     // being logged by web-look-and-feel on JDK 11.
     // (the exception is "harmless" in that it has no side effect)
     def java11silent(body: => Unit): Unit = {
-      import com.alee.managers.log.Log.setLoggingEnabled
-      val obj = classOf[com.alee.utils.ProprietaryUtils]
-
-      setLoggingEnabled(obj, false)
-      try {
+//      import com.alee.managers.log.Log.setLoggingEnabled
+//      val obj = classOf[com.alee.utils.ProprietaryUtils]
+//
+//      setLoggingEnabled(obj, false)
+//      try {
         body
-      } finally {
-        setLoggingEnabled(obj, true)
-      }
+//      } finally {
+//        setLoggingEnabled(obj, true)
+//      }
     }
 
     try {
