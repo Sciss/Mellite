@@ -45,7 +45,7 @@ lazy val deps = new {
     val dotterweide         = "0.2.3"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.21.0"
+    val freesound           = "1.21.1-SNAPSHOT"
     val fscape              = "2.31.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
@@ -57,8 +57,9 @@ lazy val deps = new {
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val raphael             = "1.0.6"
-    val scalaColliderSwing  = "1.41.4"
+    val scalaColliderSwing  = "1.41.5-SNAPSHOT"
     val scissDSP            = "1.3.2"
+    val slf4j               = "1.7.28"
     val submin              = "0.3.0-SNAPSHOT"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
@@ -349,6 +350,8 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "org.scala-lang"    %  "scala-compiler"                 % scalaVersion.value,             // embedded compiler
       "org.scala-lang.modules" %% "scala-swing"               % deps.common.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.common.scalaSTM,           // software transactional memory
+      "org.slf4j"         %  "slf4j-api"                      % deps.app.slf4j,                 // logging (used by weblaf)
+      "org.slf4j"         %  "slf4j-simple"                   % deps.app.slf4j,                 // logging (used by weblaf)
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
     initialCommands in console :=

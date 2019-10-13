@@ -16,6 +16,7 @@ package de.sciss.mellite
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
+import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
 import de.sciss.file._
@@ -233,24 +234,27 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   // runs on the EDT
   override protected def init(): Unit = {
+    // if (lafInfo.description.contains("Submin")) {
+    // }
+
     Application.init(this)
 
     // ---- look and feel
 
-    // work-around to suppress `java.lang.NoSuchFieldException: AA_TEXT_PROPERTY_KEY` exception
-    // being logged by web-look-and-feel on JDK 11.
-    // (the exception is "harmless" in that it has no side effect)
-    def java11silent(body: => Unit): Unit = {
-//      import com.alee.managers.log.Log.setLoggingEnabled
-//      val obj = classOf[com.alee.utils.ProprietaryUtils]
-//
-//      setLoggingEnabled(obj, false)
-//      try {
-        body
-//      } finally {
-//        setLoggingEnabled(obj, true)
-//      }
-    }
+//    // work-around to suppress `java.lang.NoSuchFieldException: AA_TEXT_PROPERTY_KEY` exception
+//    // being logged by web-look-and-feel on JDK 11.
+//    // (the exception is "harmless" in that it has no side effect)
+//    def java11silent(body: => Unit): Unit = {
+////      import com.alee.managers.log.Log.setLoggingEnabled
+////      val obj = classOf[com.alee.utils.ProprietaryUtils]
+////
+////      setLoggingEnabled(obj, false)
+////      try {
+//        body
+////      } finally {
+////        setLoggingEnabled(obj, true)
+////      }
+//    }
 
     try {
       val lafInfo = Prefs.lookAndFeel.getOrElse {
@@ -258,7 +262,15 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         Prefs.lookAndFeel.put(res)
         res
       }
-      java11silent(lafInfo.install())
+
+//      if (lafInfo.description.contains("Submin")) {
+//        WebLookAndFeel.globalControlFont  = WebLookAndFeel.globalControlFont.deriveFont(14f)
+//        WebLookAndFeel.globalMenuFont     = WebLookAndFeel.globalMenuFont   .deriveFont(14f)
+//        WebLookAndFeel.globalTextFont     = WebLookAndFeel.globalTextFont   .deriveFont(14f)
+//      }
+
+      lafInfo.install()
+
     } catch {
       case NonFatal(e) => e.printStackTrace()
     }

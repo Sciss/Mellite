@@ -188,8 +188,8 @@ object FolderViewImpl extends FolderView.Companion {
         val value1  = if (isFirst) data.name else "" // data.value
         // val value1  = if (value != {}) value else null
         // XXX TODO --- a bit ugly work-around for web-laf renderer
-        val state1 = if (!isFirst /*isWebLaF*/ && state.selected) state.copy(selected = false) else state
-        val res = component.getRendererComponent(tt.treeTable, value1, row = row, column = column, state = state1)
+        // val state1 = if (!isFirst /*isWebLaF*/ && state.selected) state.copy(selected = false) else state
+        val res = component.getRendererComponent(tt.treeTable, value1, row = row, column = column, state = state)
         if (isFirst) {
           if (row >= 0 && node.isLeaf) {
             try {
