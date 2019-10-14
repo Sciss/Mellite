@@ -266,6 +266,7 @@ object FolderViewImpl extends FolderView.Companion {
     protected def guiInit(): Unit = {
       val t = treeView.treeTable
       t.rootVisible = false
+      t.rowHeight   = 22  // XXX TODO : times font scale
 
       val tabCM = t.peer.getColumnModel
       tabCM.getColumn(0).setPreferredWidth(176)

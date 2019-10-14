@@ -17,11 +17,11 @@ lazy val authorEMail                = "contact@sciss.de"
 lazy val deps = new {
   val common = new {
     val audioFile           = "1.5.3"
-    val audioWidgets        = "1.14.4-SNAPSHOT"
+    val audioWidgets        = "1.14.4"
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.15.3-SNAPSHOT"
+    val lucre               = "3.15.3"
     val lucreSwing          = "1.19.1"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -45,7 +45,7 @@ lazy val deps = new {
     val dotterweide         = "0.2.3"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.21.1-SNAPSHOT"
+    val freesound           = "1.21.1"
     val fscape              = "2.31.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
@@ -57,15 +57,14 @@ lazy val deps = new {
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
     val raphael             = "1.0.6"
-    val scalaColliderSwing  = "1.41.5-SNAPSHOT"
+    val scalaColliderSwing  = "1.41.5"
     val scissDSP            = "1.3.2"
     val slf4j               = "1.7.28"
-    val submin              = "0.3.0-SNAPSHOT"
+    val submin              = "0.3.2"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
-//    val webLaF              = "2.1.5"
-    val webLaF              = "1.2.11-SNAPSHOT"
+    val webLaF              = "2.2.0"
     val wolkenpumpe         = "2.37.0"
   }
 }
@@ -277,7 +276,6 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     name    := s"$baseName-app",
     version := appVersion,
     // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
-    resolvers           += Resolver.sonatypeRepo("snapshots"),  // XXX TODO temporary
     libraryDependencies ++= Seq(
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.common.audioWidgets,       // audio application widgets
@@ -338,10 +336,10 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "topology"                       % deps.app.topology,              // graph sorting
       "de.sciss"          %  "treetable-java"                 % deps.app.treeTable,             // widget
       "de.sciss"          %% "treetable-scala"                % deps.app.treeTable,             // widget
-//      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
-//      "de.sciss"          %  "weblaf-ui"                      % deps.app.webLaF,                // look-and-feel
-      "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
-      "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
+      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
+      "de.sciss"          %  "weblaf-ui"                      % deps.app.webLaF,                // look-and-feel
+//      "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
+//      "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
       "de.sciss"          %% "wolkenpumpe-basic"              % deps.app.wolkenpumpe,           // live improvisation
       "de.sciss"          %% "wolkenpumpe-core"               % deps.app.wolkenpumpe,           // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.app.appDirs,               // finding cache directory
