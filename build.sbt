@@ -60,11 +60,11 @@ lazy val deps = new {
     val scalaColliderSwing  = "1.41.5"
     val scissDSP            = "1.3.2"
     val slf4j               = "1.7.28"
-    val submin              = "0.3.2"
+    val submin              = "0.3.3"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
-    val webLaF              = "2.2.0"
+    val webLaF              = "2.2.1"
     val wolkenpumpe         = "2.37.0"
   }
 }
