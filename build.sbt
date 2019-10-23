@@ -4,8 +4,9 @@ lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "2.40.1-SNAPSHOT"
-lazy val appVersion                 = "2.40.1-SNAPSHOT"
-lazy val mimaVersion                = "2.40.0"
+lazy val mimaCommonVersion          = "2.40.0"
+lazy val appVersion                 = "2.41.0-SNAPSHOT"
+lazy val mimaAppVersion             = "2.41.0"
 
 lazy val loggingEnabled             = true
 
@@ -46,7 +47,7 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.21.1"
-    val fscape              = "2.31.1-SNAPSHOT"
+    val fscape              = "2.32.0-SNAPSHOT"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
@@ -93,7 +94,7 @@ lazy val commonSettings = Seq(
   },
   scalacOptions in (Compile, compile) ++= (if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
-  resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
+  // resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271
   updateOptions := updateOptions.value.withLatestSnapshots(false),
   aggregate in assembly := false,
@@ -254,7 +255,7 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
       "org.scala-lang.modules" %% "scala-swing"               % deps.common.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.common.scalaSTM,           // software transactional memory
     ),
-    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaVersion)
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaCommonVersion)
   )
 
 lazy val appSettings = Seq(
@@ -351,7 +352,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "org.slf4j"         %  "slf4j-api"                      % deps.app.slf4j,                 // logging (used by weblaf)
       "org.slf4j"         %  "slf4j-simple"                   % deps.app.slf4j,                 // logging (used by weblaf)
     ),
-    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaVersion),
+    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaAppVersion),
     initialCommands in console :=
       """import de.sciss.mellite._""".stripMargin,
     fork in run := true,  // required for shutdown hook, and also the scheduled thread pool, it seems
