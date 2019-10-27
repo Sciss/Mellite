@@ -15,12 +15,13 @@ package de.sciss.mellite
 
 import de.sciss.desktop.{Desktop, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
+import de.sciss.icons.raphael
 import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
 
-import scala.swing.{Action, Component, Label, TabbedPane}
+import scala.swing.{Action, Alignment, Component, Label, TabbedPane}
 
 final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
 
@@ -42,14 +43,19 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       c
     }
 
-    // ---- general ----
+    // ---- appearance ----
 
     val lbLookAndFeel   = label("Look-and-Feel")
     val ggLookAndFeel   = comboL(Prefs.lookAndFeel, Prefs.LookAndFeel.default,
       Prefs.LookAndFeel.all)(_.description)
 
-    val lbNativeDecoration = label("Native Window Decoration")
-    val ggNativeDecoration = checkBox(Prefs.nativeWindowDecoration, default = true)
+    val lbNativeDecoration  = label("Native Window Decoration")
+    val ggNativeDecoration  = checkBox(Prefs.nativeWindowDecoration, default = true)
+    val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
+    val lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
+    val lbWarnAppText       = new Label(
+      "<html><body>Changes to appearance take only effect<br>after restarting the application.",
+      null, Alignment.Leading)
 
 //    val lbRevealFileCmd = label("Reveal File Command")
 //    val ggRevealFileCmd = textField(Prefs.revealFileCmd, Prefs.defaultRevealFileCmd)
@@ -134,7 +140,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
 //      res.result()
 //    }
 
-    def mkPage(name: String)(entries: List[(Label, Component)]*): Unit = {
+    def mkPage(name: String)(entries: List[(Component, Component)]*): Unit = {
       val sepPar    = List.newBuilder[Element.Par]
       val labelsPar = List.newBuilder[Element.Par]
       val fieldsPar = List.newBuilder[Element.Par]
@@ -158,17 +164,23 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
           }
         }
 
-        horizontal  = Par(sepPar.result() :+ Seq(Par(labelsPar.result(): _*), Par(fieldsPar.result(): _*)): _*)
+        horizontal  = Par(sepPar.result() :+ Seq(
+          Par(GroupPanel.Alignment.Trailing)(labelsPar.result(): _*),
+          Par(fieldsPar.result(): _*)): _*
+        )
         vertical    = Seq(collSeq.result(): _*)
       }
       val page = new TabbedPane.Page(name, _box, null) // cf. https://github.com/scala/scala-swing/issues/105
       tabbed.pages += page
     }
 
-    mkPage("General")(
+    mkPage("Appearance")(
       List(
         (lbLookAndFeel      , ggLookAndFeel     ),
-        (lbNativeDecoration , ggNativeDecoration)
+        (lbNativeDecoration , ggNativeDecoration),
+      ),
+      List(
+        (lbWarnAppIcon, lbWarnAppText)
 //      ),
 //      List(
 //        (lbRevealFileCmd    , ggRevealFileCmd   )
