@@ -28,7 +28,7 @@ The Mellite icon is based on the file
 [MELLITE Taillée Hongrie.jpg](https://de.wikipedia.org/wiki/Mellit#/media/File:MELLITE_Taill%C3%A9e_Hongrie.jpg), 
 provided by Didier Descouens under CC BY 4.0 license.
 
-<img src="https://raw.githubusercontent.com/Sciss/Mellite-website/master/src/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
+<img src="https://raw.githubusercontent.com/Sciss/Mellite-website/master/src/main/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
 
 ## download and installation
 
@@ -96,8 +96,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "2.40.1"
-    "de.sciss" %% "mellite-app"  % "2.40.1"
+    "de.sciss" %% "mellite-core" % "2.41.0"
+    "de.sciss" %% "mellite-app"  % "2.41.0"
 
 ## building from source
 
