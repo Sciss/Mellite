@@ -3,9 +3,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.41.0-SNAPSHOT"
+lazy val commonVersion              = "2.41.0"
 lazy val mimaCommonVersion          = "2.41.0"
-lazy val appVersion                 = "2.41.0-SNAPSHOT"
+lazy val appVersion                 = "2.41.0"
 lazy val mimaAppVersion             = "2.41.0"
 
 lazy val loggingEnabled             = true
@@ -22,8 +22,8 @@ lazy val deps = new {
     val desktop             = "0.10.4"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.16.0-SNAPSHOT"
-    val lucreSwing          = "1.20.0-SNAPSHOT"
+    val lucre               = "3.16.0"
+    val lucreSwing          = "1.20.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
     val processor           = "0.4.2"
@@ -36,7 +36,7 @@ lazy val deps = new {
     val scallop             = "3.3.1"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.33.0-SNAPSHOT"
+    val soundProcesses      = "3.33.0"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
@@ -46,14 +46,14 @@ lazy val deps = new {
     val dotterweide         = "0.2.3"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.21.1"
-    val fscape              = "2.32.0-SNAPSHOT"
+    val freesound           = "1.22.0"
+    val fscape              = "2.32.0"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val negatum             = "0.10.0"
-    val patterns            = "0.15.1"
+    val negatum             = "0.11.0"
+    val patterns            = "0.16.0"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -66,7 +66,7 @@ lazy val deps = new {
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
     val webLaF              = "2.2.1"
-    val wolkenpumpe         = "2.37.0"
+    val wolkenpumpe         = "2.38.0"
   }
 }
 
