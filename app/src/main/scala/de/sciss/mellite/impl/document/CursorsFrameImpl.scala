@@ -14,6 +14,7 @@
 package de.sciss.mellite.impl.document
 
 import java.text.SimpleDateFormat
+import java.util
 import java.util.{Date, Locale}
 
 import de.sciss.desktop
@@ -31,7 +32,9 @@ import de.sciss.model.Change
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
+import javax.swing.tree.TreeNode
 
+import scala.collection.JavaConverters.asJavaEnumerationConverter
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.Future
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, FormattedTextField, ScrollPane}
@@ -67,13 +70,28 @@ object CursorsFrameImpl {
     val name    = elem.name.value
     val created = confluent.Access.info(elem.seminal        ).timeStamp
     val updated = confluent.Access.info(elem.cursor.path() /* position */).timeStamp
-    new CursorView(elem = elem, parent = parent, children = Vector.empty,
+    new CursorView(elem = elem, parent = parent, childViews = Vector.empty,
       name = name, created = created, updated = updated)
   }
 
   private final class CursorView(val elem: Cursors[S, D], val parent: Option[CursorView],
-                                 var children: Vec[CursorView], var name: String,
-                                 val created: Long, var updated: Long)
+                                 var childViews: Vec[CursorView], var name: String,
+                                 val created: Long, var updated: Long) extends TreeNode {
+
+    def children(): util.Enumeration[_] = childViews.iterator.asJavaEnumeration
+
+    def getChildCount: Int = childViews.size
+
+    def getChildAt(childIndex: Int): TreeNode = childViews(childIndex)
+
+    def getIndex(node: TreeNode): Int = childViews.indexOf(node)
+
+    def getParent: TreeNode = parent.orNull
+
+    def getAllowsChildren: Boolean = true
+
+    def isLeaf: Boolean = childViews.isEmpty
+  }
 
   private final class FrameImpl(val view: DocumentCursorsView) // (implicit cursor: stm.Cursor[D])
     extends WindowImpl[D]()
@@ -143,10 +161,10 @@ object CursorsFrameImpl {
     private class ElementTreeModel extends AbstractTreeModel[Node] {
       lazy val root: Node = _root // ! must be lazy. suckers....
 
-      def getChildCount(parent: Node): Int = parent.children.size
-      def getChild(parent: Node, index: Int): Node = parent.children(index)
-      def isLeaf(node: Node): Boolean = node.children.isEmpty
-      def getIndexOfChild(parent: Node, child: Node): Int = parent.children.indexOf(child)
+      def getChildCount(parent: Node): Int = parent.childViews.size
+      def getChild(parent: Node, index: Int): Node = parent.childViews(index)
+      def isLeaf(node: Node): Boolean = node.childViews.isEmpty
+      def getIndexOfChild(parent: Node, child: Node): Int = parent.childViews.indexOf(child)
       def getParent(node: Node): Option[Node] = node.parent
 
       def valueForPathChanged(path: TreeTable.Path[Node], newValue: Node): Unit =
@@ -154,20 +172,20 @@ object CursorsFrameImpl {
 
       def elemAdded(parent: Node, idx: Int, view: Node): Unit = {
         // if (DEBUG) println(s"model.elemAdded($parent, $idx, $view)")
-        require(idx >= 0 && idx <= parent.children.size)
-        parent.children = parent.children.patch(idx, Vector(view), 0)
+        require(idx >= 0 && idx <= parent.childViews.size)
+        parent.childViews = parent.childViews.patch(idx, Vector(view), 0)
         fireNodesInserted(view)
       }
 
       def elemRemoved(parent: Node, idx: Int): Unit = {
         // if (DEBUG) println(s"model.elemRemoved($parent, $idx)")
-        require(idx >= 0 && idx < parent.children.size)
-        val v = parent.children(idx)
+        require(idx >= 0 && idx < parent.childViews.size)
+        val v = parent.childViews(idx)
         // this is insane. the tree UI still accesses the model based on the previous assumption
         // about the number of children, it seems. therefore, we must not update children before
         // returning from fireNodesRemoved.
         fireNodesRemoved(v)
-        parent.children  = parent.children.patch(idx, Vector.empty, 1)
+        parent.childViews  = parent.childViews.patch(idx, Vector.empty, 1)
       }
 
       def elemUpdated(view: Node): Unit = fireNodesChanged(view)
@@ -205,7 +223,7 @@ object CursorsFrameImpl {
         //
         // val idx1 = parent.children.indexOf(cv)
         // require(idx == idx1, s"elemRemoved: given idx is $idx, but should be $idx1")
-        cv.children.zipWithIndex.reverse.foreach { case (cc, cci) =>
+        cv.childViews.zipWithIndex.reverse.foreach { case (cc, cci) =>
           elemRemoved(cv, cci, cc.elem)
         }
         mapViews -= child
