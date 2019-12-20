@@ -61,11 +61,12 @@ lazy val deps = new {
     val scalaColliderSwing  = "1.41.5"
     val scissDSP            = "1.3.2"
     val slf4j               = "1.7.29"
-    val submin              = "0.3.3"
+    val submin              = "0.3.4"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
     val topology            = "1.1.2"
-    val webLaF              = "2.2.1"
+    // val webLaF              = "2.2.1"
+    val webLaF              = "1.2.11"
     val wolkenpumpe         = "2.38.0"
   }
 }
@@ -337,10 +338,10 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "topology"                       % deps.app.topology,              // graph sorting
       "de.sciss"          %  "treetable-java"                 % deps.app.treeTable,             // widget
       "de.sciss"          %% "treetable-scala"                % deps.app.treeTable,             // widget
-      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
-      "de.sciss"          %  "weblaf-ui"                      % deps.app.webLaF,                // look-and-feel
-//      "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
-//      "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
+//      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
+//      "de.sciss"          %  "weblaf-ui"                      % deps.app.webLaF,                // look-and-feel
+      "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
+      "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
       "de.sciss"          %% "wolkenpumpe-basic"              % deps.app.wolkenpumpe,           // live improvisation
       "de.sciss"          %% "wolkenpumpe-core"               % deps.app.wolkenpumpe,           // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.app.appDirs,               // finding cache directory
