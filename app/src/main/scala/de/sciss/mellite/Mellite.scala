@@ -16,9 +16,8 @@ package de.sciss.mellite
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
-import com.alee.laf.WebLookAndFeel
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
-import de.sciss.desktop.{Menu, OptionPane, WindowHandler}
+import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
@@ -98,7 +97,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       ).map(_.split(',').toList)
 
       verify()
-      val config = Config(
+      val config: Config = Config(
         open      = workspaces(),
         autoRun   = autoRun(),
         logFrame  = !noLogFrame())
@@ -127,7 +126,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       false // XXX TODO: eventually a preferences entry
     }
 
-    override lazy val usesNativeDecoration: Boolean = Prefs.nativeWindowDecoration.getOrElse(true)
+    override lazy val usesNativeDecoration: Boolean =
+      Prefs.nativeWindowDecoration.getOrElse(Prefs.defaultNativeWindowDecoration)
   }
 
   protected def menuFactory: Menu.Root = MenuBar.instance
@@ -255,6 +255,11 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 ////        setLoggingEnabled(obj, true)
 ////      }
 //    }
+
+    if (Desktop.isMac) {
+      System.setProperty("apple.laf.useScreenMenuBar",
+        Prefs.screenMenuBar.getOrElse(Prefs.defaultScreenMenuBar).toString)
+    }
 
     try {
       val lafInfo = Prefs.lookAndFeel.getOrElse {

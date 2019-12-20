@@ -50,7 +50,15 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       Prefs.LookAndFeel.all)(_.description)
 
     val lbNativeDecoration  = label("Native Window Decoration")
-    val ggNativeDecoration  = checkBox(Prefs.nativeWindowDecoration, default = true)
+    val ggNativeDecoration  = checkBox(Prefs.nativeWindowDecoration, default = Prefs.defaultNativeWindowDecoration)
+
+    val lbScreenMenuBar     = label("Screen Menu Bar")
+    val ggScreenMenuBar     = checkBox(Prefs.screenMenuBar, default = Prefs.defaultScreenMenuBar)
+    if (!Desktop.isMac) {
+      lbScreenMenuBar.visible = false
+      ggScreenMenuBar.visible = false
+    }
+
     val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
     val lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
     val lbWarnAppText       = new Label(
@@ -178,6 +186,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       List(
         (lbLookAndFeel      , ggLookAndFeel     ),
         (lbNativeDecoration , ggNativeDecoration),
+        (lbScreenMenuBar    , ggScreenMenuBar   ),
       ),
       List(
         (lbWarnAppIcon, lbWarnAppText)

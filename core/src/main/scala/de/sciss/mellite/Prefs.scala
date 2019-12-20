@@ -97,7 +97,14 @@ object Prefs {
 
   def lookAndFeel: Entry[LookAndFeel] = userPrefs("look-and-feel")
 
+  final val defaultNativeWindowDecoration = true
+
   def nativeWindowDecoration: Entry[Boolean] = userPrefs("native-window-decoration")
+
+  final val defaultScreenMenuBar = false
+
+  /** Only relevant on macOS. */
+  def screenMenuBar: Entry[Boolean] = userPrefs("screen-menu-bar")
 
 //  def defaultRevealFileCmd: String = {
 //    if (Desktop.isLinux) {
