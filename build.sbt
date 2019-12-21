@@ -1,3 +1,4 @@
+import com.typesafe.sbt.license.{DepLicense, DepModuleInfo, LicenseInfo}
 import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 
 lazy val baseName                   = "Mellite"
@@ -57,6 +58,7 @@ lazy val deps = new {
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
+    val plexMono            = "4.0.2"   // directly included
     val raphael             = "1.0.6"
     val scalaColliderSwing  = "1.41.5"
     val scissDSP            = "1.3.2"
@@ -256,7 +258,7 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
       "org.scala-lang.modules" %% "scala-swing"               % deps.common.scalaSwing,         // desktop UI kit
       "org.scala-stm"     %% "scala-stm"                      % deps.common.scalaSTM,           // software transactional memory
     ),
-    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaCommonVersion)
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-core" % mimaCommonVersion),
   )
 
 lazy val appSettings = Seq(
@@ -363,6 +365,22 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       BuildInfoKey.map(licenses) { case (_, Seq( (lic, _) )) => "license" -> lic }
     ),
     buildInfoPackage := "de.sciss.mellite",
+    // ---- license report ----
+    licenseReportTypes    := Seq(Csv),
+    licenseConfigurations := Set(Compile.name),
+    updateLicenses := {
+      val regular = updateLicenses.value
+      val plexLic = DepLicense(
+        DepModuleInfo("com.ibm", "plex-mono", deps.app.plexMono),
+        LicenseInfo(LicenseCategory("OFL"), name = "SIL Open Font License 1.1",
+          url = "https://opensource.org/licenses/OFL-1.1"
+        ),
+        configs = Set(Compile.name)
+      )
+      regular.copy(licenses = regular.licenses :+ plexLic)
+    },
+    licenseReportDir := (sourceDirectory in Compile).value / "resources" / "de" / "sciss" / "mellite",
+    // ---- packaging ----
     packageName in Universal := s"${appNameL}_${version.value}_all",
     name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
     debianPackageDependencies in Debian ++= Seq("java11-runtime"),

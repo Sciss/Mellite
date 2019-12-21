@@ -154,9 +154,8 @@ This section is an aide-mémoire for me in releasing stable versions.
  `sbt +clean  +update +test +publishLocal`
  7. now for app: `sbt mellite-app/dependencyUpdates mellite-app/evicted`
  8. License information in is updated by running
- `sbt mellite-app/dumpLicenseReport` via [sbt-license-report](https://github.com/sbt/sbt-license-report) and copying
-  the output (this might be automated in the future):
-   `cp app/target/license-reports/mellite-app-licenses.csv app/src/main/resources/de/sciss/mellite/`.
+ `sbt mellite-app/dumpLicenseReport` via [sbt-license-report](https://github.com/sbt/sbt-license-report).
+  Output is found in `app/src/main/resources/de/sciss/mellite/mellite-app-licenses.csv`.
  9. Make sure the XFree desktop file version is set:
   `vim app/src/debian/Mellite.desktop`
 10. Update the release versions in `README.md`

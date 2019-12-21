@@ -13,7 +13,9 @@
 
 package de.sciss.mellite.impl.code
 
-import java.awt.Color
+import java.awt.font.FontRenderContext
+import java.awt.{Color, Font, GraphicsEnvironment}
+import java.util.Locale
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
@@ -67,6 +69,63 @@ object CodeViewImpl extends CodeView.Companion {
       intpMap.put(id, res)
       res
     })
+  }
+
+  def availableFonts(): ISeq[String] = {
+    requireEDT()
+    _availableFonts
+  }
+
+  def installFonts(): Unit = {
+    requireEDT()
+    _installFonts
+  }
+
+  private lazy val _installFonts: Unit = {
+    val ge      = GraphicsEnvironment.getLocalGraphicsEnvironment
+    val family  = "IBM-Plex-Mono"
+    val cl      = getClass.getClassLoader
+    var warned  = false
+
+    def register(variant: String): Unit = {
+      val is = cl.getResourceAsStream(s"$family-$variant.ttf")
+      if (is != null) {
+        val fnt = Font.createFont(Font.TRUETYPE_FONT, is)
+        ge.registerFont(fnt)
+        is.close()
+      } else {
+        if (!warned) {
+          Console.err.println(s"Warning: Could not install $family fonts.")
+          warned = true
+        }
+      }
+    }
+
+    register("Regular"    )
+    register("Bold"       )
+    register("Italic"     )
+    register("BoldItalic" )
+  }
+
+  private lazy val _availableFonts: ISeq[String] = {
+    val ff  = GraphicsEnvironment.getLocalGraphicsEnvironment.getAvailableFontFamilyNames(Locale.US)
+    val frc = new FontRenderContext(null, true, false)
+    val b   = ISeq.newBuilder[String]
+
+    def isMonospaced(n: String): Boolean = {
+      val f = new Font(n, Font.PLAIN, 12)
+      f.canDisplay('.') && f.canDisplay('_') && (
+        f.getStringBounds(".", frc).getWidth == f.getStringBounds("_", frc).getWidth)
+    }
+
+    val plexName = "IBM Plex Mono"
+
+    ff.foreach { n =>
+      if (isMonospaced(n)) b += n
+    }
+
+    b += plexName
+    b.result().sorted
   }
 
   def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])

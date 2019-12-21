@@ -38,6 +38,10 @@ object CodeView {
                           (implicit tx: S#Tx, universe: Universe[S],
                            compiler: Code.Compiler,
                            undoManager: UndoManager): CodeView[S, code0.Out]
+
+    def availableFonts(): ISeq[String]
+
+    def installFonts(): Unit
   }
 
   trait Handler[S <: Sys[S], In, -Out] extends Disposable[S#Tx] {
@@ -55,6 +59,10 @@ object CodeView {
 
   sealed trait Update
   case class DirtyChange(value: Boolean) extends Update
+
+  def availableFonts(): ISeq[String] = companion.availableFonts()
+
+  def installFonts(): Unit = companion.installFonts()
 }
 trait CodeView[S <: Sys[S], Out] extends UniverseView[S] with Model[CodeView.Update] {
   def isCompiling(implicit tx: TxnLike): Boolean
