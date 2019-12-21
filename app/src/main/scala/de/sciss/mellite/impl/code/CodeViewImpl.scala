@@ -38,7 +38,7 @@ import dotterweide.Span
 import dotterweide.build.Version
 import dotterweide.editor.controller.FlashAction
 import dotterweide.editor.painter.FlashPainter
-import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl}
+import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl, FontSettings, FontSettingsImpl}
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
 import javax.swing.Icon
@@ -83,7 +83,7 @@ object CodeViewImpl extends CodeView.Companion {
 
   private lazy val _installFonts: Unit = {
     val ge      = GraphicsEnvironment.getLocalGraphicsEnvironment
-    val family  = "IBM-Plex-Mono"
+    val family  = "IBMPlexMono"
     val cl      = getClass.getClassLoader
     var warned  = false
 
@@ -372,10 +372,12 @@ object CodeViewImpl extends CodeView.Companion {
 //        .getOrElse(throw new NoSuchElementException(scalaVersionP))
 //      println(prelude)
 //      println(code.postlude)
+
+//      installFonts()
       editorPanel          = new dotterweide.ide.PanelImpl(
         language          = language,
         text0             = code.source,
-//        font        = ...,
+//        font              = new FontSettingsImpl("IBM Plex Mono", 14, 1.12f),
         stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
