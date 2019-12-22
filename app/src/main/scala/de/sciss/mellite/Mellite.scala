@@ -282,7 +282,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     // I don't remember -- what was this about?
     // I think space bar hijacking in the timeline frame
-    UIManager.getDefaults.remove("SplitPane.ancestorInputMap")
+    val uid = UIManager.getDefaults
+    uid.remove("SplitPane.ancestorInputMap")
+    uid.remove("TabbedPane.ancestorInputMap") // interferes with code editor navigation
 
     // early, so error printing in `initTypes` is already captured
     if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
