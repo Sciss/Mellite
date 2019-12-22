@@ -83,12 +83,13 @@ object CodeViewImpl extends CodeView.Companion {
 
   private lazy val _installFonts: Unit = {
     val ge      = GraphicsEnvironment.getLocalGraphicsEnvironment
-    val family  = "IBMPlexMono"
+//    val family  = "IBMPlexMono"
+    val family  = "DejaVuSansMono"
     val cl      = getClass.getClassLoader
     var warned  = false
 
     def register(variant: String): Unit = {
-      val is = cl.getResourceAsStream(s"$family-$variant.ttf")
+      val is = cl.getResourceAsStream(s"$family$variant.ttf")
       if (is != null) {
         val fnt = Font.createFont(Font.TRUETYPE_FONT, is)
         ge.registerFont(fnt)
@@ -101,10 +102,10 @@ object CodeViewImpl extends CodeView.Companion {
       }
     }
 
-    register("Regular"    )
-    register("Bold"       )
-    register("Italic"     )
-    register("BoldItalic" )
+    register(""             )
+    register("-Bold"        )
+    register("-Oblique"     )
+    register("-BoldOblique" )
   }
 
   private lazy val _availableFonts: ISeq[String] = {
@@ -378,6 +379,7 @@ object CodeViewImpl extends CodeView.Companion {
         language          = language,
         text0             = code.source,
 //        font              = new FontSettingsImpl("IBM Plex Mono", 14, 1.12f),
+        font              = new FontSettingsImpl("DejaVu Sans Mono", 15, 1.05f),
         stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
