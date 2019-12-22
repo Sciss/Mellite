@@ -82,7 +82,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
 
     val lbCodeFontStretch    = new Label
     val ggCodeFontStretch0  = intField(Prefs.codeFontStretch, default = Prefs.defaultCodeFontStretch, min = 50, max = 200)
-    val ggCodeFontStretch   = mkFlow(4, new Label("Stretch [%]:"), ggCodeFontStretch0)
+    val ggCodeFontStretch   = mkFlow(4, new Label("Vertical Stretch [%]:"), ggCodeFontStretch0)
 
     val lbCodeLineSpacing   = label("Code Line Spacing [%]")
     val ggCodeLineSpacing   = intField(Prefs.codeLineSpacing, default = Prefs.defaultCodeLineSpacing, min = 90, max = 200)
@@ -113,7 +113,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     val lbAudioAutoBoot = label("Automatic Boot")
     val ggAudioAutoBoot = checkBox(Prefs.audioAutoBoot, default = false)
 
-    val lbAudioDevice   = label("Audio Device")
+    val lbAudioDevice   = label(if (Desktop.isLinux) "Jack Client Name" else "Audio Device")
     val ggAudioDevice   = textField(Prefs.audioDevice    , Prefs.defaultAudioDevice     )
     val lbNumInputs     = label("Input Channels")
     val ggNumInputs     = intField(Prefs.audioNumInputs  , Prefs.defaultAudioNumInputs  )

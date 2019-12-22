@@ -100,7 +100,7 @@ object ApiBrowser {
       terminal  = ed.terminal,
       data      = ed.data,
       adviser   = language.adviser // doc.language.adviser
-    )(ed.async) {
+    )(ed.async, ed.platform) {
 
     override protected def run(tpeOpt: Option[NodeType]): Unit =
       tpeOpt match {
