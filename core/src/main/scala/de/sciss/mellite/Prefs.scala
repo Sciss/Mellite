@@ -42,7 +42,7 @@ object Prefs {
   final val defaultDbLockTimeout = 500
   def dbLockTimeout: Entry[Int] = userPrefs("lock-timeout")
 
-  // ---- general ----
+  // ---- appearance ----
 
   object LookAndFeel {
     implicit object Type extends Preferences.Type[LookAndFeel] {
@@ -105,6 +105,14 @@ object Prefs {
 
   /** Only relevant on macOS. */
   def screenMenuBar: Entry[Boolean] = userPrefs("screen-menu-bar")
+
+  final val defaultCodeFontFamily = "DejaVu Sans Mono"
+
+  def codeFontFamily: Entry[String] = userPrefs("code-font-family")
+
+  final val defaultCodeFontSize = 13
+
+  def codeFontSize: Entry[Int] = userPrefs("code-font-size")
 
 //  def defaultRevealFileCmd: String = {
 //    if (Desktop.isLinux) {

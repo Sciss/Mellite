@@ -20,8 +20,9 @@ import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
+import javax.swing.JPanel
 
-import scala.swing.{Action, Alignment, Component, Label, TabbedPane}
+import scala.swing.{Action, Alignment, Component, FlowPanel, Label, TabbedPane}
 
 final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
 
@@ -32,6 +33,19 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
   protected def handleClose(): Unit = dispose()
 
   protected def undoRedoActions: Option[(Action, Action)] = None
+
+//  private def font(prefsFamily: Preferences.Entry[Boolean], default: => Boolean): Component = {
+//    val gg = new CheckBox
+//    val sel0 = prefs.getOrElse(default)
+//    gg.selected = sel0
+//    gg.listenTo(gg)
+//    gg.reactions += {
+//      case ButtonClicked(_) =>
+//        val sel1 = gg.selected
+//        prefs.put(sel1)
+//    }
+//    gg
+//  }
 
   private[this] val box: Component = {
     import PrefsGUI._
@@ -59,10 +73,30 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       ggScreenMenuBar.visible = false
     }
 
+    val lbCodeFont          = label("Code Font")
+    val ggCodeFontFamily    = comboL(Prefs.codeFontFamily, default = Prefs.defaultCodeFontFamily,
+      values = CodeView.availableFonts())
+    val ggCodeFontSize      = intField(Prefs.codeFontSize, default = Prefs.defaultCodeFontSize, min = 4, max = 256)
+//    val ggCodeFont          = new BoxPanel(Orientation.Horizontal) {
+//      contents += ggCodeFontFamily
+//      contents += ggCodeFontSize
+//    }
+    val ggCodeFont = new FlowPanel(ggCodeFontFamily, ggCodeFontSize) {
+      override lazy val peer: JPanel =
+        new JPanel(new java.awt.FlowLayout(FlowPanel.Alignment.Leading.id)) with SuperMixin {
+          override def getBaseline(width: Int, height: Int): Int = {
+            ggCodeFontFamily.peer.getBaseline(width, height)
+          }
+        }
+    }
+    ggCodeFont.alignOnBaseline = true
+    ggCodeFont.hGap = 0
+    ggCodeFont.vGap = 0
+
     val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
     val lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
     val lbWarnAppText       = new Label(
-      "<html><body>Changes to appearance take only effect<br>after restarting the application.",
+      "<html><body>Some changes to appearance take only effect<br>after restarting the application.",
       null, Alignment.Leading)
 
 //    val lbRevealFileCmd = label("Reveal File Command")
@@ -187,6 +221,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbLookAndFeel      , ggLookAndFeel     ),
         (lbNativeDecoration , ggNativeDecoration),
         (lbScreenMenuBar    , ggScreenMenuBar   ),
+        (lbCodeFont         , ggCodeFont        ),
       ),
       List(
         (lbWarnAppIcon, lbWarnAppText)

@@ -28,7 +28,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.ApiBrowser
-import de.sciss.mellite.{CodeView, GUI}
+import de.sciss.mellite.{CodeView, GUI, Prefs}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
@@ -119,13 +119,13 @@ object CodeViewImpl extends CodeView.Companion {
         f.getStringBounds(".", frc).getWidth == f.getStringBounds("_", frc).getWidth)
     }
 
-    val plexName = "IBM Plex Mono"
+    val bundledName = Prefs.defaultCodeFontFamily //  "IBM Plex Mono"
 
     ff.foreach { n =>
       if (isMonospaced(n)) b += n
     }
 
-    b += plexName
+    b += bundledName
     b.result().sorted
   }
 
@@ -374,13 +374,15 @@ object CodeViewImpl extends CodeView.Companion {
 //      println(prelude)
 //      println(code.postlude)
 
-      installFonts()
+      val fntFamily = Prefs.codeFontFamily.getOrElse(Prefs.defaultCodeFontFamily)
+      val fntSize   = Prefs.codeFontSize  .getOrElse(Prefs.defaultCodeFontSize  )
+      if (fntFamily == Prefs.defaultCodeFontFamily) installFonts()
       editorPanel = dotterweide.ide.Panel(
         language          = language,
         text              = code.source,
 //        font              = new FontSettingsImpl("IBM Plex Mono", 14, 1.12f),
 //        font              = FontSettings("DejaVu Sans Mono", size = 13f, stretch = 1.04f, lineSpacing = 1.1f),
-        font              = FontSettings("DejaVu Sans Mono", size = 13f, stretch = 1.0f, lineSpacing = 1.12f),
+        font              = FontSettings(fntFamily, size = fntSize, stretch = 1.0f, lineSpacing = 1.12f),
         stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
