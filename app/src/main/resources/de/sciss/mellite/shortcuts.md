@@ -4,17 +4,21 @@
 
 |**Key**            |**Action**                         |
 |:------------------|:----------------------------------|
-|`ctrl 0`           |Reset zoom level                   |
-|`ctrl 1`           |Add new element (command line)     |
-|`ctrl BACKSPACE`   |Delete element                     |
-|`ctrl ENTER`       |Open element viewer                |
-|`ctrl MINUS`       |Zoom out                           |
-|`ctrl N`           |Add new element (popup selection)  |
-|`ctrl P`           |Show log window                    |
-|`ctrl PLUS`        |Zoom in                            |
-|`ctrl SEMICOLON`   |Open element's attribute map       |
-|`ctrl W`           |Close window                       |
-|`shift ctrl P`     |Clear log window                   |
+|`menu 1`           |Add new element (command line)     |
+|`menu N`           |Add new element (popup selection)  |
+|`menu BACKSPACE`   |Delete element                     |
+|`menu ENTER`       |Open element viewer                |
+|`menu SEMICOLON`   |Open element's attribute map       |
+|`menu PLUS`        |Zoom in                            |
+|`menu MINUS`       |Zoom out                           |
+|`menu 0`           |Reset zoom level                   |
+|`menu P`           |Show log window                    |
+|`shift menu P`     |Clear log window                   |
+|`menu W`           |Close window                       |
+|`alt LEFT`         |(L,W) Move to previous tab         |
+|`ctrl LEFT`        |(M)   Move to previous tab         |
+|`alt RIGHT`        |(L,W) Move to next tab             |
+|`ctrl RIGHT`       |(M)   Move to next tab             |
 
 ## Code Editors
 
