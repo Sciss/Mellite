@@ -38,7 +38,7 @@ import dotterweide.Span
 import dotterweide.build.Version
 import dotterweide.editor.controller.FlashAction
 import dotterweide.editor.painter.FlashPainter
-import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl, FontSettings, FontSettingsImpl}
+import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl, FontSettings}
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
 import javax.swing.Icon
@@ -374,12 +374,13 @@ object CodeViewImpl extends CodeView.Companion {
 //      println(prelude)
 //      println(code.postlude)
 
-//      installFonts()
-      editorPanel          = new dotterweide.ide.PanelImpl(
+      installFonts()
+      editorPanel = dotterweide.ide.Panel(
         language          = language,
-        text0             = code.source,
+        text              = code.source,
 //        font              = new FontSettingsImpl("IBM Plex Mono", 14, 1.12f),
-        font              = new FontSettingsImpl("DejaVu Sans Mono", 15, 1.05f),
+//        font              = FontSettings("DejaVu Sans Mono", size = 13f, stretch = 1.04f, lineSpacing = 1.1f),
+        font              = FontSettings("DejaVu Sans Mono", size = 13f, stretch = 1.0f, lineSpacing = 1.12f),
         stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )

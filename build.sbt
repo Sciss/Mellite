@@ -6,8 +6,8 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "2.41.0"
 lazy val mimaCommonVersion          = "2.41.0"
-lazy val appVersion                 = "2.41.1-SNAPSHOT"
-lazy val mimaAppVersion             = "2.41.0"
+lazy val appVersion                 = "2.42.0-SNAPSHOT"
+lazy val mimaAppVersion             = "2.42.0"
 
 lazy val loggingEnabled             = true
 
@@ -42,9 +42,9 @@ lazy val deps = new {
     val swingPlus           = "0.4.2"
   }
   val app = new {
-    val akka                = "2.5.23"
+    val akka                = "2.5.27"
     val appDirs             = "1.0.3"
-    val dotterweide         = "0.2.3"
+    val dotterweide         = "0.3.0-SNAPSHOT"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.22.0"
@@ -58,7 +58,8 @@ lazy val deps = new {
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
-    val plexMono            = "4.0.2"   // directly included
+//    val plexMono            = "4.0.2"   // directly included
+    val dejaVuFonts         = "2.37"    // directly included
     val raphael             = "1.0.6"
     val scalaColliderSwing  = "1.41.5"
     val scissDSP            = "1.3.2"
@@ -281,6 +282,8 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     version := appVersion,
     // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
+      "com.typesafe.akka" %%  "akka-stream"         % deps.app.akka,
+      "com.typesafe.akka" %%  "akka-stream-testkit" % deps.app.akka,
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.common.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.common.audioWidgets,       // audio application widgets
@@ -370,14 +373,14 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     licenseConfigurations := Set(Compile.name),
     updateLicenses := {
       val regular = updateLicenses.value
-      val plexLic = DepLicense(
-        DepModuleInfo("com.ibm", "plex-mono", deps.app.plexMono),
-        LicenseInfo(LicenseCategory("OFL"), name = "SIL Open Font License 1.1",
-          url = "https://opensource.org/licenses/OFL-1.1"
+      val fontsLic = DepLicense(
+        DepModuleInfo("io.github.dejavu-fonts", "dejavu-fonts", deps.app.dejaVuFonts),
+        LicenseInfo(LicenseCategory("OFL"), name = "DejaVu Fonts License",
+          url = "https://dejavu-fonts.github.io/License.html"
         ),
         configs = Set(Compile.name)
       )
-      regular.copy(licenses = regular.licenses :+ plexLic)
+      regular.copy(licenses = regular.licenses :+ fontsLic)
     },
     licenseReportDir := (sourceDirectory in Compile).value / "resources" / "de" / "sciss" / "mellite",
     // ---- packaging ----
@@ -421,7 +424,7 @@ lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
     jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
     jlinkModules += "jdk.unsupported", // needed for Akka
     libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep),
-    packageName in Universal := s"${appNameL}-full_${version.value}_${jfxClassifier}_$archSuffix",
+    packageName in Universal := s"$appNameL-full_${version.value}_${jfxClassifier}_$archSuffix",
     name                in Debian := s"$appNameL-full",  // this is used for .deb file-name; NOT appName,
     packageArchitecture in Debian := sys.props("os.arch"), // archSuffix,
   )
