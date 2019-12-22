@@ -34,19 +34,6 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
 
   protected def undoRedoActions: Option[(Action, Action)] = None
 
-//  private def font(prefsFamily: Preferences.Entry[Boolean], default: => Boolean): Component = {
-//    val gg = new CheckBox
-//    val sel0 = prefs.getOrElse(default)
-//    gg.selected = sel0
-//    gg.listenTo(gg)
-//    gg.reactions += {
-//      case ButtonClicked(_) =>
-//        val sel1 = gg.selected
-//        prefs.put(sel1)
-//    }
-//    gg
-//  }
-
   private[this] val box: Component = {
     import PrefsGUI._
 
@@ -73,25 +60,32 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       ggScreenMenuBar.visible = false
     }
 
+    def mkFlow(hGap0: Int, components: Component*): Component =
+      new FlowPanel(components: _*) {
+        override lazy val peer: JPanel =
+          new JPanel(new java.awt.FlowLayout(FlowPanel.Alignment.Leading.id)) with SuperMixin {
+            override def getBaseline(width: Int, height: Int): Int = {
+              components.head.peer.getBaseline(width, height)
+            }
+          }
+
+          alignOnBaseline = true
+          hGap = hGap0
+          vGap = 0
+    }
+
     val lbCodeFont          = label("Code Font")
     val ggCodeFontFamily    = comboL(Prefs.codeFontFamily, default = Prefs.defaultCodeFontFamily,
       values = CodeView.availableFonts())
     val ggCodeFontSize      = intField(Prefs.codeFontSize, default = Prefs.defaultCodeFontSize, min = 4, max = 256)
-//    val ggCodeFont          = new BoxPanel(Orientation.Horizontal) {
-//      contents += ggCodeFontFamily
-//      contents += ggCodeFontSize
-//    }
-    val ggCodeFont = new FlowPanel(ggCodeFontFamily, ggCodeFontSize) {
-      override lazy val peer: JPanel =
-        new JPanel(new java.awt.FlowLayout(FlowPanel.Alignment.Leading.id)) with SuperMixin {
-          override def getBaseline(width: Int, height: Int): Int = {
-            ggCodeFontFamily.peer.getBaseline(width, height)
-          }
-        }
-    }
-    ggCodeFont.alignOnBaseline = true
-    ggCodeFont.hGap = 0
-    ggCodeFont.vGap = 0
+    val ggCodeFont          = mkFlow(0, ggCodeFontFamily, ggCodeFontSize)
+
+    val lbCodeFontStretch    = new Label
+    val ggCodeFontStretch0  = intField(Prefs.codeFontStretch, default = Prefs.defaultCodeFontStretch, min = 50, max = 200)
+    val ggCodeFontStretch   = mkFlow(4, new Label("Stretch [%]:"), ggCodeFontStretch0)
+
+    val lbCodeLineSpacing   = label("Code Line Spacing [%]")
+    val ggCodeLineSpacing   = intField(Prefs.codeLineSpacing, default = Prefs.defaultCodeLineSpacing, min = 90, max = 200)
 
     val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
     val lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
@@ -222,6 +216,8 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbNativeDecoration , ggNativeDecoration),
         (lbScreenMenuBar    , ggScreenMenuBar   ),
         (lbCodeFont         , ggCodeFont        ),
+        (lbCodeFontStretch  , ggCodeFontStretch ),
+        (lbCodeLineSpacing  , ggCodeLineSpacing ),
       ),
       List(
         (lbWarnAppIcon, lbWarnAppText)

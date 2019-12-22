@@ -114,7 +114,17 @@ object Prefs {
 
   def codeFontSize: Entry[Int] = userPrefs("code-font-size")
 
-//  def defaultRevealFileCmd: String = {
+  final val defaultCodeFontStretch = 100
+
+  /** In percent */
+  def codeFontStretch: Entry[Int] = userPrefs("code-font-stretch")
+
+  final val defaultCodeLineSpacing = 112
+
+  /** In percent */
+  def codeLineSpacing: Entry[Int] = userPrefs("code-line-spacing")
+
+  //  def defaultRevealFileCmd: String = {
 //    if (Desktop.isLinux) {
 //      val dirs = sys.env.getOrElse("PATH", "").split(File.pathSeparator)
 //      // note: Raspberry will also have `pcmanfm` but it doesn't allow to select a file

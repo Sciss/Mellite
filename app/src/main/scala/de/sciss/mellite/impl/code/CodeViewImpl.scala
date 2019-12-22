@@ -119,13 +119,17 @@ object CodeViewImpl extends CodeView.Companion {
         f.getStringBounds(".", frc).getWidth == f.getStringBounds("_", frc).getWidth)
     }
 
-    val bundledName = Prefs.defaultCodeFontFamily //  "IBM Plex Mono"
+    var bundleInstalled = false
+    val bundledName     = Prefs.defaultCodeFontFamily //  "IBM Plex Mono"
 
     ff.foreach { n =>
-      if (isMonospaced(n)) b += n
+      if (isMonospaced(n)) {
+        b += n
+        if (!bundleInstalled && n == bundledName) bundleInstalled = true
+      }
     }
 
-    b += bundledName
+    if (!bundleInstalled) b += bundledName
     b.result().sorted
   }
 
@@ -185,7 +189,11 @@ object CodeViewImpl extends CodeView.Companion {
     }
 
     private[this] var editorPanel: dotterweide.ide.Panel = _
+
+    private[this] var disposeFontObservers: () => Unit = _
+
     private[this] val futCompile = Ref(Option.empty[Future[Any]])
+
     private[this] var actionApply: Action = _
 
     def isCompiling(implicit tx: TxnLike): Boolean =
@@ -197,6 +205,7 @@ object CodeViewImpl extends CodeView.Companion {
     def dispose()(implicit tx: S#Tx): Unit = {
       bottom.foreach(_.dispose())
       deferTx {
+        disposeFontObservers()
         editorPanel.dispose()
       }
     }
@@ -368,21 +377,39 @@ object CodeViewImpl extends CodeView.Companion {
     }
 
     private def guiInit(): Unit = {
-//      val scalaVersionP = "version.number"
-//      val scalaVersion  = scala.util.Properties.scalaPropOrNone(scalaVersionP).flatMap(Version.parse(_).toOption)
-//        .getOrElse(throw new NoSuchElementException(scalaVersionP))
-//      println(prelude)
-//      println(code.postlude)
+      val prFamily  = Prefs.codeFontFamily
+      val prSize    = Prefs.codeFontSize
+      val prStretch = Prefs.codeFontStretch
+      val prLine    = Prefs.codeLineSpacing
 
-      val fntFamily = Prefs.codeFontFamily.getOrElse(Prefs.defaultCodeFontFamily)
-      val fntSize   = Prefs.codeFontSize  .getOrElse(Prefs.defaultCodeFontSize  )
-      if (fntFamily == Prefs.defaultCodeFontFamily) installFonts()
+      val fntFamily0 = prFamily.getOrElse(Prefs.defaultCodeFontFamily)
+      if (fntFamily0 == Prefs.defaultCodeFontFamily) installFonts()
+
+      val font      = FontSettings()
+
+      def mkFamily  (): Unit = font.family      = prFamily  .getOrElse(Prefs.defaultCodeFontFamily )
+      def mkSize    (): Unit = font.size        = prSize    .getOrElse(Prefs.defaultCodeFontSize   )
+      def mkStretch (): Unit = font.stretch     = prStretch .getOrElse(Prefs.defaultCodeFontStretch) * 0.01f
+      def mkLine    (): Unit = font.lineSpacing = prLine    .getOrElse(Prefs.defaultCodeLineSpacing) * 0.01f
+
+      mkFamily(); mkSize(); mkStretch(); mkLine()
+
+      val obsFamily   = prFamily  .addListener { case _ => mkFamily () }
+      val obsSize     = prSize    .addListener { case _ => mkSize   () }
+      val obsStretch  = prStretch .addListener { case _ => mkStretch() }
+      val obsLine     = prLine    .addListener { case _ => mkLine   () }
+
+      disposeFontObservers = { () =>
+        prFamily  .removeListener(obsFamily )
+        prSize    .removeListener(obsSize   )
+        prStretch .removeListener(obsStretch)
+        prLine    .removeListener(obsLine   )
+      }
+
       editorPanel = dotterweide.ide.Panel(
         language          = language,
         text              = code.source,
-//        font              = new FontSettingsImpl("IBM Plex Mono", 14, 1.12f),
-//        font              = FontSettings("DejaVu Sans Mono", size = 13f, stretch = 1.04f, lineSpacing = 1.1f),
-        font              = FontSettings(fntFamily, size = fntSize, stretch = 1.0f, lineSpacing = 1.12f),
+        font              = font,
         stylingName       = Some(if (GUI.isDarkSkin) ColorScheme.DarkName else ColorScheme.LightName),
         preferredGridSize = Some((24, 68))
       )
