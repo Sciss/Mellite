@@ -30,6 +30,7 @@ import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
 import de.sciss.{desktop, osc}
+import javax.imageio.ImageIO
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{Ref, atomic}
@@ -54,6 +55,15 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   {
+    if (!Desktop.isLinux) {
+      val is = getClass.getResourceAsStream("/application.png")
+      if (is != null) {
+        val img = ImageIO.read(is)
+        is.close()
+        Desktop.setDockImage(img)
+      }
+    }
+
     lbSensors.horizontalAlignment = Alignment.Trailing
     lbAudio  .horizontalAlignment = Alignment.Trailing
     if (Prefs.useSensorMeters) {
