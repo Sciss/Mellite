@@ -1,5 +1,8 @@
 # Keyboard Shortcuts
 
+Modifier `menu` corresponds to `ctrl` on Linux (L) and Windows (W), 
+and `meta` or command on Mac (M).
+
 ## Common
 
 |**Key**            |**Action**                         |
@@ -15,10 +18,8 @@
 |`menu P`           |Show log window                    |
 |`shift menu P`     |Clear log window                   |
 |`menu W`           |Close window                       |
-|`alt LEFT`         |(L,W) Move to previous tab         |
-|`ctrl LEFT`        |(M)   Move to previous tab         |
-|`alt RIGHT`        |(L,W) Move to next tab             |
-|`ctrl RIGHT`       |(M)   Move to next tab             |
+|`alt LEFT`         |Move to previous tab               |
+|`alt RIGHT`        |Move to next tab                   |
 
 ## Code Editors
 
@@ -29,25 +30,35 @@ We try to use the same keyboard mappings as IntelliJ IDEA, with some additional 
 |`ESCAPE`           |Clear selection and highlights     |
 |`INSERT`           |Toggle insert and overwrite modes  |
 |`TAB`              |Increase indentation               |
-|`ctrl 0`           |Reset font size                    |
-|`ctrl A`           |Select all                         |
-|`ctrl B`           |Go to declaration                  |
-|`ctrl C`           |Copy to clipboard                  |
-|`ctrl D`           |Duplicate line                     |
-|`ctrl DOWN`        |Scroll down (forward)              |
-|`ctrl MINUS`       |Decrease font size                 |
-|`ctrl PLUS`        |Increase font size                 |
-|`ctrl SLASH`       |Toggle line comment                |
-|`ctrl SPACE`       |Trigger code completion            |
-|`ctrl UP`          |Scroll up (back)                   |
-|`ctrl V`           |Paste from clipboard               |
-|`ctrl X`           |Cut to clipboard                   |
-|`ctrl Y`           |Remove line                        |
-|`ctrl Z`           |Undo                               |
-|`ctrl alt S`       |Toggle vertical split              |
-|`ctrl alt D`       |Look up documentation              |
 |`shift TAB`        |Decrease indentation               |
-|`shift ctrl DOWN`  |Move line down                     |
-|`shift ctrl F7`    |Show usages                        |
-|`shift ctrl UP`    |Move line up                       |
-|`shift ctrl Z`     |Redo                               |
+|`menu PLUS`        |Increase font size                 |
+|`menu MINUS`       |Decrease font size                 |
+|`menu 0`           |Reset font size                    |
+|`menu A`           |Select all                         |
+|`menu X`           |Cut to clipboard                   |
+|`menu C`           |Copy to clipboard                  |
+|`menu V`           |Paste from clipboard               |
+|`menu Z`           |Undo                               |
+|`shift menu Z`     |Redo                               |
+|`menu B`           |Go to declaration                  |
+|`menu D`           |Duplicate line                     |
+|`ctrl Y`           |(L,W) Remove line                  |
+|`meta BACKSPACE`   |(M)   Remove line                  |
+|`ctrl UP`          |Scroll up (back)                   |
+|`ctrl DOWN`        |Scroll down (forward)              |
+|`menu SLASH`       |Toggle line comment                |
+|`ctrl SPACE`       |Trigger code completion            |
+|`ctrl alt S`       |Toggle vertical split (*)          |
+|`shift menu UP`    |Move line up                       |
+|`shift menu DOWN`  |Move line down                     |
+|`shift menu F7`    |Show usages                        |
+|`ctrl LEFT`        |Move to word start                 |
+|`ctrl RIGHT`       |Move to word end                   |
+|`ctrl BACKSPACE`   |Delete to word start               |
+|`ctrl DELETE`      |Delete to word end                 |
+|`menu F9`          |Compile or build project           |
+|`ctrl alt D`       |Documentation for cursor           |
+|`menu S`           |Compile and save code              |
+|`shift RETURN`     |Execute selection in interpreter   |
+
+(*) Currently not implemented
