@@ -35,7 +35,7 @@ import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.undo.UndoableEdit
-import javax.swing.{CellEditor, DropMode, UIManager}
+import javax.swing.{CellEditor, DropMode}
 
 import scala.annotation.tailrec
 import scala.collection.immutable.{IndexedSeq => Vec}

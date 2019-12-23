@@ -190,6 +190,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
                             useDevice: Boolean, pickPort: Boolean): Unit = {
     requireEDT()
     import de.sciss.file._
+    import de.sciss.numbers.Implicits._
     val programPath         = Prefs.superCollider.getOrElse(Prefs.defaultSuperCollider)
     if (programPath != Prefs.defaultSuperCollider) serverCfg.program = programPath.path
 
@@ -202,11 +203,11 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     val numInputs           = Prefs.audioNumInputs    .getOrElse(Prefs.defaultAudioNumInputs)
     serverCfg.inputBusChannels  = numInputs
     val numPrivate          = Prefs.audioNumPrivate   .getOrElse(Prefs.defaultAudioNumPrivate)
-    serverCfg.audioBusChannels = numInputs + numOutputs + numPrivate
-    serverCfg.audioBuffers  = Prefs.audioNumAudioBufs .getOrElse(Prefs.defaultAudioNumAudioBufs)
+    serverCfg.audioBusChannels = (numInputs + numOutputs + numPrivate).nextPowerOfTwo
+    serverCfg.audioBuffers  = Prefs.audioNumAudioBufs .getOrElse(Prefs.defaultAudioNumAudioBufs).nextPowerOfTwo
     serverCfg.wireBuffers   = Prefs.audioNumWireBufs  .getOrElse(Prefs.defaultAudioNumWireBufs)
     serverCfg.sampleRate    = Prefs.audioSampleRate   .getOrElse(Prefs.defaultAudioSampleRate)
-    serverCfg.blockSize     = Prefs.audioBlockSize    .getOrElse(Prefs.defaultAudioBlockSize)
+    serverCfg.blockSize     = Prefs.audioBlockSize    .getOrElse(Prefs.defaultAudioBlockSize).nextPowerOfTwo
     serverCfg.memorySize    = Prefs.audioMemorySize   .getOrElse(Prefs.defaultAudioMemorySize) * 1024
 
     if (pickPort) {
