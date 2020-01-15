@@ -20,6 +20,7 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
 import de.sciss.lucre.synth.Sys
+import de.sciss.mellite.edit.EditStreamPeer
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
@@ -27,7 +28,7 @@ import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.Pat
-import de.sciss.patterns.lucre.Stream
+import de.sciss.patterns.lucre.{Context, Pattern, Stream}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
@@ -102,10 +103,10 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
   private def codeFrame[S <: Sys[S]](obj: Stream[S])
                                     (implicit tx: S#Tx, universe: Universe[S],
                                      compiler: Code.Compiler): CodeFrame[S] = {
-    val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Stream.Code, key = Stream.attrSource)()
+    val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Pattern.Code, key = Stream.attrSource)()
     val objH    = tx.newHandle(obj) // IntelliJ highlight bug
     val code0   = codeObj.value match {
-      case cs: Stream.Code => cs
+      case cs: Pattern.Code => cs
       case other => sys.error(s"Stream source code does not produce patterns.Graph: ${other.tpe.humanName}")
     }
 
@@ -114,7 +115,10 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
 
       def save(in: Unit, out: Pat[_])(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        ??? // EditVar[S, Pat[_], Stream]("Change Stream Graph", obj, Stream.newConst[S](out))
+        implicit val ctx: patterns.Context[S] = Context[S](tx.system, tx)
+        import universe.cursor
+        val v   = out.expand[S]
+        EditStreamPeer[S]("Change Stream Graph", obj, v)
       }
 
       def dispose()(implicit tx: S#Tx): Unit = ()
@@ -128,7 +132,7 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
           val res0 = cursor.step { implicit tx =>
             implicit val ctx: patterns.Context[S] = patterns.lucre.Context[S](tx.system, tx)
             val obj = objH()
-            val st  = obj.peer // value
+            val st  = obj.peer()
             st.toIterator.take(n).toList
           }
           val abbr  = res0.lengthCompare(n) == 0
