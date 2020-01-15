@@ -40,6 +40,7 @@
 201 freesound.lucre.SoundObj
 202 freesound.lucre.Retrieval
 300 patterns.lucre.Pattern
+301 patterns.lucre.Stream
 400 Widget.Graph
 500 Control.Graph
 600 Action.Graph

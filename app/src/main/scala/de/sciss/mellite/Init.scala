@@ -2,7 +2,7 @@
  *  Init.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2019 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2020 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Affero General Public License v3+
  *
@@ -26,7 +26,7 @@ import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownObjView, MarkdownRenderViewImpl}
 import de.sciss.mellite.impl.objview.{ActionObjView, ActionRawObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, ControlObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
-import de.sciss.mellite.impl.patterns.PatternObjView
+import de.sciss.mellite.impl.patterns.{PatternObjView, StreamObjView}
 import de.sciss.mellite.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
 import de.sciss.mellite.impl.widget.WidgetObjView
@@ -79,23 +79,25 @@ trait Init {
       ParamSpecObjView,
       PatternObjView,
       ProcObjView,
+      StreamObjView,
       StringObjView,
       TimelineObjView,
-      WidgetObjView
+      WidgetObjView,
     )
     obj.foreach(ObjListView.addFactory)
 
     val gr = List(
       DoubleObjView,
       DoubleVectorObjView,
-      EnvSegmentObjView
+      EnvSegmentObjView,
     )
     gr.foreach(ObjGraphemeView.addFactory)
 
     val tl = List(
       ProcObjView,
       ActionRawObjView,
-      PatternObjView
+      PatternObjView,
+      StreamObjView,
     )
     tl.foreach(ObjTimelineView.addFactory)
   }
