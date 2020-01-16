@@ -46,13 +46,8 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
   def tpe           : Obj.Type  = Stream
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Stream[S])(implicit tx: S#Tx): StreamObjView[S] with ObjListView[S] = {
-    //    val vr = Stream.Var.unapply(obj).getOrElse {
-    //      val _vr = Stream.newVar[S](obj)
-    //      _vr
-    //    }
+  def mkListView[S <: Sys[S]](obj: Stream[S])(implicit tx: S#Tx): StreamObjView[S] with ObjListView[S] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
-  }
 
   def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Stream[S],
                                   context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S] = {
@@ -74,11 +69,10 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
 
   private abstract class Impl[S <: Sys[S]]
     extends StreamObjView[S]
-      with ObjListView /* .Int */[S]
+      with ObjListView[S]
       with ObjViewImpl.Impl[S]
       with ObjListViewImpl.EmptyRenderer[S]
-      with NonEditable[S]
-      /* with NonViewable[S] */ {
+      with NonEditable[S] {
 
     override def objH: stm.Source[S#Tx, Stream[S]]
 
@@ -98,8 +92,6 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       val frame = codeFrame(obj)
       Some(frame)
     }
-
-    // ---- adapter for editing an Stream's source ----
   }
 
   private def codeFrame[S <: Sys[S]](obj: Stream[S])
@@ -155,17 +147,19 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
             implicit val ctx: patterns.Context[S] = patterns.lucre.Context[S](tx.system, tx)
             val obj = objH()
             val st  = obj.peer()
-            if (n == 1) st.next().toString else {
-              val it = st.toIterator.take(n) // .toList
-              it.mkString("[", ", ", /*if (abbr) " ...]" else*/ "]")
+            if (n == 1) {
+              if (st.hasNext) st.next().toString else "<EOS>"
+            } else {
+              val it = st.toIterator.take(n)
+              it.mkString("[", ", ", "]")
             }
           }
-          // val abbr  = res0.lengthCompare(n) == 0
           println(res)
         }
       }
       val ks = KeyStrokes.plain + Key.F8
-      val b = GUI.toolButton(actionEval, raphael.Shapes.Quote, tooltip = s"Print next elements (${GUI.keyStrokeText(ks)})")
+      val b = GUI.toolButton(actionEval, raphael.Shapes.Quote,
+        tooltip = s"Print next elements (${GUI.keyStrokeText(ks)})")
       Util.addGlobalKey(b, ks)
       b
     }
