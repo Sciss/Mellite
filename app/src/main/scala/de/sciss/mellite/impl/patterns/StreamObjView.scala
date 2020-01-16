@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.patterns
 
-import de.sciss.desktop.UndoManager
+import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
 import de.sciss.lucre.stm
@@ -29,12 +29,14 @@ import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView,
 import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.{Context, Pattern, Stream}
+import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
-import javax.swing.Icon
+import javax.swing.{Icon, SpinnerNumberModel}
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.Button
+import scala.swing.event.Key
 
 object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
   type E[~ <: stm.Sys[~]] = Stream[~]
@@ -124,28 +126,59 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       def dispose()(implicit tx: S#Tx): Unit = ()
     }
 
-    val viewEval = View.wrap[S, Button] {
-      val actionEval = new swing.Action("Evaluate") { self =>
+    val viewReset = View.wrap[S, Button] {
+      val actionReset = new swing.Action("Reset") { self =>
         import universe.cursor
         def apply(): Unit = {
-          val n = 60
-          val res0 = cursor.step { implicit tx =>
+          cursor.step { implicit tx =>
+            val obj = objH()
+            val st  = obj.peer()
+            st.reset()
+          }
+        }
+      }
+      val ks = KeyStrokes.menu1 + Key.F5
+      val b = GUI.toolButton(actionReset, raphael.Shapes.Undo, tooltip =
+        s"Reset stream to initial position (${GUI.keyStrokeText(ks)})")
+      Util.addGlobalKey(b, ks)
+      b
+    }
+
+    lazy val mEvalN = new SpinnerNumberModel(1, 1, 1000, 1)
+
+    val viewEval = View.wrap[S, Button] {
+      val actionEval = new swing.Action("Next") { self =>
+        import universe.cursor
+        def apply(): Unit = {
+          val n = mEvalN.getNumber.intValue()
+          val res = cursor.step { implicit tx =>
             implicit val ctx: patterns.Context[S] = patterns.lucre.Context[S](tx.system, tx)
             val obj = objH()
             val st  = obj.peer()
-            st.toIterator.take(n).toList
+            if (n == 1) st.next().toString else {
+              val it = st.toIterator.take(n) // .toList
+              it.mkString("[", ", ", /*if (abbr) " ...]" else*/ "]")
+            }
           }
-          val abbr  = res0.lengthCompare(n) == 0
-          val res   = if (abbr) res0.init else res0
-          println(res.mkString("[", ", ", if (abbr) " ...]" else "]"))
+          // val abbr  = res0.lengthCompare(n) == 0
+          println(res)
         }
       }
-      GUI.toolButton(actionEval, raphael.Shapes.Quote)
+      val ks = KeyStrokes.plain + Key.F8
+      val b = GUI.toolButton(actionEval, raphael.Shapes.Quote, tooltip = s"Print next elements (${GUI.keyStrokeText(ks)})")
+      Util.addGlobalKey(b, ks)
+      b
+    }
+
+    val viewEvalN = View.wrap[S, Spinner] {
+      val res = new Spinner(mEvalN)
+      res.tooltip = "Number of elements to print"
+      res
     }
 
     val viewPower = RunnerToggleButton(obj)
 
-    val bottom = viewEval :: viewPower :: Nil
+    val bottom = viewReset :: viewEval :: viewEvalN :: viewPower :: Nil
 
     implicit val undo: UndoManager = UndoManager()
     CodeFrameImpl.make(obj, objH, codeObj, code0, Some(handler), bottom = bottom, rightViewOpt = None,
