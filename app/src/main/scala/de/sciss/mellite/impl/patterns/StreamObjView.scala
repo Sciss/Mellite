@@ -28,12 +28,12 @@ import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.Pat
-import de.sciss.patterns.lucre.{Context, Pattern, Stream}
+import de.sciss.patterns.lucre.{Pattern, Stream}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
-import javax.swing.{Icon, SpinnerNumberModel}
 import javax.swing.undo.UndoableEdit
+import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.swing.Button
 import scala.swing.event.Key
@@ -109,7 +109,7 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
 
       def save(in: Unit, out: Pat[_])(implicit tx: S#Tx): UndoableEdit = {
         val obj = objH()
-        implicit val ctx: patterns.Context[S] = Context[S](tx.system, tx)
+        import obj.context
         import universe.cursor
         val v   = out.expand[S]
         EditStreamPeer[S]("Change Stream Graph", obj, v)
