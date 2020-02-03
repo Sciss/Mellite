@@ -97,7 +97,7 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite-core" % "2.42.1"
-    "de.sciss" %% "mellite-app"  % "2.43.0"
+    "de.sciss" %% "mellite-app"  % "2.43.1"
 
 ## building from source
 
@@ -182,7 +182,7 @@ Then Windows can be built on Linux using wine:
  
  1. `rm -r full/target` (otherwise Jlink fails)
  2. `wine cmd.exe` and
- `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11\jdk-11.0.4+11\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.2.8\sbt\bin\sbt-launch.jar` then in sbt console:
+ `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11\jdk-11.0.4+11\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.3.7\sbt\bin\sbt-launch.jar` then in sbt console:
  `project mellite-full` and `universal:packageBin`
  
 For Mac we need a bloody fruit company machine:
