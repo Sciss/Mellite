@@ -39,7 +39,7 @@ import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
 import de.sciss.synth.io.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
-import de.sciss.synth.{Client, SynthGraph, addToTail}
+import de.sciss.synth.{Client, SynthGraph, addToTail, intNumberWrapper}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}
 import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 
@@ -356,7 +356,7 @@ object ActionBounce {
     config.sampleRate         = sampleRate
     config.outputBusChannels  = numChannels
     val numPrivate = Prefs.audioNumPrivate.getOrElse(Prefs.defaultAudioNumPrivate)
-    config.audioBusChannels   = config.outputBusChannels + numPrivate
+    config.audioBusChannels   = (config.outputBusChannels + numPrivate).nextPowerOfTwo
   }
 
   sealed trait Selection
