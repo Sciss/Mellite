@@ -42,13 +42,13 @@ lazy val deps = new {
     val swingPlus           = "0.4.2"
   }
   val app = new {
-    val akka                = "2.6.1"
+    val akka                = "2.6.3"
     val appDirs             = "1.0.3"
     val dotterweide         = "0.3.0"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.23.0"
-    val fscape              = "2.33.2"
+    val fscape              = "2.33.3-SNAPSHOT"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
@@ -324,6 +324,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "scalacollider"                  % deps.common.scalaCollider,      // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-api"         % deps.common.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-core"        % deps.common.scalaColliderUGens, // realtime sound synthesis
+      "de.sciss"          %% "scalacolliderugens-plugins"     % deps.common.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %  "scalacolliderugens-spec"        % deps.common.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderswing-core"        % deps.app.scalaColliderSwing,    // UI methods for scala-collider
       "de.sciss"          %% "scalainterpreterpane"           % deps.app.interpreterPane,       // REPL
