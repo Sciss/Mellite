@@ -6,7 +6,7 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "2.42.1"
 lazy val mimaCommonVersion          = "2.42.0"
-lazy val appVersion                 = "2.43.2-SNAPSHOT"
+lazy val appVersion                 = "2.43.2"
 lazy val mimaAppVersion             = "2.43.0"
 
 lazy val loggingEnabled             = true
@@ -48,7 +48,7 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.23.0"
-    val fscape              = "2.33.3-SNAPSHOT"
+    val fscape              = "2.33.4"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
