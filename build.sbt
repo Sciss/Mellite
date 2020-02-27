@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.42.1"
+lazy val commonVersion              = "2.42.2"
 lazy val mimaCommonVersion          = "2.42.0"
-lazy val appVersion                 = "2.43.2"
+lazy val appVersion                 = "2.43.3"
 lazy val mimaAppVersion             = "2.43.0"
 
 lazy val loggingEnabled             = true
@@ -23,7 +23,7 @@ lazy val deps = new {
     val desktop             = "0.10.5"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.3"
-    val lucre               = "3.16.1"
+    val lucre               = "3.16.2"
     val lucreSwing          = "1.20.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -48,12 +48,12 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.23.0"
-    val fscape              = "2.33.4"
+    val fscape              = "2.33.5"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val negatum             = "0.12.0"
+    val negatum             = "0.12.1"
     val patterns            = "0.17.1"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
@@ -359,7 +359,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "org.slf4j"         %  "slf4j-api"                      % deps.app.slf4j,                 // logging (used by weblaf)
       "org.slf4j"         %  "slf4j-simple"                   % deps.app.slf4j,                 // logging (used by weblaf)
     ),
-    mimaPreviousArtifacts := Set("de.sciss" %% baseNameL % mimaAppVersion),
+    mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-app" % mimaAppVersion),
     initialCommands in console :=
       """import de.sciss.mellite._""".stripMargin,
     fork in run := true,  // required for shutdown hook, and also the scheduled thread pool, it seems

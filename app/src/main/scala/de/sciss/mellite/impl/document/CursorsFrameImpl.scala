@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.document
 
 import java.text.SimpleDateFormat
-import java.util
 import java.util.{Date, Locale}
 
 import de.sciss.desktop
@@ -78,7 +77,7 @@ object CursorsFrameImpl {
                                  var childViews: Vec[CursorView], var name: String,
                                  val created: Long, var updated: Long) extends TreeNode {
 
-    def children(): util.Enumeration[_] = childViews.iterator.asJavaEnumeration
+    def children() /*: util.Enumeration[_]*/ = childViews.iterator.asJavaEnumeration
 
     def getChildCount: Int = childViews.size
 
@@ -129,7 +128,7 @@ object CursorsFrameImpl {
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }
 
-    override protected def placement = WindowPlacement(1f, 0f)
+    override protected def placement: WindowPlacement = WindowPlacement(1f, 0f)
   }
 
   private abstract class ViewImpl(val _root: CursorView)

@@ -16,6 +16,8 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.desktop.{SwingApplication, SwingApplicationProxy}
+import de.sciss.lucre.synth.Server
+import de.sciss.synth.Client
 import de.sciss.synth.proc.{AuralSystem, Code, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -30,6 +32,11 @@ object Application extends SwingApplicationProxy[Universe[_], Application] { me 
 
   implicit def auralSystem: AuralSystem   = peer.auralSystem
   implicit def compiler   : Code.Compiler = peer.compiler
+
+  def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
+                            useDevice: Boolean, pickPort: Boolean): Unit =
+    peer.applyAudioPreferences(serverCfg = serverCfg, clientCfg = clientCfg,
+      useDevice = useDevice, pickPort = pickPort)
 
   def cacheDir: File = peer.cacheDir
 }
@@ -56,6 +63,10 @@ trait Application extends SwingApplication[Application.Document] {
   implicit def auralSystem: AuralSystem
 
   implicit def compiler: Code.Compiler
+
+  def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
+                            useDevice: Boolean, pickPort: Boolean): Unit =
+    throw new NotImplementedError()
 
   def cacheDir: File
 }

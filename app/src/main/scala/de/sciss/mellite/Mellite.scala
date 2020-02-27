@@ -186,8 +186,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     true
   }
 
-  def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
-                            useDevice: Boolean, pickPort: Boolean): Unit = {
+  override def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
+                                     useDevice: Boolean, pickPort: Boolean): Unit = {
     requireEDT()
     import de.sciss.file._
     import de.sciss.numbers.Implicits._
