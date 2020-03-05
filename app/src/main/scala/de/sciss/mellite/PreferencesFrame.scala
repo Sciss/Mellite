@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 
-import de.sciss.desktop.{Desktop, Preferences, PrefsGUI, Window, WindowHandler}
+import de.sciss.desktop.{Desktop, FileDialog, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
 import de.sciss.icons.raphael
 import de.sciss.mellite.impl.component.NoMenuBarActions
@@ -88,9 +88,9 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     val ggCodeLineSpacing   = intField(Prefs.codeLineSpacing, default = Prefs.defaultCodeLineSpacing, min = 90, max = 200)
 
     val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
-    val lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
-    val lbWarnAppText       = new Label(
-      "<html><body>Some changes to appearance take only effect<br>after restarting the application.",
+    def lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
+    def lbWarnText(sec: String) = new Label(
+      s"<html><body>Some changes to $sec take only effect<br>after restarting the application.",
       null, Alignment.Leading)
 
 //    val lbRevealFileCmd = label("Reveal File Command")
@@ -157,6 +157,10 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
 
     // ---- system ----
 
+    val lbTempDir = label("Temporary directory")
+    val ggTempDir = pathField1(Prefs.tempDir, Prefs.defaultTempDir,
+      title = "Directory for storing temporary files (e.g. during rendering)", mode = FileDialog.Folder)
+
     val lbLockTimeout   = label("Database Lock Timeout [ms]")
     val ggLockTimeout   = intField(Prefs.dbLockTimeout, Prefs.defaultDbLockTimeout)
 
@@ -220,7 +224,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbCodeLineSpacing  , ggCodeLineSpacing ),
       ),
       List(
-        (lbWarnAppIcon, lbWarnAppText)
+        (lbWarnAppIcon, lbWarnText("appearance"))
 //      ),
 //      List(
 //        (lbRevealFileCmd    , ggRevealFileCmd   )
@@ -258,7 +262,11 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     )
     mkPage("System")(
       List(
+        (lbTempDir          , ggTempDir         ),
         (lbLockTimeout      , ggLockTimeout     )
+      ),
+      List(
+        (lbWarnAppIcon, lbWarnText("system"))
       )
     )
 

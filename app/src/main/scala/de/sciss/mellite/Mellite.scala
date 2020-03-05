@@ -257,6 +257,11 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 ////      }
 //    }
 
+    val tempDir = Prefs.tempDir.getOrElse(Prefs.defaultTempDir)
+    if (tempDir != Prefs.defaultTempDir) {
+      System.setProperty("java.io.tmpdir", tempDir.getPath)
+    }
+
     if (Desktop.isMac) {
       System.setProperty("apple.laf.useScreenMenuBar",
         Prefs.screenMenuBar.getOrElse(Prefs.defaultScreenMenuBar).toString)
@@ -294,8 +299,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     ActionOpenWorkspace.install()
 
     // at this point, awt.Toolkit will have loaded Atk
-    sys.props.get("javax.accessibility.assistive_technologies") match {
-      case Some("org.GNOME.Accessibility.AtkWrapper") =>
+    System.getProperty("javax.accessibility.assistive_technologies") match {
+      case "org.GNOME.Accessibility.AtkWrapper" =>
         println(
           s"""WARNING: Assistive technology installed
              |  that is known to cause performance problems.

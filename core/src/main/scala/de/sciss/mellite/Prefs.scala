@@ -40,7 +40,14 @@ object Prefs {
   // ---- system ----
 
   final val defaultDbLockTimeout = 500
+
   def dbLockTimeout: Entry[Int] = userPrefs("lock-timeout")
+
+  /** Is interpreted as using the JVM's default `java.io.tmpdir` */
+  final val defaultTempDir: File  = file("<default>")
+
+  /** Temporary directory; is set at application start, using system property `java.io.tmpdir`. */
+  def tempDir: Entry[File] = userPrefs("temp-dir")
 
   // ---- appearance ----
 
@@ -194,9 +201,7 @@ object Prefs {
   def sensorChannels : Entry[Int              ] = userPrefs("sensor-channels")
   def sensorAutoStart: Entry[Boolean          ] = userPrefs("sensor-auto-start")
 
-  // ---- sub-applications ----
-  // they are here, because right now Mellite is `DelayedInit` which
-  // can cause trouble with `var`s.
+  // ---- audio mixer ----
 
   /** The master volume in decibels. A value of -72 or less
     * is mapped to -inf.
@@ -207,6 +212,8 @@ object Prefs {
   def audioMasterLimiter  : Entry[Boolean]  = userPrefs("audio-master-limiter")
   def audioMasterPostMeter: Entry[Boolean]  = userPrefs("audio-master-post-meter")
   def headphonesActive    : Entry[Boolean]  = userPrefs("headphones-active")
+
+  // ---- applications can set these ----
 
   /** Whether to create a log (post) window or not. Defaults to `true`. */
   var useLogFrame: Boolean = true
