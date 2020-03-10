@@ -37,7 +37,7 @@ lazy val deps = new {
     val scallop             = "3.3.2"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.33.0"
+    val soundProcesses      = "3.33.1"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
@@ -48,7 +48,7 @@ lazy val deps = new {
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
     val freesound           = "1.23.0"
-    val fscape              = "2.33.5"
+    val fscape              = "2.33.6"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
