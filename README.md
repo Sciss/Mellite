@@ -96,8 +96,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "2.42.3"
-    "de.sciss" %% "mellite-app"  % "2.43.4"
+    "de.sciss" %% "mellite-core" % "2.42.4"
+    "de.sciss" %% "mellite-app"  % "2.43.5"
 
 ## building from source
 
@@ -174,7 +174,7 @@ To build for Linux:
  1. `java-use-8`
  2. `sbt mellite-app/universal:packageBin`
  3. `java-use-11`
- 4. `sbt -java-home '/home/hhrutz/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11/jdk-11.0.4+11' mellite-full/universal:packageBin mellite-full/debian:packageBin`
+ 4. `sbt -java-home '/home/hhrutz/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.6_10/jdk-11.0.6+10' mellite-full/universal:packageBin mellite-full/debian:packageBin`
  
 Copy the artifacts to a safe location now.
 To build for Mac and Windows, we need to publish all libraries now to Maven Central (use JDK 8 again!).
