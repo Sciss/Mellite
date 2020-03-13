@@ -182,7 +182,7 @@ Then Windows can be built on Linux using wine:
  
  1. `rm -r full/target` (otherwise Jlink fails)
  2. `wine cmd.exe` and
- `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.4_11\jdk-11.0.4+11\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.3.7\sbt\bin\sbt-launch.jar` then in sbt console:
+ `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.6_10\jdk-11.0.6+10\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.3.7\sbt\bin\sbt-launch.jar` then in sbt console:
  `project mellite-full` and `universal:packageBin`
  
 For Mac we need a bloody fruit company machine:
