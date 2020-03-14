@@ -423,11 +423,12 @@ object CodeViewImpl extends CodeView.Companion {
           ln < nl && doc.text(doc.intervalOf(ln)).startsWith(language.lineCommentPrefix)
         }) ln += 1
         if (ln > 0) {
-          editorPanel.currentEditor.terminal.offset = doc.startOffsetOf(ln)
+          val off = doc.startOffsetOf(ln)
+          if (off > 0) editorPanel.currentEditor.terminal.offset = off
         }
       }
 
-      val intpFut       = interpreter(code.tpe.id)
+      val intpFut = interpreter(code.tpe.id)
       intpFut.value match {
         case Some(tr) =>
           intpReady(tr)

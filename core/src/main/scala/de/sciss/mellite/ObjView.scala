@@ -36,7 +36,7 @@ object ObjView {
   final val categResources    = "Resources"
   final val categComposition  = "Composition"
   // final val categSound        = "Sound"
-  final val categOrganisation = "Organisation"
+  final val categOrganisation = "Organization"  // XXX TODO rename field name
   final val categMisc         = "Miscellaneous"
 
   final val Unnamed = "<unnamed>"
