@@ -61,6 +61,8 @@ object AudioCueViewImpl {
       case AudioCue.Obj               (a, _, _, _)  => Some(tx.newHandle(a))
       case AudioCue.Obj.Shift         (p, _)        => findArtifact(p)
       case AudioCue.Obj.ReplaceOffset (p, _)        => findArtifact(p)
+      case AudioCue.Obj.Var           (vr)          => findArtifact(vr())
+      case _: AudioCue.Obj.Const[S]                 => None
     }
 
     val artifactOptH = findArtifact(obj)
