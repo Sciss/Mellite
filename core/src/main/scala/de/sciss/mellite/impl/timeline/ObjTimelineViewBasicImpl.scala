@@ -299,7 +299,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
         }
 
         g.clipRect(px + 2, py + 2, pw - 4, ph - 4)
-        // possible unicodes: 2327 23DB 24DC 25C7 2715 29BB
+        // possible unicode values: 2327 23DB 24DC 25C7 2715 29BB
         // val text  = if (view.muted) "\u23DB " + name else name
         val text: String = this match {
           case mv: ObjTimelineView.HasMute if mv.muted => s"\u25C7 $name"

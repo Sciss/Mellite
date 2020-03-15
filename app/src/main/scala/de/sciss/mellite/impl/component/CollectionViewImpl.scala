@@ -272,23 +272,26 @@ trait CollectionViewImpl[S <: Sys[S]]
                   println(pre)
                   println(availS)
 
-                case multiple =>
+                case _ /*multiple*/ =>
                   // make more attempts first by selecting only those
-                  // supporting command line; then by looking for exact match
+                  // supporting command line; then choosing the shorter one
                   val factOpt1 = factOpts.filter(_.canMakeObj)
                   if (factOpt1 !== factOpts) {
                     checkOpts(factOpt1)
                   } else {
-                    val factOps2 = factOpts.filter(_.prefix.toLowerCase(Locale.US) === nameL)
-                    if (factOps2.nonEmpty && (factOps2 !== factOpts)) {
-                      checkOpts(factOps2)
-                    } else {
-                      val pre     = s"Multiple object types start with '$cmd':\n"
-                      val avail   = multiple.map(_.prefix).sorted
-                      val availS  = GUI.formatTextTable(avail, columns = 3)
-                      println(pre)
-                      println(availS)
-                    }
+                    val choice = factOpts.minBy(_.prefix)
+                    checkOpts(choice :: Nil)
+
+//                    val factOps2 = factOpts.filter(_.prefix.toLowerCase(Locale.US) === nameL)
+//                    if (factOps2.nonEmpty && (factOps2 !== factOpts)) {
+//                      checkOpts(factOps2)
+//                    } else {
+//                      val pre     = s"Multiple object types start with '$cmd':\n"
+//                      val avail   = multiple.map(_.prefix).sorted
+//                      val availS  = GUI.formatTextTable(avail, columns = 3)
+//                      println(pre)
+//                      println(availS)
+//                    }
                   }
               }
 

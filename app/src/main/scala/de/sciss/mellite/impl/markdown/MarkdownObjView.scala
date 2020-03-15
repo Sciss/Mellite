@@ -33,7 +33,7 @@ object MarkdownObjView extends ObjListView.Factory {
   val prefix        : String    = "Markdown"
   def humanName     : String    = s"$prefix Text"
   def tpe           : Obj.Type  = Markdown
-  def category      : String    = ObjView.categOrganisation
+  def category      : String    = ObjView.categOrganization
   def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ObjListView[S] = {

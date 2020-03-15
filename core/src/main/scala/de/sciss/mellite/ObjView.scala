@@ -25,7 +25,6 @@ import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
 
-import scala.language.higherKinds
 import scala.util.Try
 
 object ObjView {
@@ -36,7 +35,7 @@ object ObjView {
   final val categResources    = "Resources"
   final val categComposition  = "Composition"
   // final val categSound        = "Sound"
-  final val categOrganisation = "Organization"  // XXX TODO rename field name
+  final val categOrganization = "Organization"
   final val categMisc         = "Miscellaneous"
 
   final val Unnamed = "<unnamed>"

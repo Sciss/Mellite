@@ -18,7 +18,6 @@ import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{Obj, Sys}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 object EditAttrMap {

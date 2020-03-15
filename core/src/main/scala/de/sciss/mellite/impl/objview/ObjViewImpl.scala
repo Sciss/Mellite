@@ -37,7 +37,6 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 import org.rogach.scallop
 
-import scala.language.higherKinds
 import scala.swing.Component
 import scala.util.{Failure, Try}
 

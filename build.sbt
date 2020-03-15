@@ -4,10 +4,10 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.42.5-SNAPSHOT"
-lazy val mimaCommonVersion          = "2.42.0"
-lazy val appVersion                 = "2.43.6-SNAPSHOT"
-lazy val mimaAppVersion             = "2.43.0"
+lazy val commonVersion              = "2.44.0-SNAPSHOT"
+lazy val mimaCommonVersion          = "2.44.0"
+lazy val appVersion                 = "2.44.0-SNAPSHOT"
+lazy val mimaAppVersion             = "2.44.0"
 
 lazy val loggingEnabled             = true
 
@@ -34,27 +34,27 @@ lazy val deps = new {
     val scalaOSC            = "1.2.1"
     val scalaSTM            = "0.9.1"
     val scalaSwing          = "2.1.1"
-    val scallop             = "3.3.2"
+    val scallop             = "3.4.0"
     val serial              = "1.1.1"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.33.3"
+    val soundProcesses      = "3.34.0-SNAPSHOT"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
   val app = new {
-    val akka                = "2.6.3"
+    val akka                = "2.6.4"
     val appDirs             = "1.0.3"
     val dotterweide         = "0.3.0"
     val fileCache           = "0.5.1"
     val fingerTree          = "1.5.4"
-    val freesound           = "1.23.0"
-    val fscape              = "2.33.6"
+    val freesound           = "1.24.0-SNAPSHOT"
+    val fscape              = "2.34.0-SNAPSHOT"
     val interpreterPane     = "1.10.1"
     val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
-    val negatum             = "0.12.1"
-    val patterns            = "0.17.1"
+    val negatum             = "0.13.0-SNAPSHOT"
+    val patterns            = "0.18.0-SNAPSHOT"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
@@ -70,7 +70,7 @@ lazy val deps = new {
     val topology            = "1.1.2"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "2.38.0"
+    val wolkenpumpe         = "2.39.0-SNAPSHOT"
   }
 }
 
@@ -88,8 +88,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.12.10",
-  crossScalaVersions := Seq("2.13.0", "2.12.10"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
+  scalaVersion       := "2.13.1",
+  crossScalaVersions := Seq("2.13.1", "2.12.10"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"

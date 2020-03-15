@@ -30,7 +30,6 @@ import de.sciss.swingplus.{ListView, SpinningProgressBar}
 import de.sciss.synth.proc.{Confluent, Universe, Workspace}
 
 import scala.concurrent.ExecutionContext
-import scala.language.higherKinds
 import scala.swing.{BoxPanel, Component, Orientation, ScrollPane}
 
 object ExprHistoryView {

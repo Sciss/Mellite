@@ -41,7 +41,7 @@ object ColorObjView extends ObjListView.Factory {
   val prefix        : String   = "Color"
   def humanName     : String   = prefix
   def tpe           : Obj.Type  = Color.Obj
-  def category      : String   = ObjView.categOrganisation
+  def category      : String   = ObjView.categOrganization
   def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Color.Obj[S])(implicit tx: S#Tx): ObjListView[S] = {

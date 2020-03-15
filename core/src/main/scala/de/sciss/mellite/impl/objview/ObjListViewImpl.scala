@@ -21,7 +21,6 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.ObjListView
 import javax.swing.undo.UndoableEdit
 
-import scala.language.higherKinds
 import scala.swing.{CheckBox, Component, Label}
 import scala.util.Try
 

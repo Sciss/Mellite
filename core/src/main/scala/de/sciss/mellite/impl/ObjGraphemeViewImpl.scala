@@ -23,7 +23,6 @@ import de.sciss.mellite.{GraphemeRendering, GraphemeView, ObjGraphemeView}
 import de.sciss.synth.proc.Grapheme
 import de.sciss.synth.proc.Grapheme.Entry
 
-import scala.language.higherKinds
 import scala.swing.Graphics2D
 
 object ObjGraphemeViewImpl {

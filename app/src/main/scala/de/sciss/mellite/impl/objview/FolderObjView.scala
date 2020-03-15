@@ -30,7 +30,7 @@ object FolderObjView extends NoArgsListObjViewFactory {
   val prefix        : String   = "Folder"
   def humanName     : String   = prefix
   def tpe           : Obj.Type  = Folder
-  def category      : String   = ObjView.categOrganisation
+  def category      : String   = ObjView.categOrganization
 
   def mkListView[S <: Sys[S]](obj: Folder[S])(implicit tx: S#Tx): ObjListView[S] =
     new Impl[S](tx.newHandle(obj)).initAttrs(obj)

@@ -31,7 +31,7 @@ object WidgetObjView extends NoArgsListObjViewFactory {
   val prefix        : String    = "Widget"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Widget
-  def category      : String    = ObjView.categOrganisation
+  def category      : String    = ObjView.categOrganization
 
   def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ObjListView[S] = {
     val value = "" // ex.value
