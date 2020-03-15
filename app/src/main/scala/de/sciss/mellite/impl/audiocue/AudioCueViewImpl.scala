@@ -93,8 +93,9 @@ object AudioCueViewImpl {
 
     val objH = tx.newHandle(obj)
     val res: Impl[S, I] = new Impl[S, I](value, objH, inMemoryBridge = system.inMemoryTx) {
-      val timelineModel = TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
-        sampleRate = TimeRef.SampleRate)
+      val timelineModel: TimelineModel =
+        TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
+          sampleRate = TimeRef.SampleRate)
       val transportView: TransportView[I]   = TransportView[I](transport, timelineModel, hasMillis = true, hasLoop = true)
     }
 
