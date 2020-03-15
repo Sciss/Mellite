@@ -27,7 +27,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.AudioCueObjView.{Config, LocationConfig, MakeResult, SingleConfig}
-import de.sciss.mellite.AudioFileFrame
+import de.sciss.mellite.AudioCueFrame
 import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
@@ -212,7 +212,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     }
 
     def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-      val frame = AudioFileFrame(obj)
+      val frame = AudioCueFrame(obj)
       Some(frame)
     }
   }

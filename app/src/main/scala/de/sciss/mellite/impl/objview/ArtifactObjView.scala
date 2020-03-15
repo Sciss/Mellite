@@ -14,24 +14,22 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
-import de.sciss.desktop.{FileDialog, PathField}
 import de.sciss.file._
 import de.sciss.icons.raphael
 import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{ActionArtifactLocation, MessageException, ObjListView, ObjView}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.artifact.ArtifactViewImpl
+import de.sciss.mellite.{ActionArtifactLocation, ArtifactFrame, MessageException, ObjListView, ObjView}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.swingplus.ComboBox
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-import scala.swing.FlowPanel
-import scala.swing.event.SelectionChanged
 import scala.util.{Failure, Success}
 
 object ArtifactObjView extends ObjListView.Factory {
@@ -55,20 +53,7 @@ object ArtifactObjView extends ObjListView.Factory {
 
   def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
                                  (implicit universe: Universe[S]): Unit = {
-    val ggFile  = new PathField
-    ggFile.mode = FileDialog.Save
-    val ggMode  = new ComboBox(Seq("New File", "Existing File", "Existing Folder")) {
-      listenTo(selection)
-      reactions += {
-        case SelectionChanged(_) =>
-          ggFile.mode = selection.index match {
-            case 1 => FileDialog.Open
-            case 2 => FileDialog.Folder
-            case _ => FileDialog.Save
-          }
-      }
-    }
-    val ggValue = new FlowPanel(ggFile, ggMode)
+    val (ggFile, ggValue) = ArtifactViewImpl.mkPathField(reveal = false, mode = true)
     val res = ObjViewImpl.primitiveConfig[S, File](window, tpe = prefix, ggValue = ggValue,
       prepare = ggFile.valueOption match {
         case Some(value) => Success(value)
@@ -126,8 +111,7 @@ object ArtifactObjView extends ObjListView.Factory {
     extends ArtifactObjView[S]
       with ObjListView[S]
       with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.StringRenderer
-      with ObjViewImpl.NonViewable[S] {
+      with ObjListViewImpl.StringRenderer {
 
     type E[~ <: stm.Sys[~]] = Artifact[~]
 
@@ -136,6 +120,13 @@ object ArtifactObjView extends ObjListView.Factory {
     def value: File = file
 
     override def obj(implicit tx: S#Tx): Artifact[S] = objH()
+
+    def isViewable: Boolean = true
+
+    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+      val frame = ArtifactFrame[S](objH(), mode = true)
+      Some(frame)
+    }
 
     def init(obj: Artifact[S])(implicit tx: S#Tx): this.type = {
       initAttrs(obj)
