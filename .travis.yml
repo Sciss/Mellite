@@ -7,8 +7,8 @@ scala:
   - 2.12.10
 
 jdk:
-  - oraclejdk8
-  - oraclejdk11
+  - openjdk8
+  - openjdk11
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION mellite-app/test mellite-app/assembly

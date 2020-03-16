@@ -4,7 +4,7 @@
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sciss/Mellite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=master)](https://travis-ci.org/Sciss/Mellite)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite_2.13)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13)
 <a href="https://liberapay.com/sciss/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 
 ## statement
