@@ -106,7 +106,7 @@ See the section 'download and installation' for requirements (JDK, JavaFX).
 Mellite builds with [sbt](http://scala-sbt.org/) and Scala 2.13, 2.12.
 The last version to support Scala 2.11 is 2.38.1.
 The last version to support Scala 2.10 is 2.10.2.
-The default target and the binary distribution of the application are currently based on Scala 2.12.
+The default target and the binary distribution of the application are currently based on Scala 2.13. Scala 2.12 was used up to Mellite v2.43.0.
 
 The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during
 development. For convenience, the [sbt script by Paul Phillips](https://github.com/paulp/sbt-extras) has been
