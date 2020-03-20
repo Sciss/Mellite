@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 
-import java.awt.event.{ActionEvent, ActionListener}
+import java.awt.event.ActionEvent
 import java.awt.geom.{AffineTransform, Area, Path2D}
 import java.awt.image.BufferedImage
 import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints, Shape}
@@ -208,18 +208,27 @@ object GUI {
     knob
   }
 
+  def step[S <: Sys[S]](title: String, message: String, window: Option[desktop.Window] = None,
+                        timeout: Int = 1000)(fun: S#Tx => Unit)
+                       (implicit cursor: stm.Cursor[S]): Unit = {
+    val f = atomic(title = title, message = message, window = window, timeout = timeout)(fun)
+    import ExecutionContext.Implicits.global
+    f.onComplete {
+      case Failure(ex)  => SoundProcesses.errorHandler(title, ex)
+      case _            =>
+    }
+  }
+
   def atomic[S <: Sys[S], A](title: String, message: String, window: Option[desktop.Window] = None,
                              timeout: Int = 1000)(fun: S#Tx => A)
                             (implicit cursor: stm.Cursor[S]): Future[A] = {
     requireEDT()
     val res = SoundProcesses.atomic[S, A](fun)
     var opt: OptionPane[Unit] = null
-    val t = new javax.swing.Timer(timeout, new ActionListener {
-      def actionPerformed(e: ActionEvent): Unit = {
-        if (!res.isCompleted) {
-          opt = OptionPane.message(message = s"$message…")
-          opt.showNonModal(window, title)
-        }
+    val t = new javax.swing.Timer(timeout, (_: ActionEvent) => {
+      if (!res.isCompleted) {
+        opt = OptionPane.message(message = s"$message…")
+        opt.showNonModal(window, title)
       }
     })
     t.setRepeats(false)

@@ -341,7 +341,7 @@ object CursorsFrameImpl {
           val view  = path.last
           val elem  = view.elem
           implicit val cursor: confluent.Cursor[S, D] = confluent.Cursor.wrap(elem.cursor)(workspace.system)
-          GUI.atomic[S, Unit]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
+          GUI.step[S]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
             implicit val dtxView: Confluent.Txn => Durable.Txn = workspace.system.durableTx _ // (tx)
             implicit val dtx: Durable.Txn = dtxView(tx)
             // XXX TODO - every branch gets a fresh universe. Ok?

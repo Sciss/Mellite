@@ -71,7 +71,7 @@ trait CollectionViewImpl[S <: Sys[S]]
   lazy final protected val actionAttr: Action = Action(null) {
     val sel = selectedObjects
     val sz  = sel.size
-    if (sz > 0) GUI.atomic[S, Unit](nameAttr, s"Opening ${if (sz == 1) "window" else "windows"}") { implicit tx =>
+    if (sz > 0) GUI.step[S](nameAttr, s"Opening ${if (sz == 1) "window" else "windows"}") { implicit tx =>
       sel.foreach(n => AttrMapFrame(n.obj))
     }
   }
@@ -81,7 +81,7 @@ trait CollectionViewImpl[S <: Sys[S]]
     val sz  = sel.size
     if (sz > 0) {
       val windowOption = Window.find(this)
-      GUI.atomic[S, Unit](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
+      GUI.step[S](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
         sel.foreach(_.openView(windowOption))
       }
     }

@@ -65,14 +65,14 @@ object ActionOpenWorkspace extends Action("Open...") {
       case cf: Workspace.Confluent =>
         implicit val workspace: Workspace.Confluent  = cf
         implicit val cursor: stm.Cursor[Durable] = workspace.system.durable
-        GUI.atomic[proc.Durable, Unit](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
+        GUI.step[proc.Durable](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
           implicit val u: Universe[Confluent] = universe.asInstanceOf[Universe[Confluent]]
           DocumentCursorsFrame(cf)
         }
       case eph =>
         implicit val cursor: stm.Cursor[S] = eph.cursor
         val nameView = CellView.const[S, String](eph.name)
-        GUI.atomic[S, Unit](fullTitle, s"Opening root elements window for '${eph.name}'") { implicit tx =>
+        GUI.step[S](fullTitle, s"Opening root elements window for '${eph.name}'") { implicit tx =>
 //          implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
           implicit val u: Universe[S] = universe
           FolderFrame[S](name = nameView, isWorkspaceRoot = true)
