@@ -5,7 +5,7 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sciss/Mellite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=master)](https://travis-ci.org/Sciss/Mellite)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13)
-<a href="https://liberapay.com/sciss/donate"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
+<a href="https://liberapay.com/sciss"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 
 ## statement
 
@@ -96,7 +96,7 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "2.44.1"
+    "de.sciss" %% "mellite-core" % "2.44.2"
     "de.sciss" %% "mellite-app"  % "2.44.2"
 
 ## building from source
