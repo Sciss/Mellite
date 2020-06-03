@@ -45,6 +45,7 @@ current 16-bit max
  1152 patterns.graph.Folder      (Patterns)
  1153 patterns.graph.AudioCue    (Patterns)
  1154 expr.graph.Stream.Bridge   (Patterns)
+ 1155 expr.graph.Pattern.Bridge  (Patterns)
 
  2000 Artifact.Bridge            (SoundProcesses)
  2001 Folder  .Bridge            (SoundProcesses)

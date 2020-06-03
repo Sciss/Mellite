@@ -34,13 +34,14 @@ import scala.swing.Swing.EmptyIcon
 import scala.swing.{Alignment, CheckBox, Dialog, Label, TextField}
 import scala.util.{Failure, Success}
 
+@deprecated("Should only use Folder now with Control/Action", since = "2.46.1")
 object EnsembleObjView extends ObjListView.Factory {
   type E[~ <: stm.Sys[~]] = Ensemble[~]
-  val icon          : Icon      = raphaelIcon(raphael.Shapes.Cube2)
+  val icon          : Icon      = raphaelIcon(raphael.Shapes.No)
   val prefix        : String    = "Ensemble"
-  def humanName     : String    = prefix
+  def humanName     : String    = s"$prefix (obsolete)"
   def tpe           : Obj.Type  = Ensemble
-  def category      : String    = ObjView.categComposition
+  def category      : String    = ObjView.categMisc
   def canMakeObj    : Boolean   = true
 
   def mkListView[S <: Sys[S]](obj: Ensemble[S])(implicit tx: S#Tx): ObjListView[S] = {

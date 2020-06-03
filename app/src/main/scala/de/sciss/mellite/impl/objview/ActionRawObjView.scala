@@ -25,6 +25,7 @@ import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{ActionRaw, Universe}
 import javax.swing.Icon
 
+@deprecated("Action should be used instead of ActionRaw", since = "2.46.1")
 object ActionRawObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
   type E[~ <: stm.Sys[~]] = ActionRaw[~] // .Elem[S]
   val icon      : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.No)
