@@ -17,6 +17,7 @@ import java.awt.{Color, Font}
 import java.net.URI
 
 import de.sciss.audiowidgets.PeakMeter
+import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm.TxnLike
@@ -25,7 +26,7 @@ import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
 import de.sciss.mellite.Mellite.{executionContext, log, showTimelineLog}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.numbers.Implicits._
-import de.sciss.synth.proc.gui.AudioBusMeter
+import de.sciss.synth.proc.gui.{AudioBusMeter, Oscilloscope}
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
@@ -166,6 +167,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     mf.get("actions").foreach {
       case g: Menu.Group =>
         g.add(Some(this), Menu.Item("server-tree", ActionShowTree))
+        g.add(Some(this), Menu.Item("server-scope", ActionScope))
         g.add(Some(this), Menu.Item("toggle-debug-log")("Toggle Debug Log")(toggleDebugLog()))
       case _ =>
     }
@@ -181,22 +183,52 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     proc.showTransportLog   = state
   }
 
+  private object ActionScope extends Action("Show Oscilloscope") {
+    enabled = false
+
+    def apply(): Unit = {
+      val scopeOpt = step { implicit tx =>
+        val sOpt = Mellite.auralSystem.serverOption
+        sOpt.map { server =>
+          val scope = Oscilloscope(server)
+          scope.bus = Bus.soundOut(server, math.min(2, server.config.outputBusChannels))
+          scope.start()
+          scope
+        }
+      }
+      scopeOpt.foreach { scope =>
+        new WindowImpl { me =>
+          def handler: WindowHandler = Application.windowHandler
+
+          contents  = Component.wrap(scope.component)
+          title     = "Oscilloscope"
+
+          closeOperation  = Window.CloseDispose
+
+          reactions += {
+            case Window.Closing(_) =>
+              step { implicit tx =>
+                scope.dispose()
+              }
+          }
+
+          pack()
+          front()
+        }
+      }
+    }
+  }
+
   private object ActionShowTree extends Action("Show Server Node Tree") {
     enabled = false
 
-    private var sOpt = Option.empty[Server]
-
-    def server: Option[Server] = sOpt
-    def server_=(value: Option[Server]): Unit = {
-      sOpt    = value
-      enabled = sOpt.isDefined
-    }
-
-    def apply(): Unit =
+    def apply(): Unit = {
+      val sOpt = step { implicit tx => Mellite.auralSystem.serverOption }
       sOpt.foreach { server =>
         import de.sciss.synth.swing.Implicits._
         server.peer.gui.tree()
       }
+    }
   }
 
   private[this] val metersRef   = Ref(List.empty[AudioBusMeter])
@@ -296,8 +328,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   // group -- master group; mGroup -- metering group
   private def mkAuralGUI(s: Server, syn: Synth, meters: List[AudioBusMeter], group: Group, mGroup: Group): Unit = {
-    ActionShowTree.server = Some(s)
-
+    ActionShowTree.enabled = true
+    ActionScope   .enabled = true
     audioServerPane.server = Some(s.peer)
 
     val p = new FlowPanel() // new BoxPanel(Orientation.Horizontal)
@@ -443,6 +475,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     metersRef .swap(Nil)(tx.peer).foreach(_.dispose())
     synOpt.swap(None)(tx.peer)
     deferTx {
+      ActionShowTree.enabled = false
+      ActionScope   .enabled = false
       audioServerPane.server = None
       onlinePane.foreach { p =>
         onlinePane = None
