@@ -25,6 +25,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
 import de.sciss.mellite.Mellite.{executionContext, log, showTimelineLog}
 import de.sciss.mellite.impl.ApiBrowser
+import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.numbers.Implicits._
 import de.sciss.synth.proc.gui.{AudioBusMeter, Oscilloscope}
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
@@ -197,22 +198,33 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
         }
       }
       scopeOpt.foreach { scope =>
-        new WindowImpl { me =>
+        new WindowImpl with NoMenuBarActions { frame =>
           def handler: WindowHandler = Application.windowHandler
+          override protected def style: Window.Style = Window.Auxiliary
 
-          contents  = Component.wrap(scope.component)
+          protected def undoRedoActions: Option[(Action, Action)] = None
+
+          private[this] val scopeC = Component.wrap(scope.component)
+
+          contents  = scopeC
           title     = "Oscilloscope"
 
-          closeOperation  = Window.CloseDispose
+          closeOperation  = Window.CloseIgnore // CloseDispose
+          initNoMenuBarActions(scopeC)
 
           reactions += {
-            case Window.Closing(_) =>
-              step { implicit tx =>
-                scope.dispose()
-              }
+            case Window.Closing(_) => handleClose()
+          }
+
+          protected def handleClose(): Unit = {
+            step { implicit tx =>
+              scope.dispose()
+            }
+            dispose()
           }
 
           pack()
+          desktop.Util.placeWindow(frame, horizontal = 1f, vertical = 0.125f, padding = 60)
           front()
         }
       }
