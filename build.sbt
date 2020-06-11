@@ -6,8 +6,8 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "2.45.2-SNAPSHOT"
 lazy val mimaCommonVersion          = "2.45.0"
-lazy val appVersion                 = "2.46.1-SNAPSHOT"
-lazy val mimaAppVersion             = "2.46.0"
+lazy val appVersion                 = "2.47.0-SNAPSHOT"
+lazy val mimaAppVersion             = "2.47.0"
 
 lazy val loggingEnabled             = true
 
@@ -37,7 +37,7 @@ lazy val deps = new {
     val scallop             = "3.4.0"
     val serial              = "1.1.2"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.35.3-SNAPSHOT"
+    val soundProcesses      = "3.35.3"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
@@ -54,14 +54,14 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val negatum             = "0.15.0"
-    val patterns            = "0.19.1-SNAPSHOT"
+    val patterns            = "0.20.0"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
     val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
     val dejaVuFonts         = "2.37"    // directly included
     val raphael             = "1.0.6"
-    val scalaColliderSwing  = "1.41.7-SNAPSHOT"
+    val scalaColliderSwing  = "1.41.7"
     val scissDSP            = "1.3.2"
     val slf4j               = "1.7.30"
     val submin              = "0.3.4"
