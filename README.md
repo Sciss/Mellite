@@ -3,7 +3,7 @@
 # Mellite
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sciss/Mellite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=master)](https://travis-ci.org/Sciss/Mellite)
+[![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=main)](https://travis-ci.org/Sciss/Mellite)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13)
 <a href="https://liberapay.com/sciss"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 
@@ -12,7 +12,7 @@
 Mellite is a computer music environment, implemented as a graphical front end
 for [SoundProcesses](http://git.iem.at/sciss/SoundProcesses). It is (C)opyright 2012&ndash;2020 by Hanns Holger Rutz.
 All rights reserved. Mellite is released under the
-[GNU Affero General Public License](https://git.iem.at/sciss/Mellite/raw/master/LICENSE) v3+ and comes with
+[GNU Affero General Public License](https://git.iem.at/sciss/Mellite/raw/main/LICENSE) v3+ and comes with
 absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
 The website for Mellite is [www.sciss.de/mellite](https://www.sciss.de/mellite/).
 
@@ -28,7 +28,7 @@ The Mellite icon is based on the file
 [MELLITE Taillée Hongrie.jpg](https://de.wikipedia.org/wiki/Mellit#/media/File:MELLITE_Taill%C3%A9e_Hongrie.jpg), 
 provided by Didier Descouens under CC BY 4.0 license.
 
-<img src="https://raw.githubusercontent.com/Sciss/Mellite-website/master/src/main/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
+<img src="https://raw.githubusercontent.com/Sciss/Mellite-website/main/src/main/paradox/assets/images/screenshot.png" alt="screenshot" width="696" height="436"/>
 
 ## download and installation
 

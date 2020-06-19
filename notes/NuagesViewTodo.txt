@@ -8,15 +8,15 @@ sConfig
 x   def lineInputs  : Vec[NamedBusConfig]
 x   def micInputs   : Vec[NamedBusConfig]
 x   def lineOutputs : Vec[NamedBusConfig]
-    def masterGroups: Vec[NamedBusConfig]
+    def mainGroups  : Vec[NamedBusConfig]
 
     /** Force the number of channels in the generator, where `<= 0` indicates no forcing. */
     def generatorChannels: Int
 
 nConfig
 
-x   var masterChannels : Option[Vec[Int]]
-x   var soloChannels   : Option[Vec[Int]]
+x   var mainChannels : Option[Vec[Int]]
+x   var soloChannels : Option[Vec[Int]]
 
 
 ////

@@ -78,12 +78,12 @@ object NuagesEditorViewImpl {
         }
 
       val hasSolo         = attr.$[BooleanObj](NuagesEditorView.attrUseSolo).exists(_.value)
-      val numMasterChans  = Prefs.audioNumOutputs.getOrElse(Prefs.defaultAudioNumOutputs)
+      val numMainChans    = Prefs.audioNumOutputs.getOrElse(Prefs.defaultAudioNumOutputs)
       val hpOffset        = Prefs.headphonesBus  .getOrElse(Prefs.defaultHeadphonesBus  )
       val nCfg            = Nuages.Config()
-      val masterChans     = attr.$[IntVector](NuagesEditorView.attrMasterChans)
-        .fold[Vec[Int]](0 until numMasterChans)(_.value)
-      nCfg.masterChannels = Some(masterChans)
+      val mainChans       = attr.$[IntVector](NuagesEditorView.attrMainChans)
+        .fold[Vec[Int]](0 until numMainChans)(_.value)
+      nCfg.mainChannels   = Some(mainChans)
       nCfg.soloChannels   = if (!hasSolo) None else Some(hpOffset to (hpOffset + 1))
       nCfg.micInputs      = mkBusConfigs(NuagesEditorView.attrMicInputs  )
       nCfg.lineInputs     = mkBusConfigs(NuagesEditorView.attrLineInputs )
@@ -152,7 +152,7 @@ object NuagesEditorViewImpl {
           val sCfg = ScissProcs.Config()
           sCfg.genNumChannels     = genNumChannels
           sCfg.audioFilesFolder   = audioFilesFolder
-          // sCfg.masterGroups       = ...
+          // sCfg.mainGroups       = ...
           ScissProcs[S](n, nCfg, sCfg)
         }
 

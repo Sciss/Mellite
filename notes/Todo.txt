@@ -5,7 +5,7 @@ AttrMapView
 
 Cursors
 
-        - rename master produces error
+        - rename main cursor produces error (although it performs the renaming)
 
 TimelineView
 

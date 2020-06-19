@@ -35,10 +35,10 @@ object NuagesEditorView {
   final val attrUseSolo = "use-solo"
 
   /** Key convention for an `IntVector` in the `Nuages` object
-    * to determine the master channels. If not found, the master channels
+    * to determine the main channels. If not found, the main channels
     * are taken from Mellite's number-of-audio-outputs preferences.
     */
-  final val attrMasterChans = "master-channels"
+  final val attrMainChans = "main-channels"
 
   /** Key convention for a `Folder` in the `Nuages` object
     * containing instances of `IntVector`. Each `IntVector` is translated

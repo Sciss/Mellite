@@ -203,15 +203,27 @@ object Prefs {
 
   // ---- audio mixer ----
 
-  /** The master volume in decibels. A value of -72 or less
+  /** The main volume in decibels. A value of -72 or less
     * is mapped to -inf.
     */
-  def audioMasterVolume   : Entry[Int] = userPrefs("audio-master-volume")
+  def audioMainVolume     : Entry[Int] = userPrefs("audio-main-volume")
   def headphonesVolume    : Entry[Int] = userPrefs("headphones-volume")
 
-  def audioMasterLimiter  : Entry[Boolean]  = userPrefs("audio-master-limiter")
-  def audioMasterPostMeter: Entry[Boolean]  = userPrefs("audio-master-post-meter")
+  def audioMainLimiter    : Entry[Boolean]  = userPrefs("audio-main-limiter")
+  def audioMainPostMeter  : Entry[Boolean]  = userPrefs("audio-main-post-meter")
   def headphonesActive    : Entry[Boolean]  = userPrefs("headphones-active")
+
+  // XXX TODO remove in next major version
+  @deprecated("Use audioMainVolume; will be removed", since = "2.45.4")
+  def audioMasterVolume   : Entry[Int] = audioMainVolume
+
+  // XXX TODO remove in next major version
+  @deprecated("Use audioMainLimiter; will be removed", since = "2.45.4")
+  def audioMasterLimiter  : Entry[Boolean] = audioMainLimiter
+
+  // XXX TODO remove in next major version
+  @deprecated("Use audioMainPostMeter; will be removed", since = "2.45.4")
+  def audioMasterPostMeter  : Entry[Boolean]  = audioMainPostMeter
 
   // ---- applications can set these ----
 

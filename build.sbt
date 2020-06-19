@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.45.3"
+lazy val commonVersion              = "2.45.4-SNAPSHOT"
 lazy val mimaCommonVersion          = "2.45.0"
-lazy val appVersion                 = "2.47.1"
+lazy val appVersion                 = "2.48.0-SNAPSHOT"
 lazy val mimaAppVersion             = "2.47.0"
 
 lazy val loggingEnabled             = true
@@ -22,7 +22,7 @@ lazy val deps = new {
     val audioWidgets        = "1.14.4"
     val desktop             = "0.10.6"
     val equal               = "0.1.4"
-    val fileUtil            = "1.1.3"
+    val fileUtil            = "1.1.4"
     val lucre               = "3.17.1"
     val lucreSwing          = "1.21.0"
     val model               = "0.3.4"
@@ -30,14 +30,14 @@ lazy val deps = new {
     val processor           = "0.4.2"
     val raphaelIcons        = "1.0.6"
     val scalaCollider       = "1.28.5"
-    val scalaColliderUGens  = "1.19.6"
+    val scalaColliderUGens  = "1.19.7"
     val scalaOSC            = "1.2.1"
     val scalaSTM            = "0.9.1"
     val scalaSwing          = "2.1.1"
     val scallop             = "3.4.0"
     val serial              = "1.1.2"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.35.4"
+    val soundProcesses      = "3.35.5"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
@@ -50,14 +50,15 @@ lazy val deps = new {
     val freesound           = "1.25.0"
     val fscape              = "2.36.0"
     val interpreterPane     = "1.10.1"
-    val jline               = "2.14.6"
+//    val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
+    val linKernighan        = "0.1.2"
     val negatum             = "0.15.0"
     val patterns            = "0.20.0"
     val pdflitz             = "1.4.1"
     val pegDown             = "1.6.0"
-    val playJSON            = "0.4.0"
+//    val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
     val dejaVuFonts         = "2.37"    // directly included
     val raphael             = "1.0.6"
@@ -70,7 +71,7 @@ lazy val deps = new {
     val topology            = "1.1.2"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "2.40.0"
+    val wolkenpumpe         = "2.41.0"
   }
 }
 
@@ -304,6 +305,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "fscape-views"                   % deps.app.fscape,                // offline audio rendering
       "de.sciss"          %  "jump3r"                         % deps.app.jump3r,                // mp3 export
       "de.sciss"          %% "kollflitz"                      % deps.app.kollFlitz,             // more collections methods
+      "de.sciss"          %% "linkernighantsp"                % deps.app.linKernighan,          // used by FScape
       "de.sciss"          %% "lucre-adjunct"                  % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-base"                     % deps.common.lucre,              // object system
       "de.sciss"          %% s"lucre-$bdb"                    % deps.common.lucre,              // object system (database backend)

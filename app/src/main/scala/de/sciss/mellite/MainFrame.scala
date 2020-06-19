@@ -309,7 +309,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
     val hpBus = Prefs.headphonesBus.getOrElse(Prefs.defaultHeadphonesBus)
 
-    val syn = Synth.playOnce(graph = graph, nameHint = Some("master"))(target = group,
+    val syn = Synth.playOnce(graph = graph, nameHint = Some("main"))(target = group,
       addAction = addToTail, args = List("hp-bus" -> hpBus), dependencies = Nil)
     synOpt.set(Some(syn))(tx.peer)
 
@@ -338,7 +338,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     }
   }
 
-  // group -- master group; mGroup -- metering group
+  // group -- main group; mGroup -- metering group
   private def mkAuralGUI(s: Server, syn: Synth, meters: List[AudioBusMeter], group: Group, mGroup: Group): Unit = {
     ActionShowTree.enabled = true
     ActionScope   .enabled = true
@@ -357,7 +357,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       step { implicit tx => syn.set(ctl -> amp) }
     }
 
-    val ggMainVolume    = mkAmpFader("amp"   , Prefs.audioMasterVolume)
+    val ggMainVolume    = mkAmpFader("amp"   , Prefs.audioMainVolume)
     val ggHPVolume      = mkAmpFader("hp-amp", Prefs.headphonesVolume )
     ggMainVolumeOpt = Some(ggMainVolume)
 
@@ -378,13 +378,13 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       res
     }
 
-    val ggPost = mkToggle("post", Prefs.audioMasterPostMeter) { post =>
+    val ggPost = mkToggle("post", Prefs.audioMainPostMeter) { post =>
       step { implicit tx =>
         if (post) mGroup.moveToTail(group) else mGroup.moveToHead(group)
       }
     }
 
-    val ggLim = mkToggle("limiter", Prefs.audioMasterLimiter) { lim =>
+    val ggLim = mkToggle("limiter", Prefs.audioMainLimiter) { lim =>
       val on = if (lim) 1f else 0f
       step { implicit tx => syn.set("limiter" -> on) }
     }
