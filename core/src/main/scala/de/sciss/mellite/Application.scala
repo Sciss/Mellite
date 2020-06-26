@@ -27,18 +27,37 @@ object Application extends SwingApplicationProxy[Universe[_], Application] { me 
 
   type Document = Universe[_]
 
-  def topLevelObjects : ISeq[String]      = peer.topLevelObjects
-  def objectFilter    : String => Boolean = peer.objectFilter
+  def topLevelObjects: ISeq[String] = {
+    requireInitialized()
+    peer.topLevelObjects
+  }
 
-  implicit def auralSystem: AuralSystem   = peer.auralSystem
-  implicit def compiler   : Code.Compiler = peer.compiler
+  def objectFilter: String => Boolean = {
+    requireInitialized()
+    peer.objectFilter
+  }
+
+  implicit def auralSystem: AuralSystem = {
+    requireInitialized()
+    peer.auralSystem
+  }
+
+  implicit def compiler: Code.Compiler = {
+    requireInitialized()
+    peer.compiler
+  }
 
   def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
-                            useDevice: Boolean, pickPort: Boolean): Unit =
+                            useDevice: Boolean, pickPort: Boolean): Unit = {
+    requireInitialized()
     peer.applyAudioPreferences(serverCfg = serverCfg, clientCfg = clientCfg,
       useDevice = useDevice, pickPort = pickPort)
+  }
 
-  def cacheDir: File = peer.cacheDir
+  def cacheDir: File = {
+    requireInitialized()
+    peer.cacheDir
+  }
 }
 trait Application extends SwingApplication[Application.Document] {
   type Document = Application.Document
