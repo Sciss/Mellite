@@ -246,7 +246,8 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
     make(obj, objH, codeObj,
       code0           = code0,
-      handler         = Some(handler), bottom = bottom,
+      handler         = Some(handler),
+      bottom          = bottom,
       rightViewOpt    = Some(("In/Out", rightView)),
       debugMenuItems  = List(actToggleControl, actToggleStream),
       canBounce       = false   // XXX TODO --- perhaps a standard bounce option would be useful

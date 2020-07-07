@@ -25,7 +25,6 @@ import de.sciss.lucre.stm.{Sys, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx, requireEDT}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.{CodeView, GUI, Prefs}
@@ -156,13 +155,13 @@ object CodeViewImpl extends CodeView.Companion {
                                                    bottom: ISeq[View[S]])
                                                   (implicit undoManager: UndoManager, val universe: Universe[S],
                                                    compiler: Code.Compiler)
-    extends ComponentHolder[Component] with CodeView[S, Out0] with ModelImpl[CodeView.Update] {
+    extends CodeView[S, Out0] with ModelImpl[CodeView.Update] {
 
     type C = Component
 
-    private[this] val _dirty = Ref(false)
+    // ---- generic lazy ----
 
-    private[this] val language = {
+    private[this] lazy val language = {
       val v = de.sciss.mellite.BuildInfo.scalaVersion
       val implied = Code.getImports(code.tpe.id).collect {
         case i if i.selectors.contains(Import.Wildcard) => i.prefix
@@ -175,66 +174,45 @@ object CodeViewImpl extends CodeView.Companion {
       )
     }
 
-    def dirty(implicit tx: TxnLike): Boolean = _dirty.get(tx.peer)
-
-    protected def dirty_=(value: Boolean): Unit = {
-      requireEDT()
-      val wasDirty = _dirty.single.swap(value)
-      if (wasDirty != value) {
-        //        deferTx {
-        actionApply.enabled = value
-        dispatch(CodeView.DirtyChange(value))
-        //        }
-      }
-    }
+    // ---- edt ----
 
     private[this] var editorPanel: dotterweide.ide.Panel = _
 
     private[this] var disposeFontObservers: () => Unit = _
-
-    private[this] val futCompile = Ref(Option.empty[Future[Any]])
-
+    
     private[this] var actionApply: Action = _
 
-    def isCompiling(implicit tx: TxnLike): Boolean =
-      futCompile.get(tx.peer).isDefined
-
-    def currentText         : String        = editorPanel.currentEditor.text
-    def currentText_= (value: String): Unit = editorPanel.currentEditor.text = value
-
-    def dispose()(implicit tx: S#Tx): Unit = {
-      bottom.foreach(_.dispose())
-      deferTx {
-        disposeFontObservers()
-        editorPanel.dispose()
-      }
-    }
-
-    def undoAction: Action = new ActionAdapter(editorPanel.currentEditor.actions.undo)
-    def redoAction: Action = new ActionAdapter(editorPanel.currentEditor.actions.redo)
-
-    private def saveSource(newSource: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
-      // val expr  = ExprImplicits[S]
-      // import StringObj.{varSerializer, serializer}
-      // val imp = ExprImplicits[S]
-      codeVarHOpt.map { source =>
-        val newCode = Code.Obj.newConst[S](code.updateSource(newSource))
-        EditVar.Expr[S, Code, Code.Obj]("Change Source Code", source(), newCode)
-      }
-    }
-
-    private def addEditAndClear(edit: UndoableEdit): Unit = {
+    private def ensureEDT(): Unit = {
       requireEDT()
-      undoManager.add(edit)
+      _initEDT
+    }
 
-      // so let's clear the undo history now...
-      // (note that if we don't do this, the user will see
-      // a warning dialog when closing the window)
-      editorPanel.history.clear()
+    private[this] var _guiInitialized = false
+
+    private[this] lazy val _initEDT: Unit = guiInit()
+
+    def undoAction: Action = {
+      ensureEDT()
+      new ActionAdapter(editorPanel.currentEditor.actions.undo)
+    }
+    
+    def redoAction: Action = {
+      ensureEDT()
+      new ActionAdapter(editorPanel.currentEditor.actions.redo)
+    }
+
+    def currentText: String = {
+      ensureEDT()
+      editorPanel.currentEditor.text
+    }
+
+    def currentText_=(value: String): Unit = {
+      ensureEDT()
+      editorPanel.currentEditor.text = value
     }
 
     def save(): Future[Unit] = {
-      requireEDT()
+      ensureEDT()
       val newCode = currentText
       if (handlerOpt.isDefined) {
         compileSource(newCode, save = true, andThen = None)
@@ -247,6 +225,65 @@ object CodeViewImpl extends CodeView.Companion {
       }
     }
 
+    // ---- txn ----
+
+    private[this] var _component: C = _
+
+    def component: Component = {
+      ensureEDT()
+      _component
+    }
+
+    private[this] val futCompile = Ref(Option.empty[Future[Any]])
+
+    private[this] val _dirty = Ref(false)
+
+    def dirty(implicit tx: TxnLike): Boolean = _dirty.get(tx.peer)
+
+    protected def dirty_=(value: Boolean): Unit = {
+      ensureEDT()
+      val wasDirty = _dirty.single.swap(value)
+      if (wasDirty != value) {
+        //        deferTx {
+        actionApply.enabled = value
+        dispatch(CodeView.DirtyChange(value))
+        //        }
+      }
+    }
+
+    def isCompiling(implicit tx: TxnLike): Boolean =
+      futCompile.get(tx.peer).isDefined
+
+    def dispose()(implicit tx: S#Tx): Unit = {
+      bottom.foreach(_.dispose())
+      deferTx {
+        if (_guiInitialized) {
+          disposeFontObservers()
+          editorPanel.dispose()
+        }
+      }
+    }
+    
+    private def saveSource(newSource: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
+      // val expr  = ExprImplicits[S]
+      // import StringObj.{varSerializer, serializer}
+      // val imp = ExprImplicits[S]
+      codeVarHOpt.map { source =>
+        val newCode = Code.Obj.newConst[S](code.updateSource(newSource))
+        EditVar.Expr[S, Code, Code.Obj]("Change Source Code", source(), newCode)
+      }
+    }
+
+    private def addEditAndClear(edit: UndoableEdit): Unit = {
+      ensureEDT()
+      undoManager.add(edit)
+
+      // so let's clear the undo history now...
+      // (note that if we don't do this, the user will see
+      // a warning dialog when closing the window)
+      editorPanel.history.clear()
+    }
+    
     private def saveSourceAndObject(newCode: String, in: In0, out: Out0)(implicit tx: S#Tx): Option[UndoableEdit] = {
       val edit1 = saveSource(newCode)
       val edit2 = handlerOpt.map { handler =>
@@ -260,7 +297,7 @@ object CodeViewImpl extends CodeView.Companion {
     private def compile(): Unit = compileSource(currentText, save = false, andThen = None)
 
     def preview(): Future[Out0] = {
-      requireEDT()
+      ensureEDT()
       val p = Promise[Out0]()
       val newCode = currentText
       if (handlerOpt.isDefined) {
@@ -272,7 +309,7 @@ object CodeViewImpl extends CodeView.Companion {
     }
 
     private def compileSource(newCode: String, save: Boolean, andThen: Option[Out0 => Unit]): Future[Unit] = {
-      requireEDT()
+      ensureEDT()
       val saveObject = handlerOpt.isDefined && save
       if (futCompile.single.get.isDefined && !saveObject) return Future.successful[Unit] {}
 
@@ -347,7 +384,7 @@ object CodeViewImpl extends CodeView.Companion {
     private[this] var clearGreen = false
 
     def init()(implicit tx: S#Tx): this.type = {
-      deferTx(guiInit())
+//      deferTx(guiInit())
       this
     }
 
@@ -377,6 +414,9 @@ object CodeViewImpl extends CodeView.Companion {
     }
 
     private def guiInit(): Unit = {
+//      println("guiInit()")
+//      (new Exception).fillInStackTrace().printStackTrace()
+
       val prFamily  = Prefs.codeFontFamily
       val prSize    = Prefs.codeFontSize
       val prStretch = Prefs.codeFontStretch
@@ -475,8 +515,10 @@ object CodeViewImpl extends CodeView.Companion {
       val iPaneC  = editorPanel.component
       editorPanel.setBottomRightComponent(panelBottom)
 
-      component = iPaneC
+      _component = iPaneC
       iPaneC.requestFocus()
+
+      _guiInitialized = true
     }
   }
 }

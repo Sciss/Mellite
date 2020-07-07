@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.impl.widget
 
+import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
+
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.stm
@@ -124,9 +126,25 @@ object WidgetEditorViewImpl {
       if (tabs.selection.index == 0) WidgetEditorView.EditorTab else WidgetEditorView.RendererTab
 
     private def guiInit(/* initialText: String, */ showEditor: Boolean): Unit = {
-      val paneEdit = new BorderPanel {
-        add(codeView.component, BorderPanel.Position.Center)
-//        add(panelBottom       , BorderPanel.Position.South )
+      val paneEdit: BorderPanel = new BorderPanel {
+        private def addEditor(): Unit =
+          add(codeView.component, BorderPanel.Position.Center)
+
+        if (showEditor) {
+          addEditor()
+
+        } else {
+          lazy val cl: ComponentListener = new ComponentAdapter {
+            override def componentShown(e: ComponentEvent): Unit = {
+              if (peer.isShowing) {
+                peer.removeComponentListener(cl)
+                addEditor()
+                revalidate()
+              }
+            }
+          }
+          peer.addComponentListener(cl)
+        }
       }
 
       val _tabs = new TabbedPane

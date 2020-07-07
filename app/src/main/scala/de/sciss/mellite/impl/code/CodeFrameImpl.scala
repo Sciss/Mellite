@@ -13,9 +13,11 @@
 
 package de.sciss.mellite.impl.code
 
+import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
+
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.expr.{BooleanObj, CellView}
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.{IdPeek, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -29,12 +31,12 @@ import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
 import de.sciss.synth.proc.impl.ActionRawImpl
-import de.sciss.synth.proc.{Action, ActionRaw, Code, Control, Proc, SynthGraphObj, Universe}
+import de.sciss.synth.proc.{Action, ActionRaw, Code, Control, Proc, SynthGraphObj, Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.event.Key
-import scala.swing.{Button, Component, Orientation, TabbedPane}
+import scala.swing.{BorderPanel, Button, Component, FlowPanel, Orientation, TabbedPane}
 import scala.util.control.NonFatal
 
 object CodeFrameImpl extends CodeFrame.Companion {
@@ -85,7 +87,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
-      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true,
+//      alwaysShowBottom = true
+    )
   }
 
   // ---- adapter for editing a ActionRaw's source ----
@@ -147,7 +151,10 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val bottom = viewExecute :: Nil
 
     implicit val undo: UndoManager = UndoManager()
-    make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None, canBounce = false)
+    make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None,
+      canBounce = false,
+//      alwaysShowBottom = true
+    )
   }
 
   // ---- adapter for editing a Control.Graph's source ----
@@ -188,7 +195,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
-      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true,
+//      alwaysShowBottom = true
+    )
   }
 
   // ---- adapter for editing a Control.Graph's source ----
@@ -224,12 +233,14 @@ object CodeFrameImpl extends CodeFrame.Companion {
     }
 
     implicit val undo: UndoManager = UndoManager()
-    val attrView    = AttrMapView     [S](obj)
+    val attrView    = AttrMapView[S](obj)
     val viewPower   = RunnerToggleButton[S](obj, isAction = true)
     val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
-      rightViewOpt = Some(("In/Out", rightView)), canBounce = true)
+      rightViewOpt = Some(("In/Out", rightView)), canBounce = true,
+//      alwaysShowBottom = true
+    )
   }
 
   // ---- general constructor ----
@@ -253,7 +264,8 @@ object CodeFrameImpl extends CodeFrame.Companion {
       bottom = bottom, rightViewOpt = None, debugMenuItems = Nil, canBounce = canBounce)
   }
 
-  private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[(String, View[S])])
+  private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[(String, View[S])],
+                                       showEditor: Boolean, bottom: ISeq[View[S]])
                                       (implicit val universe: Universe[S],
                                        val undoManager: UndoManager)
     extends View.Editable[S] with UniverseView[S] with ComponentHolder[Component] {
@@ -268,47 +280,70 @@ object CodeFrameImpl extends CodeFrame.Companion {
     }
 
     private def guiInit(): Unit = {
-      component = rightViewOpt.fold[C](codeView.component) { case (rightTitle, rightView) =>
+      val pane = rightViewOpt.fold[C](codeView.component) { case (rightTitle, rightView) =>
         val _tabs = new TabbedPane
         _tabs.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
         _tabs.focusable  = false
-        val pageEdit    = new TabbedPane.Page("Editor"  , codeView  .component, null)
+        val pageEditC   = if (showEditor) codeView.component else {
+          new BorderPanel {
+            private def addEditor(): Unit =
+              add(codeView.component, BorderPanel.Position.Center)
+
+            lazy val cl: ComponentListener = new ComponentAdapter {
+              override def componentShown(e: ComponentEvent): Unit = {
+                if (peer.isShowing) {
+                  peer.removeComponentListener(cl)
+                  addEditor()
+                  revalidate()
+                }
+              }
+            }
+            peer.addComponentListener(cl)
+          }
+        }
+
+        val pageEdit    = new TabbedPane.Page("Editor"  , pageEditC, null)
         val pageRender  = new TabbedPane.Page(rightTitle, rightView .component, null)
         _tabs.pages     += pageEdit
         _tabs.pages     += pageRender
-        //      _tabs.pages     += pageAttr
         Util.addTabNavigation(_tabs)
 
-        //      render(initialText)
-
-        // tabs = _tabs
-
-//        val res = new SplitPane(Orientation.Vertical, codeView.component, rightView.component)
-//        res.oneTouchExpandable  = true
-//        res.resizeWeight        = 1.0
-//        // cf. https://stackoverflow.com/questions/4934499
-//        res.peer.addAncestorListener(new AncestorListener {
-//          def ancestorAdded  (e: AncestorEvent): Unit = res.dividerLocation = 1.0
-//          def ancestorRemoved(e: AncestorEvent): Unit = ()
-//          def ancestorMoved  (e: AncestorEvent): Unit = ()
-//        })
-//        res
+        if (showEditor) {
+          codeView.component.requestFocus()
+        } else {
+          _tabs.selection.index = 1
+          // paneEdit.preferredSize = renderer.component.preferredSize
+        }
 
         _tabs
+      }
+
+      component = if (bottom.isEmpty) pane else new BorderPanel {
+        add(pane, BorderPanel.Position.Center)
+
+        {
+          val botC          = bottom.map(_.component)
+          val panelBottom   = new FlowPanel(FlowPanel.Alignment.Trailing)(botC: _*)
+          panelBottom.hGap  = 4
+          panelBottom.vGap  = 2
+          add(panelBottom, BorderPanel.Position.South)
+        }
       }
     }
 
     def dispose()(implicit tx: S#Tx): Unit = {
-      codeView                 .dispose()
+      codeView.dispose()
       rightViewOpt.foreach(_._2.dispose())
+      bottom.foreach(_.dispose())
     }
   }
 
   private final class CanBounceView[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], codeView: View[S],
-                                                 rightViewOpt: Option[(String, View[S])])
+                                                 rightViewOpt: Option[(String, View[S])],
+                                                 showEditor: Boolean, bottom: ISeq[View[S]])
                                                 (implicit universe: Universe[S],
                                                  undoManager: UndoManager)
-    extends PlainView[S](codeView, rightViewOpt) with CanBounce {
+    extends PlainView[S](codeView, rightViewOpt, showEditor = showEditor, bottom = bottom) with CanBounce {
 
     object actionBounce extends ActionBounce[S](this, objH)
   }
@@ -319,21 +354,28 @@ object CodeFrameImpl extends CodeFrame.Companion {
   /**
     * @param rightViewOpt optional title and component for a second tab view
     */
-  def make[S <: Sys[S], In0, Out0](pObj: Obj[S], pObjH: stm.Source[S#Tx, Obj[S]], obj: Code.Obj[S],
-                                   code0: CodeT[In0, Out0],
-                                   handler: Option[CodeView.Handler[S, In0, Out0]], bottom: ISeq[View[S]],
-                                   rightViewOpt: Option[(String, View[S])] = None,
-                                   debugMenuItems: ISeq[swing.Action] = Nil,
-                                   canBounce: Boolean)
+  def make[S <: Sys[S], In0, Out0](pObj           : Obj[S],
+                                   pObjH          : stm.Source[S#Tx, Obj[S]],
+                                   obj            : Code.Obj[S],
+                                   code0          : CodeT[In0, Out0],
+                                   handler        : Option[CodeView.Handler[S, In0, Out0]],
+                                   bottom         : ISeq[View[S]],
+//                                   alwaysShowBottom: Boolean,
+                                   rightViewOpt   : Option[(String, View[S])] = None,
+                                   debugMenuItems : ISeq[swing.Action]        = Nil,
+                                   canBounce      : Boolean
+                                  )
                                   (implicit tx: S#Tx, universe: Universe[S],
                                    undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
-    // val _name   = /* title getOrElse */ obj.attr.name
-    val codeView  = CodeView(obj, code0, bottom = bottom)(handler)
+    val showEditor  = pObj.attr.$[BooleanObj](Widget.attrEditMode).forall(_.value)
+    val bottomCode  = if (showEditor) bottom else Nil
+    val bottomView  = if (showEditor) Nil else bottom
+    val codeView    = CodeView(obj, code0, bottom = bottomCode)(handler)
 
-    val view      = if (canBounce)
-      new CanBounceView(pObjH, codeView, rightViewOpt)
+    val view = if (canBounce)
+      new CanBounceView(pObjH,  codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
     else
-      new PlainView(codeView, rightViewOpt)
+      new PlainView(            codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
 
     view.init()
     val _name = CellView.name(pObj)
