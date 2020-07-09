@@ -80,6 +80,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //  de.sciss.fscape.showStreamLog   = true
 //  de.sciss.fscape.showControlLog  = true
 //  Prefs.useLogFrame = false
+//  de.sciss.synth.proc.graph.impl.ActionResponder.DEBUG = true
 
   override def main(args: Array[String]): Unit = {
     object p extends ScallopConf(args) {
