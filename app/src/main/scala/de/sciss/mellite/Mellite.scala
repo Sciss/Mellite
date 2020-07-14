@@ -325,6 +325,12 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     initTypes()
 
+    // ---- Expr ----
+
+    // XXX TODO ugly
+    de.sciss.lucre.expr.graph.Bounce.applyAudioPreferences =
+      applyAudioPreferences(_, _, useDevice = false, pickPort = false)
+
     new MainFrame
 
     config.open.foreach { fIn =>

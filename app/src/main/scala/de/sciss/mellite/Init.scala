@@ -136,6 +136,8 @@ trait Init {
     _initObjViews
     _initCompanionFactories
 
+    // ---- FScape ----
+
     val cacheLim = Limit(count = 8192, space = 2L << 10 << 100)  // 2 GB; XXX TODO --- through user preferences
     FScCache.init(folder = cacheDir, capacity = cacheLim)
 
