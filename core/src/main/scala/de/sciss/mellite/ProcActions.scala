@@ -147,7 +147,7 @@ object ProcActions {
         val valueOpt = attrIn.get(Proc.mainIn).collect {
           case op: proc.Output[S] => op
           case fIn: Folder[S] =>
-            val fOut = Folder[S]
+            val fOut = Folder[S]()
             fIn.iterator.foreach { op => fOut.addLast(op) }
             fOut
         }
@@ -282,7 +282,7 @@ object ProcActions {
       bus       : Option[IntObj[S]]) // stm.Source[S#Tx, Element.Int[S]]])
      (implicit tx: S#Tx): Proc[S] = {
 
-    val proc    = Proc[S]
+    val proc    = Proc[S]()
     val obj     = proc // Obj(Proc.Elem(proc))
     val attr    = obj.attr
     val nameEx  = StringObj.newVar[S](StringObj.newConst(name))

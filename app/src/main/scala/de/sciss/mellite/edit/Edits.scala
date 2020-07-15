@@ -126,7 +126,7 @@ object Edits {
         val index = f.size
         EditFolderInsertObj("Link", parent = f, index = index, child = source)
       case Some(other) =>
-        val f = Folder[S]
+        val f = Folder[S]()
         f.addLast(other)
         f.addLast(source)
         EditAttrMap("Add Link", obj = sink, key = key, value = Some(f))

@@ -50,7 +50,7 @@ object AudioCueViewImpl {
     val system: S     = tx.system
     type I            = system.I // _workspace.I
     implicit val itx: I#Tx = system.inMemoryTx(tx) // inMemoryBridge(tx)
-    val timeline      = Timeline[I] // proc.ProcGroup.Modifiable[I]
+    val timeline      = Timeline[I]() // proc.ProcGroup.Modifiable[I]
     // val groupObj      = Obj(ProcGroupElem(group))
     val srRatio       = value.spec.sampleRate / TimeRef.SampleRate
     // val fullSpanFile  = Span(0L, f.spec.numFrames)
@@ -78,7 +78,7 @@ object AudioCueViewImpl {
     val (_, proc)     = ProcActions.insertAudioRegion[I](timeline, time = Span(0L, numFramesTL),
       /* track = 0, */ audioCue = audioCueI, gOffset = 0L /* , bus = None */)
 
-    val diff = Proc[I]
+    val diff = Proc[I]()
     val diffGr = SynthGraph {
       import synth._
       import ugen._

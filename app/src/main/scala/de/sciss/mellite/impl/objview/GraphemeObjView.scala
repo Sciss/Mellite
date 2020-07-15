@@ -37,7 +37,7 @@ object GraphemeObjView extends NoArgsListObjViewFactory {
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj = Grapheme[S] // .Modifiable[S]
+    val obj = Grapheme[S]() // .Modifiable[S]
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

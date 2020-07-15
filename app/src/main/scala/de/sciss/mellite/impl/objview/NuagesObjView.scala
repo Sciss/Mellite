@@ -38,7 +38,7 @@ object NuagesObjView extends NoArgsListObjViewFactory {
     new Impl[S](tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val tl  = Timeline[S]
+    val tl  = Timeline[S]()
     val obj = Nuages[S](Nuages.Surface.Timeline(tl))
     if (!name.isEmpty) obj.name = name
     obj :: Nil

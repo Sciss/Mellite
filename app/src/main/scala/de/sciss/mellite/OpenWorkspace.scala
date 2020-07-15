@@ -1,5 +1,5 @@
 /*
- *  ActionOpenWorkspace.scala
+ *  OpenWorkspace.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2020 Hanns Holger Rutz. All rights reserved.
@@ -34,16 +34,27 @@ import scala.swing.event.Key
 import scala.swing.{Action, Dialog}
 import scala.util.{Failure, Success}
 
-object ActionOpenWorkspace extends Action("Open...") {
-  import KeyStrokes._
-
-  private val _recent = RecentFiles(Application.userPrefs("recent-docs")) { folder =>
+object OpenWorkspace extends  {
+  // N.B.: we want `OpenWorkspace` to be usable in headless mode,
+  // therefore all UI things have to be lazily initialized
+  private lazy val _recent = RecentFiles(Application.userPrefs("recent-docs")) { folder =>
     perform(folder)
   }
 
-  accelerator = Some(menu1 + Key.O)
+  object action extends Action("Open...") {
+    import KeyStrokes._
 
-  private def dh = Application.documentHandler
+    accelerator = Some(menu1 + Key.O)
+
+    def apply(): Unit = {
+      val dlg = FileDialog.folder(title = fullTitle)
+      // import TypeCheckedTripleEquals._
+      // dlg.setFilter { f => f.isDirectory && f.ext.toLowerCase === Workspace.ext}
+      dlg.show(None).foreach(perform)
+    }
+  }
+
+  private def dh        = Application.documentHandler
   private def fullTitle = "Open Workspace"
 
   private[this] lazy val _init: Unit =
@@ -51,7 +62,7 @@ object ActionOpenWorkspace extends Action("Open...") {
       case Desktop.OpenFiles(_, files) =>
         // println(s"TODO: $open; EDT? ${java.awt.EventQueue.isDispatchThread}")
         files.foreach { f =>
-          ActionOpenWorkspace.perform(f)
+          OpenWorkspace.perform(f)
         }
     }
 
@@ -83,13 +94,6 @@ object ActionOpenWorkspace extends Action("Open...") {
   def recentFiles: RecentFiles  = _recent
   def recentMenu : Menu.Group   = _recent.menu
 
-  def apply(): Unit = {
-    val dlg = FileDialog.folder(title = fullTitle)
-    // import TypeCheckedTripleEquals._
-    // dlg.setFilter { f => f.isDirectory && f.ext.toLowerCase === Workspace.ext}
-    dlg.show(None).foreach(perform)
-  }
-
 //  private def openView[S <: Sys[S]](universe: Universe[S]): Unit = ()
 //// MMM
 ////    DocumentViewHandler.instance(doc).collectFirst {
@@ -98,14 +102,14 @@ object ActionOpenWorkspace extends Action("Open...") {
 
   def perform(folder: File): Future[Universe[_]] = {
 //    val fOpt = Some(folder)
-    dh.documents.find(_.workspace.folder.contains(folder)).fold(doOpen(folder)) { u =>
+    dh.documents.find(_.workspace.folder.contains(folder)).fold(open(folder, headless = false)) { u =>
 //      val u1 = u.asInstanceOf[Universe[S] forSome { type S <: Sys[S] }]
       // openView(u1)
       Mellite.withUniverse(u)(Future.successful)
     }
   }
 
-  private def doOpen(folder: File): Future[Universe[_]] = {
+  def open(folder: File, headless: Boolean): Future[Universe[_]] = {
     import SoundProcesses.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
@@ -120,7 +124,7 @@ object ActionOpenWorkspace extends Action("Open...") {
     }
 
     var opt: OptionPane[Unit] = null
-    desktop.Util.delay(1000) {
+    if (!headless) desktop.Util.delay(1000) {
       if (!fut.isCompleted) {
         opt = OptionPane.message(message = s"Reading '$folder'…")
         opt.show(None, "Open Workspace")
@@ -133,17 +137,23 @@ object ActionOpenWorkspace extends Action("Open...") {
           if (w != null) w.dispose()
         }
         tr match {
-          case Success(ws) => openGUI(ws)
+          case Success(ws) => if (!headless) openGUI(ws)
 //          case Success(cf : Workspace.Confluent) => openGUI(cf )
 //          case Success(eph: Workspace.Durable)   => openGUI(eph)
 //          case Success(eph: Workspace.InMemory)  => openGUI(eph)
           case Failure(e) =>
-            Dialog.showMessage(
-              message     = s"Unable to create new workspace ${folder.path}\n\n${Util.formatException(e)}",
-              title       = fullTitle,
-              messageType = Dialog.Message.Error
-            )
-          // case _ =>
+            val message = s"Unable to create new workspace ${folder.path}\n\n${Util.formatException(e)}"
+
+            if (headless) {
+              Console.err.println(message)
+
+            } else {
+              Dialog.showMessage(
+                message     = message,
+                title       = fullTitle,
+                messageType = Dialog.Message.Error
+              )
+            }
         }
       }
     }

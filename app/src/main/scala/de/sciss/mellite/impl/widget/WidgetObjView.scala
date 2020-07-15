@@ -40,7 +40,7 @@ object WidgetObjView extends NoArgsListObjViewFactory {
 
   def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
     val name  = config
-    val obj   = Widget[S]
+    val obj   = Widget[S]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

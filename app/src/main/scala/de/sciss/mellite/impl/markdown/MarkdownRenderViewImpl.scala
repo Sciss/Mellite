@@ -108,7 +108,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
 
     // ---- impl ----
 
-    private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]
+    private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]()
     private[this] var _editor: HTMLEditorPaneWithZoom = _
     private[this] val nav   = NavigationHistory.empty[S, stm.Source[S#Tx, Markdown[S]]]
     private[this] var actionBwd: Action = _

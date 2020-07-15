@@ -88,7 +88,7 @@ object ActionNewWorkspace extends Action("Workspace...") {
   def performInMemory(): (Workspace.InMemory, Universe[InMemory]) = {
     val w   = Workspace.InMemory()
     val u   = Mellite.mkUniverse(w)
-    ActionOpenWorkspace.openGUI(u)
+    OpenWorkspace.openGUI(u)
     (w, u)
   }
 
@@ -155,7 +155,7 @@ object ActionNewWorkspace extends Action("Workspace...") {
         config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
         val w               = fun(folder, ds)
         val u               = Mellite.mkUniverse(w)
-        ActionOpenWorkspace.openGUI(u)
+        OpenWorkspace.openGUI(u)
         Some((w, u))
 
       } catch {

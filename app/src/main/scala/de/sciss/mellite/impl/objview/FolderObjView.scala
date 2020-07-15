@@ -36,7 +36,7 @@ object FolderObjView extends NoArgsListObjViewFactory {
     new Impl[S](tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = Folder[S]
+    val obj  = Folder[S]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }

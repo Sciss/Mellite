@@ -48,7 +48,7 @@ object GlobalProcPreset {
     override def toString: String = name
 
     final def make[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): Proc[S] = {
-      val p = Proc[S]
+      val p = Proc[S]()
       p.graph() = graph(controls)
       source(controls).foreach(s => p.attr.put(Proc.attrSource, Code.Obj.newVar(Code.SynthGraph(s))))
       if (hasOutput) p.outputs.add(Proc.mainOut)

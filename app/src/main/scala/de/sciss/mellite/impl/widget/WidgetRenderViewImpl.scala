@@ -53,8 +53,8 @@ object WidgetRenderViewImpl {
 
     type C = Component
 
-    private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]
-    private[this] val graphRef    = Ref.make[Widget.Graph]
+    private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]()
+    private[this] val graphRef    = Ref.make[Widget.Graph]()
     private[this] val viewRef     = Ref(Option.empty[(View[S], Disposable[S#Tx])])
 //    private[this] val viewInit    = Ref(-2) // -2 is special code for "no previous view"
 

@@ -90,6 +90,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       val workspaces: Opt[List[File]] = trailArg(required = false, default = Some(Nil),
         descr = "Workspaces (.mllt directories) to open"
       )
+      val headless: Opt[Boolean] = opt("headless",
+        descr = "Run without graphical user-interface (Note: does not initialize preferences)."
+      )
       val noLogFrame: Opt[Boolean] = opt("no-log-frame",
         descr = "Do not create log frame (post window)."
       )
@@ -100,13 +103,19 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       verify()
       val config: Config = Config(
         open      = workspaces(),
+        headless  = headless(),
         autoRun   = autoRun(),
         logFrame  = !noLogFrame())
     }
 
     _config = p.config
 //    Console.setErr(System.err)
-    super.main(args)
+
+    if (_config.headless) {
+      init()
+    } else {
+      super.main(args)
+    }
   }
 
   def version : String = buildInfString("version" )
@@ -234,35 +243,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
   }
 
-  // runs on the EDT
-  override protected def init(): Unit = {
-    // if (lafInfo.description.contains("Submin")) {
-    // }
-
-    Application.init(this)
-
-    // ---- look and feel
-
-//    // work-around to suppress `java.lang.NoSuchFieldException: AA_TEXT_PROPERTY_KEY` exception
-//    // being logged by web-look-and-feel on JDK 11.
-//    // (the exception is "harmless" in that it has no side effect)
-//    def java11silent(body: => Unit): Unit = {
-////      import com.alee.managers.log.Log.setLoggingEnabled
-////      val obj = classOf[com.alee.utils.ProprietaryUtils]
-////
-////      setLoggingEnabled(obj, false)
-////      try {
-//        body
-////      } finally {
-////        setLoggingEnabled(obj, true)
-////      }
-//    }
-
-    val tempDir = Prefs.tempDir.getOrElse(Prefs.defaultTempDir)
-    if (tempDir != Prefs.defaultTempDir) {
-      System.setProperty("java.io.tmpdir", tempDir.getPath)
-    }
-
+  private def initUI(): Unit = {
     if (Desktop.isMac) {
       System.setProperty("apple.laf.useScreenMenuBar",
         Prefs.screenMenuBar.getOrElse(Prefs.defaultScreenMenuBar).toString)
@@ -275,11 +256,11 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         res
       }
 
-//      if (lafInfo.description.contains("Submin")) {
-//        WebLookAndFeel.globalControlFont  = WebLookAndFeel.globalControlFont.deriveFont(14f)
-//        WebLookAndFeel.globalMenuFont     = WebLookAndFeel.globalMenuFont   .deriveFont(14f)
-//        WebLookAndFeel.globalTextFont     = WebLookAndFeel.globalTextFont   .deriveFont(14f)
-//      }
+      //      if (lafInfo.description.contains("Submin")) {
+      //        WebLookAndFeel.globalControlFont  = WebLookAndFeel.globalControlFont.deriveFont(14f)
+      //        WebLookAndFeel.globalMenuFont     = WebLookAndFeel.globalMenuFont   .deriveFont(14f)
+      //        WebLookAndFeel.globalTextFont     = WebLookAndFeel.globalTextFont   .deriveFont(14f)
+      //      }
 
       lafInfo.install()
 
@@ -297,7 +278,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
     DocumentViewHandler.instance                                  // init
 
-    ActionOpenWorkspace.install()
+    OpenWorkspace.install()
 
     // at this point, awt.Toolkit will have loaded Atk
     System.getProperty("javax.accessibility.assistive_technologies") match {
@@ -317,6 +298,29 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
       case _ =>
     }
+  }
+
+  // runs on the EDT (unless `config.headless`)
+  override protected def init(): Unit = {
+    // if (lafInfo.description.contains("Submin")) {
+    // }
+
+    Application.init(this)
+
+    val headless = _config.headless
+
+    // ---- temporary directory ----
+
+    if (!headless) {  // XXX TODO --- we should have headless preferences access
+      val tempDir = Prefs.tempDir.getOrElse(Prefs.defaultTempDir)
+      if (tempDir != Prefs.defaultTempDir) {
+        System.setProperty("java.io.tmpdir", tempDir.getPath)
+      }
+    }
+
+    // ---- look and feel ----
+
+    if (!headless) initUI()
 
     // ---- type extensions ----
     // since some are registering view factories,
@@ -325,16 +329,26 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     initTypes()
 
-    // ---- Expr ----
+    // ---- expr ----
 
-    // XXX TODO ugly
-    de.sciss.lucre.expr.graph.Bounce.applyAudioPreferences =
-      applyAudioPreferences(_, _, useDevice = false, pickPort = false)
+    if (!headless) {  // XXX TODO --- we should have headless preferences access
+      // XXX TODO ugly
+      de.sciss.lucre.expr.graph.Bounce.applyAudioPreferences =
+        applyAudioPreferences(_, _, useDevice = false, pickPort = false)
+    }
 
-    new MainFrame
+    // ---- main window ----
+
+    if (!headless) new MainFrame
+
+    // ---- workspaces and auto-run ----
 
     config.open.foreach { fIn =>
-      val fut = ActionOpenWorkspace.perform(fIn)
+      val fut = if (headless) {
+        OpenWorkspace.open(fIn, headless = true)
+      } else {
+        OpenWorkspace.perform(fIn)
+      }
       if (config.autoRun.nonEmpty) fut.foreach { ws =>
         Mellite.withUniverse(ws)(autoRun(_))
 //        val ws1 = ws.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]

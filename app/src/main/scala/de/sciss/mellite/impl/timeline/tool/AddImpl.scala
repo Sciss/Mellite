@@ -70,7 +70,7 @@ final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], t
   def commit(drag: Add)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
     canvas.timeline.modifiableOption.map { g =>
       val span  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[S]
-      val p     = Proc[S]
+      val p     = Proc[S]()
       val obj   = p // Obj(Proc.Elem(p))
       obj.attr.put(ObjTimelineView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
       obj.attr.put(ObjTimelineView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))

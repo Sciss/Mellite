@@ -39,7 +39,7 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = Proc[S]
+    val obj  = Proc[S]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
