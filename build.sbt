@@ -23,7 +23,7 @@ lazy val deps = new {
     val desktop             = "0.10.6"
     val equal               = "0.1.4"
     val fileUtil            = "1.1.4"
-    val lucre               = "3.17.4"
+    val lucre               = "3.17.5"
     val lucreSwing          = "1.21.0"
     val model               = "0.3.4"
     val numbers             = "0.2.0"
@@ -42,7 +42,7 @@ lazy val deps = new {
     val swingPlus           = "0.4.2"
   }
   val app = new {
-    val akka                = "2.6.7"
+    val akka                = "2.6.8"
     val appDirs             = "1.2.0"
     val dejaVuFonts         = "2.37"    // directly included
     val dotterweide         = "0.3.0"
@@ -71,7 +71,7 @@ lazy val deps = new {
     val topology            = "1.1.2"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "2.41.0"
+    val wolkenpumpe         = "2.41.1"
   }
 }
 
@@ -97,7 +97,11 @@ lazy val commonSettings = Seq(
     )
     if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
   },
-  scalacOptions in (Compile, compile) ++= (if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil), // JDK >8 breaks API; skip scala-doc
+  scalacOptions /* in (Compile, compile) */ ++= {
+    val sq0 = if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil // JDK >8 breaks API; skip scala-doc
+    val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) Seq("-Wconf:cat=deprecation&msg=Widening conversion:s") else Nil // nanny state defaults :-E
+    sq1
+  },
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   // resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271
