@@ -128,7 +128,7 @@ The produced installation is _platform dependent_, so will create a version that
 
 Note that should probably specify an explicit java-home, otherwise the bundled package might be unreasonably large:
 
-    sbt ++2.13.1 -java-home ~/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11/jdk-11.0.4+11 clean update mellite-full/debian:packageBin
+    sbt ++2.13.3 -java-home ~/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.4_11/jdk-11.0.4+11 clean update mellite-full/debian:packageBin
 
 ---------
 
@@ -174,7 +174,7 @@ To build for Linux:
  1. `java-use-8`
  2. `sbt mellite-app/universal:packageBin`
  3. `java-use-11`
- 4. `sbt -java-home '/home/hhrutz/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.6_10/jdk-11.0.6+10' mellite-full/universal:packageBin mellite-full/debian:packageBin`
+ 4. `sbt -java-home '/home/hhrutz/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.8_10/jdk-11.0.8+10' mellite-full/universal:packageBin mellite-full/debian:packageBin`
  
 Copy the artifacts to a safe location now.
 To build for Mac and Windows, we need to publish all libraries now to Maven Central (use JDK 8 again!).
@@ -182,7 +182,7 @@ Then Windows can be built on Linux using wine:
  
  1. `rm -r full/target` (otherwise Jlink fails)
  2. `wine cmd.exe` and
- `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.6_10\jdk-11.0.6+10\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.3.10\sbt\bin\sbt-launch.jar` then in sbt console:
+ `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.8_10\jdk-11.0.8+10\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.3.10\sbt\bin\sbt-launch.jar` then in sbt console:
  `project mellite-full` and `universal:packageBin`
  
 For Mac we need a bloody fruit company machine:
