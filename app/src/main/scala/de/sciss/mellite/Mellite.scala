@@ -98,7 +98,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       )
       val autoRun: Opt[List[String]] = opt[String]("auto-run", short = 'r', default = Some(""),
         descr = "Run object with given name from root folder's top level. Comma separated list for multiple objects."
-      ).map(_.split(',').toList)
+      ).map(_.split(',').filter(_.nonEmpty).toList)
 
       verify()
       val config: Config = Config(
@@ -343,7 +343,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     // ---- workspaces and auto-run ----
 
-    config.open.foreach { fIn =>
+    config.open.foreach { fIn0 =>
+      val fIn = fIn0.absolute
       val fut = if (headless) {
         OpenWorkspace.open(fIn, headless = true)
       } else {
