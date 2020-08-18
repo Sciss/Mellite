@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "2.45.7"
+lazy val commonVersion              = "2.45.8-SNAPSHOT"
 lazy val mimaCommonVersion          = "2.45.0"
-lazy val appVersion                 = "2.49.0"
+lazy val appVersion                 = "2.49.1-SNAPSHOT"
 lazy val mimaAppVersion             = "2.49.0"
 
 lazy val loggingEnabled             = true
@@ -37,7 +37,7 @@ lazy val deps = new {
     val scallop             = "3.4.0"
     val serial              = "1.1.2"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.35.8"
+    val soundProcesses      = "3.35.9-SNAPSHOT"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
@@ -55,6 +55,7 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.3"
     val linKernighan        = "0.1.2"
+    val lucrePi             = "0.1.0-SNAPSHOT"
     val negatum             = "0.15.5"
     val patterns            = "0.20.0"
     val pdflitz             = "1.4.1"
@@ -316,6 +317,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "lucre-confluent"                % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-core"                     % deps.common.lucre,              // object system
       "de.sciss"          %% "lucre-expr"                     % deps.common.lucre,              // object system
+      "de.sciss"          %% "lucre-pi"                       % deps.app.lucrePi,               // Raspberry Pi support
       "de.sciss"          %% "lucre-swing"                    % deps.common.lucreSwing,         // reactive Swing components
       "de.sciss"          %% "lucre-synth"                    % deps.common.soundProcesses,     // computer-music framework
       "de.sciss"          %% "model"                          % deps.common.model,              // non-txn MVC
