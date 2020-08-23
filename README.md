@@ -188,7 +188,7 @@ Then Windows can be built on Linux using wine:
 For Mac we need a bloody fruit company machine:
 
  1. `git fetch; git merge origin/work`
- 2. `./sbt -java-home /Users/naya/Downloads/jdk-11.0.4+11/Contents/Home clean update mellite-full/universal:packageBin`
+ 2. `./sbt -java-home /Users/naya/Downloads/jdk-11.0.8+10/Contents/Home clean update mellite-full/universal:packageBin`
  3. We need to set the execution bits on Linux after copying the zip to the Linux machine, and unpacking it:
  `rm mellite-full_<version>_mac_x64/bin/mellite.bat` then
  `rm mellite-full_<version>_mac_x64.zip` then
