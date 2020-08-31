@@ -36,6 +36,7 @@ current 16-bit max
  1012 Ex.CanFlatMapSeq           (Lucre)
  1013 Ex.CanFlatMapSeqToAct      (Lucre)
  1014 Ex.CanFlatMapSeqOption     (Lucre)
+ 1015 Ex.FileTop                 (Lucre)
 
  1024 Obj.Extractor.Int          (Patterns)
  1026 Obj.Extractor.Double       (Patterns)
