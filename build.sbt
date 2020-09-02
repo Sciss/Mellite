@@ -37,7 +37,7 @@ lazy val deps = new {
     val scallop             = "3.4.0"
     val serial              = "1.1.2"
     val sonogram            = "1.11.2"
-    val soundProcesses      = "3.35.9"
+    val soundProcesses      = "3.35.10-SNAPSHOT"
     val span                = "1.4.3"
     val swingPlus           = "0.4.2"
   }
