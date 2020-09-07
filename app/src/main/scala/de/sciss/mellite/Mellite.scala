@@ -21,7 +21,6 @@ import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
 import de.sciss.lucre.stm
 import de.sciss.lucre.stm.TxnLike
-import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.{Server, Sys, Txn}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
@@ -90,10 +89,13 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       val workspaces: Opt[List[File]] = trailArg(required = false, default = Some(Nil),
         descr = "Workspaces (.mllt directories) to open"
       )
-      val headless: Opt[Boolean] = opt("headless",
+      val headless: Opt[Boolean] = opt("headless", short = 'h',
         descr = "Run without graphical user-interface (Note: does not initialize preferences)."
       )
-      val noLogFrame: Opt[Boolean] = opt("no-log-frame",
+      val bootAudio: Opt[Boolean] = opt("boot-audio", short = 'b',
+        descr = "Boot audio server when in headless mode."
+      )
+      val noLogFrame: Opt[Boolean] = opt("no-log-frame", short = 'n',
         descr = "Do not create log frame (post window)."
       )
       val autoRun: Opt[List[String]] = opt[String]("auto-run", short = 'r', default = Some(""),
@@ -104,8 +106,10 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       val config: Config = Config(
         open      = workspaces(),
         headless  = headless(),
+        bootAudio = bootAudio(),
         autoRun   = autoRun(),
-        logFrame  = !noLogFrame())
+        logFrame  = !noLogFrame(),
+      )
     }
 
     _config = p.config
@@ -168,7 +172,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     * @return `true` if the attempt to boot was made, `false` if the program was not found
     */
   def startAuralSystem(): Boolean = {
-    requireEDT()
+//    requireEDT()
     val serverCfg = Server.Config()
 //    serverCfg.verbosity = -1
     val clientCfg = Client.Config()
@@ -198,7 +202,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   override def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
                                      useDevice: Boolean, pickPort: Boolean): Unit = {
-    requireEDT()
+//    requireEDT()
     import de.sciss.file._
     import de.sciss.numbers.Implicits._
     val programPath         = Prefs.superCollider.getOrElse(Prefs.defaultSuperCollider)
@@ -337,9 +341,17 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         applyAudioPreferences(_, _, useDevice = false, pickPort = false)
     }
 
-    // ---- main window ----
+    // ---- main window and boot ----
 
-    if (!headless) new MainFrame
+    if (headless) {
+      if (_config.bootAudio) {
+//        Swing.onEDT {
+          Mellite.startAuralSystem()
+//        }
+      }
+    } else {
+      new MainFrame
+    }
 
     // ---- workspaces and auto-run ----
 

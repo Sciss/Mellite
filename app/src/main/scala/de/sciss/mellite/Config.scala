@@ -15,8 +15,9 @@ package de.sciss.mellite
 
 import de.sciss.file.File
 
-final case class Config(open    : List[File]    = Nil,
-                        autoRun : List[String]  = Nil,
-                        headless: Boolean       = false,
-                        logFrame: Boolean       = true,
+final case class Config(open      : List[File]    = Nil,
+                        autoRun   : List[String]  = Nil,
+                        headless  : Boolean       = false,
+                        bootAudio : Boolean       = false,
+                        logFrame  : Boolean       = true,
                        )
