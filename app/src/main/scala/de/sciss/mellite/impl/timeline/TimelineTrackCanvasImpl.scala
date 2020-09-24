@@ -19,13 +19,13 @@ import de.sciss.mellite.TimelineTool.EmptyRubber
 import de.sciss.mellite.impl.TimelineCanvas2DImpl
 import de.sciss.mellite.{ObjTimelineView, TimelineTools, TimelineTrackCanvas, TimelineView}
 
-trait TimelineTrackCanvasImpl[S <: Sys[S]]
-  extends TimelineCanvas2DImpl[S, Int, ObjTimelineView[S]]
-    with TimelineTrackCanvas[S] {
+trait TimelineTrackCanvasImpl[T <: Txn[T]]
+  extends TimelineCanvas2DImpl[T, Int, ObjTimelineView[T]]
+    with TimelineTrackCanvas[T] {
 
   // ---- impl ----
 
-  final val timelineTools: TimelineTools[S] = TimelineTools(this)
+  final val timelineTools: TimelineTools[T] = TimelineTools(this)
 
   import TimelineTools._
 

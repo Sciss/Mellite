@@ -14,17 +14,17 @@
 package de.sciss.mellite.impl.artifact
 
 import de.sciss.desktop.{FileDialog, UndoManager}
-import de.sciss.lucre.artifact.Artifact
+import de.sciss.lucre.Artifact
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.objview.ArtifactObjView.humanName
 import de.sciss.mellite.{ArtifactFrame, ArtifactView}
 import de.sciss.synth.proc.Universe
 
 object ArtifactFrameImpl {
-  def apply[S <: Sys[S]](obj: Artifact[S], mode: Boolean, initMode: FileDialog.Mode)
-                        (implicit tx: S#Tx, universe: Universe[S]): ArtifactFrame[S] = {
+  def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode)
+                        (implicit tx: T, universe: Universe[T]): ArtifactFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val afv       = ArtifactView(obj, mode = mode, initMode = initMode)
     val name      = CellView.name(obj)
@@ -33,8 +33,8 @@ object ArtifactFrameImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](/* val document: Workspace[S], */ val view: ArtifactView[S],
-                                        name: CellView[S#Tx, String])
-    extends WindowImpl[S](name.map(n => s"$n : $humanName"))
-      with ArtifactFrame[S]
+  private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: ArtifactView[T],
+                                        name: CellView[T, String])
+    extends WindowImpl[T](name.map(n => s"$n : $humanName"))
+      with ArtifactFrame[T]
 }

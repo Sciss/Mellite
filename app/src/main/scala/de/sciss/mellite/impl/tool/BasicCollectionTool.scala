@@ -21,7 +21,7 @@ import de.sciss.lucre.synth.Sys
   * It implements `handlePress` to update the child selection and then
   * for the currently hit child invoke the `handleSelect` method.
   */
-trait BasicCollectionTool[S <: Sys[S], A, Y, Child] extends CollectionToolLike[S, A, Y, Child] {
+trait BasicCollectionTool[T <: Txn[T], A, Y, Child] extends CollectionToolLike[T, A, Y, Child] {
 
   protected def handlePress(e: MouseEvent, modelY: Y, pos: Long, childOpt: Option[Child]): Unit = {
     handleMouseSelection(e, childOpt)

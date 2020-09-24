@@ -16,7 +16,7 @@ package de.sciss.mellite
 import de.sciss.desktop
 import de.sciss.desktop.KeyStrokes._
 import de.sciss.desktop.Window
-import de.sciss.lucre.stm.{Sys, Workspace}
+import de.sciss.lucre.{Txn, Workspace}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.processor.Processor.Aborted
@@ -69,10 +69,10 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
 //    if (allOk) docs.foreach(doc => close(doc.asInstanceOf[Workspace[~] forSome { type ~ <: Sys[~] }]))
   }
 
-  private final class InMemoryVeto[S <: Sys[S]](/* universe: Universe[S], */ window: Option[Window])
-    extends Veto[S#Tx] {
+  private final class InMemoryVeto[T <: Txn[T]](/* universe: Universe[T], */ window: Option[Window])
+    extends Veto[T] {
 
-    def vetoMessage(implicit tx: S#Tx): String = "Closing an in-memory workspace."
+    def vetoMessage(implicit tx: T): String = "Closing an in-memory workspace."
 
     /** Attempts to resolve the veto condition by consulting the user.
       *
@@ -80,7 +80,7 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
       *         proceed with the operation. failed future if the veto is upheld, and
       *         the caller should abort the operation.
       */
-    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
+    def tryResolveVeto()(implicit tx: T): Future[Unit] = {
       val p = Promise[Unit]()
       deferTx {
         val msg = s"<html><body>$vetoMessage That means<br>" +
@@ -105,19 +105,19 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
     *
     * @return `true` if it is ok to close the workspace, `false` if the request was denied
     */
-  def prepareDisposal[S <: Sys[S]](workspace: Workspace[S], window: Option[Window])
-                                  (implicit tx: S#Tx /* , cursor: stm.Cursor[S] */): Option[Veto[S#Tx]] = {
-    val vetoInMemOpt: Option[Veto[S#Tx]] =
+  def prepareDisposal[T <: Txn[T]](workspace: Workspace[T], window: Option[Window])
+                                  (implicit tx: T /* , cursor: Cursor[T] */): Option[Veto[T]] = {
+    val vetoInMemOpt: Option[Veto[T]] =
       workspace match {
-        case _: proc.Workspace.InMemory => Some(new InMemoryVeto[S](/* universe, */ window))
+        case _: proc.Workspace.InMemory => Some(new InMemoryVeto[T](/* universe, */ window))
         case _ => None
       }
 
     collectVetos(workspace, vetoInMemOpt)
   }
 
-  def tryClose[S <: Sys[S]](workspace: Workspace[S], window: Option[Window]): Future[Unit] = {
-    def succeed()(implicit tx: S#Tx): Future[Unit] = {
+  def tryClose[T <: Txn[T]](workspace: Workspace[T], window: Option[Window]): Future[Unit] = {
+    def succeed()(implicit tx: T): Future[Unit] = {
       workspace.dispose()
       Future.successful(())
     }
@@ -141,10 +141,10 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
     }
   }
 
-  private def collectVetos[S <: Sys[S]](workspace: Workspace[S], preOpt: Option[Veto[S#Tx]])
-                                       (implicit tx: S#Tx /*, cursor: stm.Cursor[S] */): Option[Veto[S#Tx]] = {
-    val list0: List[Veto[S#Tx]] = workspace.dependents.iterator.flatMap {
-      case mv: DependentMayVeto[S#Tx] /* if mv != self */ => mv.prepareDisposal()
+  private def collectVetos[T <: Txn[T]](workspace: Workspace[T], preOpt: Option[Veto[T]])
+                                       (implicit tx: T /*, cursor: Cursor[T] */): Option[Veto[T]] = {
+    val list0: List[Veto[T]] = workspace.dependents.iterator.flatMap {
+      case mv: DependentMayVeto[T] /* if mv != self */ => mv.prepareDisposal()
       case _ => None
     } .toList
 
@@ -153,12 +153,12 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
     list match {
       case Nil  => None
       case _    =>
-        val res = new Veto[S#Tx] {
-          def vetoMessage(implicit tx: S#Tx): String =
+        val res = new Veto[T] {
+          def vetoMessage(implicit tx: T): String =
             list.map(_.vetoMessage).mkString("\n")
 
-          def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
-            def loop(in: Future[Unit], rem: List[Veto[S#Tx]]): Future[Unit] = rem match {
+          def tryResolveVeto()(implicit tx: T): Future[Unit] = {
+            def loop(in: Future[Unit], rem: List[Veto[T]]): Future[Unit] = rem match {
               case Nil => in
               case head :: tail =>
                 in.value match {
@@ -188,14 +188,14 @@ object ActionCloseAllWorkspaces extends Action("Close All") {
 //    *
 //    * @return `true` if the space was closed
 //    */
-//  def checkAndClose[S <: Sys[S]](doc: Workspace[S], window: Option[Window]): Boolean = ...
+//  def checkAndClose[T <: Txn[T]](doc: Workspace[T], window: Option[Window]): Boolean = ...
 ////    check(doc, window) && {
 ////      close(doc)
 ////      true
 ////    }
 
 //  /** Closes the provided workspace without checking. */
-//  def close[S <: Sys[S]](doc: Workspace[S]): Unit = {
+//  def close[T <: Txn[T]](doc: Workspace[T]): Unit = {
 //    requireEDT()
 //    log(s"Closing workspace ${doc.folder}")
 //    dh.removeDocument(doc)

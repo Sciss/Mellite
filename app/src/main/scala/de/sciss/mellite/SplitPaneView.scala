@@ -21,15 +21,15 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import scala.swing.{Orientation, SplitPane}
 
 object SplitPaneView {
-  def apply[S <: Sys[S]](left: View[S], right: View[S], orientation: Orientation.Value)
-                        (implicit tx: S#Tx): SplitPaneView[S] = {
+  def apply[T <: Txn[T]](left: View[T], right: View[T], orientation: Orientation.Value)
+                        (implicit tx: T): SplitPaneView[T] = {
     new Impl(left, right, orientation).init()
   }
 
-  private final class Impl[S <: Sys[S]](val left: View[S], val right: View[S], orientation: Orientation.Value)
-    extends SplitPaneView[S] with ComponentHolder[SplitPane] {
+  private final class Impl[T <: Txn[T]](val left: View[T], val right: View[T], orientation: Orientation.Value)
+    extends SplitPaneView[T] with ComponentHolder[SplitPane] {
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx(guiInit())
       this
     }
@@ -38,15 +38,15 @@ object SplitPaneView {
       component = new SplitPane(orientation, left.component, right.component)
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       left  .dispose()
       right .dispose()
     }
   }
 }
-trait SplitPaneView[S <: Sys[S]] extends View[S] {
+trait SplitPaneView[T <: Txn[T]] extends View[T] {
   type C = SplitPane
 
-  def left  : View[S]
-  def right : View[S]
+  def left  : View[T]
+  def right : View[T]
 }

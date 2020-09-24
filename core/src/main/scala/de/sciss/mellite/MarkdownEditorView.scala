@@ -14,9 +14,8 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.{Sys, TxnLike}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Txn, TxnLike, synth}
 import de.sciss.model.Model
 import de.sciss.synth.proc.{Markdown, Universe}
 
@@ -32,21 +31,21 @@ object MarkdownEditorView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: SSys[S]](obj: Markdown[S], showEditor: Boolean, bottom: ISeq[View[S]])
-                           (implicit tx: S#Tx, universe: Universe[S],
-                            undoManager: UndoManager): MarkdownEditorView[S]
+    def apply[T <: synth.Txn[T]](obj: Markdown[T], showEditor: Boolean, bottom: ISeq[View[T]])
+                                (implicit tx: T, universe: Universe[T],
+                            undoManager: UndoManager): MarkdownEditorView[T]
   }
 
-  def apply[S <: SSys[S]](obj: Markdown[S], showEditor: Boolean = true, bottom: ISeq[View[S]] = Nil)
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undoManager: UndoManager): MarkdownEditorView[S] =
+  def apply[T <: synth.Txn[T]](obj: Markdown[T], showEditor: Boolean = true, bottom: ISeq[View[T]] = Nil)
+                              (implicit tx: T, universe: Universe[T],
+                         undoManager: UndoManager): MarkdownEditorView[T] =
     companion(obj, showEditor = showEditor, bottom = bottom)
 
   sealed trait Update
   final case class DirtyChange(value: Boolean) extends Update
 }
-trait MarkdownEditorView[S <: Sys[S]] extends UniverseView[S] with Model[MarkdownEditorView.Update] {
-  def renderer: MarkdownRenderView[S]
+trait MarkdownEditorView[T <: Txn[T]] extends UniverseView[T] with Model[MarkdownEditorView.Update] {
+  def renderer: MarkdownRenderView[T]
 
   def dirty(implicit tx: TxnLike): Boolean
 

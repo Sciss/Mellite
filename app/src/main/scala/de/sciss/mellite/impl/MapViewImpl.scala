@@ -37,20 +37,20 @@ import scala.concurrent.stm.TMap
 import scala.swing.event.TableRowsSelected
 import scala.swing.{Component, Dimension, Label, ScrollPane, Table, TextField}
 
-abstract class MapViewImpl[S <: Sys[S], Repr]
-                              (implicit val universe: Universe[S], val undoManager: UndoManager)
-  extends MapView[S, Repr] with ComponentHolder[Component] with ModelImpl[MapView.Update[S, Repr]] {
+abstract class MapViewImpl[T <: Txn[T], Repr]
+                              (implicit val universe: Universe[T], val undoManager: UndoManager)
+  extends MapView[T, Repr] with ComponentHolder[Component] with ModelImpl[MapView.Update[T, Repr]] {
   impl: Repr =>
 
   type C = Component
 
   // ---- abstract ----
 
-  protected def observer: Disposable[S#Tx]
+  protected def observer: Disposable[T]
 
-  protected def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit]
+  protected def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit]
 
-  protected def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit]
+  protected def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit]
 
   protected def guiInit1(scroll: ScrollPane): Unit
 
@@ -59,22 +59,22 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
   protected def showKeyOnly: Boolean = false
   protected def keyEditable: Boolean = true
 
-  private[this] var modelEDT: Vec[(String, ObjListView[S])] = _ // = list0
+  private[this] var modelEDT: Vec[(String, ObjListView[T])] = _ // = list0
 
   private[this] var _table: Table = _
   private[this] var _scroll: ScrollPane = _
 
-  private[this] val viewMap = TMap.empty[String, ObjListView[S]] // TMap(list0: _*)
+  private[this] val viewMap = TMap.empty[String, ObjListView[T]] // TMap(list0: _*)
 
   final protected def table : Table      = _table
   final protected def scroll: ScrollPane = _scroll
 
-  final protected def model: Vec[(String, ObjListView[S])] = {
+  final protected def model: Vec[(String, ObjListView[T])] = {
     requireEDT()
     modelEDT
   }
 
-  def dispose()(implicit tx: S#Tx): Unit = {
+  def dispose()(implicit tx: T): Unit = {
     import TxnLike.peer
     observer.dispose()
     viewMap.foreach(_._2.dispose())
@@ -82,7 +82,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
   }
 
   // helper method that executes model updates on the EDT
-  private[this] def withRow(key: String)(fun: Int => Unit)(implicit tx: S#Tx): Unit = deferTx {
+  private[this] def withRow(key: String)(fun: Int => Unit)(implicit tx: T): Unit = deferTx {
     import de.sciss.equal.Implicits._
     val row = modelEDT.indexWhere(_._1 === key)
     if (row < 0) {
@@ -92,14 +92,14 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  private[this] def mkValueView(key: String, value: Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
+  private[this] def mkValueView(key: String, value: Obj[T])(implicit tx: T): ObjListView[T] = {
     val view = ObjListView(value)
     viewMap.put(key, view)(tx.peer).foreach(_.dispose())
     observeView(key, view)
     view
   }
 
-  private def observeView(key: String, view: ObjListView[S])(implicit tx: S#Tx): Unit =
+  private def observeView(key: String, view: ObjListView[T])(implicit tx: T): Unit =
     view.react { implicit tx => {
       case ObjView.Repaint(_) =>
         withRow(key) { row =>
@@ -107,7 +107,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
         }
     }}
 
-  final protected def attrAdded(key: String, value: Obj[S])(implicit tx: S#Tx): Unit = {
+  final protected def attrAdded(key: String, value: Obj[T])(implicit tx: T): Unit = {
     val view = mkValueView(key, value)
     deferTx {
       val row = modelEDT.size
@@ -116,7 +116,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  final protected def attrRemoved(key: String)(implicit tx: S#Tx): Unit = {
+  final protected def attrRemoved(key: String)(implicit tx: T): Unit = {
     viewMap.remove(key)(tx.peer).foreach(_.dispose())
     withRow(key) { row =>
       modelEDT = modelEDT.patch(row, Nil, 1)
@@ -124,7 +124,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  final protected def attrReplaced(key: String, before: Obj[S], now: Obj[S])(implicit tx: S#Tx): Unit = {
+  final protected def attrReplaced(key: String, before: Obj[T], now: Obj[T])(implicit tx: T): Unit = {
     val view = mkValueView(key, now)
     withRow(key) { row =>
       modelEDT = modelEDT.patch(row, (key -> view) :: Nil, 1)
@@ -155,8 +155,8 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
 
     override def getColumnClass(col: Int): Class[_] = (col: @switch) match {
       case 0 => classOf[String]
-      case 1 => classOf[ObjView[S]]
-      case 2 => classOf[ObjView[S]]
+      case 1 => classOf[ObjView[T]]
+      case 2 => classOf[ObjView[T]]
     }
 
     override def isCellEditable(row: Int, col: Int): Boolean = {
@@ -187,7 +187,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     }
   }
 
-  final protected def init(list0: Vec[(String, ObjListView[S])])(implicit tx: S#Tx): this.type = {
+  final protected def init(list0: Vec[(String, ObjListView[T])])(implicit tx: T): this.type = {
     import TxnLike.peer
     modelEDT  = list0
     viewMap ++= list0
@@ -351,7 +351,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
           val isInsert  = dl.isInsertRow
           val data      = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
           require(data.universe == universe, "Cross-session list copy not yet implemented")
-          val view      = data.view.asInstanceOf[ObjView[S]]
+          val view      = data.view.asInstanceOf[ObjView[T]]
 
           val keyOpt = if (isInsert) { // ---- create new entry with key via dialog ----
             queryKey()
@@ -393,7 +393,7 @@ abstract class MapViewImpl[S <: Sys[S], Repr]
     opt.show(Window.find(component))
   }
 
-  final def selection: List[(String, ObjView[S])] = {
+  final def selection: List[(String, ObjView[T])] = {
     val ind0: List[Int] = _table.selection.rows.iterator.map(_table.peer.convertRowIndexToModel).toList
     val indices = ind0.sorted
     indices.map(modelEDT.apply)

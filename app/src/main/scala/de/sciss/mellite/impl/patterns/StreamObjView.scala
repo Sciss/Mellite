@@ -15,22 +15,19 @@ package de.sciss.mellite.impl.patterns
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing._
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Ident, Obj, Source, SpanLikeObj, Txn => LTxn}
 import de.sciss.mellite.edit.EditStreamPeer
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
-import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
+import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.{Pattern, Stream}
 import de.sciss.swingplus.Spinner
-import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel}
@@ -39,46 +36,46 @@ import scala.swing.Button
 import scala.swing.event.Key
 
 object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
-  type E[~ <: stm.Sys[~]] = Stream[~]
+  type E[~ <: LTxn[~]] = Stream[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Stream)
   val prefix        : String    = "Stream"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Stream
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Stream[S])(implicit tx: S#Tx): StreamObjView[S] with ObjListView[S] =
+  def mkListView[T <: Txn[T]](obj: Stream[T])(implicit tx: T): StreamObjView[T] with ObjListView[T] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
-  def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Stream[S],
-                                  context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S] = {
-    val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
+  def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: Stream[T],
+                                  context: ObjTimelineView.Context[T])(implicit tx: T): ObjTimelineView[T] = {
+    val res = new TimelineImpl[T](tx.newHandle(obj)).initAttrs(id, span, obj)
     res
   }
 
-  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Stream[S]])
-    extends Impl[S]
+  private final class ListImpl[T <: Txn[T]](val objH: Source[T, Stream[T]])
+    extends Impl[T]
 
-  private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Stream[S]])
-    extends Impl[S] with ObjTimelineViewBasicImpl[S]
+  private final class TimelineImpl[T <: Txn[T]](val objH : Source[T, Stream[T]])
+    extends Impl[T] with ObjTimelineViewBasicImpl[T]
 
-  def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = Stream[S]() // .newVar[S](Stream.empty[S])
+  def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
+    val obj  = Stream[T]() // .newVar[T](Stream.empty[T])
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  private abstract class Impl[S <: Sys[S]]
-    extends StreamObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.EmptyRenderer[S]
-      with NonEditable[S] {
+  private abstract class Impl[T <: Txn[T]]
+    extends StreamObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.EmptyRenderer[T]
+      with NonEditable[T] {
 
-    override def objH: stm.Source[S#Tx, Stream[S]]
+    override def objH: Source[T, Stream[T]]
 
-    override def obj(implicit tx: S#Tx): Stream[S] = objH()
+    override def obj(implicit tx: T): Stream[T] = objH()
 
-    type E[~ <: stm.Sys[~]] = Stream[~]
+    type E[~ <: LTxn[~]] = Stream[~]
 
     final def factory: ObjView.Factory = StreamObjView
 
@@ -86,17 +83,17 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
 
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
-    final def openView(parent: Option[Window[S]])
-                      (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    final def openView(parent: Option[Window[T]])
+                      (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = codeFrame(obj)
       Some(frame)
     }
   }
 
-  private def codeFrame[S <: Sys[S]](obj: Stream[S])
-                                    (implicit tx: S#Tx, universe: Universe[S],
-                                     compiler: Code.Compiler): CodeFrame[S] = {
+  private def codeFrame[T <: Txn[T]](obj: Stream[T])
+                                    (implicit tx: T, universe: Universe[T],
+                                     compiler: Code.Compiler): CodeFrame[T] = {
     val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Pattern.Code, key = Stream.attrSource)()
     val objH    = tx.newHandle(obj) // IntelliJ highlight bug
     val code0   = codeObj.value match {
@@ -104,21 +101,20 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       case other => sys.error(s"Stream source code does not produce patterns.Graph: ${other.tpe.humanName}")
     }
 
-    val handler = new CodeView.Handler[S, Unit, Pat[_]] {
+    val handler = new CodeView.Handler[T, Unit, Pat[_]] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: Pat[_])(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: Pat[_])(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import obj.context
-        import universe.cursor
-        val v   = out.expand[S]
-        EditStreamPeer[S]("Change Stream Graph", obj, v)
+        val v   = out.expand[T]
+        EditStreamPeer[T]("Change Stream Graph", obj, v)
       }
 
-      def dispose()(implicit tx: S#Tx): Unit = ()
+      def dispose()(implicit tx: T): Unit = ()
     }
 
-    val viewReset = View.wrap[S, Button] {
+    val viewReset = View.wrap[T, Button] {
       val actionReset = new swing.Action("Reset") { self =>
         import universe.cursor
         def apply(): Unit = {
@@ -138,13 +134,13 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
 
     lazy val mEvalN = new SpinnerNumberModel(1, 1, 1000, 1)
 
-    val viewEval = View.wrap[S, Button] {
+    val viewEval = View.wrap[T, Button] {
       val actionEval = new swing.Action("Next") { self =>
         import universe.cursor
         def apply(): Unit = {
           val n = mEvalN.getNumber.intValue()
           val res = cursor.step { implicit tx =>
-            implicit val ctx: patterns.Context[S] = patterns.lucre.Context[S](tx.system, tx)
+            implicit val ctx: patterns.Context[T] = patterns.lucre.Context[T](tx.system, tx)
             val obj = objH()
             val st  = obj.peer()
             if (n == 1) {
@@ -164,7 +160,7 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       b
     }
 
-    val viewEvalN = View.wrap[S, Spinner] {
+    val viewEvalN = View.wrap[T, Spinner] {
       val res = new Spinner(mEvalN)
       res.tooltip = "Number of elements to print"
       res
@@ -179,6 +175,6 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       canBounce = true)
   }
 }
-trait StreamObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Stream[S]
+trait StreamObjView[T <: LTxn[T]] extends ObjView[T] {
+  type Repr = Stream[T]
 }

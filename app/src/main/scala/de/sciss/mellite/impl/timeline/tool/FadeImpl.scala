@@ -29,8 +29,8 @@ import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicTimelineTool[S, TimelineTool.Fade] {
+final class FadeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends BasicTimelineTool[T, TimelineTool.Fade] {
 
   import TimelineTool.{EmptyFade, Fade}
 
@@ -67,8 +67,8 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     result
   }
 
-  protected def commitObj(drag: Fade)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  protected def commitObj(drag: Fade)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import drag._
 
     val attr    = obj.attr
@@ -96,9 +96,9 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
       val curve   = if (newInC == 0f) Curve.linear else Curve.parametric(newInC)
       val fr      = valIn.numFrames + dIn
       val res     = FadeSpec(fr, curve, valIn.floor)
-      val elem    = FadeSpec.Obj.newConst[S](res)
+      val elem    = FadeSpec.Obj.newConst[T](res)
 
-      val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-In", obj, ObjKeys.attrFadeIn, Some(elem))
+      val edit    = EditAttrMap.expr[T, FadeSpec, FadeSpec.Obj]("Adjust Fade-In", obj, ObjKeys.attrFadeIn, Some(elem))
 
       edits ::= edit
 
@@ -133,8 +133,8 @@ final class FadeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
       val curve   = if (newOutC == 0f) Curve.linear else Curve.parametric(newOutC)
       val fr      = valOut.numFrames + dOut
       val res     = FadeSpec(fr, curve, valOut.floor)
-      val elem    = FadeSpec.Obj.newConst[S](res)
-      val edit    = EditAttrMap.expr[S, FadeSpec, FadeSpec.Obj]("Adjust Fade-Out", obj, ObjKeys.attrFadeOut, Some(elem))
+      val elem    = FadeSpec.Obj.newConst[T](res)
+      val edit    = EditAttrMap.expr[T, FadeSpec, FadeSpec.Obj]("Adjust Fade-Out", obj, ObjKeys.attrFadeOut, Some(elem))
 
       edits ::= edit
 

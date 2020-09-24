@@ -34,14 +34,14 @@ import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
 object OutputsViewImpl {
-  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, universe: Universe[S],
-                                       undoManager: UndoManager): ProcOutputsView[S] = {
+  def apply[T <: Txn[T]](obj: Proc[T])(implicit tx: T, universe: Universe[T],
+                                       undoManager: UndoManager): ProcOutputsView[T] = {
     val list0 = obj.outputs.iterator.map { out =>
       (out.key, ObjListView(out))
     }  .toIndexedSeq
 
     new Impl(tx.newHandle(obj)) {
-      protected val observer: Disposable[S#Tx] = obj.changed.react { implicit tx =>upd =>
+      protected val observer: Disposable[T] = obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case Proc.OutputAdded  (out) => attrAdded(out.key, out)
           case Proc.OutputRemoved(out) => attrRemoved(out.key)
@@ -53,13 +53,13 @@ object OutputsViewImpl {
     }
   }
 
-  private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, Proc[S]])
-                                       (implicit universe: Universe[S],
+  private abstract class Impl[T <: Txn[T]](objH: Source[T, Proc[T]])
+                                       (implicit universe: Universe[T],
                                         undoManager: UndoManager)
-    extends MapViewImpl[S, ProcOutputsView[S]] with ProcOutputsView[S] with ComponentHolder[Component] { impl =>
+    extends MapViewImpl[T, ProcOutputsView[T]] with ProcOutputsView[T] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
-    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit] = None
+    protected final def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true
@@ -116,7 +116,7 @@ object OutputsViewImpl {
       ggDrag        = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] =
           selection.headOption.map { case (key, _ /* view */) =>
-            DragAndDrop.Transferable(ProcOutputsView.flavor)(ProcOutputsView.Drag[S](
+            DragAndDrop.Transferable(ProcOutputsView.flavor)(ProcOutputsView.Drag[T](
               universe, objH, key))
           }
       }

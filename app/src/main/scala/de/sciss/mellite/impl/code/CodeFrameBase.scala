@@ -29,12 +29,12 @@ import scala.concurrent.{Future, Promise}
   *
   * Also provides menu generation for examples.
   */
-trait CodeFrameBase[S <: Sys[S]] extends Veto[S#Tx] {
-  _: WindowImpl[S] =>
+trait CodeFrameBase[T <: Txn[T]] extends Veto[T] {
+  _: WindowImpl[T] =>
 
-  protected def codeView: CodeView[S, _]
+  protected def codeView: CodeView[T, _]
 
-  override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+  override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
     if (!codeView.isCompiling && !codeView.dirty) None else Some(this)
 
   private def _vetoMessage = "The code has been edited."
@@ -46,10 +46,10 @@ trait CodeFrameBase[S <: Sys[S]] extends Veto[S#Tx] {
       codeView.currentText = ex.code
   }
 
-  def vetoMessage(implicit tx: S#Tx): String =
+  def vetoMessage(implicit tx: T): String =
     if (codeView.isCompiling) "Ongoing compilation." else _vetoMessage
 
-  def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] =
+  def tryResolveVeto()(implicit tx: T): Future[Unit] =
     if (codeView.isCompiling) Future.failed(Aborted())
     else {
       val p = Promise[Unit]()

@@ -14,16 +14,16 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.grapheme.{GraphemeFrameImpl => Impl}
 import de.sciss.synth.proc.{Grapheme, Universe}
 
 object GraphemeFrame {
-  def apply[S <: Sys[S]](group: Grapheme[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): GraphemeFrame[S] =
+  def apply[T <: Txn[T]](group: Grapheme[T])
+                        (implicit tx: T, universe: Universe[T]): GraphemeFrame[T] =
     Impl(group)
 }
-trait GraphemeFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-  def view: GraphemeView[S]
+trait GraphemeFrame[T <: LTxn[T]] extends lucre.swing.Window[T] {
+  def view: GraphemeView[T]
 }

@@ -41,28 +41,28 @@ object ArtifactObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categResources
   def canMakeObj : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Artifact[S])(implicit tx: S#Tx): ArtifactObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Artifact[T])(implicit tx: T): ArtifactObjView[T] with ObjListView[T] = {
     val peer      = obj
     val value     = peer.value  // peer.child.path
     val editable  = false // XXX TODO -- peer.modifiableOption.isDefined
-    new Impl[S](tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
+    new Impl[T](tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
-  type LocationConfig[S <: stm.Sys[S]] = ActionArtifactLocation.QueryResult[S]
-  final case class Config[S <: stm.Sys[S]](name: String, file: File, location: LocationConfig[S])
+  type LocationConfig[S <: stm.Sys[T]] = ActionArtifactLocation.QueryResult[T]
+  final case class Config[S <: stm.Sys[T]](name: String, file: File, location: LocationConfig[T])
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val (ggFile, ggValue) = ArtifactViewImpl.mkPathField(reveal = false, mode = true)
-    val res = ObjViewImpl.primitiveConfig[S, File](window, tpe = prefix, ggValue = ggValue,
+    val res = ObjViewImpl.primitiveConfig[T, File](window, tpe = prefix, ggValue = ggValue,
       prepare = ggFile.valueOption match {
         case Some(value) => Success(value)
         case None => Failure(MessageException("No file was specified"))
       })
     val res1 = res.flatMap { c =>
       import c._
-      val locOpt = ActionArtifactLocation.query[S](file = value, window = window, askName = true)(implicit tx => universe.workspace.root)
-      locOpt.fold[MakeResult[S]](Failure(Aborted())) { location =>
+      val locOpt = ActionArtifactLocation.query[T](file = value, window = window, askName = true)(implicit tx => universe.workspace.root)
+      locOpt.fold[MakeResult[T]](Failure(Aborted())) { location =>
         val cfg = Config(name = name, file = value, location = location)
         Success(cfg)
       }
@@ -70,8 +70,8 @@ object ArtifactObjView extends ObjListView.Factory {
     done(res1)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val location: Opt[File] = opt(
         descr = "Artifact's base location (directory). If absent, artifact's direct parent is used."
       )
@@ -93,7 +93,7 @@ object ArtifactObjView extends ObjListView.Factory {
     }))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
     val (list0, loc) = location match {
       case (Left(source), _) => (Nil, source())
@@ -106,11 +106,11 @@ object ArtifactObjView extends ObjListView.Factory {
     art :: list0
   }
 
-  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Artifact[S]],
+  private final class Impl[T <: Txn[T]](val objH: Source[T, Artifact[T]],
                                         var file: File, val isListCellEditable: Boolean)
-    extends ArtifactObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl.Impl[S]
+    extends ArtifactObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl.Impl[T]
       with ObjListViewImpl.StringRenderer {
 
     type E[~ <: stm.Sys[~]] = Artifact[~]
@@ -119,16 +119,16 @@ object ArtifactObjView extends ObjListView.Factory {
 
     def value: File = file
 
-    override def obj(implicit tx: S#Tx): Artifact[S] = objH()
+    override def obj(implicit tx: T): Artifact[T] = objH()
 
     def isViewable: Boolean = true
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-      val frame = ArtifactFrame[S](objH(), mode = true)
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
+      val frame = ArtifactFrame[T](objH(), mode = true)
       Some(frame)
     }
 
-    def init(obj: Artifact[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: Artifact[T])(implicit tx: T): this.type = {
       initAttrs(obj)
       addDisposable(obj.changed.react { implicit tx =>upd =>
         deferAndRepaint {
@@ -138,9 +138,9 @@ object ArtifactObjView extends ObjListView.Factory {
       this
     }
 
-    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None // XXX TODO
+    def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None // XXX TODO
   }
 }
-trait ArtifactObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Artifact[S]
+trait ArtifactObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = Artifact[T]
 }

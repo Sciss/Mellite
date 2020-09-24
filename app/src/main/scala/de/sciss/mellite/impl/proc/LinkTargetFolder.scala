@@ -20,13 +20,13 @@ import de.sciss.mellite.edit.EditFolderRemoveObj
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import javax.swing.undo.UndoableEdit
 
-final class LinkTargetFolder[S <: Sys[S]](val attr: InputAttrFolder[S],
-                                          objH : stm.Source[S#Tx, Obj[S]])
-  extends LinkTarget[S] {
+final class LinkTargetFolder[T <: Txn[T]](val attr: InputAttrFolder[T],
+                                          objH : Source[T, Obj[T]])
+  extends LinkTarget[T] {
 
   override def toString: String = s"LinkTargetFolder($attr)@${hashCode.toHexString}"
 
-  def remove()(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def remove()(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     val f     = attr.folder
     val obj   = objH()
     val index = f.indexOf(obj)

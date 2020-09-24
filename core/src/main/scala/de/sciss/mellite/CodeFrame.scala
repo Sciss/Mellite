@@ -14,10 +14,10 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.stm
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
-import de.sciss.synth.proc.{Action, ActionRaw, Code, Control, Proc, Universe}
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.synth.proc.{Action, Code, Control, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 
@@ -30,58 +30,58 @@ object CodeFrame {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           compiler: Code.Compiler): CodeFrame[S]
+    def apply[T <: Txn[T]](obj: Code.Obj[T], bottom: ISeq[View[T]])
+                          (implicit tx: T, universe: Universe[T],
+                           compiler: Code.Compiler): CodeFrame[T]
 
-    def proc[S <: Sys[S]](proc: Proc[S])
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          compiler: Code.Compiler): CodeFrame[S]
+    def proc[T <: Txn[T]](proc: Proc[T])
+                         (implicit tx: T, universe: Universe[T],
+                          compiler: Code.Compiler): CodeFrame[T]
 
-    def control[S <: Sys[S]](control: Control[S])
-                           (implicit tx: S#Tx, universe: Universe[S],
-                            compiler: Code.Compiler): CodeFrame[S]
+    def control[T <: Txn[T]](control: Control[T])
+                           (implicit tx: T, universe: Universe[T],
+                            compiler: Code.Compiler): CodeFrame[T]
 
-    def action[S <: Sys[S]](action: Action[S])
-                            (implicit tx: S#Tx, universe: Universe[S],
-                             compiler: Code.Compiler): CodeFrame[S]
+    def action[T <: Txn[T]](action: Action[T])
+                            (implicit tx: T, universe: Universe[T],
+                             compiler: Code.Compiler): CodeFrame[T]
 
-    def actionRaw[S <: Sys[S]](action: ActionRaw[S])
-                              (implicit tx: S#Tx, universe: Universe[S],
-                            compiler: Code.Compiler): CodeFrame[S]
+//    def actionRaw[T <: Txn[T]](action: ActionRaw[T])
+//                              (implicit tx: T, universe: Universe[T],
+//                            compiler: Code.Compiler): CodeFrame[T]
   }
 
-  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         compiler: Code.Compiler): CodeFrame[S] =
+  def apply[T <: Txn[T]](obj: Code.Obj[T], bottom: ISeq[View[T]])
+                        (implicit tx: T, universe: Universe[T],
+                         compiler: Code.Compiler): CodeFrame[T] =
     companion(obj, bottom = bottom)
 
-  def proc[S <: Sys[S]](proc: Proc[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         compiler: Code.Compiler): CodeFrame[S] =
+  def proc[T <: Txn[T]](proc: Proc[T])
+                        (implicit tx: T, universe: Universe[T],
+                         compiler: Code.Compiler): CodeFrame[T] =
     companion.proc(proc)
 
-  def control[S <: Sys[S]](control: Control[S])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           compiler: Code.Compiler): CodeFrame[S] =
+  def control[T <: Txn[T]](control: Control[T])
+                          (implicit tx: T, universe: Universe[T],
+                           compiler: Code.Compiler): CodeFrame[T] =
     companion.control(control)
 
-  def action[S <: Sys[S]](action: Action[S])
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          compiler: Code.Compiler): CodeFrame[S] =
+  def action[T <: Txn[T]](action: Action[T])
+                         (implicit tx: T, universe: Universe[T],
+                          compiler: Code.Compiler): CodeFrame[T] =
     companion.action(action)
 
-  def actionRaw[S <: Sys[S]](action: ActionRaw[S])
-                            (implicit tx: S#Tx, universe: Universe[S],
-                          compiler: Code.Compiler): CodeFrame[S] =
-    companion.actionRaw(action)
+//  def actionRaw[T <: Txn[T]](action: ActionRaw[T])
+//                            (implicit tx: T, universe: Universe[T],
+//                          compiler: Code.Compiler): CodeFrame[T] =
+//    companion.actionRaw(action)
 
-//  def fscape[S <: Sys[S]](fscape: FScape[S])
-//                       (implicit tx: S#Tx, workspace: Workspace[S], cursor: stm.Cursor[S],
-//                        compiler: Code.Compiler): CodeFrame[S] =
+//  def fscape[T <: Txn[T]](fscape: FScape[T])
+//                       (implicit tx: T, workspace: Workspace[T], cursor: Cursor[T],
+//                        compiler: Code.Compiler): CodeFrame[T] =
 //    Impl.fscape(fscape)
 }
 
-trait CodeFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-  def codeView: CodeView[S, _]
+trait CodeFrame[T <: LTxn[T]] extends lucre.swing.Window[T] {
+  def codeView: CodeView[T, _]
 }

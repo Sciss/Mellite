@@ -15,14 +15,14 @@ package de.sciss.mellite.impl.audiocue
 
 import de.sciss.file._
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{AudioCueView, AudioCueFrame}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.{AudioCueFrame, AudioCueView}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
 object AudioCueFrameImpl {
-  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): AudioCueFrame[S] = {
+  def apply[T <: Txn[T]](obj: AudioCue.Obj[T])
+                        (implicit tx: T, universe: Universe[T]): AudioCueFrame[T] = {
     val afv       = AudioCueView(obj)
     val name0     = CellView.name(obj)
     val file      = obj.value.artifact
@@ -36,10 +36,10 @@ object AudioCueFrameImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](/* val document: Workspace[S], */ val view: AudioCueView[S],
-                                        name: CellView[S#Tx, String], _file: File)
-    extends WindowImpl[S](name)
-    with AudioCueFrame[S] {
+  private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: AudioCueView[T],
+                                        name: CellView[T, String], _file: File)
+    extends WindowImpl[T](name)
+    with AudioCueFrame[T] {
 
     override protected def initGUI(): Unit = windowFile = Some(_file)
   }

@@ -19,12 +19,12 @@ import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import javax.swing.undo.UndoableEdit
 
-final class LinkTargetOutput[S <: Sys[S]](val attr: InputAttrOutput[S])
-  extends LinkTarget[S] {
+final class LinkTargetOutput[T <: Txn[T]](val attr: InputAttrOutput[T])
+  extends LinkTarget[T] {
 
   override def toString: String = s"LinkTargetOutput($attr)@${hashCode.toHexString}"
 
-  def remove()(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def remove()(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     // val out = attr.output
     val obj  = attr.parent.obj
     val edit = EditAttrMap.remove("Output", obj = obj, key = attr.key)

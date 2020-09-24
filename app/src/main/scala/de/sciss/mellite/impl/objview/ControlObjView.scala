@@ -32,34 +32,34 @@ object ControlObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Control
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Control[S])(implicit tx: S#Tx): ControlObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Control[T])(implicit tx: T): ControlObjView[T] with ObjListView[T] = {
     val value = "" // ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     val name  = config
-    val obj   = Control[S]()
+    val obj   = Control[T]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
   // XXX TODO make private
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Control[S]], var value: String)
-    extends ControlObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl.Impl[S]
+  final class Impl[T <: Txn[T]](val objH: Source[T, Control[T]], var value: String)
+    extends ControlObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl.Impl[T]
       with ObjListViewImpl.StringRenderer {
 
     def factory: ObjView.Factory = ControlObjView
 
-    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: Cursor[S]): Option[UndoableEdit] = None
+    def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None
 
     def isListCellEditable: Boolean = false // never within the list view
 
     def isViewable: Boolean = true
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = CodeFrame.control(obj)
 //      val frame = ControlEditorFrame(obj)
@@ -67,6 +67,6 @@ object ControlObjView extends NoArgsListObjViewFactory {
     }
   }
 }
-trait ControlObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Control[S]
+trait ControlObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = Control[T]
 }

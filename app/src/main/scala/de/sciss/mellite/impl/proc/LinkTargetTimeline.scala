@@ -21,14 +21,14 @@ import de.sciss.mellite.edit.EditTimelineRemoveObj
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import javax.swing.undo.UndoableEdit
 
-final class LinkTargetTimeline[S <: Sys[S]](val attr: InputAttrTimeline[S],
-                                            spanH: stm.Source[S#Tx, SpanLikeObj[S]],
-                                            objH : stm.Source[S#Tx, Obj[S]])
-  extends LinkTarget[S] {
+final class LinkTargetTimeline[T <: Txn[T]](val attr: InputAttrTimeline[T],
+                                            spanH: Source[T, SpanLikeObj[T]],
+                                            objH : Source[T, Obj[T]])
+  extends LinkTarget[T] {
 
   override def toString: String = s"LinkTargetTimeline($attr)@${hashCode.toHexString}"
 
-  def remove()(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def remove()(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     val tl = attr.timeline
     tl.modifiableOption.map { tlMod =>
       val span = spanH()

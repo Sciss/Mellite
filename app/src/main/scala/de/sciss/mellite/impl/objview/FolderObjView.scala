@@ -32,30 +32,30 @@ object FolderObjView extends NoArgsListObjViewFactory {
   def tpe           : Obj.Type  = Folder
   def category      : String   = ObjView.categOrganization
 
-  def mkListView[S <: Sys[S]](obj: Folder[S])(implicit tx: S#Tx): ObjListView[S] =
-    new Impl[S](tx.newHandle(obj)).initAttrs(obj)
+  def mkListView[T <: Txn[T]](obj: Folder[T])(implicit tx: T): ObjListView[T] =
+    new Impl[T](tx.newHandle(obj)).initAttrs(obj)
 
-  def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = Folder[S]()
+  def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
+    val obj  = Folder[T]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
   // XXX TODO: could be viewed as a new folder view with this folder as root
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Folder[S]])
-    extends ObjListView /* .Folder */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.EmptyRenderer[S]
-      with ObjListViewImpl.NonEditable[S] {
+  final class Impl[T <: Txn[T]](val objH: Source[T, Folder[T]])
+    extends ObjListView /* .Folder */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.EmptyRenderer[T]
+      with ObjListViewImpl.NonEditable[T] {
 
-    type Repr = Folder[S]
+    type Repr = Folder[T]
 
     def factory: ObjView.Factory = FolderObjView
 
     def isViewable = true
 
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[T]])
+                (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val folderObj = objH()
       val nameView  = CellView.name(folderObj)
       Some(FolderFrame(nameView, folderObj))

@@ -19,13 +19,12 @@ import java.util.{Date, Locale}
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.TxnLike
-import de.sciss.lucre.synth.{Server, Sys, Txn}
+import de.sciss.lucre.synth.{Server, Txn}
+import de.sciss.lucre.{Cursor, Txn => LTxn, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
 import de.sciss.synth.Client
-import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe, Workspace}
+import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe}
 import javax.swing.UIManager
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
@@ -242,7 +241,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     config.command        = Prefs.sensorCommand.getOrElse(Prefs.defaultSensorCommand)
 
     atomic { implicit itx =>
-      implicit val tx: TxnLike = TxnLike.wrap(itx)
+      implicit val tx: TxnLike = Txn.wrap(itx)
       sensorSystem.start(config.build)
     }
   }
@@ -364,36 +363,36 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       }
       if (config.autoRun.nonEmpty) fut.foreach { ws =>
         Mellite.withUniverse(ws)(autoRun(_))
-//        val ws1 = ws.asInstanceOf[Workspace[S] forSome { type S <: Sys[S] }]
+//        val ws1 = ws.asInstanceOf[Workspace[T] forSome { type T <: Txn[T] }]
 //        autoRun(ws1)
       }
     }
   }
 
   /** Utility method that helps avoid type-casts in other places. */
-  def withWorkspace[A](w: Workspace[_])(fun: (Workspace[S] forSome { type S <: Sys[S] }) => A): A = {
+  def withWorkspace[A](w: Workspace[_])(fun: (Workspace[T] forSome { type T <: Txn[T] }) => A): A = {
     fun.asInstanceOf[Workspace[_] => A](w)
   }
 
   /** Utility method that helps avoid type-casts in other places. */
-  def withUniverse[A](u: Universe[_])(fun: (Universe[S] forSome { type S <: Sys[S] }) => A): A = {
+  def withUniverse[A](u: Universe[_])(fun: (Universe[T] forSome { type T <: Txn[T] }) => A): A = {
     fun.asInstanceOf[Universe[_] => A](u)
   }
 
-  def mkUniverse[S <: Sys[S]](implicit w: Workspace[S]): Universe[S] = {
-    implicit val c: stm.Cursor[S] = w.cursor
+  def mkUniverse[T <: Txn[T]](implicit w: Workspace[T]): Universe[T] = {
+    implicit val c: Cursor[T] = w.cursor
     c.step { implicit tx =>
-      val gen = GenContext[S]()
-      val sch = Scheduler [S]()
+      val gen = GenContext[T]()
+      val sch = Scheduler [T]()
       Universe(gen, sch, Mellite.auralSystem)
     }
   }
 
-  private def autoRun[S <: Sys[S]](u: Universe[S]): Unit = {
+  private def autoRun[T <: Txn[T]](u: Universe[T]): Unit = {
     u.cursor.step { implicit tx =>
       val f = u.workspace.root
       config.autoRun.foreach { name =>
-        import proc.Implicits._
+
         (f / name).fold[Unit] {
           tx.afterCommit(println(s"Warning: auto-run object '$name' does not exist."))
         } { obj =>

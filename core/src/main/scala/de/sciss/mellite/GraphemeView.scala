@@ -14,8 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.Source
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.synth.proc.{Grapheme, Universe}
 
 object GraphemeView {
@@ -27,14 +28,14 @@ object GraphemeView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: Sys[S]](gr: Grapheme[S])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           undoManager: UndoManager): GraphemeView[S]
+    def apply[T <: Txn[T]](gr: Grapheme[T])
+                          (implicit tx: T, universe: Universe[T],
+                           undoManager: UndoManager): GraphemeView[T]
   }
 
-  def apply[S <: Sys[S]](gr: Grapheme[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undoManager: UndoManager): GraphemeView[S] =
+  def apply[T <: Txn[T]](gr: Grapheme[T])
+                        (implicit tx: T, universe: Universe[T],
+                         undoManager: UndoManager): GraphemeView[T] =
     companion(gr)
 
   sealed trait Mode
@@ -43,9 +44,9 @@ object GraphemeView {
     case object TwoDim extends Mode
   }
 }
-trait GraphemeView[S <: stm.Sys[S]] extends TimelineViewBase[S, Double, ObjGraphemeView[S]] {
-  def graphemeH: stm.Source[S#Tx, Grapheme[S]]
-  def grapheme(implicit tx: S#Tx): Grapheme[S]
+trait GraphemeView[T <: LTxn[T]] extends TimelineViewBase[T, Double, ObjGraphemeView[T]] {
+  def graphemeH: Source[T, Grapheme[T]]
+  def grapheme(implicit tx: T): Grapheme[T]
 
-  override def canvas: GraphemeCanvas[S]
+  override def canvas: GraphemeCanvas[T]
 }

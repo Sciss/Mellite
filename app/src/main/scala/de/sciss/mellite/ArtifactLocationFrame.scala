@@ -14,17 +14,17 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.ArtifactLocation
+import de.sciss.lucre.synth.{Sys, Txn}
 import de.sciss.mellite.impl.artifact.{ArtifactLocationFrameImpl => Impl}
 import de.sciss.synth.proc.Universe
 
 object ArtifactLocationFrame {
-  def apply[S <: Sys[S]](obj: ArtifactLocation[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): ArtifactLocationFrame[S] =
+  def apply[T <: Txn[T]](obj: ArtifactLocation[T])
+                        (implicit tx: T, universe: Universe[T]): ArtifactLocationFrame[T] =
     Impl(obj)
 }
 
-trait ArtifactLocationFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  def view: ArtifactLocationView[S]
+trait ArtifactLocationFrame[T <: Txn[T]] extends lucre.swing.Window[T] {
+  def view: ArtifactLocationView[T]
 }

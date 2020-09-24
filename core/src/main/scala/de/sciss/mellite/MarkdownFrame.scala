@@ -14,9 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Cursor, Txn => LTxn}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -30,34 +30,34 @@ object MarkdownFrame {
   }
 
   private[mellite] trait Companion {
-    def render[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, universe: Universe[S]): Render[S]
+    def render[T <: Txn[T]](obj: Markdown[T])(implicit tx: T, universe: Universe[T]): Render[T]
 
-    def basic[S <: stm.Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S]
+    def basic[T <: LTxn[T]](obj: Markdown[T])(implicit tx: T, cursor: Cursor[T]): Basic[T]
 
-    def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
-                           (implicit tx: S#Tx, universe: Universe[S]): Editor[S]
+    def editor[T <: Txn[T]](obj: Markdown[T], bottom: ISeq[View[T]])
+                           (implicit tx: T, universe: Universe[T]): Editor[T]
   }
 
-  def render[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, universe: Universe[S]): Render[S] =
+  def render[T <: Txn[T]](obj: Markdown[T])(implicit tx: T, universe: Universe[T]): Render[T] =
     companion.render(obj)
 
-  def basic[S <: stm.Sys[S]](obj: Markdown[S])(implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S] =
+  def basic[T <: LTxn[T]](obj: Markdown[T])(implicit tx: T, cursor: Cursor[T]): Basic[T] =
     companion.basic(obj)
 
-  def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]] = Nil)
-                         (implicit tx: S#Tx, universe: Universe[S]): Editor[S] =
+  def editor[T <: Txn[T]](obj: Markdown[T], bottom: ISeq[View[T]] = Nil)
+                         (implicit tx: T, universe: Universe[T]): Editor[T] =
     companion.editor(obj, bottom = bottom)
 
-  trait Basic[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-    override def view: MarkdownRenderView.Basic[S]
+  trait Basic[T <: LTxn[T]] extends lucre.swing.Window[T] {
+    override def view: MarkdownRenderView.Basic[T]
   }
 
-  trait Render[S <: stm.Sys[S]] extends Basic[S] {
-    override def view: MarkdownRenderView[S]
+  trait Render[T <: LTxn[T]] extends Basic[T] {
+    override def view: MarkdownRenderView[T]
   }
 
 
-  trait Editor[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-    override def view: MarkdownEditorView[S]
+  trait Editor[T <: LTxn[T]] extends lucre.swing.Window[T] {
+    override def view: MarkdownEditorView[T]
   }
 }

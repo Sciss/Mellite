@@ -32,8 +32,8 @@ import javax.swing.undo.UndoableEdit
 
 import scala.swing.{FlowPanel, Label, TextField}
 
-final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
-  extends CollectionImpl[S, TimelineTool.Cursor] {
+final class CursorImpl[T <: Txn[T]](val canvas: TimelineTrackCanvas[T])
+  extends CollectionImpl[T, TimelineTool.Cursor] {
 
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
@@ -41,7 +41,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
 
   private def renameName = "Rename Region"
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit =
     if (e.getClickCount === 2) {
       val ggText  = new TextField(region.name, 24)
       val panel   = new FlowPanel(new Label("Name:"), ggText)
@@ -69,7 +69,7 @@ final class CursorImpl[S <: Sys[S]](val canvas: TimelineTrackCanvas[S])
       }
     }
 
-  protected def commitObj(drag: TimelineTool.Cursor)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
-    Some(Edits.setName(obj, drag.name.map(n => StringObj.newConst(n): StringObj[S])))
+  protected def commitObj(drag: TimelineTool.Cursor)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
+    Some(Edits.setName(obj, drag.name.map(n => StringObj.newConst(n): StringObj[T])))
 }

@@ -14,10 +14,8 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Ident, Obj, Source, SpanLikeObj, Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.ObjGraphemeViewImpl
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
@@ -34,25 +32,25 @@ object GenericObjView extends NoMakeListObjViewFactory with ObjGraphemeView.Fact
   def tpe: Obj.Type     = ???  // RRR
   val category          = "None"
 
-  type E[S <: stm.Sys[S]]  = Obj[S]
+  type E[T <: LTxn[T]]  = Obj[T]
 
-  def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): ObjTimelineView[S] = {
-    val res = new TimelineImpl[S](tx.newHandle(obj)).initAttrs(id, span, obj)
+  def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: Obj[T])(implicit tx: T): ObjTimelineView[T] = {
+    val res = new TimelineImpl[T](tx.newHandle(obj)).initAttrs(id, span, obj)
     res
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Grapheme.Entry[S], value: Obj[S], mode: Mode)
-                                 (implicit tx: S#Tx): ObjGraphemeView[S] = {
-    val res = new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
+  def mkGraphemeView[T <: Txn[T]](entry: Grapheme.Entry[T], value: Obj[T], mode: Mode)
+                                 (implicit tx: T): ObjGraphemeView[T] = {
+    val res = new GraphemeImpl[T](tx.newHandle(entry), tx.newHandle(entry.value)).initAttrs(entry)
     res
   }
 
-  def mkListView[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx): ObjListView[S] =
+  def mkListView[T <: Txn[T]](obj: Obj[T])(implicit tx: T): ObjListView[T] =
     new ListImpl(tx.newHandle(obj)).initAttrs(obj)
 
-  private trait Impl[S <: stm.Sys[S]] extends ObjViewImpl.Impl[S] {
+  private trait Impl[T <: LTxn[T]] extends ObjViewImpl.Impl[T] {
 
-    type Repr = Obj[S]
+    type Repr = Obj[T]
 
     def factory: ObjView.Factory = GenericObjView
 
@@ -61,19 +59,19 @@ object GenericObjView extends NoMakeListObjViewFactory with ObjGraphemeView.Fact
     final def configureListCellRenderer(label: Label): Component = label
   }
 
-  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Obj[S]])
-    extends Impl[S] with ObjListView[S] with ObjListViewImpl.NonEditable[S] with ObjViewImpl.NonViewable[S]
+  private final class ListImpl[T <: Txn[T]](val objH: Source[T, Obj[T]])
+    extends Impl[T] with ObjListView[T] with ObjListViewImpl.NonEditable[T] with ObjViewImpl.NonViewable[T]
 
-  private final class TimelineImpl[S <: Sys[S]](val objH : stm.Source[S#Tx, Obj[S]])
-    extends Impl[S] with ObjTimelineViewBasicImpl[S] with ObjViewImpl.NonViewable[S]
+  private final class TimelineImpl[T <: Txn[T]](val objH : Source[T, Obj[T]])
+    extends Impl[T] with ObjTimelineViewBasicImpl[T] with ObjViewImpl.NonViewable[T]
 
-  private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Grapheme.Entry[S]],
-                                                val objH: stm.Source[S#Tx, Obj[S]])
-    extends Impl[S] with ObjGraphemeViewImpl.BasicImpl[S] with ObjViewImpl.NonViewable[S] {
+  private final class GraphemeImpl[T <: Txn[T]](val entryH: Source[T, Grapheme.Entry[T]],
+                                                val objH: Source[T, Obj[T]])
+    extends Impl[T] with ObjGraphemeViewImpl.BasicImpl[T] with ObjViewImpl.NonViewable[T] {
 
     val insets = Insets(8, 8, 8, 8)
 
-    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+    override def paintFront(g: Graphics2D, gv: GraphemeView[T], r: GraphemeRendering): Unit = {
       val c   = gv.canvas
       val jc  = c.canvasComponent.peer
       val h   = jc.getHeight

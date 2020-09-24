@@ -50,10 +50,10 @@ object AuditionImpl {
   *
   * TODO: update -- this is partly fixed now.
   */
-class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionToolLike[S, Unit, Int, ObjTimelineView[S]]
-    with RubberBandTool[S, Unit, Int, ObjTimelineView[S]]
-    with TimelineTool[S, Unit] {
+class AuditionImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tlv: TimelineView[T])
+  extends CollectionToolLike[T, Unit, Int, ObjTimelineView[T]]
+    with RubberBandTool[T, Unit, Int, ObjTimelineView[T]]
+    with TimelineTool[T, Unit] {
 
   // import TrackTool.{Cursor => _}
 
@@ -61,7 +61,7 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
   val name                  = "Audition"
   val icon: Icon            = GUI.iconNormal(Shapes.Audition)
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[S]]): Unit = {
+  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
     handleMouseSelection(e, childOpt = regionOpt)
 
     val selMod = canvas.selectionModel
@@ -78,7 +78,7 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
     import tlv.{cursor, universe}
     val playOpt = cursor.step { implicit tx =>
       universe.auralSystem.serverOption.map { server =>
-        implicit val aural: AuralContext[S] = AuralContext(server)
+        implicit val aural: AuralContext[T] = AuralContext(server)
         val auralTimeline = AuralObj.Timeline /* .empty */(tlv.obj)
 
 //        (/* tlv.globalView.iterator ++ */ selMod.iterator).foreach { view =>
@@ -108,5 +108,5 @@ class AuditionImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tl
     }
   }
 
-  def commit(drag: Unit)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None
+  def commit(drag: Unit)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None
 }

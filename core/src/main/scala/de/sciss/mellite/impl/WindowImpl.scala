@@ -16,21 +16,20 @@ package de.sciss.mellite.impl
 import de.sciss.desktop
 import de.sciss.desktop.WindowHandler
 import de.sciss.file._
+import de.sciss.lucre.{Disposable, Txn}
+import de.sciss.lucre.Txn.peer
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
-import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.mellite.{Application, CanBounce, DependentMayVeto, DocumentViewHandler, UniverseView, Veto, WindowPlacement}
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.stm.Ref
+import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Action
 import scala.util.Success
 
 object WindowImpl {
-  private final class Peer[S <: Sys[S]](view: View[S], impl: WindowImpl[S],
+  private final class Peer[T <: Txn[T]](view: View[T], impl: WindowImpl[T],
                                         undoRedoActions: Option[(Action, Action)],
                                         override val style: desktop.Window.Style,
                                         undecorated: Boolean)
@@ -57,7 +56,7 @@ object WindowImpl {
         impl.handleClose()
       case desktop.Window.Activated(_) =>
         view match {
-          case uv: UniverseView[S] =>
+          case uv: UniverseView[T] =>
             DocumentViewHandler.instance.activeDocument = Some(uv.universe)
           case _ =>
         }
@@ -81,17 +80,17 @@ object WindowImpl {
   }
 }
 
-abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx, String]])
-  extends Window[S] with WindowHolder[desktop.Window] with DependentMayVeto[S#Tx] {
+abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, String]])
+  extends Window[T] with WindowHolder[desktop.Window] with DependentMayVeto[T] {
   impl =>
 
   def this() = this(None)
-  def this(titleExpr: CellView[S#Tx, String]) = this(Some(titleExpr))
+  def this(titleExpr: CellView[T, String]) = this(Some(titleExpr))
 
   protected def style: desktop.Window.Style = desktop.Window.Regular
 
-  private[this] var windowImpl: WindowImpl.Peer[S] = _
-  private[this] val titleObserver = Ref(stm.Disposable.empty[S#Tx])
+  private[this] var windowImpl: WindowImpl.Peer[T] = _
+  private[this] val titleObserver = Ref(Disposable.empty[T])
 
   final def title        : String        = windowImpl.title
   final def title_=(value: String): Unit = windowImpl.title = value
@@ -109,10 +108,10 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
 
   final protected def bindMenus(entries: (String, Action)*): Unit = windowImpl.bindMenus(entries: _*)
 
-  def setTitleExpr(exprOpt: Option[CellView[S#Tx, String]])(implicit tx: S#Tx): Unit = {
-    titleObserver.swap(stm.Disposable.empty).dispose()
+  def setTitleExpr(exprOpt: Option[CellView[T, String]])(implicit tx: T): Unit = {
+    titleObserver.swap(Disposable.empty).dispose()
     exprOpt.foreach { ex =>
-      def update(s: String)(implicit tx: S#Tx): Unit = deferTx { title = s }
+      def update(s: String)(implicit tx: T): Unit = deferTx { title = s }
 
       val obs = ex.react { implicit tx => now => update(now) }
       titleObserver() = obs
@@ -120,9 +119,9 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
     }
   }
 
-  final def init()(implicit tx: S#Tx): this.type = {
+  final def init()(implicit tx: T): this.type = {
     view match {
-      case vu: UniverseView[S] => vu.universe.workspace.addDependent(impl)
+      case vu: UniverseView[T] => vu.universe.workspace.addDependent(impl)
       case _ =>
     }
 
@@ -152,12 +151,12 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
 
   /** Subclasses may override this. By default this always returns `None`.
     */
-  def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] = None
+  def prepareDisposal()(implicit tx: T): Option[Veto[T]] = None
 
   /** Subclasses may override this. */
   protected def undoRedoActions: Option[(Action, Action)] =
     view match {
-      case ev: View.Editable[S] =>
+      case ev: View.Editable[T] =>
         val mgr = ev.undoManager
         Some(mgr.undoAction -> mgr.redoAction)
       case _ => None
@@ -167,15 +166,15 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
 
   protected def performClose(): Future[Unit] =
     view match {
-      case cv: View.Cursor[S] =>
+      case cv: View.Cursor[T] =>
         import cv.cursor
 
-        def complete()(implicit tx: S#Tx): Unit = {
+        def complete()(implicit tx: T): Unit = {
           deferTx(windowImpl.visible = false)
           dispose()
         }
 
-        def succeed()(implicit tx: S#Tx): Future[Unit] = {
+        def succeed()(implicit tx: T): Future[Unit] = {
           complete()
           Future.successful(())
         }
@@ -217,13 +216,13 @@ abstract class WindowImpl[S <: Sys[S]] private (titleExpr: Option[CellView[S#Tx,
 
   def pack(): Unit = windowImpl.pack()
 
-  protected final def wasDisposed(implicit tx: S#Tx): Boolean = _wasDisposed.get(tx.peer)
+  protected final def wasDisposed(implicit tx: T): Boolean = _wasDisposed.get(tx.peer)
 
-  def dispose()(implicit tx: S#Tx): Unit = {
+  def dispose()(implicit tx: T): Unit = {
     titleObserver().dispose()
 
     view match {
-      case vu: UniverseView[S] => vu.universe.workspace.removeDependent(this)
+      case vu: UniverseView[T] => vu.universe.workspace.removeDependent(this)
       case _ =>
     }
 

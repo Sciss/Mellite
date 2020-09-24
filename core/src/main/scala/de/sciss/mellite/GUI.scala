@@ -21,9 +21,8 @@ import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints,
 import de.sciss.audiowidgets.{ParamField, RotaryKnob, Transport}
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.LucreSwing.{defer, requireEDT}
+import de.sciss.lucre.{Cursor, Txn}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
 import de.sciss.synth.proc.SoundProcesses
@@ -208,9 +207,9 @@ object GUI {
     knob
   }
 
-  def step[S <: Sys[S]](title: String, message: String, window: Option[desktop.Window] = None,
-                        timeout: Int = 1000)(fun: S#Tx => Unit)
-                       (implicit cursor: stm.Cursor[S]): Unit = {
+  def step[T <: Txn[T]](title: String, message: String, window: Option[desktop.Window] = None,
+                        timeout: Int = 1000)(fun: T => Unit)
+                       (implicit cursor: Cursor[T]): Unit = {
     val f = atomic(title = title, message = message, window = window, timeout = timeout)(fun)
     import ExecutionContext.Implicits.global
     f.onComplete {
@@ -219,11 +218,11 @@ object GUI {
     }
   }
 
-  def atomic[S <: Sys[S], A](title: String, message: String, window: Option[desktop.Window] = None,
-                             timeout: Int = 1000)(fun: S#Tx => A)
-                            (implicit cursor: stm.Cursor[S]): Future[A] = {
+  def atomic[T <: Txn[T], A](title: String, message: String, window: Option[desktop.Window] = None,
+                             timeout: Int = 1000)(fun: T => A)
+                            (implicit cursor: Cursor[T]): Future[A] = {
     requireEDT()
-    val res = SoundProcesses.atomic[S, A](fun)
+    val res = SoundProcesses.atomic[T, A](fun)
     var opt: OptionPane[Unit] = null
     val t = new javax.swing.Timer(timeout, (_: ActionEvent) => {
       if (!res.isCompleted) {

@@ -22,17 +22,17 @@ object TimelineToolImpl extends TimelineTool.Companion {
   def install(): Unit =
     TimelineTool.peer = this
 
-  def cursor  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Cursor  ] = new CursorImpl  (canvas)
-  def move    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Move    ] = new MoveImpl    (canvas)
-  def resize  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Resize  ] = new ResizeImpl  (canvas)
-  def gain    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Gain    ] = new GainImpl    (canvas)
-  def mute    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Mute    ] = new MuteImpl    (canvas)
-  def fade    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Fade    ] = new FadeImpl    (canvas)
-  def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Add] =
+  def cursor  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Cursor  ] = new CursorImpl  (canvas)
+  def move    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Move    ] = new MoveImpl    (canvas)
+  def resize  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Resize  ] = new ResizeImpl  (canvas)
+  def gain    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Gain    ] = new GainImpl    (canvas)
+  def mute    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Mute    ] = new MuteImpl    (canvas)
+  def fade    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Fade    ] = new FadeImpl    (canvas)
+  def function[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Add] =
     new AddImpl(canvas, view)
 
-  def patch   [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Patch[S]] = new PatchImpl   (canvas)
+  def patch   [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Patch[T]] = new PatchImpl   (canvas)
 
-  def audition[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Unit] =
+  def audition[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Unit] =
     new AuditionImpl(canvas, view)
 }

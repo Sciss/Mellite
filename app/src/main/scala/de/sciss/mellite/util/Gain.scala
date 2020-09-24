@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.util
 
-import de.sciss.serial.{DataInput, DataOutput, ImmutableSerializer, Writable}
+import de.sciss.serial.{DataInput, DataOutput, ConstFormat, Writable}
 import de.sciss.synth
 
 object Gain {
@@ -22,7 +22,7 @@ object Gain {
   def immediate (decibels: Float) = Gain(decibels, normalized = false)
   def normalized(decibels: Float) = Gain(decibels, normalized = true )
 
-  implicit object Serializer extends ImmutableSerializer[Gain] {
+  implicit object format extends ConstFormat[Gain] {
     def write(v: Gain, out: DataOutput): Unit = v.write(out)
     def read(in: DataInput): Gain = Gain.read(in)
   }

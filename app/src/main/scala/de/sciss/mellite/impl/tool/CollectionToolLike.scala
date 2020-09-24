@@ -22,11 +22,11 @@ import de.sciss.model.impl.ModelImpl
 import scala.swing.Component
 
 /** A basic implementation block for timeline tools that process selected child views. */
-trait CollectionToolLike[S <: Sys[S], A, Y, Child] extends BasicTool[S, A] with ModelImpl[BasicTool.Update[A]] {
+trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with ModelImpl[BasicTool.Update[A]] {
   tool =>
 
   // protected def trackList: TrackList
-  protected def canvas: TimelineCanvas2D[S, Y, Child]
+  protected def canvas: TimelineCanvas2D[T, Y, Child]
 
   /** Applies standard mouse selection techniques regarding regions.
     *

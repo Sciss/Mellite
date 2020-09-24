@@ -22,7 +22,7 @@ object GraphemeToolImpl extends GraphemeTool.Companion {
   def install(): Unit =
     GraphemeTool.peer = this
 
-  def cursor  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Unit] = new CursorImpl(canvas)
-  def move    [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Move] = new MoveImpl  (canvas)
-  def add     [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Add ] = new AddImpl   (canvas)
+  def cursor  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Unit] = new CursorImpl(canvas)
+  def move    [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Move] = new MoveImpl  (canvas)
+  def add     [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Add ] = new AddImpl   (canvas)
 }

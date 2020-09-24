@@ -20,12 +20,11 @@ import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.{Desktop, FileDialog, Util}
 import de.sciss.file._
 import de.sciss.icons.raphael
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.stm
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Artifact, ArtifactLocation, Source, Workspace}
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
@@ -44,12 +43,12 @@ import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, Label, Ori
 import scala.util.control.NonFatal
 
 object AudioCueViewImpl {
-  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioCueView[S] = {
+  def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] = {
     val value         = obj.value // .artifact // store.resolve(element.entity.value.artifact)
     // val sampleRate    = f.spec.sampleRate
     val system: S     = tx.system
-    type I            = system.I // _workspace.I
-    implicit val itx: I#Tx = system.inMemoryTx(tx) // inMemoryBridge(tx)
+    type I            = tx.I // _workspace.I
+    implicit val itx: I = tx.inMemory // inMemoryBridge(tx)
     val timeline      = Timeline[I]() // proc.ProcGroup.Modifiable[I]
     // val groupObj      = Obj(ProcGroupElem(group))
     val srRatio       = value.spec.sampleRate / TimeRef.SampleRate
@@ -57,12 +56,12 @@ object AudioCueViewImpl {
     val numFramesTL   = (value.spec.numFrames / srRatio).toLong
     val fullSpanTL    = Span(0L, numFramesTL)
 
-    @tailrec def findArtifact(in: AudioCue.Obj[S]): Option[stm.Source[S#Tx, Artifact[S]]] = in match {
+    @tailrec def findArtifact(in: AudioCue.Obj[T]): Option[Source[T, Artifact[T]]] = in match {
       case AudioCue.Obj               (a, _, _, _)  => Some(tx.newHandle(a))
       case AudioCue.Obj.Shift         (p, _)        => findArtifact(p)
       case AudioCue.Obj.ReplaceOffset (p, _)        => findArtifact(p)
       case AudioCue.Obj.Var           (vr)          => findArtifact(vr())
-      case _: AudioCue.Obj.Const[S]                 => None
+      case _: AudioCue.Obj.Const[T]                 => None
     }
 
     val artifactOptH = findArtifact(obj)
@@ -93,7 +92,7 @@ object AudioCueViewImpl {
     diff.attr.put(Proc.mainIn, output)
     // val transport     = Transport[I, I](group, sampleRate = sampleRate)
 
-//    implicit val cursorI: stm.Cursor[I] = stm.Cursor.inMemory(system)
+//    implicit val cursorI: Cursor[I] = Cursor.inMemory(system)
     implicit val systemI: I = system.inMemory
     implicit val workspaceI: Workspace[I] = Workspace.Implicits.dummy[I]
     val genI        = GenContext[I]() // (itx, cursorI, workspaceI)
@@ -104,7 +103,7 @@ object AudioCueViewImpl {
     transport.addObject(diff)
 
     val objH = tx.newHandle(obj)
-    val res: Impl[S, I] = new Impl[S, I](value, objH, artifactOptH, inMemoryBridge = system.inMemoryTx) {
+    val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, inMemoryBridge = system.inMemoryTx) {
       val timelineModel: TimelineModel =
         TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
           sampleRate = TimeRef.SampleRate)
@@ -114,11 +113,11 @@ object AudioCueViewImpl {
     res.init(obj)
   }
 
-  private abstract class Impl[S <: Sys[S], I <: Sys[I]](var value: AudioCue, val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
-                                                        artifactOptH: Option[stm.Source[S#Tx, Artifact[S]]],
-                                                        inMemoryBridge: S#Tx => I#Tx)
-                                                       (implicit val universe: Universe[S])
-    extends AudioCueView[S] with AudioCueObjViewImpl.Basic[S] with ComponentHolder[Component] { impl =>
+  private abstract class Impl[T <: Txn[T], I <: Txn[I]](var value: AudioCue, val objH: Source[T, AudioCue.Obj[T]],
+                                                        artifactOptH: Option[Source[T, Artifact[T]]],
+                                                        inMemoryBridge: T => I)
+                                                       (implicit val universe: Universe[T])
+    extends AudioCueView[T] with AudioCueObjViewImpl.Basic[T] with ComponentHolder[Component] { impl =>
 
     type C = Component
 
@@ -127,8 +126,8 @@ object AudioCueViewImpl {
 
     private var _sonogram: sonogram.Overview = _
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
-      val itx: I#Tx = inMemoryBridge(tx)
+    override def dispose()(implicit tx: T): Unit = {
+      val itx: I = inMemoryBridge(tx)
       transportView.transport.dispose()(itx)
       transportView.dispose()(itx)
 //      gainView     .dispose()
@@ -138,8 +137,8 @@ object AudioCueViewImpl {
       super.dispose()
     }
 
-    def init(obj: AudioCue.Obj[S])
-            (implicit tx: S#Tx): this.type = {
+    def init(obj: AudioCue.Obj[T])
+            (implicit tx: T): this.type = {
       initAttrs(obj)
       deferTx {
         guiInit()
@@ -175,7 +174,7 @@ object AudioCueViewImpl {
             }
           }
           val t1Opt = spOpt.map { sp =>
-            val drag  = timeline.DnD.AudioDrag[S](universe, objH, selection = sp)
+            val drag  = timeline.DnD.AudioDrag[T](universe, objH, selection = sp)
             DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
           }
           val t = t2 :: t3 :: t1Opt.toList
@@ -188,7 +187,7 @@ object AudioCueViewImpl {
         contents ++= Seq(
           HStrut(4),
           ggDragObject,
-          // new BusSinkButton[S](impl, ggDragRegion),
+          // new BusSinkButton[T](impl, ggDragRegion),
 //          HStrut(4),
 //          new Label("Gain:"),
 //          gainView.component,

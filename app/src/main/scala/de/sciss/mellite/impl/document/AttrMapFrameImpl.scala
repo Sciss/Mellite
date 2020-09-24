@@ -17,41 +17,39 @@ import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjView
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Obj, Source}
 import de.sciss.mellite.edit.EditAttrMap
-import de.sciss.mellite.impl.component.{CollectionViewImpl, NoMenuBarActions}
-import de.sciss.mellite.{AttrMapFrame, AttrMapView}
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.component.{CollectionViewImpl, NoMenuBarActions}
+import de.sciss.mellite.{AttrMapFrame, AttrMapView, ObjView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Action, Component}
 
 object AttrMapFrameImpl {
-  def apply[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AttrMapFrame[S] = {
+  def apply[T <: Txn[T]](obj: Obj[T])(implicit tx: T, universe: Universe[T]): AttrMapFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
-    val contents  = AttrMapView[S](obj)
-    val view      = new ViewImpl[S](contents)
+    val contents  = AttrMapView[T](obj)
+    val view      = new ViewImpl[T](contents)
     view.init()
     val name      = CellView.name(obj)
-    val res       = new FrameImpl[S](tx.newHandle(obj), view, name = name)
+    val res       = new FrameImpl[T](tx.newHandle(obj), view, name = name)
     res.init()
     res
   }
 
-  private final class ViewImpl[S <: Sys[S]](val peer: AttrMapView[S])
+  private final class ViewImpl[T <: Txn[T]](val peer: AttrMapView[T])
                                            (implicit val undoManager: UndoManager)
-    extends CollectionViewImpl[S] {
+    extends CollectionViewImpl[T] {
 
     impl =>
 
-//    def workspace: Workspace[S] = peer.workspace
-    val universe: Universe[S] = peer.universe
+//    def workspace: Workspace[T] = peer.workspace
+    val universe: Universe[T] = peer.universe
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+    def dispose()(implicit tx: T): Unit = ()
 
     protected lazy val actionDelete: Action = Action(null) {
       val sel = peer.selection
@@ -74,7 +72,7 @@ object AttrMapFrameImpl {
       case _            => None
     }
 
-    protected def editInsert(f: ObjView.Factory, xs: List[Obj[S]], key: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
+    protected def editInsert(f: ObjView.Factory, xs: List[Obj[T]], key: String)(implicit tx: T): Option[UndoableEdit] = {
       val edits = xs.map { value =>
         val editName = s"Create Attribute '$key'"
         EditAttrMap(name = editName, obj = peer.obj, key = key, value = Some(value))
@@ -89,22 +87,22 @@ object AttrMapFrameImpl {
       }
     }
 
-    protected def selectedObjects: List[ObjView[S]] = peer.selection.map(_._2)
+    protected def selectedObjects: List[ObjView[T]] = peer.selection.map(_._2)
   }
 
-  private final class FrameImpl[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], val view: ViewImpl[S],
-                                             name: CellView[S#Tx, String])
+  private final class FrameImpl[T <: Txn[T]](objH: Source[T, Obj[T]], val view: ViewImpl[T],
+                                             name: CellView[T, String])
                                        (implicit undoManager: UndoManager)
-    extends WindowImpl[S](name.map(n => s"$n : Attributes"))
-    with AttrMapFrame[S] with NoMenuBarActions {
+    extends WindowImpl[T](name.map(n => s"$n : Attributes"))
+    with AttrMapFrame[T] with NoMenuBarActions {
 
     override protected def style: desktop.Window.Style = desktop.Window.Auxiliary
 
-    def contents: AttrMapView[S] = view.peer
+    def contents: AttrMapView[T] = view.peer
 
     def component: Component = contents.component
 
-    protected def selectedObjects: List[ObjView[S]] = contents.selection.map(_._2)
+    protected def selectedObjects: List[ObjView[T]] = contents.selection.map(_._2)
 
     override protected def initGUI(): Unit = {
       super.initGUI()

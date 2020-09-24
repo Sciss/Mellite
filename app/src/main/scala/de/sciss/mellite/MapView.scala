@@ -13,21 +13,21 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
 import de.sciss.model.Model
 
 object MapView {
-  type Selection[S <: stm.Sys[S]] = List[(String, ObjView[S])]
+  type Selection[T <: LTxn[T]] = List[(String, ObjView[T])]
 
-  sealed trait Update[S <: stm.Sys[S], Repr] { def view: Repr }
-  final case class SelectionChanged[S <: stm.Sys[S], Repr](view: Repr, selection: Selection[S])
-    extends Update[S, Repr]
+  sealed trait Update[T <: LTxn[T], Repr] { def view: Repr }
+  final case class SelectionChanged[T <: LTxn[T], Repr](view: Repr, selection: Selection[T])
+    extends Update[T, Repr]
 }
-trait MapView[S <: stm.Sys[S], Repr]
-  extends UniverseView[S] with View.Editable[S] with Model[MapView.Update[S, Repr]] {
+trait MapView[T <: LTxn[T], Repr]
+  extends UniverseView[T] with View.Editable[T] with Model[MapView.Update[T, Repr]] {
 
-  def selection: MapView.Selection[S]
+  def selection: MapView.Selection[T]
 
   def queryKey(initial: String = "key"): Option[String]
 }

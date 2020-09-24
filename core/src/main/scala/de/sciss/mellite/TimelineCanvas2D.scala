@@ -14,13 +14,13 @@
 package de.sciss.mellite
 
 import de.sciss.audiowidgets.TimelineCanvas
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.span.Span
 
-trait TimelineCanvas2D[S <: Sys[S], Y, Child] extends TimelineCanvas {
-//  def timeline(implicit tx: S#Tx): Timeline[S]
+trait TimelineCanvas2D[T <: Txn[T], Y, Child] extends TimelineCanvas {
+//  def timeline(implicit tx: T): Timeline[T]
 
-  def selectionModel: SelectionModel[S, Child]
+  def selectionModel: SelectionModel[T, Child]
 
   def iterator: Iterator[Child]
 
@@ -42,5 +42,5 @@ trait TimelineCanvas2D[S <: Sys[S], Y, Child] extends TimelineCanvas {
 
   def modelYBox(a: Y, b: Y): (Y, Y)
 
-//  def timelineTools: TimelineTools[S]
+//  def timelineTools: TimelineTools[T]
 }

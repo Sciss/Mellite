@@ -28,8 +28,8 @@ import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicTimelineTool[S, TimelineTool.Resize] {
+final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends BasicTimelineTool[T, TimelineTool.Resize] {
 
   import TimelineTool.Resize
 
@@ -60,8 +60,8 @@ final class ResizeImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S]
 
   // ProcActions.resize(span, obj, drag, minStart = minStart)
 
-  protected def commitObj(drag: Resize)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  protected def commitObj(drag: Resize)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
     Edits.resize(span, obj, drag, minStart = minStart)
   }

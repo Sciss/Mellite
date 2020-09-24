@@ -28,18 +28,18 @@ import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
   /** A button view toggling between `run` and `stop` an a runner created from the `obj` argument. */
-  def apply[S <: SSys[S]](obj: Obj[S], isAction: Boolean = false)
-                         (implicit tx: S#Tx, universe: Universe[S]): RunnerToggleButton[S] = {
+  def apply[S <: SSys[T]](obj: Obj[T], isAction: Boolean = false)
+                         (implicit tx: T, universe: Universe[T]): RunnerToggleButton[T] = {
     val r = Runner(obj)
-    new Impl[S](r, disposeRunner = true, isAction = isAction).init()
+    new Impl[T](r, disposeRunner = true, isAction = isAction).init()
   }
 
-  private final class Impl[S <: Sys[S]](val runner: Runner[S], disposeRunner: Boolean, isAction: Boolean)
-    extends RunnerToggleButton[S] with ComponentHolder[ToggleButton] {
+  private final class Impl[T <: Txn[T]](val runner: Runner[T], disposeRunner: Boolean, isAction: Boolean)
+    extends RunnerToggleButton[T] with ComponentHolder[ToggleButton] {
 
-    private[this] var obs: Disposable[S#Tx] = _
+    private[this] var obs: Disposable[T] = _
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       obs.dispose()
       if (disposeRunner) runner.dispose()
     }
@@ -50,7 +50,7 @@ object RunnerToggleButton {
     private[this] lazy val icnDone    = GUI.iconSuccess (shapeFun)
     private[this] lazy val icnFailed  = GUI.iconFailure (shapeFun)
 
-    private def select(state: State)(implicit tx: S#Tx): Unit = {
+    private def select(state: State)(implicit tx: T): Unit = {
       val selected = !state.idle
       deferTx {
         val c = component
@@ -65,7 +65,7 @@ object RunnerToggleButton {
       }
     }
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx(guiInit())
       obs = runner.react { implicit tx => state =>
         select(state)
@@ -86,7 +86,7 @@ object RunnerToggleButton {
             val sel = selected
             val sch = runner.universe.scheduler
             sch.stepTag
-            /*SoundProcesses.atomic[S, Unit]*/ { implicit tx =>
+            /*SoundProcesses.atomic[T, Unit]*/ { implicit tx =>
               runner.stop()
               if (sel) {
                 runner.run()
@@ -103,8 +103,8 @@ object RunnerToggleButton {
     }
   }
 }
-trait RunnerToggleButton[S <: Sys[S]] extends View[S] {
+trait RunnerToggleButton[T <: Txn[T]] extends View[T] {
   type C = ToggleButton
 
-//  def transport: Transport[S]
+//  def transport: Transport[T]
 }

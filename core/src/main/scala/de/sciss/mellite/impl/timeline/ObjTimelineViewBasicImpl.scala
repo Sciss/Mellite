@@ -14,10 +14,9 @@
 package de.sciss.mellite.impl.timeline
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
-import de.sciss.lucre.expr.{CellView, IntObj, SpanLikeObj}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.{Ident, IntObj, Obj, Source, SpanLikeObj, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl
 import de.sciss.mellite.{FadeViewMode, ObjTimelineView, ObjView, RegionViewMode, TimelineRendering, TimelineTool, TimelineView}
 import de.sciss.span.{Span, SpanLike}
@@ -25,22 +24,22 @@ import de.sciss.synth.Curve
 
 import scala.swing.Graphics2D
 
-trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with ObjViewImpl.Impl[S] {
+trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with ObjViewImpl.Impl[T] {
   var trackIndex  : Int = _
   var trackHeight : Int = _
   // var nameOption  : Option[String] = _
   var spanValue   : SpanLike = _
-  var spanH       : stm.Source[S#Tx, SpanLikeObj[S]] = _
+  var spanH       : Source[T, SpanLikeObj[T]] = _
 
-  protected var idH  : stm.Source[S#Tx, S#Id] = _
+  protected var idH  : Source[T, Ident[T]] = _
 
-  def span(implicit tx: S#Tx): SpanLikeObj[S] = spanH()
-  def id  (implicit tx: S#Tx): S#Id           = idH()
+  def span(implicit tx: T): SpanLikeObj[T]  = spanH()
+  def id  (implicit tx: T): Ident[T]        = idH()
 
-  def initAttrs(id: S#Id, span: SpanLikeObj[S], obj: Obj[S])(implicit tx: S#Tx): this.type = {
+  def initAttrs(id: Ident[T], span: SpanLikeObj[T], obj: Obj[T])(implicit tx: T): this.type = {
     val attr      = obj.attr
 
-    val trackIdxView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackIndex)
+    val trackIdxView = CellView.attr[T, Int, IntObj](attr, ObjTimelineView.attrTrackIndex)
     addDisposable(trackIdxView.react { implicit tx =>opt =>
       deferTx {
         trackIndex = opt.getOrElse(0)
@@ -49,7 +48,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     })
     trackIndex   = trackIdxView().getOrElse(0)
 
-    val trackHView = CellView.attr[S, Int, IntObj](attr, ObjTimelineView.attrTrackHeight)
+    val trackHView = CellView.attr[T, Int, IntObj](attr, ObjTimelineView.attrTrackHeight)
     addDisposable(trackHView.react { implicit tx =>opt =>
       deferTx {
         trackHeight = opt.getOrElse(TimelineView.DefaultTrackHeight)
@@ -64,7 +63,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     initAttrs(obj)
   }
 
-  protected def paintInner(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering, selected: Boolean): Unit = ()
+  protected def paintInner(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering, selected: Boolean): Unit = ()
 
   /** These are updated by paintBack and will thus be valid in paintFront as well. */
   var px  = 0
@@ -84,7 +83,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
   /** Clipped right */
   protected var px2c  = 0
 
-  def paintBack(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering): Unit = {
+  def paintBack(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering): Unit = {
     val selected  = tlv.selectionModel.contains(this)
     val move0     = r.ttMoveState
     if (!move0.copy) {
@@ -100,7 +99,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     }
   }
 
-  private[this] def updateBounds(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering,
+  private[this] def updateBounds(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering,
                                  moveState: TimelineTool.Move, selected: Boolean): Unit = {
     val canvas          = tlv.canvas
     var x1              = -5
@@ -189,7 +188,7 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     px2c      = math.min(px + pw, clipRect.x + clipRect.width + 3)
   }
 
-  private[this] def paintBackImpl(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering, selected: Boolean): Unit = {
+  private[this] def paintBackImpl(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering, selected: Boolean): Unit = {
     val canvas          = tlv.canvas
     val timelineTools   = canvas.timelineTools
     val regionViewMode  = timelineTools.regionViewMode
@@ -327,5 +326,5 @@ trait ObjTimelineViewBasicImpl[S <: stm.Sys[S]] extends ObjTimelineView[S] with 
     }
   }
 
-  def paintFront(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering): Unit = ()
+  def paintFront(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering): Unit = ()
 }

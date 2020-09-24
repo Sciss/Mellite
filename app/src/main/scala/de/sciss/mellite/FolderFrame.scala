@@ -15,8 +15,8 @@ package de.sciss.mellite
 
 import de.sciss.lucre
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Folder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.Folder
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.document.{FolderFrameImpl => Impl}
 import de.sciss.synth.proc.Universe
 
@@ -29,20 +29,20 @@ object FolderFrame {
     * @param isWorkspaceRoot  if `true`, closes the workspace when the window closes; if `false` does nothing
     *                         upon closing the window
     */
-  def apply[S <: Sys[S]](name: CellView[S#Tx, String], isWorkspaceRoot: Boolean)
-                        (implicit tx: S#Tx, universe: Universe[S]): FolderFrame[S] =
+  def apply[T <: Txn[T]](name: CellView[T, String], isWorkspaceRoot: Boolean)
+                        (implicit tx: T, universe: Universe[T]): FolderFrame[T] =
     Impl(name = name, folder = universe.workspace.root, isWorkspaceRoot = isWorkspaceRoot)
 
-  def apply[S <: Sys[S]](name: CellView[S#Tx, String], folder: Folder[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): FolderFrame[S] = {
+  def apply[T <: Txn[T]](name: CellView[T, String], folder: Folder[T])
+                        (implicit tx: T, universe: Universe[T]): FolderFrame[T] = {
     Impl(name = name, folder = folder, isWorkspaceRoot = false)
   }
 }
 
-trait FolderFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  override def view: FolderEditorView[S]
+trait FolderFrame[T <: Txn[T]] extends lucre.swing.Window[T] {
+  override def view: FolderEditorView[T]
 
-  def folderView: FolderView[S]
+  def folderView: FolderView[T]
 
   def bottomComponent: Component with SequentialContainer
 }

@@ -22,12 +22,12 @@ import de.sciss.mellite.impl.proc.OutputsViewImpl
 import de.sciss.synth.proc.{Proc, Universe}
 
 object ProcOutputsView {
-  final case class Drag[S <: Sys[S]](universe: Universe[S], proc: stm.Source[S#Tx, Proc[S]], key: String)
+  final case class Drag[T <: Txn[T]](universe: Universe[T], proc: Source[T, Proc[T]], key: String)
 
   final val flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 
-  def apply[S <: Sys[S]](obj: Proc[S])(implicit tx: S#Tx, universe: Universe[S],
-                                       undoManager: UndoManager): ProcOutputsView[S] =
+  def apply[T <: Txn[T]](obj: Proc[T])(implicit tx: T, universe: Universe[T],
+                                       undoManager: UndoManager): ProcOutputsView[T] =
     OutputsViewImpl(obj)
 }
-trait ProcOutputsView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S]
+trait ProcOutputsView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]

@@ -36,16 +36,16 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
   def install(): Unit =
     FolderEditorView.peer = this
 
-  def apply[S <: Sys[S]](folder: Folder[S])(implicit tx: S#Tx, universe: Universe[S],
-                                            undoManager: UndoManager): FolderEditorView[S] = {
+  def apply[T <: Txn[T]](folder: Folder[T])(implicit tx: T, universe: Universe[T],
+                                            undoManager: UndoManager): FolderEditorView[T] = {
     val peer  = FolderView(folder)
-    val view  = new Impl[S](peer)
+    val view  = new Impl[T](peer)
     view.init()
   }
 
-  private final class Impl[S <: Sys[S]](val peer: FolderView[S])
-                                       (implicit val universe: Universe[S], val undoManager: UndoManager)
-    extends CollectionViewImpl[S] with FolderEditorView[S]
+  private final class Impl[T <: Txn[T]](val peer: FolderView[T])
+                                       (implicit val universe: Universe[T], val undoManager: UndoManager)
+    extends CollectionViewImpl[T] with FolderEditorView[T]
   {
 
     impl =>
@@ -56,8 +56,8 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
 
     protected def prepareInsertCmdLine(args: List[String]): Option[(Unit, List[String])] = Some(((), args))
 
-    protected def editInsert(f: ObjView.Factory, xs: List[Obj[S]], config: InsertConfig)
-                            (implicit tx: S#Tx): Option[UndoableEdit] = {
+    protected def editInsert(f: ObjView.Factory, xs: List[Obj[T]], config: InsertConfig)
+                            (implicit tx: T): Option[UndoableEdit] = {
       val (parent, idx) = impl.peer.insertionPoint
       val edits: List[UndoableEdit] = xs.zipWithIndex.map { case (x, j) =>
         EditFolderInsertObj(f.prefix, parent, idx + j, x)
@@ -65,7 +65,7 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
       CompoundEdit(edits, "Create Objects")
     }
 
-    def dispose()(implicit tx: S#Tx): Unit =
+    def dispose()(implicit tx: T): Unit =
       peer.dispose()
 
     protected lazy val actionDelete: Action = Action(null) {
@@ -80,7 +80,7 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
             println("WARNING: Parent folder of object not found")
             None
           } else {
-            val edit = EditFolderRemoveObj[S](nodeView.renderData.humanName, parent, idx, child)
+            val edit = EditFolderRemoveObj[T](nodeView.renderData.humanName, parent, idx, child)
             Some(edit)
           }
         }
@@ -172,7 +172,7 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
                 if (append) {
                   val suffix = incLast(appendText, n)
                   orig.attr.$[StringObj](ObjKeys.attrName).foreach { oldName =>
-                    // val imp = ExprImplicits[S]
+                    // val imp = ExprImplicits[T]
                     import expr.Ops._
                     val newName = oldName ++ suffix
                     cpy.attr.put(ObjKeys.attrName, StringObj.newVar(newName))
@@ -190,6 +190,6 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
       }
     }
 
-    def selectedObjects: List[ObjView[S]] = peer.selection.map(_.renderData)
+    def selectedObjects: List[ObjView[T]] = peer.selection.map(_.renderData)
   }
 }

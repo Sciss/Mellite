@@ -18,11 +18,11 @@ import java.util.concurrent.TimeUnit
 import de.sciss.desktop
 import de.sciss.desktop.{Desktop, FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
+import de.sciss.lucre.Cursor
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.store.BerkeleyDB
+import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
 import javax.swing.SwingUtilities
@@ -69,24 +69,24 @@ object OpenWorkspace extends  {
   def install(): Unit = _init
 
   // XXX TODO: should be in another place
-  def openGUI[S <: Sys[S]](universe: Universe[S]): Unit = {
+  def openGUI[T <: Txn[T]](universe: Universe[T]): Unit = {
     universe.workspace.folder.foreach(recentFiles.add)
     dh.addDocument(universe)
     universe.workspace match {
       case cf: Workspace.Confluent =>
         implicit val workspace: Workspace.Confluent  = cf
-        implicit val cursor: stm.Cursor[Durable] = workspace.system.durable
+        implicit val cursor: Cursor[Durable] = workspace.system.durable
         GUI.step[proc.Durable](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
           implicit val u: Universe[Confluent] = universe.asInstanceOf[Universe[Confluent]]
           DocumentCursorsFrame(cf)
         }
       case eph =>
-        implicit val cursor: stm.Cursor[S] = eph.cursor
-        val nameView = CellView.const[S, String](eph.name)
-        GUI.step[S](fullTitle, s"Opening root elements window for '${eph.name}'") { implicit tx =>
-//          implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
-          implicit val u: Universe[S] = universe
-          FolderFrame[S](name = nameView, isWorkspaceRoot = true)
+        implicit val cursor: Cursor[T] = eph.cursor
+        val nameView = CellView.const[T, String](eph.name)
+        GUI.step[T](fullTitle, s"Opening root elements window for '${eph.name}'") { implicit tx =>
+//          implicit val universe: Universe[T] = Universe(GenContext[T](), Scheduler[T](), Mellite.auralSystem)
+          implicit val u: Universe[T] = universe
+          FolderFrame[T](name = nameView, isWorkspaceRoot = true)
         }
     }
   }
@@ -94,7 +94,7 @@ object OpenWorkspace extends  {
   def recentFiles: RecentFiles  = _recent
   def recentMenu : Menu.Group   = _recent.menu
 
-//  private def openView[S <: Sys[S]](universe: Universe[S]): Unit = ()
+//  private def openView[T <: Txn[T]](universe: Universe[T]): Unit = ()
 //// MMM
 ////    DocumentViewHandler.instance(doc).collectFirst {
 ////      case dcv: DocumentCursorsView => dcv.window
@@ -103,7 +103,7 @@ object OpenWorkspace extends  {
   def perform(folder: File): Future[Universe[_]] = {
 //    val fOpt = Some(folder)
     dh.documents.find(_.workspace.folder.contains(folder)).fold(open(folder, headless = false)) { u =>
-//      val u1 = u.asInstanceOf[Universe[S] forSome { type S <: Sys[S] }]
+//      val u1 = u.asInstanceOf[Universe[T] forSome { type T <: Txn[T] }]
       // openView(u1)
       Mellite.withUniverse(u)(Future.successful)
     }
@@ -116,7 +116,7 @@ object OpenWorkspace extends  {
 //    config.readOnly     = true
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
-    val fut: Future[Universe[~] forSome { type ~ <: Sys[~] }] = Future {  // IntelliJ highlight bug
+    val fut: Future[Universe[~] forSome { type ~ <: Txn[~] }] = Future {  // IntelliJ highlight bug
       val w = blocking {
         Workspace.read(folder, ds)
       }

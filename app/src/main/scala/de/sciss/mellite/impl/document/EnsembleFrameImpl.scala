@@ -22,20 +22,20 @@ import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.{Ensemble, Universe}
 
 object EnsembleFrameImpl {
-  def apply[S <: Sys[S]](obj: Ensemble[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): EnsembleFrame[S] = {
+  def apply[T <: Txn[T]](obj: Ensemble[T])
+                        (implicit tx: T, universe: Universe[T]): EnsembleFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val ensembleView      = EnsembleViewImpl(obj)
     val name  = CellView.name(obj)
-    val res   = new FrameImpl[S](ensembleView, name)
+    val res   = new FrameImpl[T](ensembleView, name)
     res.init()
     res
   }
 
-  private final class FrameImpl[S <: Sys[S]](val ensembleView: EnsembleViewImpl.Impl[S], name: CellView[S#Tx, String])
-    extends WindowImpl[S](name) with EnsembleFrame[S] {
+  private final class FrameImpl[T <: Txn[T]](val ensembleView: EnsembleViewImpl.Impl[T], name: CellView[T, String])
+    extends WindowImpl[T](name) with EnsembleFrame[T] {
 
-    def view: View[S] = ensembleView
+    def view: View[T] = ensembleView
 
     override protected def initGUI(): Unit = {
       FolderFrameImpl.addDuplicateAction(this, ensembleView.view.actionDuplicate) // XXX TODO -- all hackish

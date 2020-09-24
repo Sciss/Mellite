@@ -50,43 +50,43 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
   def install(): Unit =
     GlobalProcsView.peer = this
 
-  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undo: UndoManager): GlobalProcsView[S] = {
+  def apply[T <: Txn[T]](group: Timeline[T], selectionModel: SelectionModel[T, ObjTimelineView[T]])
+                        (implicit tx: T, universe: Universe[T],
+                         undo: UndoManager): GlobalProcsView[T] = {
 
     // import ProcGroup.Modifiable.serializer
     val groupHOpt = group.modifiableOption.map(gm => tx.newHandle(gm))
-    val view      = new Impl[S](/* tx.newHandle(group), */ groupHOpt, selectionModel)
+    val view      = new Impl[T](/* tx.newHandle(group), */ groupHOpt, selectionModel)
     deferTx(view.guiInit())
     view
   }
 
-  private final class Impl[S <: Sys[S]](// groupH: stm.Source[S#Tx, Timeline[S]],
-                                        groupHOpt: Option[stm.Source[S#Tx, Timeline.Modifiable[S]]],
-                                        tlSelModel: SelectionModel[S, ObjTimelineView[S]])
-                                       (implicit val universe: Universe[S],
+  private final class Impl[T <: Txn[T]](// groupH: Source[T, Timeline[T]],
+                                        groupHOpt: Option[Source[T, Timeline.Modifiable[T]]],
+                                        tlSelModel: SelectionModel[T, ObjTimelineView[T]])
+                                       (implicit val universe: Universe[T],
                                         val undoManager: UndoManager)
-    extends GlobalProcsView[S] with ComponentHolder[Component] {
+    extends GlobalProcsView[T] with ComponentHolder[Component] {
 
     type C = Component
 
-//    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[S]]
-    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[S]]
+//    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
+    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
 
-    private def atomic[A](block: S#Tx => A): A = cursor.step(block)
+    private def atomic[A](block: T => A): A = cursor.step(block)
 
     private[this] var table: Table = _
 
     def tableComponent: Table = table
 
-//    val selectionModel: SelectionModel[S, ProcObjView.Timeline[S]] = SelectionModel.apply
-    val selectionModel: SelectionModel[S, ObjView[S]] = SelectionModel.apply
+//    val selectionModel: SelectionModel[T, ProcObjView.Timeline[T]] = SelectionModel.apply
+    val selectionModel: SelectionModel[T, ObjView[T]] = SelectionModel.apply
 
-    private[this] val tlSelListener: SelectionModel.Listener[S, ObjTimelineView[S]] = {
+    private[this] val tlSelListener: SelectionModel.Listener[T, ObjTimelineView[T]] = {
       case SelectionModel.Update(_, _) =>
-        val items: Set[ProcObjView.Timeline[S]] = TxnExecutor.defaultAtomic { implicit itx =>
+        val items: Set[ProcObjView.Timeline[T]] = TxnExecutor.defaultAtomic { implicit itx =>
           tlSelModel.iterator.flatMap {
-            case pv: ProcObjView.Timeline[S] =>
+            case pv: ProcObjView.Timeline[T] =>
               pv.targets.flatMap { link =>
                 val tgt = link.attr.parent
                 if (tgt.isGlobal) Some(tgt) else None
@@ -212,16 +212,16 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
           val edit = atomic { implicit tx =>
 //            ProcActions.insertGlobalRegion(groupH(), name, bus = None)
             import de.sciss.synth.proc.Implicits._
-            val obj   = presetCtl.make[S]()
+            val obj   = presetCtl.make[T]()
             obj.name  = name
             val group = groupH()
-            EditTimelineInsertObj[S](objType, group, Span.All, obj)
+            EditTimelineInsertObj[T](objType, group, Span.All, obj)
           }
           undoManager.add(edit)
         }
       }
 
-    private def removeProcs(pvs: Iterable[ProcObjView.Timeline[S]]): Unit =
+    private def removeProcs(pvs: Iterable[ProcObjView.Timeline[T]]): Unit =
       if (pvs.nonEmpty) groupHOpt.foreach { groupH =>
         val editOpt = atomic { implicit tx =>
           ProcGUIActions.removeProcs(groupH(), pvs)
@@ -288,11 +288,11 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
             Option(jt.getDropLocation).fold(false) { dl =>
               val pv    = procSeq(dl.getRow)
               val drag  = support.getTransferable.getTransferData(ObjView.Flavor)
-                .asInstanceOf[ObjView.Drag[S]]
+                .asInstanceOf[ObjView.Drag[T]]
               import de.sciss.equal.Implicits._
               drag.universe === universe && {
                 drag.view match {
-                  case iv: IntObjView[S] =>
+                  case iv: IntObjView[T] =>
                     atomic { implicit tx =>
                       val objT = iv.obj
                       val intExpr = objT
@@ -300,7 +300,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
                       true
                     }
 
-//                  case iv: CodeObjView[S] =>
+//                  case iv: CodeObjView[T] =>
 //                    atomic { implicit tx =>
 //                      val objT = iv.obj
 //                      import Mellite.compiler
@@ -360,7 +360,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
           actionAttr  .enabled = hasSel
           actionEdit  .enabled = hasSel
           // println(s"Table range = $range")
-          val newSel = range.map(procSeq(_): ObjView[S])
+          val newSel = range.map(procSeq(_): ObjView[T])
           selectionModel.iterator.foreach { v =>
             if (!newSel.contains(v)) {
               // println(s"selectionModel -= $v")
@@ -434,8 +434,8 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
         val it = itGlob.map { inView =>
           val inObj   = inView.obj
 //          val span    = inView.span   // not necessary to copy
-          val span    = SpanLikeObj.newConst[S](Span.all)
-          val outObj  = ProcActions.copy[S](inObj, connectInput = connect)
+          val span    = SpanLikeObj.newConst[T](Span.all)
+          val outObj  = ProcActions.copy[T](inObj, connectInput = connect)
           EditTimelineInsertObj("Insert Global Proc", tl, span, outObj)
         }
         it.toList   // tricky, need to unwind transactional iterator
@@ -453,8 +453,8 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
         val it = for {
           outView <- seqTL
           inView  <- seqGlob
-          in      <- inView .obj match { case p: Proc[S] => Some(p); case _ => None }
-          out     <- outView.obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
+          in      <- inView .obj match { case p: Proc[T] => Some(p); case _ => None }
+          out     <- outView.obj match { case p: Proc[T] => Some(p); case _ => None } // Proc.unapply(outView.obj)
           source  <- out.outputs.get(Proc.mainOut)
           if Edits.findLink(out = out, in = in).isEmpty
         } yield Edits.addLink(source = source, sink = in, key = Proc.mainIn)
@@ -474,8 +474,8 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
         val it = for {
           outView <- seqTL
           inView  <- seqGlob
-          in      <- inView .obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
-          out     <- outView.obj match { case p: Proc[S] => Some(p); case _ => None } // Proc.unapply(outView.obj)
+          in      <- inView .obj match { case p: Proc[T] => Some(p); case _ => None } // Proc.unapply(outView.obj)
+          out     <- outView.obj match { case p: Proc[T] => Some(p); case _ => None } // Proc.unapply(outView.obj)
           link    <- Edits.findLink(out = out, in = in)
         } yield Edits.removeLink(link)
         it.toList   // tricky, need to unwind transactional iterator
@@ -485,7 +485,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       editOpt.foreach(undoManager.add)
     }
 
-    private def removeInputs(in: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] =
+    private def removeInputs(in: Obj[T])(implicit tx: T): Option[UndoableEdit] =
       if (!in.attr.contains(Proc.mainIn)) None else {
         val edit = EditAttrMap.remove(name = "Input", obj = in, key = Proc.mainIn)
         Some(edit)
@@ -505,12 +505,12 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       editOpt.foreach(undoManager.add)
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = deferTx {
+    def dispose()(implicit tx: T): Unit = deferTx {
       tlSelModel removeListener tlSelListener
     }
 
-    def add(proc: ObjView[S]): Unit = proc match {
-      case pv: ProcObjView.Timeline[S] =>
+    def add(proc: ObjView[T]): Unit = proc match {
+      case pv: ProcObjView.Timeline[T] =>
         val row   = procSeq.size
         procSeq :+= pv
         tm.fireTableRowsInserted(row, row)
@@ -518,7 +518,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       case _ =>
     }
 
-    def remove(proc: ObjView[S]): Unit = {
+    def remove(proc: ObjView[T]): Unit = {
       val row = procSeq.indexOf(proc)
       if (row >= 0) {
         procSeq = procSeq.patch(row, Vec.empty, 1)
@@ -526,9 +526,9 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       }
     }
 
-    def iterator: Iterator[ProcObjView.Timeline[S]] = procSeq.iterator
+    def iterator: Iterator[ProcObjView.Timeline[T]] = procSeq.iterator
 
-    def updated(proc: ObjView[S]): Unit = {
+    def updated(proc: ObjView[T]): Unit = {
       val row = procSeq.indexOf(proc)
       if (row >= 0) {
         tm.fireTableRowsUpdated(row, row)

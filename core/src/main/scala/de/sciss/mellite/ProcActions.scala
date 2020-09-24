@@ -14,9 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.equal
-import de.sciss.lucre.expr
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, IntObj, LongObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys}
+import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.span.Span
 import de.sciss.synth.proc.impl.MkSynthGraphSource
 import de.sciss.synth.proc.{AudioCue, ObjKeys, Proc, SynthGraphObj, Timeline}
@@ -26,8 +24,8 @@ object ProcActions {
   private val MinDur    = 32
 
   // scalac still has bug finding Timeline.Modifiable
-  // private type TimelineMod[S <: Sys[S]] = Timeline.Modifiable[S] // BiGroup.Modifiable[S, Proc[S], Proc.Update[S]]
-  private type TimelineMod[S <: Sys[S]] = Timeline.Modifiable[S]
+  // private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T] // BiGroup.Modifiable[T, Proc[T], Proc.Update[T]]
+  private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T]
 
   final case class Resize(deltaStart: Long, deltaStop: Long) {
     override def toString = s"$productPrefix(deltaStart = $deltaStart, deltaStop = $deltaStop)"
@@ -37,12 +35,12 @@ object ProcActions {
   }
 
   /** Queries the audio region's grapheme segment start and audio element. */
-  def getAudioRegion[S <: Sys[S]](proc: Proc[S])(implicit tx: S#Tx): Option[AudioCue.Obj[S]] =
+  def getAudioRegion[T <: Txn[T]](proc: Proc[T])(implicit tx: T): Option[AudioCue.Obj[T]] =
     proc.attr.$[AudioCue.Obj](Proc.graphAudio)
 
-  def resize[S <: Sys[S]](span: SpanLikeObj[S], obj: Obj[S],
+  def resize[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T],
                           amount: Resize, minStart: Long /* timelineModel: TimelineModel */)
-                         (implicit tx: S#Tx): Unit = {
+                         (implicit tx: T): Unit = {
     import amount._
 
     val oldSpan   = span.value
@@ -79,22 +77,23 @@ object ProcActions {
       }
 
       if (dStartCC != 0L) obj match {
-        case objT: Proc[S] =>
+        case objT: Proc[T] =>
           for {
-            audioCue <- getAudioRegion[S](objT)
+            audioCue <- getAudioRegion[T](objT)
           } {
+            def any2stringadd: Any = ()
             audioCue match {
               case AudioCue.Obj.Shift(peer, amt) =>
-                import expr.Ops._
+//                import expr.Ops._
                 amt match {
                   case LongObj.Var(amtVr) =>
                     amtVr() = amtVr() + dStartCC
                   case _ =>
-                    val newCue = AudioCue.Obj.Shift(peer, LongObj.newVar[S](amt + dStartCC))
+                    val newCue = AudioCue.Obj.Shift(peer, LongObj.newVar[T](amt + dStartCC))
                     objT.attr.put(Proc.graphAudio, newCue)
                 }
               case other =>
-                val newCue = AudioCue.Obj.Shift(other, LongObj.newVar[S](dStartCC))
+                val newCue = AudioCue.Obj.Shift(other, LongObj.newVar[T](dStartCC))
                 objT.attr.put(Proc.graphAudio, newCue)
             }
           }
@@ -108,7 +107,7 @@ object ProcActions {
     * @param obj the proc to rename
     * @param name the new name or `None` to remove the name attribute
     */
-  def rename[S <: Sys[S]](obj: Obj[S], name: Option[String])(implicit tx: S#Tx): Unit = {
+  def rename[T <: Txn[T]](obj: Obj[T], name: Option[String])(implicit tx: T): Unit = {
     val attr  = obj.attr
     name match {
       case Some(n) =>
@@ -126,15 +125,15 @@ object ProcActions {
     *
     * @param in  the process to copy
     */
-  def copy[S <: Sys[S]](in: Obj[S])(implicit tx: S#Tx): Obj[S] = copy(in, connectInput = false)
+  def copy[T <: Txn[T]](in: Obj[T])(implicit tx: T): Obj[T] = copy(in, connectInput = false)
 
     /** Makes a copy of a proc. Copies the graph and all attributes.
     * If `connect` is falls, does not put `Proc.mainIn`
     *
     * @param in  the process to copy
     */
-  def copy[S <: Sys[S]](in: Obj[S], connectInput: Boolean)(implicit tx: S#Tx): Obj[S] = {
-    val context = Copy.apply1[S, S]
+  def copy[T <: Txn[T]](in: Obj[T], connectInput: Boolean)(implicit tx: T): Obj[T] = {
+    val context = Copy.apply[T, T]()
     val out     = context.copyPlain(in)
     val attrIn  = in .attr
     val attrOut = out.attr
@@ -145,9 +144,9 @@ object ProcActions {
         attrOut.put(key, valueOut)
       } else if (connectInput) {
         val valueOpt = attrIn.get(Proc.mainIn).collect {
-          case op: proc.Output[S] => op
-          case fIn: Folder[S] =>
-            val fOut = Folder[S]()
+          case op: Proc.Output[T] => op
+          case fIn: Folder[T] =>
+            val fOut = Folder[T]()
             fIn.iterator.foreach { op => fOut.addLast(op) }
             fOut
         }
@@ -158,7 +157,7 @@ object ProcActions {
     out
   }
 
-  def setGain[S <: Sys[S]](proc: Proc[S], gain: Double)(implicit tx: S#Tx): Unit = {
+  def setGain[T <: Txn[T]](proc: Proc[T], gain: Double)(implicit tx: T): Unit = {
     val attr  = proc.attr
 
     if (gain == 1.0) {
@@ -171,14 +170,14 @@ object ProcActions {
     }
   }
 
-  def adjustGain[S <: Sys[S]](obj: Obj[S], factor: Double)(implicit tx: S#Tx): Unit = {
+  def adjustGain[T <: Txn[T]](obj: Obj[T], factor: Double)(implicit tx: T): Unit = {
     if (factor == 1.0) return
 
     val attr  = obj.attr
 
     attr.$[DoubleObj](ObjKeys.attrGain) match {
       case Some(DoubleObj.Var(vr)) =>
-        import expr.Ops._
+//        import expr.Ops._
         vr() = vr() * factor
       case other =>
         val newGain = other.fold(1.0)(_.value) * factor
@@ -186,13 +185,13 @@ object ProcActions {
     }
   }
 
-  def setBus[S <: Sys[S]](objects: Iterable[Obj[S]], intExpr: IntObj[S])(implicit tx: S#Tx): Unit = {
+  def setBus[T <: Txn[T]](objects: Iterable[Obj[T]], intExpr: IntObj[T])(implicit tx: T): Unit = {
     objects.foreach { proc =>
       proc.attr.put(ObjKeys.attrBus, intExpr)
     }
   }
 
-  def toggleMute[S <: Sys[S]](obj: Obj[S])(implicit tx: S#Tx): Unit = {
+  def toggleMute[T <: Txn[T]](obj: Obj[T])(implicit tx: T): Unit = {
     val attr = obj.attr
     attr.$[BooleanObj](ObjKeys.attrMute) match {
       // XXX TODO: BooleanObj should have `not` operator
@@ -204,20 +203,20 @@ object ProcActions {
     }
   }
 
-  def mkAudioRegion[S <: Sys[S]](time      : Span,
-                                 audioCue  : AudioCue.Obj[S],
+  def mkAudioRegion[T <: Txn[T]](time      : Span,
+                                 audioCue  : AudioCue.Obj[T],
                                  gOffset   : Long)
-     (implicit tx: S#Tx): (SpanLikeObj /* SpanObj */[S], Proc[S]) = {
+     (implicit tx: T): (SpanLikeObj /* SpanObj */[T], Proc[T]) = {
 
     // val srRatio = grapheme.spec.sampleRate / Timeline.SampleRate
     val spanV   = time // Span(time, time + (selection.length / srRatio).toLong)
-    val span    = SpanLikeObj /* SpanObj */.newVar[S](spanV)
-    val p       = Proc[S]()
+    val span    = SpanLikeObj /* SpanObj */.newVar[T](spanV)
+    val p       = Proc[T]()
     val a       = p.attr
 
     // val scanIn  = proc.inputs .add(Proc.graphAudio )
     /*val sOut=*/ p.outputs.add(Proc.mainOut)
-    // val grIn    = Grapheme[S] //(audioCue.value.spec.numChannels)
+    // val grIn    = Grapheme[T] //(audioCue.value.spec.numChannels)
 
     // we preserve data.source(), i.e. the original audio file offset
     // ; therefore the grapheme element must start `selection.start` frames
@@ -229,7 +228,7 @@ object ProcActions {
     // but then editing heuristics become a nightmare. Therefore,
     // now just flatten the thing...
 
-//    val gOffset1    = (gOffset: LongObj[S]) + audioCue.offset
+//    val gOffset1    = (gOffset: LongObj[T]) + audioCue.offset
 //    val audioCueOff = audioCue.replaceOffset(LongObj.newVar(gOffset1))
 //    val gOffset1    = gOffset + audioCue.value.offset
 //    val audioCueOff = audioCue.replaceOffset(LongObj.newVar(gOffset1))
@@ -238,16 +237,16 @@ object ProcActions {
     val audioCueOff = if (gOffset == 0L) audioCue else {
       audioCue match {
         case AudioCue.Obj.Shift(peer, amt) =>
-          AudioCue.Obj.Shift(peer , LongObj.newVar[S](amt + gOffset))
+          AudioCue.Obj.Shift(peer , LongObj.newVar[T](amt + gOffset))
         case other =>
-          AudioCue.Obj.Shift(other, LongObj.newVar[S](      gOffset))
+          AudioCue.Obj.Shift(other, LongObj.newVar[T](      gOffset))
       }
     }
 
     // val gStart  = LongObj.newVar(time - selection.start)
     // require(time.start == 0, s"mkAudioRegion - don't know yet how to handle relative grapheme time")
-    // val gStart = LongObj.newVar[S](-gOffset)
-    // val bi: Grapheme.TimedElem[S] = (gStart, grapheme) // BiExpr(gStart, grapheme)
+    // val gStart = LongObj.newVar[T](-gOffset)
+    // val bi: Grapheme.TimedElem[T] = (gStart, grapheme) // BiExpr(gStart, grapheme)
     // grIn.add(gStart, audioCue)
     // scanIn add grIn
     p.graph() = SynthGraphObj.tape
@@ -266,26 +265,26 @@ object ProcActions {
     *                   whereas the proc will be placed in the group aligned with `time`.
     * @return           a tuple consisting of the span expression and the newly created proc.
     */
-  def insertAudioRegion[S <: Sys[S]](group     : TimelineMod[S],
+  def insertAudioRegion[T <: Txn[T]](group     : TimelineMod[T],
                                      time      : Span,
-                                     audioCue  : AudioCue.Obj[S],
+                                     audioCue  : AudioCue.Obj[T],
                                      gOffset   : Long)
-                                    (implicit tx: S#Tx): (SpanLikeObj /* SpanObj */[S], Proc[S]) = {
+                                    (implicit tx: T): (SpanLikeObj /* SpanObj */[T], Proc[T]) = {
     val res @ (span, obj) = mkAudioRegion(time, audioCue, gOffset)
     group.add(span, obj)
     res
   }
 
-  def insertGlobalRegion[S <: Sys[S]](
-      group     : TimelineMod[S],
+  def insertGlobalRegion[T <: Txn[T]](
+      group     : TimelineMod[T],
       name      : String,
-      bus       : Option[IntObj[S]]) // stm.Source[S#Tx, Element.Int[S]]])
-     (implicit tx: S#Tx): Proc[S] = {
+      bus       : Option[IntObj[T]]) // Source[T, Element.Int[T]]])
+     (implicit tx: T): Proc[T] = {
 
-    val proc    = Proc[S]()
+    val proc    = Proc[T]()
     val obj     = proc // Obj(Proc.Elem(proc))
     val attr    = obj.attr
-    val nameEx  = StringObj.newVar[S](StringObj.newConst(name))
+    val nameEx  = StringObj.newVar[T](StringObj.newConst(name))
     attr.put(ObjKeys.attrName, nameEx)
 
     group.add(Span.All, obj) // constant span expression

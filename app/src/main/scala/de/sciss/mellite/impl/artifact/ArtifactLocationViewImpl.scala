@@ -16,13 +16,11 @@ package de.sciss.mellite.impl.artifact
 import de.sciss.desktop.{Desktop, FileDialog, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
-import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{ArtifactLocation, Disposable, Source}
 import de.sciss.mellite.ArtifactLocationObjView.humanName
 import de.sciss.mellite.ArtifactLocationView
 import de.sciss.mellite.GUI.iconNormal
@@ -65,8 +63,8 @@ object ArtifactLocationViewImpl {
     (ggFile, ggValue)
   }
 
-  def apply[S <: Sys[S]](obj: ArtifactLocation[S])
-                        (implicit tx: S#Tx, universe: Universe[S], undo: UndoManager): ArtifactLocationView[S] = {
+  def apply[T <: Txn[T]](obj: ArtifactLocation[T])
+                        (implicit tx: T, universe: Universe[T], undo: UndoManager): ArtifactLocationView[T] = {
     val objH      = tx.newHandle(obj)
     val editable  = ArtifactLocation.Var.unapply(obj).isDefined
     val res       = new Impl(objH, editable = editable)
@@ -74,17 +72,17 @@ object ArtifactLocationViewImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, ArtifactLocation[S]], val editable: Boolean)
-                                           (implicit val universe: Universe[S],
+  private final class Impl[T <: Txn[T]](objH: Source[T, ArtifactLocation[T]], val editable: Boolean)
+                                           (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends ArtifactLocationView[S] with ComponentHolder[Component] {
+    extends ArtifactLocationView[T] with ComponentHolder[Component] {
 
     type C = Component
 
     private[this] var ggPath      : PathField   = _
-    private[this] var observer    : Disposable[S#Tx]  = _
+    private[this] var observer    : Disposable[T]  = _
 
-    def init(obj0: ArtifactLocation[S])(implicit tx: S#Tx): this.type = {
+    def init(obj0: ArtifactLocation[T])(implicit tx: T): this.type = {
       val value0 = obj0.value
       deferTx(guiInit(value0))
       observer = obj0.changed.react { implicit tx => upd =>
@@ -131,8 +129,8 @@ object ArtifactLocationViewImpl {
             val oldVal  = pVr.value
             import de.sciss.equal.Implicits._
             if (newValue === oldVal) None else {
-              val pVal    = ArtifactLocation.newConst[S](newValue)
-              val edit    = EditVar.Expr[S, File, ArtifactLocation](title, pVr, pVal)
+              val pVal    = ArtifactLocation.newConst[T](newValue)
+              val edit    = EditVar.Expr[T, File, ArtifactLocation](title, pVr, pVal)
               Some(edit)
             }
 
@@ -144,6 +142,6 @@ object ArtifactLocationViewImpl {
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+    def dispose()(implicit tx: T): Unit = observer.dispose()
   }
 }

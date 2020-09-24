@@ -13,10 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.IdentifierMap
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Ident, IdentMap, Source, SpanLikeObj, Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite
 import de.sciss.mellite.impl.{ObjTimelineViewImpl => Impl}
 import de.sciss.span.{Span, SpanLike}
@@ -26,10 +24,10 @@ import scala.language.implicitConversions
 import scala.swing.Graphics2D
 
 object ObjTimelineView {
-  type SelectionModel[S <: stm.Sys[S]] = mellite.SelectionModel[S, ObjTimelineView[S]]
+  type SelectionModel[T <: LTxn[T]] = mellite.SelectionModel[T, ObjTimelineView[T]]
 
   /** A useful view for `RangedSeq`. It gives (start, stop) of the view's span */
-  implicit def viewToPoint[S <: stm.Sys[S]](view: ObjTimelineView[S]): (Long, Long) = spanToPoint(view.spanValue)
+  implicit def viewToPoint[T <: LTxn[T]](view: ObjTimelineView[T]): (Long, Long) = spanToPoint(view.spanValue)
 
   def spanToPoint(span: SpanLike): (Long, Long) = span match {
     case Span(start, stop)  => (start, stop)
@@ -39,11 +37,11 @@ object ObjTimelineView {
     case Span.Void          => (Long.MinValue, Long.MinValue)
   }
 
-  type Map[S <: stm.Sys[S]] = IdentifierMap[S#Id, S#Tx, ObjTimelineView[S]]
+  type Map[T <: LTxn[T]] = IdentMap[T, ObjTimelineView[T]]
 
-  trait Context[S <: stm.Sys[S]] extends AuxContext[S] {
+  trait Context[T <: LTxn[T]] extends AuxContext[T] {
     /** A map from `TimedProc` ids to their views. This is used to establish scan links. */
-    def viewMap: Map[S]
+    def viewMap: Map[T]
   }
 
   trait Factory extends ObjView.Factory {
@@ -53,15 +51,15 @@ object ObjTimelineView {
       * @param span     the span on the timeline
       * @param obj      the object placed on the timeline
       */
-    def mkTimelineView[S <: Sys[S]](id: S#Id, span: SpanLikeObj[S], obj: E[S],
-                                    context: ObjTimelineView.Context[S])(implicit tx: S#Tx): ObjTimelineView[S]
+    def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: E[T],
+                                    context: ObjTimelineView.Context[T])(implicit tx: T): ObjTimelineView[T]
   }
 
   def addFactory(f: Factory): Unit = Impl.addFactory(f)
 
   def factories: Iterable[Factory] = Impl.factories
 
-  def apply[S <: Sys[S]](timed: Timeline.Timed[S], context: Context[S])(implicit tx: S#Tx): ObjTimelineView[S] =
+  def apply[T <: Txn[T]](timed: Timeline.Timed[T], context: Context[T])(implicit tx: T): ObjTimelineView[T] =
     Impl(timed, context)
 
   // ---- specialization ----
@@ -82,19 +80,19 @@ object ObjTimelineView {
     var fadeOut: FadeSpec
   }
 }
-trait ObjTimelineView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ObjTimelineView[T <: LTxn[T]] extends ObjView[T] {
 
-  def spanH: stm.Source[S#Tx, SpanLikeObj[S]]
+  def spanH: Source[T, SpanLikeObj[T]]
 
-  def span(implicit tx: S#Tx): SpanLikeObj[S]
+  def span(implicit tx: T): SpanLikeObj[T]
 
-  def id(implicit tx: S#Tx): S#Id // Timeline.Timed[S]
+  def id(implicit tx: T): Ident[T] // Timeline.Timed[T]
 
   var spanValue: SpanLike
 
   var trackIndex : Int
   var trackHeight: Int
 
-  def paintBack (g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering): Unit
-  def paintFront(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering): Unit
+  def paintBack (g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering): Unit
+  def paintFront(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering): Unit
 }

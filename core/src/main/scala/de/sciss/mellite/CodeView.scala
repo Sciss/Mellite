@@ -14,8 +14,10 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
 import de.sciss.lucre.swing.View
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.{Disposable, TxnLike}
 import de.sciss.model.Model
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.undo.UndoableEdit
@@ -33,28 +35,28 @@ object CodeView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
-                          (handler: Option[Handler[S, code0.In, code0.Out]])
-                          (implicit tx: S#Tx, universe: Universe[S],
+    def apply[T <: Txn[T]](obj: Code.Obj[T], code0: Code, bottom: ISeq[View[T]])
+                          (handler: Option[Handler[T, code0.In, code0.Out]])
+                          (implicit tx: T, universe: Universe[T],
                            compiler: Code.Compiler,
-                           undoManager: UndoManager): CodeView[S, code0.Out]
+                           undoManager: UndoManager): CodeView[T, code0.Out]
 
     def availableFonts(): ISeq[String]
 
     def installFonts(): Unit
   }
 
-  trait Handler[S <: Sys[S], In, -Out] extends Disposable[S#Tx] {
+  trait Handler[T <: Txn[T], In, -Out] extends Disposable[T] {
     def in(): In
-    def save(in: In, out: Out)(implicit tx: S#Tx): UndoableEdit
+    def save(in: In, out: Out)(implicit tx: T): UndoableEdit
   }
 
   /** If `graph` is given, the `apply` action is tied to updating the graph variable. */
-  def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
-                        (handler: Option[Handler[S, code0.In, code0.Out]])
-                        (implicit tx: S#Tx, universe: Universe[S],
+  def apply[T <: Txn[T]](obj: Code.Obj[T], code0: Code, bottom: ISeq[View[T]])
+                        (handler: Option[Handler[T, code0.In, code0.Out]])
+                        (implicit tx: T, universe: Universe[T],
                          compiler: Code.Compiler,
-                         undoManager: UndoManager): CodeView[S, code0.Out] =
+                         undoManager: UndoManager): CodeView[T, code0.Out] =
     companion(obj, code0, bottom = bottom)(handler)
 
   sealed trait Update
@@ -64,7 +66,7 @@ object CodeView {
 
   def installFonts(): Unit = companion.installFonts()
 }
-trait CodeView[S <: Sys[S], Out] extends UniverseView[S] with Model[CodeView.Update] {
+trait CodeView[T <: LTxn[T], Out] extends UniverseView[T] with Model[CodeView.Update] {
   def isCompiling(implicit tx: TxnLike): Boolean
 
   def dirty(implicit tx: TxnLike): Boolean
@@ -76,7 +78,7 @@ trait CodeView[S <: Sys[S], Out] extends UniverseView[S] with Model[CodeView.Upd
 
   var currentText: String
 
-  // def updateSource(text: String)(implicit tx: S#Tx): Unit
+  // def updateSource(text: String)(implicit tx: T): Unit
 
   def undoAction: Action
   def redoAction: Action

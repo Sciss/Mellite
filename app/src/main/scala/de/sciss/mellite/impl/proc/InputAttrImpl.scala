@@ -26,10 +26,10 @@ import scala.annotation.switch
 import scala.concurrent.stm.TSet
 import scala.swing.Graphics2D
 
-trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
+trait InputAttrImpl[S <: stm.Sys[T]] extends InputAttr[T] {
   // ---- abstract ----
 
-  protected def viewMap: IdentifierMap[S#Id, S#Tx, Elem]
+  protected def viewMap: IdentifierMap[S#Id, T, Elem]
 
   protected def elemOverlappingEDT(start: Long, stop: Long): Iterator[Elem]
   protected def elemAddedEDT  (elem: Elem): Unit
@@ -37,12 +37,12 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
 
   // ---- impl ----
 
-  final type Elem = InputElem[S]
+  final type Elem = InputElem[T]
 
   // _not_ [this] because Scala 2.10 crashes!
   private /* [this] */ val viewSet = TSet.empty[Elem]  // because `viewMap.iterator` does not exist...
 
-  def paintInputAttr(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering, px1c: Int, px2c: Int): Unit = {
+  def paintInputAttr(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering, px1c: Int, px2c: Int): Unit = {
     // println(s"paintInputAttr(${rangeSeq.iterator.size})")
     val canvas  = tlv.canvas
     val pStart  = parent.pStart
@@ -351,7 +351,7 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
     g.setStroke(strkOrig)
   }
 
-  def dispose()(implicit tx: S#Tx): Unit = {
+  def dispose()(implicit tx: T): Unit = {
     import TxnLike.peer
     viewSet.foreach(_.dispose())
     viewSet.clear()
@@ -359,17 +359,17 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
 
   type Entry <: Identifiable[S#Id]
 
-  protected def mkTarget(entry: Entry)(implicit tx: S#Tx): LinkTarget[S]
+  protected def mkTarget(entry: Entry)(implicit tx: T): LinkTarget[T]
 
-  final protected def addAttrIn(span: SpanLike, entry: Entry, value: Obj[S], fire: Boolean)
-                               (implicit tx: S#Tx): Unit =
+  final protected def addAttrIn(span: SpanLike, entry: Entry, value: Obj[T], fire: Boolean)
+                               (implicit tx: T): Unit =
     value match {
-      case out: proc.Output[S] =>
+      case out: proc.Output[T] =>
         import TxnLike.peer
         val entryId   = entry.id
         val idH       = tx.newHandle(entryId)
-        val viewInit  = parent.context.getAux    [ProcObjView.Timeline[S]](out.id)
-        val obs       = parent.context.observeAux[ProcObjView.Timeline[S]](out.id) { implicit tx => upd =>
+        val viewInit  = parent.context.getAux    [ProcObjView.Timeline[T]](out.id)
+        val obs       = parent.context.observeAux[ProcObjView.Timeline[T]](out.id) { implicit tx => upd =>
           val id = idH()
           viewMap.get(id).foreach { elem1 =>
             // elem2 keeps the observer, so no `dispose` call here
@@ -404,7 +404,7 @@ trait InputAttrImpl[S <: stm.Sys[S]] extends InputAttr[S] {
       case _ => // no others supported ATM
     }
 
-  final protected def removeAttrIn(/* span: SpanLike, */ entryId: S#Id)(implicit tx: S#Tx): Unit =
+  final protected def removeAttrIn(/* span: SpanLike, */ entryId: S#Id)(implicit tx: T): Unit =
     viewMap.get(entryId).foreach { elem0 =>
       import TxnLike.peer
       viewMap.remove(entryId)

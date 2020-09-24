@@ -52,11 +52,11 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
   import de.sciss.mellite.Mellite.{logTimeline => logT}
 
-//  private type EntryProc[S <: Sys[S]] = BiGroup.Entry[S, Proc[S]]
+//  private type EntryProc[T <: Txn[T]] = BiGroup.Entry[T, Proc[T]]
 
-  def apply[S <: Sys[S]](gr: Grapheme[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undo: UndoManager): GraphemeView[S] = {
+  def apply[T <: Txn[T]](gr: Grapheme[T])
+                        (implicit tx: T, universe: Universe[T],
+                         undo: UndoManager): GraphemeView[T] = {
     val sampleRate      = TimeRef.SampleRate
     val visStart        = 0L // obj.firstEvent.getOrElse(0L)
     val visStop         = gr.lastEvent.getOrElse((sampleRate * 60 * 2).toLong)
@@ -66,15 +66,15 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       sampleRate = sampleRate)
     // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
     val graphemeH       = tx.newHandle(gr)
-    var disposables     = List.empty[Disposable[S#Tx]]
-    val selectionModel  = SelectionModel[S, ObjGraphemeView[S]]
-    val grView          = new Impl[S](graphemeH, tlm, selectionModel)
+    var disposables     = List.empty[Disposable[T]]
+    val selectionModel  = SelectionModel[T, ObjGraphemeView[T]]
+    val grView          = new Impl[T](graphemeH, tlm, selectionModel)
 
     // XXX TODO --- this is all horrible; we really need a proper iterator on grapheme
     // that gives time values and full leaf data
     gr.firstEvent.foreach { time0 =>
       @tailrec
-      def populate(pred: List[ObjGraphemeView[S]], time: Long, entries: Vec[Grapheme.Entry[S]]): Unit = {
+      def populate(pred: List[ObjGraphemeView[T]], time: Long, entries: Vec[Grapheme.Entry[T]]): Unit = {
         val curr = entries.reverseIterator.map { entry =>
           val view = grView.objAddedInit(gr, time = time, entry = entry)
           view
@@ -123,21 +123,21 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     grView.init()
   }
 
-  private final class Impl[S <: Sys[S]](val graphemeH     : stm.Source[S#Tx, Grapheme[S]],
+  private final class Impl[T <: Txn[T]](val graphemeH     : Source[T, Grapheme[T]],
                                         val timelineModel : TimelineModel,
-                                        val selectionModel: SelectionModel[S, ObjGraphemeView[S]])
-                                       (implicit val universe: Universe[S],
+                                        val selectionModel: SelectionModel[T, ObjGraphemeView[T]])
+                                       (implicit val universe: Universe[T],
                                         val undoManager: UndoManager)
-    extends GraphemeView[S]
-      with TimelineViewBaseImpl[S, Double, ObjGraphemeView[S]]
-      with GraphemeActions[S]
+    extends GraphemeView[T]
+      with TimelineViewBaseImpl[T, Double, ObjGraphemeView[T]]
+      with GraphemeActions[T]
       with ComponentHolder[Component] {
 
     impl =>
 
     type C = Component
 
-    private type Child    = ObjGraphemeView[S]
+    private type Child    = ObjGraphemeView[T]
 
     private final class ViewMapEntry(val key: Long, val value: List[Child]) {
       override def toString: String = s"ViewMapEntry($key, $value)"
@@ -157,20 +157,20 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     // kind-of priority queue keeping track of horizontal margin needed when querying views to paint
     private[this] var viewMaxHorizG = ISortedMap.empty[Int, Int] // maxHoriz to count
 
-    var canvas: GraphemeCanvasImpl[S] = _
+    var canvas: GraphemeCanvasImpl[T] = _
 
-    val disposables: Ref[List[Disposable[S#Tx]]] = Ref(Nil)
+    val disposables: Ref[List[Disposable[T]]] = Ref(Nil)
 
     def mode: Mode = Mode.TwoDim
 
-    private[this] lazy val toolCursor   = GraphemeTool.cursor  [S](canvas)
-    private[this] lazy val toolMove     = GraphemeTool.move    [S](canvas)
-    private[this] lazy val toolAdd      = GraphemeTool.add     [S](canvas)
+    private[this] lazy val toolCursor   = GraphemeTool.cursor  [T](canvas)
+    private[this] lazy val toolMove     = GraphemeTool.move    [T](canvas)
+    private[this] lazy val toolAdd      = GraphemeTool.add     [T](canvas)
 
-    def grapheme  (implicit tx: S#Tx): Grapheme[S] = graphemeH()
-    def plainGroup(implicit tx: S#Tx): Grapheme[S] = grapheme
+    def grapheme  (implicit tx: T): Grapheme[T] = graphemeH()
+    def plainGroup(implicit tx: T): Grapheme[T] = grapheme
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       val m: ViewMap = emptyMap
       deferTx {
         viewMapG = m
@@ -179,7 +179,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       viewMapT.swap(m).iterator.foreach(_.value.foreach(_.dispose()))
     }
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx(guiInit())
       this
     }
@@ -239,7 +239,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       if (c === 0) viewMaxHorizG -= h else viewMaxHorizG += h -> c
     }
 
-    def objAdded(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
+    def objAdded(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Unit = {
       logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
       val a = addObjImpl(gr, time = time, entry = entry, updateSucc = true)
       deferTx {
@@ -249,7 +249,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       }
     }
 
-    def objAddedInit(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Child = {
+    def objAddedInit(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Child = {
       logT(s"objAddedInit(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
       assert (time == entry.key.value, s"time = $time, entry.key = ${entry.key.value}")
       val a = addObjImpl(gr, time = time, entry = entry, updateSucc = false)
@@ -261,8 +261,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     private final class Added(val newView: Child, val newViewMap: ViewMap)
 
     // does not invoke EDT code
-    private def addObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], updateSucc: Boolean)
-                          (implicit tx: S#Tx): Added = {
+    private def addObjImpl(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T], updateSucc: Boolean)
+                          (implicit tx: T): Added = {
       val view = ObjGraphemeView(entry = entry, mode = mode)
       val _viewMapG = viewMapT.transformAndGet { m =>
         val before  = m.get(time)
@@ -305,10 +305,10 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       new Added(view, _viewMapG)
     }
 
-    private def warnViewNotFound(action: String, entry: Grapheme.Entry[S]): Unit =
+    private def warnViewNotFound(action: String, entry: Grapheme.Entry[T]): Unit =
       Console.err.println(s"Warning: Grapheme - $action. View for object $entry (value ${entry.value}) not found.")
 
-    def objRemoved(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S])(implicit tx: S#Tx): Unit = {
+    def objRemoved(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Unit = {
       logT(s"objRemoved($time, entry.value = ${entry.value})")
       val opt = removeObjImpl(gr = gr, time = time, entry = entry, isMove = false)
       opt.fold[Unit] {
@@ -326,8 +326,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     private final class Removed(val oldView: Child, val newViewMap: ViewMap)
 
     // does not invoke EDT code
-    private def removeObjImpl(gr: BiPin[S, Obj[S]], time: Long, entry: Grapheme.Entry[S], isMove: Boolean)
-                             (implicit tx: S#Tx): Option[Removed] = {
+    private def removeObjImpl(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T], isMove: Boolean)
+                             (implicit tx: T): Option[Removed] = {
       val _viewMapG0 = viewMapT()
       val oldObj = entry.value
       for {
@@ -367,8 +367,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       }
     }
 
-    def objMoved(gr: BiPin[S, Obj[S]], entry: Grapheme.Entry[S], timeCh: Change[Long])
-                (implicit tx: S#Tx): Unit = {
+    def objMoved(gr: BiPin[T, Obj[T]], entry: Grapheme.Entry[T], timeCh: Change[Long])
+                (implicit tx: T): Unit = {
       logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, entry.value = ${entry.value})")
       val opt = removeObjImpl(gr = gr, time = timeCh.before, entry = entry, isMove = true)
       opt.fold[Unit] {
@@ -394,23 +394,23 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       }
     }
 
-    private def objUpdated(view: ObjGraphemeView[S]): Unit = {
+    private def objUpdated(view: ObjGraphemeView[T]): Unit = {
       repaintAll() // XXX TODO: optimize dirty rectangle
     }
 
-    private final class View extends GraphemeCanvasImpl[S] {
+    private final class View extends GraphemeCanvasImpl[T] {
       canvasImpl =>
 
       def timelineModel : TimelineModel                         = impl.timelineModel
-      def selectionModel: SelectionModel[S, ObjGraphemeView[S]] = impl.selectionModel
-      def grapheme(implicit tx: S#Tx): Grapheme[S]              = impl.plainGroup
+      def selectionModel: SelectionModel[T, ObjGraphemeView[T]] = impl.selectionModel
+      def grapheme(implicit tx: T): Grapheme[T]              = impl.plainGroup
 
-//      def findChildView(frame: Long): Option[GraphemeObjView[S]] = {
+//      def findChildView(frame: Long): Option[GraphemeObjView[T]] = {
 //        val it = viewMapG.valuesIteratorFrom(frame)
 //        if (it.hasNext) it.next().headOption else None
 //      }
 
-      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[ObjGraphemeView[S]] = {
+      def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[ObjGraphemeView[T]] = {
         val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
         val dTop    = screenToModelExtent     (ObjGraphemeView.ScreenTolerance)
@@ -422,14 +422,14 @@ object GraphemeViewImpl extends GraphemeView.Companion {
         childIterator(frame1 = frame1, frame2 = frame2, modelY1 = modelY1, modelY2 = modelY2)
       }
 
-      def iterator: Iterator[ObjGraphemeView[S]] = viewMapG.iterator.flatMap(_.value.headOption)
+      def iterator: Iterator[ObjGraphemeView[T]] = viewMapG.iterator.flatMap(_.value.headOption)
 
-      def intersect(span: Span.NonVoid): Iterator[ObjGraphemeView[S]] = {
+      def intersect(span: Span.NonVoid): Iterator[ObjGraphemeView[T]] = {
         ???
       }
 
       private def childIterator(frame1: Long, frame2: Long,
-                                modelY1: Double, modelY2: Double): Iterator[ObjGraphemeView[S]] = {
+                                modelY1: Double, modelY2: Double): Iterator[ObjGraphemeView[T]] = {
         val it0 = viewMapG.iteratorFrom(frame1)
           .flatMap  (_.value.headOption)
           .dropWhile(_.timeValue <  frame1)
@@ -444,7 +444,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
         it
       }
 
-      def findChildView(frame: Long, modelY: Double): Option[ObjGraphemeView[S]] = {
+      def findChildView(frame: Long, modelY: Double): Option[ObjGraphemeView[T]] = {
         val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
         val dTop    = screenToModelExtent     (ObjGraphemeView.ScreenTolerance)
@@ -493,11 +493,11 @@ object GraphemeViewImpl extends GraphemeView.Companion {
         }
       }
 
-      object canvasComponent extends Component /* with DnD[S] */ /* with sonogram.PaintController */ {
+      object canvasComponent extends Component /* with DnD[T] */ /* with sonogram.PaintController */ {
         protected def graphemeModel: TimelineModel  = impl.timelineModel
-//        protected def workspace: Workspace[S]       = impl.workspace
+//        protected def workspace: Workspace[T]       = impl.workspace
 
-        // private var currentDrop = Option.empty[DnD.Drop[S]]
+        // private var currentDrop = Option.empty[DnD.Drop[T]]
 
         font = {
           val f = UIManager.getFont("Slider.font", Locale.US)
@@ -509,12 +509,12 @@ object GraphemeViewImpl extends GraphemeView.Companion {
           (b.width >> 1, b.height >> 1)
         }
 
-//        protected def updateDnD(drop: Option[DnD.Drop[S]]): Unit = {
+//        protected def updateDnD(drop: Option[DnD.Drop[T]]): Unit = {
 //          currentDrop = drop
 //          repaint()
 //        }
 //
-//        protected def acceptDnD(drop: DnD.Drop[S]): Boolean = performDrop(drop)
+//        protected def acceptDnD(drop: DnD.Drop[T]): Boolean = performDrop(drop)
 
         def imageObserver: JComponent = peer
 

@@ -29,10 +29,10 @@ import de.sciss.synth.proc.Proc
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], tlv: TimelineView[S])
-  extends CollectionToolLike[S, TimelineTool.Add, Int, ObjTimelineView[S]]
-    with DraggingTool[S, TimelineTool.Add, Int]
-    with TimelineTool[S, TimelineTool.Add] {
+final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tlv: TimelineView[T])
+  extends CollectionToolLike[T, TimelineTool.Add, Int, ObjTimelineView[T]]
+    with DraggingTool[T, TimelineTool.Add, Int]
+    with TimelineTool[T, TimelineTool.Add] {
 
   import TimelineTool.Add
 
@@ -43,7 +43,7 @@ final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], t
 
   protected type Initial = Unit
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[S]]): Unit = {
+  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
     handleMouseSelection(e, regionOpt)
     regionOpt match {
       case Some(region) =>
@@ -67,10 +67,10 @@ final class AddImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S], t
     Add(modelYOffset = dTrkIdx, modelYExtent = dTrkH, span = Span(dStart, dStop))
   }
 
-  def commit(drag: Add)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+  def commit(drag: Add)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
     canvas.timeline.modifiableOption.map { g =>
-      val span  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[S]
-      val p     = Proc[S]()
+      val span  = SpanLikeObj.newVar[T](SpanLikeObj.newConst(drag.span)) // : SpanLikeObj[T]
+      val p     = Proc[T]()
       val obj   = p // Obj(Proc.Elem(p))
       obj.attr.put(ObjTimelineView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
       obj.attr.put(ObjTimelineView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))

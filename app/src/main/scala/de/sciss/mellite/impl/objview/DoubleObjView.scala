@@ -33,7 +33,7 @@ import scala.swing.{Component, Graphics2D, Label}
 import scala.util.{Success, Try}
 
 object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
-  type E[S <: stm.Sys[S]]       = DoubleObj[S]
+  type E[S <: stm.Sys[T]]       = DoubleObj[T]
   type V                        = Double
   val icon          : Icon      = raphaelIcon(Shapes.RealNumber)
   val prefix        : String    = "Double"
@@ -42,7 +42,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: E[T])(implicit tx: T): ObjListView[T] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -50,28 +50,28 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
       case _                => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new ListImpl[S](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
+    new ListImpl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Double, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Double, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val model   = new SpinnerNumberModel(0.0, Double.NegativeInfinity, Double.PositiveInfinity, 1.0)
     val ggValue = new Spinner(model)
     val res0    = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = Success(model.getNumber.doubleValue))
-    val res     = res0.map { c => Config[S](name = c.name, value = c.value) }
+    val res     = res0.map { c => Config[T](name = c.name, value = c.value) }
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
 //    // cf. https://github.com/scallop/scallop/issues/189
 //    val args1 = args match {
 //      case ("--help" | "-h") :: Nil => args
 //      case _ => "--ignore" +: args
 //    }
-    object p extends ObjViewCmdLineParser[Config[S]](this, args /*args1*/) {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args /*args1*/) {
 //      val ignore: Opt[Boolean]  = opt(hidden = true)
       val const : Opt[Boolean]  = opt     (descr = s"Make constant instead of variable")
       val value : Opt[Double]   = trailArg(descr = "Initial double value")
@@ -79,43 +79,43 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
     p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = DoubleObj.newConst[S](value)
+    val obj0  = DoubleObj.newConst[T](value)
     val obj   = if (const) obj0 else DoubleObj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
-                                 (implicit tx: S#Tx): ObjGraphemeView[S] = {
+  def mkGraphemeView[T <: Txn[T]](entry: Entry[T], obj: E[T], mode: GraphemeView.Mode)
+                                 (implicit tx: T): ObjGraphemeView[T] = {
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
     // assert (entry.value == value)
-    new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = obj.value, isViewable = isViewable)
+    new GraphemeImpl[T](tx.newHandle(entry), tx.newHandle(obj), value = obj.value, isViewable = isViewable)
       .init(obj, entry)
   }
 
   // ---- basic ----
 
-  private abstract class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, E[S]], val isViewable: Boolean)
-    extends ObjViewImpl.Impl[S]
-    with ObjViewImpl.ExprLike[S, V, E] {
+  private abstract class Impl[T <: Txn[T]](val objH: Source[T, E[T]], val isViewable: Boolean)
+    extends ObjViewImpl.Impl[T]
+    with ObjViewImpl.ExprLike[T, V, E] {
 
-    type Repr = DoubleObj[S]
+    type Repr = DoubleObj[T]
 
     final def factory: ObjView.Factory = DoubleObjView
 
     final def exprType: Type.Expr[V, E] = DoubleObj
 
-    final def expr(implicit tx: S#Tx): E[S] = objH()
+    final def expr(implicit tx: T): E[T] = objH()
   }
 
   // ---- ListObjView ----
 
-  private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: Double,
+  private final class ListImpl[T <: Txn[T]](objH: Source[T, E[T]], var value: Double,
                                             override val isListCellEditable: Boolean, isViewable: Boolean)
-    extends Impl(objH, isViewable = isViewable) with ObjListView[S]
-      with ObjListViewImpl.SimpleExpr[S, V, E] {
+    extends Impl(objH, isViewable = isViewable) with ObjListView[T]
+      with ObjListViewImpl.SimpleExpr[T, V, E] {
 
     def configureListCellRenderer(label: Label): Component = {
       label.text = value.toFloat.toString   // avoid excessive number of digits!
@@ -130,8 +130,8 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
 
   // ---- GraphemeObjView ----
 
-  def graphemePaintFront[S <: Sys[S]](view: ObjGraphemeView[S], value: Double, g: Graphics2D,
-                                      gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+  def graphemePaintFront[T <: Txn[T]](view: ObjGraphemeView[T], value: Double, g: Graphics2D,
+                                      gv: GraphemeView[T], r: GraphemeRendering): Unit = {
     import ObjGraphemeView.{HandleDiameter, HandleRadius}
     val c         = gv.canvas
     val selected  = gv.selectionModel.contains(view)
@@ -149,19 +149,19 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
     g.draw(p)
   }
 
-  private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
-                                                objH: stm.Source[S#Tx, E[S]],
+  private final class GraphemeImpl[T <: Txn[T]](val entryH: Source[T, Entry[T]],
+                                                objH: Source[T, E[T]],
                                                 var value: V,
                                                 isViewable: Boolean)
-    extends Impl[S](objH, isViewable = isViewable)
-    with ObjGraphemeViewImpl.SimpleExpr[S, V, E]
-    with ObjGraphemeView.HasStartLevels[S] {
+    extends Impl[T](objH, isViewable = isViewable)
+    with ObjGraphemeViewImpl.SimpleExpr[T, V, E]
+    with ObjGraphemeView.HasStartLevels[T] {
 
     def insets: Insets = ObjGraphemeView.DefaultInsets
 
     def startLevels: Vec[Double] = value +: Vector.empty
 
-    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit =
+    override def paintFront(g: Graphics2D, gv: GraphemeView[T], r: GraphemeRendering): Unit =
       graphemePaintFront(this, value, g, gv, r)
   }
 }

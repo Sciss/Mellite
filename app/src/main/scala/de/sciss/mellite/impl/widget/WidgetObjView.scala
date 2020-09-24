@@ -13,10 +13,9 @@
 
 package de.sciss.mellite.impl.widget
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Cursor, Obj}
+import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.{Shapes, WidgetEditorFrame}
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
@@ -26,46 +25,46 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 object WidgetObjView extends NoArgsListObjViewFactory {
-  type E[~ <: stm.Sys[~]] = Widget[~]
+  type E[~ <: LTxn[~]] = Widget[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Gauge)
   val prefix        : String    = "Widget"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Widget
   def category      : String    = ObjView.categOrganization
 
-  def mkListView[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx): WidgetObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Widget[T])(implicit tx: T): WidgetObjView[T] with ObjListView[T] = {
     val value = "" // ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     val name  = config
-    val obj   = Widget[S]()
+    val obj   = Widget[T]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
   // XXX TODO make private
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Widget[S]], var value: String)
-    extends WidgetObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl.Impl[S]
+  final class Impl[T <: Txn[T]](val objH: Source[T, Widget[T]], var value: String)
+    extends WidgetObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl.Impl[T]
       with ObjListViewImpl.StringRenderer {
 
     def factory: ObjView.Factory = WidgetObjView
 
-    def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: Cursor[S]): Option[UndoableEdit] = None
+    def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None
 
     def isListCellEditable: Boolean = false // never within the list view
 
     def isViewable: Boolean = true
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val frame = WidgetEditorFrame(obj)
       Some(frame)
     }
   }
 }
-trait WidgetObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Widget[S]
+trait WidgetObjView[T <: LTxn[T]] extends ObjView[T] {
+  type Repr = Widget[T]
 }

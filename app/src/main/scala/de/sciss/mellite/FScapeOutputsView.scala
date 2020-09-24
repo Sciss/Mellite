@@ -15,20 +15,20 @@ package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
 import de.sciss.fscape.lucre.FScape
-import de.sciss.lucre.stm
+import de.sciss.lucre.Source
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.impl.fscape.FScapeOutputsViewImpl
 import de.sciss.synth.proc.Universe
 
 object FScapeOutputsView {
-  final case class Drag[S <: Sys[S]](universe: Universe[S], fscape: stm.Source[S#Tx, FScape[S]], key: String)
+  final case class Drag[T <: Txn[T]](universe: Universe[T], fscape: Source[T, FScape[T]], key: String)
 
   final val flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 
-  def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, universe: Universe[S],
-                                         undoManager: UndoManager): FScapeOutputsView[S] =
+  def apply[T <: Txn[T]](obj: FScape[T])(implicit tx: T, universe: Universe[T],
+                                         undoManager: UndoManager): FScapeOutputsView[T] =
     FScapeOutputsViewImpl(obj)
 }
-trait FScapeOutputsView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S]
+trait FScapeOutputsView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]

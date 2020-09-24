@@ -24,7 +24,7 @@ object TimelineToolsImpl extends TimelineTools.Companion {
   def install(): Unit =
     TimelineTools.peer = this
 
-  def apply  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTools[S] = new ToolsImpl(canvas)
-  def palette[S <: Sys[S]](control: TimelineTools[S], tools: Vec[TimelineTool[S, _]]): Component =
-    new ToolPaletteImpl[S, TimelineTool[S, _]](control, tools)
+  def apply  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTools[T] = new ToolsImpl(canvas)
+  def palette[T <: Txn[T]](control: TimelineTools[T], tools: Vec[TimelineTool[T, _]]): Component =
+    new ToolPaletteImpl[T, TimelineTool[T, _]](control, tools)
 }

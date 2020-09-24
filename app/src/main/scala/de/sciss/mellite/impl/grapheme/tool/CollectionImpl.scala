@@ -27,12 +27,12 @@ import javax.swing.undo.UndoableEdit
   * It implements `commit` by aggregating individual view based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Double, ObjGraphemeView[S]]
-  with GraphemeTool[S, A] {
+trait CollectionImpl[T <: Txn[T], A] extends BasicCollectionTool[T, A, Double, ObjGraphemeView[T]]
+  with GraphemeTool[T, A] {
 
-  override protected def canvas: GraphemeCanvas[S]
+  override protected def canvas: GraphemeCanvas[T]
 
-  def commit(drag: A)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def commit(drag: A)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     lazy val parent = canvas.grapheme
     val edits = canvas.selectionModel.iterator.flatMap { childView =>
       val time  = childView.time
@@ -47,6 +47,6 @@ trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Double, O
     CompoundEdit(edits, name)
   }
 
-  protected def commitObj(drag: A)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
+  protected def commitObj(drag: A)(time: LongObj[T], child: Obj[T], parent: Grapheme[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit]
 }

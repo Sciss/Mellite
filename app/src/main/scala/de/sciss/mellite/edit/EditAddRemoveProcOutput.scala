@@ -20,9 +20,9 @@ import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
 // XXX TODO - should disconnect links and restore them in undo
-private[edit] final class EditAddRemoveProcOutput[S <: Sys[S]](isAdd: Boolean,
-                                                               procH: stm.Source[S#Tx, Proc[S]],
-                                                               key: String)(implicit cursor: stm.Cursor[S])
+private[edit] final class EditAddRemoveProcOutput[T <: Txn[T]](isAdd: Boolean,
+                                                               procH: Source[T, Proc[T]],
+                                                               key: String)(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {
@@ -43,9 +43,9 @@ private[edit] final class EditAddRemoveProcOutput[S <: Sys[S]](isAdd: Boolean,
     }
   }
 
-  def perform()(implicit tx: S#Tx): Unit = perform(isUndo = false)
+  def perform()(implicit tx: T): Unit = perform(isUndo = false)
 
-  private def perform(isUndo: Boolean)(implicit tx: S#Tx): Unit = {
+  private def perform(isUndo: Boolean)(implicit tx: T): Unit = {
     val proc    = procH()
     val outputs = proc.outputs
     if (isAdd ^ isUndo)
@@ -57,8 +57,8 @@ private[edit] final class EditAddRemoveProcOutput[S <: Sys[S]](isAdd: Boolean,
   override def getPresentationName = s"${if (isAdd) "Add" else "Remove"} Output"
 }
 object EditAddProcOutput {
-  def apply[S <: Sys[S]](proc: Proc[S], key: String)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](proc: Proc[T], key: String)
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val procH = tx.newHandle(proc)
     val res = new EditAddRemoveProcOutput(isAdd = true, procH = procH, key = key)
     res.perform()
@@ -67,8 +67,8 @@ object EditAddProcOutput {
 }
 
 object EditRemoveProcOutput {
-  def apply[S <: Sys[S]](proc: Proc[S], key: String)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](proc: Proc[T], key: String)
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val procH = tx.newHandle(proc)
     val res = new EditAddRemoveProcOutput(isAdd = false, procH = procH, key = key)
     res.perform()

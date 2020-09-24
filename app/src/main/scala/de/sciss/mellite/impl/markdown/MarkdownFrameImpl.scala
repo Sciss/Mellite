@@ -31,37 +31,37 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
   def install(): Unit =
     MarkdownFrame.peer = this
 
-  def editor[S <: Sys[S]](obj: Markdown[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, universe: Universe[S]): MarkdownFrame.Editor[S] = {
+  def editor[T <: Txn[T]](obj: Markdown[T], bottom: ISeq[View[T]])
+                        (implicit tx: T, universe: Universe[T]): MarkdownFrame.Editor[T] = {
     implicit val undo: UndoManager = UndoManager()
     val showEditor  = obj.attr.$[BooleanObj](Markdown.attrEditMode).forall(_.value)
     val view        = MarkdownEditorView(obj, showEditor = showEditor, bottom = bottom)
-    val res         = new EditorFrameImpl[S](view).init()
+    val res         = new EditorFrameImpl[T](view).init()
     trackTitle(res, view.renderer)
     res
   }
 
-  def render[S <: Sys[S]](obj: Markdown[S])
-                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownFrame.Render[S] = {
+  def render[T <: Txn[T]](obj: Markdown[T])
+                         (implicit tx: T, universe: Universe[T]): MarkdownFrame.Render[T] = {
     val view  = MarkdownRenderView(obj)
-    val res   = new RenderFrameImpl[S](view).init()
+    val res   = new RenderFrameImpl[T](view).init()
     trackTitle(res, view)
     res
   }
 
-  def basic[S <: stm.Sys[S]](obj: Markdown[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownFrame.Basic[S] = {
+  def basic[S <: stm.Sys[T]](obj: Markdown[T])
+                        (implicit tx: T, cursor: Cursor[T]): MarkdownFrame.Basic[T] = {
     val view  = MarkdownRenderView.basic(obj)
-    val res   = new BasicImpl[S](view).init()
+    val res   = new BasicImpl[T](view).init()
     trackTitle(res, view)
     res
   }
 
-  private def setTitle[S <: stm.Sys[S]](win: WindowImpl[S], md: Markdown[S])(implicit tx: S#Tx): Unit =
+  private def setTitle[S <: stm.Sys[T]](win: WindowImpl[T], md: Markdown[T])(implicit tx: T): Unit =
     win.setTitleExpr(Some(CellView.name(md)))
 
-  private def trackTitle[S <: stm.Sys[S]](win: WindowImpl[S], renderer: MarkdownRenderView.Basic[S])
-                                     (implicit tx: S#Tx): Unit = {
+  private def trackTitle[S <: stm.Sys[T]](win: WindowImpl[T], renderer: MarkdownRenderView.Basic[T])
+                                     (implicit tx: T): Unit = {
     setTitle(win, renderer.markdown)
     renderer.react { implicit tx => {
       case MarkdownRenderView.FollowedLink(_, now) => setTitle(win, now)
@@ -70,22 +70,22 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
 
   // ---- frame impl ----
 
-  private final class RenderFrameImpl[S <: Sys[S]](val view: MarkdownRenderView[S])
-    extends WindowImpl[S] with MarkdownFrame.Render[S] {
+  private final class RenderFrameImpl[T <: Txn[T]](val view: MarkdownRenderView[T])
+    extends WindowImpl[T] with MarkdownFrame.Render[T] {
   }
-  private final class BasicImpl[S <: stm.Sys[S]](val view: MarkdownRenderView.Basic[S])
-    extends WindowImpl[S] with MarkdownFrame.Basic[S]
+  private final class BasicImpl[S <: stm.Sys[T]](val view: MarkdownRenderView.Basic[T])
+    extends WindowImpl[T] with MarkdownFrame.Basic[T]
 
-  private final class EditorFrameImpl[S <: Sys[S]](val view: MarkdownEditorView[S])
-    extends WindowImpl[S] with MarkdownFrame.Editor[S] with Veto[S#Tx] {
+  private final class EditorFrameImpl[T <: Txn[T]](val view: MarkdownEditorView[T])
+    extends WindowImpl[T] with MarkdownFrame.Editor[T] with Veto[T] {
 
-    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+    override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.dirty) None else Some(this)
 
 
     private[this] def _vetoMessage = "The text has been edited."
 
-    def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
+    def vetoMessage(implicit tx: T): String = _vetoMessage
 
     /** Attempts to resolve the veto condition by consulting the user.
       *
@@ -93,7 +93,7 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
       *         proceed with the operation. failed future if the veto is upheld, and
       *         the caller should abort the operation.
       */
-    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
+    def tryResolveVeto()(implicit tx: T): Future[Unit] = {
       val p = Promise[Unit]()
       deferTx {
         val message = s"${_vetoMessage}\nDo you want to save the changes?"

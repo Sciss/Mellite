@@ -13,12 +13,12 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.mellite.SelectionModel
 import de.sciss.model.impl.ModelImpl
 
-final class SelectionModelImpl[S <: Sys[S], Repr]
-  extends SelectionModel[S, Repr] with ModelImpl[SelectionModel.Update[S, Repr]] {
+final class SelectionModelImpl[T <: Txn[T], Repr]
+  extends SelectionModel[T, Repr] with ModelImpl[SelectionModel.Update[T, Repr]] {
 
   import SelectionModel.Update
 

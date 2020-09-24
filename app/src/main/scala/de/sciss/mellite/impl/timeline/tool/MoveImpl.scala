@@ -29,9 +29,9 @@ import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicTimelineTool[S, TimelineTool.Move]
-    with RubberBandTool[S, TimelineTool.Move, Int, ObjTimelineView[S]] {
+final class MoveImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends BasicTimelineTool[T, TimelineTool.Move]
+    with RubberBandTool[T, TimelineTool.Move, Int, ObjTimelineView[T]] {
 
   import TimelineTool.Move
 
@@ -60,8 +60,8 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   override protected def handleOutside(e: MouseEvent, hitTrack: Int, pos: Long): Unit =
     mkRubber(e, modelY = hitTrack, pos = pos)
 
-  protected def commitObj(drag: Move)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  protected def commitObj(drag: Move)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
     Edits.timelineMoveOrCopy(span, obj, timeline, drag, minStart = minStart)
   }

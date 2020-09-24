@@ -20,8 +20,8 @@ import de.sciss.lucre.stm.Sys
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditArtifactLocation {
-  def apply[S <: Sys[S]](obj: ArtifactLocation.Var[S], directory: File)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](obj: ArtifactLocation.Var[T], directory: File)
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val before    = obj.directory
     val objH      = tx.newHandle(obj)
     val res       = new Impl(objH, before, directory)
@@ -29,8 +29,8 @@ object EditArtifactLocation {
     res
   }
 
-  private[edit] final class Impl[S <: Sys[S]](objH  : stm.Source[S#Tx, ArtifactLocation.Var[S]],
-                                              before: File, now: File)(implicit cursor: stm.Cursor[S])
+  private[edit] final class Impl[T <: Txn[T]](objH  : Source[T, ArtifactLocation.Var[T]],
+                                              before: File, now: File)(implicit cursor: Cursor[T])
     extends AbstractUndoableEdit {
 
     override def undo(): Unit = {
@@ -43,10 +43,10 @@ object EditArtifactLocation {
       cursor.step { implicit tx => perform() }
     }
 
-    private def perform(directory: File)(implicit tx: S#Tx): Unit =
+    private def perform(directory: File)(implicit tx: T): Unit =
       objH().update(ArtifactLocation.newConst(directory)) // .directory = directory
 
-    def perform()(implicit tx: S#Tx): Unit = perform(now)
+    def perform()(implicit tx: T): Unit = perform(now)
 
     override def getPresentationName = "Change Artifact Location"
   }

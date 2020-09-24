@@ -26,8 +26,8 @@ import scala.swing.Action
 import scala.swing.event.Key
 
 /** Implements the actions defined for the grapheme-view. */
-trait GraphemeActions[S <: Sys[S]] {
-  view: GraphemeView[S] with TimelineViewBaseImpl[S, Double, ObjGraphemeView[S]] =>
+trait GraphemeActions[T <: Txn[T]] {
+  view: GraphemeView[T] with TimelineViewBaseImpl[T, Double, ObjGraphemeView[T]] =>
 
   object actionSelectAll extends Action("Select All") {
     def apply(): Unit = {
@@ -65,7 +65,7 @@ trait GraphemeActions[S <: Sys[S]] {
 
   // -----------
 
-  protected def graphemeMod(implicit tx: S#Tx): Option[Grapheme.Modifiable[S]] =
+  protected def graphemeMod(implicit tx: T): Option[Grapheme.Modifiable[T]] =
     grapheme.modifiableOption
 
 //  // ---- clear ----
@@ -73,8 +73,8 @@ trait GraphemeActions[S <: Sys[S]] {
 //  // - if the object is contained in the span, remove it
 //  // - if the object overlaps the span, split it once or twice,
 //  //   then remove the fragments that are contained in the span
-//  protected def editClearSpan(groupMod: proc.Grapheme.Modifiable[S], selSpan: Span)
-//                             (implicit tx: S#Tx): Option[UndoableEdit] = {
+//  protected def editClearSpan(groupMod: proc.Grapheme.Modifiable[T], selSpan: Span)
+//                             (implicit tx: T): Option[UndoableEdit] = {
 //      ...
 ////    val allEdits = groupMod.intersect(selSpan).flatMap {
 ////      case (elemSpan, elems) =>

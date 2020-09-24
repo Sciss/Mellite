@@ -50,7 +50,7 @@ import scala.swing.{Alignment, Component, Dialog, Graphics2D, Label, Swing, Text
 import scala.util.{Failure, Success}
 
 object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
-  type E[S <: stm.Sys[S]]       = EnvSegment.Obj[S]
+  type E[S <: stm.Sys[T]]       = EnvSegment.Obj[T]
   type V                        = EnvSegment
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Connect)
   val prefix        : String    = "EnvSegment"
@@ -59,13 +59,13 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: E[T])(implicit tx: T): ObjListView[T] = {
     val value     = obj.value
     val editable  = EnvSegment.Obj.Var.unapply(obj).isDefined
-    new ListImpl[S](tx.newHandle(obj), value = value, isEditable = editable).init(obj)
+    new ListImpl[T](tx.newHandle(obj), value = value, isEditable = editable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String       = prefix,
+  final case class Config[S <: stm.Sys[T]](name: String       = prefix,
                                            value: EnvSegment  = EnvSegment.Single(0.0, Curve.lin),
                                            const: Boolean     = false)
 
@@ -185,10 +185,10 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   }
 
   // XXX TODO DRY with ParamSpecObjView
-  private final class ViewImpl[S <: Sys[S]](objH: stm.Source[S#Tx, EnvSegment.Obj[S]], val editable: Boolean)
-                                           (implicit val universe: Universe[S],
+  private final class ViewImpl[T <: Txn[T]](objH: Source[T, EnvSegment.Obj[T]], val editable: Boolean)
+                                           (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends UniverseView[S] with View.Editable[S] with ComponentHolder[Component] {
+    extends UniverseView[T] with View.Editable[T] with ComponentHolder[Component] {
 
     type C = Component
 
@@ -196,9 +196,9 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     private[this] var panel       : PanelImpl         = _
     // private[this] val _dirty      : Ref[Boolean]      = Ref(false)
     // private[this] var actionApply : Action            = _
-    private[this] var observer    : Disposable[S#Tx]  = _
+    private[this] var observer    : Disposable[T]  = _
 
-    def init(obj0: EnvSegment.Obj[S])(implicit tx: S#Tx): this.type = {
+    def init(obj0: EnvSegment.Obj[T])(implicit tx: T): this.type = {
       val value0 = obj0.value
       deferTx(guiInit(value0))
       observer = obj0.changed.react { implicit tx => upd =>
@@ -235,7 +235,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       component = panel.component
     }
 
-//    def dirty(implicit tx: S#Tx): Boolean = _dirty.get(tx.peer)
+//    def dirty(implicit tx: T): Boolean = _dirty.get(tx.peer)
 
 //    private def updateDirty(): Unit = {
 //      val valueNow  = panel.value
@@ -253,8 +253,8 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
           case EnvSegment.Obj.Var(pVr) =>
             val oldVal  = pVr.value
             if (newValue === oldVal) None else {
-              val pVal    = EnvSegment.Obj.newConst[S](newValue)
-              val edit    = EditVar.Expr[S, EnvSegment, EnvSegment.Obj](title, pVr, pVal)
+              val pVal    = EnvSegment.Obj.newConst[T](newValue)
+              val edit    = EditVar.Expr[T, EnvSegment, EnvSegment.Obj](title, pVr, pVal)
               Some(edit)
             }
 
@@ -262,13 +262,13 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
             var edits = List.empty[UndoableEdit]
             val newCurve = newValue.curve
             if (curveVr.value !== newCurve) {
-              val curveVal = CurveObj.newConst[S](newCurve)
-              edits ::= EditVar.Expr[S, Curve, CurveObj](title, curveVr, curveVal)
+              val curveVal = CurveObj.newConst[T](newCurve)
+              edits ::= EditVar.Expr[T, Curve, CurveObj](title, curveVr, curveVal)
             }
             val newStart = newValue.startLevels.headOption.getOrElse(0.0) // XXX TODO
             if (startVr.value !== newStart) {
-              val startVal = DoubleObj.newConst[S](newStart)
-              edits ::= EditVar.Expr[S, Double, DoubleObj](title, startVr, startVal)
+              val startVal = DoubleObj.newConst[T](newStart)
+              edits ::= EditVar.Expr[T, Double, DoubleObj](title, startVr, startVal)
             }
             CompoundEdit(edits, title)
 
@@ -282,24 +282,24 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+    def dispose()(implicit tx: T): Unit = observer.dispose()
   }
 
   // XXX TODO DRY with ParamSpecObjView
-  private final class FrameImpl[S <: Sys[S]](val view: ViewImpl[S],
-                                             name: CellView[S#Tx, String])
-    extends WindowImpl[S](name) /* with Veto[S#Tx] */ {
+  private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
+                                             name: CellView[T, String])
+    extends WindowImpl[T](name) /* with Veto[T] */ {
 
     //    resizable = false
 
-//    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+//    override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
 //      if (!view.editable || !view.dirty) None else Some(this)
 //
 //    private def _vetoMessage = "The object has been edited."
 //
-//    def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
+//    def vetoMessage(implicit tx: T): String = _vetoMessage
 //
-//    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
+//    def tryResolveVeto()(implicit tx: T): Future[Unit] = {
 //      val p = Promise[Unit]()
 //      deferTx {
 //        val message = s"${_vetoMessage}\nDo you want to save the changes?"
@@ -322,18 +322,18 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 //    }
   }
 
-  private def detectEditable[S <: Sys[S]](obj: E[S]): Boolean =
+  private def detectEditable[T <: Txn[T]](obj: E[T]): Boolean =
     obj match {
       case EnvSegment.Obj.Var(_) => true
       case EnvSegment.Obj.ApplySingle(DoubleObj.Var(_), CurveObj.Var(_)) => true
       case _ => false // XXX TODO --- support multi
     }
 
-  def mkGraphemeView[S <: Sys[S]](entry: Entry[S], obj: E[S], mode: GraphemeView.Mode)
-                                 (implicit tx: S#Tx): ObjGraphemeView[S] = {
+  def mkGraphemeView[T <: Txn[T]](entry: Entry[T], obj: E[T], mode: GraphemeView.Mode)
+                                 (implicit tx: T): ObjGraphemeView[T] = {
     val value     = obj.value
     val editable  = detectEditable(obj)
-    new GraphemeImpl[S](tx.newHandle(entry), tx.newHandle(obj), value = value, isEditable = editable)
+    new GraphemeImpl[T](tx.newHandle(entry), tx.newHandle(obj), value = value, isEditable = editable)
       .init(obj, entry)
   }
 
@@ -360,8 +360,8 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   }
 
   // XXX TODO DRY with ParamSpecObjView
-  override def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
-                                          (implicit universe: Universe[S]): Unit = {
+  override def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
+                                          (implicit universe: Universe[T]): Unit = {
     val panel = new PanelImpl(nameIn = Some(prefix), editable = true)
 
     val pane = desktop.OptionPane.confirmation(panel.component, optionType = Dialog.Options.OkCancel,
@@ -370,15 +370,15 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     val res = pane.show(window)
 
     val res1 = if (res === Dialog.Result.Ok) {
-      Success(Config[S](name = panel.name, value = panel.value))
+      Success(Config[T](name = panel.name, value = panel.value))
     } else {
       Failure(Aborted())
     }
     done(res1)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val startLevel: Opt[Vec[Double]] = vecArg[Double](
         descr = "Starting level (single double or comma separated doubles)"
       )
@@ -394,9 +394,9 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     }))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = EnvSegment.Obj.newConst[S](value)
+    val obj0  = EnvSegment.Obj.newConst[T](value)
     val obj   = if (const) obj0 else EnvSegment.Obj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
@@ -404,9 +404,9 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 
   // ---- basic ----
 
-  private abstract class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, E[S]])
-    extends ObjViewImpl.Impl[S]
-      with ObjViewImpl.ExprLike[S, V, E] with EnvSegmentObjView[S] {
+  private abstract class Impl[T <: Txn[T]](val objH: Source[T, E[T]])
+    extends ObjViewImpl.Impl[T]
+      with ObjViewImpl.ExprLike[T, V, E] with EnvSegmentObjView[T] {
 
     final def isViewable: Boolean = true
 
@@ -414,42 +414,42 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 
     final def exprType: Type.Expr[V, E] = EnvSegment.Obj
 
-    final def expr(implicit tx: S#Tx): E[S] = objH()
+    final def expr(implicit tx: T): E[T] = objH()
 
     protected def isEditable: Boolean
 
-    override def obj(implicit tx: S#Tx): E[S] = objH()
+    override def obj(implicit tx: T): E[T] = objH()
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       implicit val undo: UndoManager = UndoManager()
       val _obj      = obj
-      val view      = new ViewImpl[S](objH, editable = isEditable).init(_obj)
+      val view      = new ViewImpl[T](objH, editable = isEditable).init(_obj)
       val nameView  = CellView.name(_obj)
-      val fr        = new FrameImpl[S](view, nameView).init()
+      val fr        = new FrameImpl[T](view, nameView).init()
       Some(fr)
     }
   }
 
   // ---- ListObjView ----
 
-  private final class ListImpl[S <: Sys[S]](objH: stm.Source[S#Tx, E[S]], var value: V, val isEditable: Boolean)
-    extends Impl(objH) with ObjListView[S]
-      with ObjListViewImpl.SimpleExpr[S, V, E]
-//      with ListObjViewImpl.NonEditable[S]
+  private final class ListImpl[T <: Txn[T]](objH: Source[T, E[T]], var value: V, val isEditable: Boolean)
+    extends Impl(objH) with ObjListView[T]
+      with ObjListViewImpl.SimpleExpr[T, V, E]
+//      with ListObjViewImpl.NonEditable[T]
       with ObjListViewImpl.StringRenderer
-      with ObjListViewImpl.NonEditable[S] {
+      with ObjListViewImpl.NonEditable[T] {
 
     def convertEditValue(v: Any): Option[V] = None
   }
 
   // ---- GraphemeObjView ----
 
-  private final class GraphemeImpl[S <: Sys[S]](val entryH: stm.Source[S#Tx, Entry[S]],
-                                                objH: stm.Source[S#Tx, E[S]],
+  private final class GraphemeImpl[T <: Txn[T]](val entryH: Source[T, Entry[T]],
+                                                objH: Source[T, E[T]],
                                                 var value: V, val isEditable: Boolean)
-    extends Impl[S](objH)
-      with ObjGraphemeViewImpl.SimpleExpr[S, V, E]
-      with ObjGraphemeView.HasStartLevels[S] {
+    extends Impl[T](objH)
+      with ObjGraphemeViewImpl.SimpleExpr[T, V, E]
+      with ObjGraphemeView.HasStartLevels[T] {
 
     private[this] val allSame =
       value.numChannels <= 1 || { val v0 = value.startLevels; val vh = v0.head; v0.forall(_ === vh) }
@@ -458,16 +458,16 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 
     def insets: Insets = ObjGraphemeView.DefaultInsets
 
-    private[this] var succOpt = Option.empty[HasStartLevels[S]]
+    private[this] var succOpt = Option.empty[HasStartLevels[T]]
 
-    override def succ_=(opt: Option[ObjGraphemeView[S]])(implicit tx: S#Tx): Unit = deferTx {
+    override def succ_=(opt: Option[ObjGraphemeView[T]])(implicit tx: T): Unit = deferTx {
       succOpt = opt.collect {
-        case hs: HasStartLevels[S] => hs
+        case hs: HasStartLevels[T] => hs
       }
       // XXX TODO --- fire repaint?
     }
 
-    override def paintBack(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = succOpt match {
+    override def paintBack(g: Graphics2D, gv: GraphemeView[T], r: GraphemeRendering): Unit = succOpt match {
       case Some(succ) =>
         val startLvl  = value.startLevels
         val endLvl    = succ .startLevels
@@ -528,7 +528,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       case _ =>
     }
 
-    override def paintFront(g: Graphics2D, gv: GraphemeView[S], r: GraphemeRendering): Unit = {
+    override def paintFront(g: Graphics2D, gv: GraphemeView[T], r: GraphemeRendering): Unit = {
       if (value.numChannels === 0) return
       val levels = value.startLevels
       if (allSame) {
@@ -579,6 +579,6 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     }
   }
 }
-trait EnvSegmentObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = EnvSegment.Obj[S]
+trait EnvSegmentObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = EnvSegment.Obj[T]
 }

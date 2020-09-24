@@ -53,25 +53,25 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 //
 //  def init(): Unit = _init
 
-  def mkListView[S <: Sys[S]](obj: FScape[S])
-                             (implicit tx: S#Tx): FScapeObjView[S] with ObjListView[S] =
+  def mkListView[T <: Txn[T]](obj: FScape[T])
+                             (implicit tx: T): FScapeObjView[T] with ObjListView[T] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
-  def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj  = FScape[S]()
+  def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
+    val obj  = FScape[T]()
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FScape[S]])
-    extends FScapeObjView[S]
-      with ObjListView /* .Int */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.EmptyRenderer[S]
-      with NonEditable[S]
-      /* with NonViewable[S] */ {
+  final class Impl[T <: Txn[T]](val objH: Source[T, FScape[T]])
+    extends FScapeObjView[T]
+      with ObjListView /* .Int */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.EmptyRenderer[T]
+      with NonEditable[T]
+      /* with NonViewable[T] */ {
 
-    override def obj(implicit tx: S#Tx): FScape[S] = objH()
+    override def obj(implicit tx: T): FScape[T] = objH()
 
     type E[~ <: stm.Sys[~]] = FScape[~]
 
@@ -81,8 +81,8 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
     // currently this just opens a code editor. in the future we should
     // add a scans map editor, and a convenience button for the attributes
-    def openView(parent: Option[Window[S]])
-                      (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[T]])
+                      (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = codeFrame(obj) // CodeFrame.fscape(obj)
       Some(frame)
@@ -91,9 +91,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     // ---- adapter for editing an FScape's source ----
   }
 
-  private def codeFrame[S <: Sys[S]](obj: FScape[S])
-                                    (implicit tx: S#Tx, universe: Universe[S],
-                                     compiler: Code.Compiler): CodeFrame[S] = {
+  private def codeFrame[T <: Txn[T]](obj: FScape[T])
+                                    (implicit tx: T, universe: Universe[T],
+                                     compiler: Code.Compiler): CodeFrame[T] = {
     import de.sciss.mellite.impl.code.CodeFrameImpl.{make, mkSource}
     val codeObj = mkSource(obj = obj, codeTpe = FScape.Code, key = FScape.attrSource)()
     val objH    = tx.newHandle(obj)
@@ -105,25 +105,25 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     import de.sciss.fscape.Graph
     import de.sciss.fscape.lucre.GraphObj
 
-    val handler = new CodeView.Handler[S, Unit, Graph] {
+    val handler = new CodeView.Handler[T, Unit, Graph] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: Graph)(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: Graph)(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import universe.cursor
-        EditVar.Expr[S, Graph, GraphObj]("Change FScape Graph", obj.graph, GraphObj.newConst[S](out))
+        EditVar.Expr[T, Graph, GraphObj]("Change FScape Graph", obj.graph, GraphObj.newConst[T](out))
       }
 
-      def dispose()(implicit tx: S#Tx): Unit = ()
+      def dispose()(implicit tx: T): Unit = ()
     }
 
-    val renderRef = Ref(Option.empty[FScape.Rendering[S]])
+    val renderRef = Ref(Option.empty[FScape.Rendering[T]])
 
     lazy val ggProgress: ProgressBar = new ProgressBar {
       max = 160
     }
 
-    val viewProgress = View.wrap[S, ProgressBar](ggProgress)
+    val viewProgress = View.wrap[T, ProgressBar](ggProgress)
 
     lazy val actionCancel: swing.Action = new swing.Action(null) {
       def apply(): Unit = {
@@ -135,7 +135,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
       enabled = false
     }
 
-    val viewCancel = View.wrap[S, Button] {
+    val viewCancel = View.wrap[T, Button] {
       GUI.toolButton(actionCancel, raphael.Shapes.Cross, tooltip = "Abort Rendering")
     }
 
@@ -143,7 +143,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     var debugLaunchC  = 0
 
     // XXX TODO --- should use custom view so we can cancel upon `dispose`
-    val viewRender = View.wrap[S, Button] {
+    val viewRender = View.wrap[T, Button] {
       val actionRender = new swing.Action("Render") { self =>
         def apply(): Unit = {
           import universe.cursor
@@ -167,7 +167,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
                 config.debugWaitLaunch  = Some(pDebug.future)
               }
 
-              def finished()(implicit tx: S#Tx): Unit = {
+              def finished()(implicit tx: T): Unit = {
                 renderRef.set(None)(tx.peer)
                 deferTx {
                   actionCancel.enabled  = false
@@ -209,7 +209,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
       res
     }
 
-    val viewDebug = View.wrap[S, Button] {
+    val viewDebug = View.wrap[T, Button] {
       new Button("Debug") {
         action = Action(text) {
           renderRef.single.get.foreach { r =>
@@ -229,8 +229,8 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     val bottom = viewProgress :: viewCancel :: viewRender :: viewDebug :: Nil
 
     implicit val undo: UndoManager = UndoManager()
-    val outputsView = FScapeOutputsView [S](obj)
-    val attrView    = AttrMapView       [S](obj)
+    val outputsView = FScapeOutputsView [T](obj)
+    val attrView    = AttrMapView       [T](obj)
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     import de.sciss.fscape.{showControlLog, showStreamLog}
@@ -254,6 +254,6 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     )
   }
 }
-trait FScapeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = FScape[S]
+trait FScapeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = FScape[T]
 }

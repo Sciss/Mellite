@@ -46,12 +46,12 @@ object FolderViewImpl extends FolderView.Companion {
   def install(): Unit =
     FolderView.peer = this
 
-  def apply[S <: Sys[S]](root0: Folder[S])
-                        (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S] = {
-    implicit val folderSer: Serializer[S#Tx, S#Acc, Folder[S]] = Folder.serializer[S]
+  def apply[T <: Txn[T]](root0: Folder[T])
+                        (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T] = {
+    implicit val folderSer: Serializer[T, S#Acc, Folder[T]] = Folder.serializer[T]
 
-    new Impl[S] {
-      val treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]] = TreeTableView(root0, TTHandler)
+    new Impl[T] {
+      val treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]] = TreeTableView(root0, TTHandler)
 
       deferTx {
         guiInit()
@@ -59,9 +59,9 @@ object FolderViewImpl extends FolderView.Companion {
     }
   }
 
-  def cleanSelection[S <: stm.Sys[S]](in: Selection[S]): Selection[S] = {
-    type NodeView = FolderView.NodeView[S]
-    type Sel      = Selection[S]
+  def cleanSelection[S <: stm.Sys[T]](in: Selection[T]): Selection[T] = {
+    type NodeView = FolderView.NodeView[T]
+    type Sel      = Selection[T]
 
     @tailrec
     def loop(set: Set[NodeView], rem: Sel, res: Sel): Sel = rem match {
@@ -84,31 +84,31 @@ object FolderViewImpl extends FolderView.Companion {
     resRev.reverse
   }
 
-  private abstract class Impl[S <: Sys[S]](implicit val undoManager: UndoManager, val universe: Universe[S])
+  private abstract class Impl[T <: Txn[T]](implicit val undoManager: UndoManager, val universe: Universe[T])
     extends ComponentHolder[Component]
-    with FolderView[S]
-    with ModelImpl[FolderView.Update[S]]
-    with FolderViewTransferHandler[S] {
+    with FolderView[T]
+    with ModelImpl[FolderView.Update[T]]
+    with FolderViewTransferHandler[T] {
 
     view =>
 
     type C = Component
 
-    private type Data     = ObjListView[S]
-    private type NodeView = FolderView.NodeView[S]
+    private type Data     = ObjListView[T]
+    private type NodeView = FolderView.NodeView[T]
 
     protected object TTHandler
-      extends TreeTableView.Handler[S, Obj[S], Folder[S], ObjListView[S]] {
+      extends TreeTableView.Handler[T, Obj[T], Folder[T], ObjListView[T]] {
 
-      def branchOption(node: Obj[S]): Option[Folder[S]] = node match {
-        case fe: Folder[S] => Some(fe)
+      def branchOption(node: Obj[T]): Option[Folder[T]] = node match {
+        case fe: Folder[T] => Some(fe)
         case _ => None
       }
 
-      def children(branch: Folder[S])(implicit tx: S#Tx): Iterator[Obj[S]] =
+      def children(branch: Folder[T])(implicit tx: T): Iterator[Obj[T]] =
         branch.iterator
 
-      private def updateObjectName(obj: Obj[S], nameOption: Option[String])(implicit tx: S#Tx): Boolean = {
+      private def updateObjectName(obj: Obj[T], nameOption: Option[String])(implicit tx: T): Boolean = {
         treeView.nodeView(obj).exists { nv =>
           val objView = nv.renderData
           deferTx {
@@ -118,11 +118,11 @@ object FolderViewImpl extends FolderView.Companion {
         }
       }
 
-      private type MUpdate = ModelUpdate[Obj[S], Folder[S]]
+      private type MUpdate = ModelUpdate[Obj[T], Folder[T]]
 
       // XXX TODO - d'oh this because ugly
-      def observe(obj: Obj[S], dispatch: S#Tx => MUpdate => Unit)
-                 (implicit tx: S#Tx): Disposable[S#Tx] = {
+      def observe(obj: Obj[T], dispatch: T => MUpdate => Unit)
+                 (implicit tx: T): Disposable[T] = {
         val objH      = tx.newHandle(obj)
         val objReact  = obj.changed.react { implicit tx => _ =>
           // theoretically, we don't need to refresh the object,
@@ -138,14 +138,14 @@ object FolderViewImpl extends FolderView.Companion {
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)
         }
         val attr      = obj.attr
-        val nameView  = CellView.attr[S, String, StringObj](attr, ObjKeys.attrName)
+        val nameView  = CellView.attr[T, String, StringObj](attr, ObjKeys.attrName)
         val attrReact = nameView.react { implicit tx => nameOpt =>
           val isDirty = updateObjectName(obj, nameOpt)
           if (isDirty) dispatch(tx)(TreeTableView.NodeChanged(obj): MUpdate)
         }
 
         val folderReact = obj match {
-          case f: Folder[S] =>
+          case f: Folder[T] =>
             val res = f.changed.react { implicit tx => u2 =>
               u2.list.modifiableOption.foreach { folder =>
                 val m = updateBranch(folder, u2.changes)
@@ -157,8 +157,8 @@ object FolderViewImpl extends FolderView.Companion {
           case _ => None
         }
 
-        new Disposable[S#Tx] {
-          def dispose()(implicit tx: S#Tx): Unit = {
+        new Disposable[T] {
+          def dispose()(implicit tx: T): Unit = {
             objReact .dispose()
             attrReact.dispose()
             folderReact.foreach(_.dispose())
@@ -166,7 +166,7 @@ object FolderViewImpl extends FolderView.Companion {
         }
       }
 
-      private def updateBranch(parent: Folder[S], changes: Vec[Folder.Change[S]]): Vec[MUpdate] =
+      private def updateBranch(parent: Folder[T], changes: Vec[Folder.Change[T]]): Vec[MUpdate] =
         changes.flatMap {
           case Folder.Added  (idx, obj) => Vec(TreeTableView.NodeAdded  (parent, idx, obj): MUpdate)
           case Folder.Removed(idx, obj) => Vec(TreeTableView.NodeRemoved(parent, idx, obj): MUpdate)
@@ -181,7 +181,7 @@ object FolderViewImpl extends FolderView.Companion {
         res
       }
 
-      def renderer(tt: TreeTableView[S, Obj[S], Folder[S], Data], node: NodeView, row: Int, column: Int,
+      def renderer(tt: TreeTableView[T, Obj[T], Folder[T], Data], node: NodeView, row: Int, column: Int,
                    state: TreeTableCellRenderer.State): Component = {
         val data    = node.renderData
         val isFirst = column == 0
@@ -207,7 +207,7 @@ object FolderViewImpl extends FolderView.Companion {
         }
       }
 
-      private var editView    = Option.empty[ObjListView[S]]
+      private var editView    = Option.empty[ObjListView[T]]
       private var editColumn  = 0
 
       private lazy val defaultEditorJ = new javax.swing.JTextField
@@ -220,11 +220,11 @@ object FolderViewImpl extends FolderView.Companion {
             val editOpt: Option[UndoableEdit] = cursor.step { implicit tx =>
               val text = defaultEditorJ.getText
               if (editColumn == 0) {
-                val valueOpt: Option[StringObj[S]] /* Obj[S] */ = if (text.isEmpty || text.toLowerCase == "<unnamed>") None else {
-                  val expr = StringObj.newConst[S](text)
+                val valueOpt: Option[StringObj[T]] /* Obj[T] */ = if (text.isEmpty || text.toLowerCase == "<unnamed>") None else {
+                  val expr = StringObj.newConst[T](text)
                   Some(expr)
                 }
-                val ed = EditAttrMap.expr[S, String, StringObj](s"Rename ${objView.humanName} Element", objView.obj, ObjKeys.attrName,
+                val ed = EditAttrMap.expr[T, String, StringObj](s"Rename ${objView.humanName} Element", objView.obj, ObjKeys.attrName,
                   valueOpt)
                 Some(ed)
               } else {
@@ -242,7 +242,7 @@ object FolderViewImpl extends FolderView.Companion {
 
       val columnNames: Vec[String] = Vector("Name", "Value")
 
-      def editor(tt: TreeTableView[S, Obj[S], Folder[S], Data], node: NodeView, row: Int, column: Int,
+      def editor(tt: TreeTableView[T, Obj[T], Folder[T], Data], node: NodeView, row: Int, column: Int,
                  selected: Boolean): (Component, CellEditor) = {
         val data    = node.renderData
         editView    = Some(data)
@@ -252,16 +252,16 @@ object FolderViewImpl extends FolderView.Companion {
         (defaultEditorC, defaultEditor)
       }
 
-      def data(node: Obj[S])(implicit tx: S#Tx): Data = ObjListView(node)
+      def data(node: Obj[T])(implicit tx: T): Data = ObjListView(node)
     }
 
-    protected def treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]]
+    protected def treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]]
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       treeView.dispose()
     }
 
-    def root: stm.Source[S#Tx, Folder[S]] = treeView.root
+    def root: Source[T, Folder[T]] = treeView.root
 
     protected def guiInit(): Unit = {
       val t = treeView.treeTable
@@ -291,18 +291,18 @@ object FolderViewImpl extends FolderView.Companion {
 
     }
 
-    def selection: Selection[S] = treeView.selection
+    def selection: Selection[T] = treeView.selection
 
-    def insertionPoint(implicit tx: S#Tx): (Folder[S], Int) = treeView.insertionPoint
+    def insertionPoint(implicit tx: T): (Folder[T], Int) = treeView.insertionPoint
 
-    def locations: Vec[ArtifactLocationObjView[S]] = selection.iterator.flatMap { nodeView =>
+    def locations: Vec[ArtifactLocationObjView[T]] = selection.iterator.flatMap { nodeView =>
       nodeView.renderData match {
-        case view: ArtifactLocationObjView[S] => Some(view)
+        case view: ArtifactLocationObjView[T] => Some(view)
         case _ => None
       }
     } .toIndexedSeq
 
-    def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]] = {
+    def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]] = {
       val locationsOk = locations.flatMap { view =>
         try {
           val dir = view.directory
@@ -314,7 +314,7 @@ object FolderViewImpl extends FolderView.Companion {
       } .headOption
 
       locationsOk.orElse {
-        ActionArtifactLocation.query[S](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
+        ActionArtifactLocation.query[T](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
       }
     }
   }

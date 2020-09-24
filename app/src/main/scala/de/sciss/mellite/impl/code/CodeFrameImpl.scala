@@ -45,9 +45,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- adapter for editing a Proc's source ----
 
-  def proc[S <: Sys[S]](obj: Proc[S])
-                       (implicit tx: S#Tx, universe: Universe[S],
-                        compiler: Code.Compiler): CodeFrame[S] = {
+  def proc[T <: Txn[T]](obj: Proc[T])
+                       (implicit tx: T, universe: Universe[T],
+                        compiler: Code.Compiler): CodeFrame[T] = {
     val codeObj = mkSource(obj = obj, codeTpe = Code.SynthGraph, key = Proc.attrSource)({
       val gv: SynthGraph = obj.graph.value
       val txt     = /*if (gv.isEmpty) "" else*/ try {
@@ -68,22 +68,22 @@ object CodeFrameImpl extends CodeFrame.Companion {
       case other => sys.error(s"Proc source code does not produce SynthGraph: ${other.tpe.humanName}")
     }
 
-    val handler = new CodeView.Handler[S, Unit, SynthGraph] {
+    val handler = new CodeView.Handler[T, Unit, SynthGraph] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: SynthGraph)(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: SynthGraph)(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import universe.cursor
-        EditVar.Expr[S, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[S](out))
+        EditVar.Expr[T, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[T](out))
       }
 
-      def dispose()(implicit tx: S#Tx): Unit = ()
+      def dispose()(implicit tx: T): Unit = ()
     }
 
     implicit val undo: UndoManager = UndoManager()
-    val outputsView = ProcOutputsView [S](obj)
-    val attrView    = AttrMapView     [S](obj)
-    val viewPower   = RunnerToggleButton[S](obj)
+    val outputsView = ProcOutputsView [T](obj)
+    val attrView    = AttrMapView     [T](obj)
+    val viewPower   = RunnerToggleButton[T](obj)
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
@@ -94,9 +94,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- adapter for editing a ActionRaw's source ----
 
-  def actionRaw[S <: Sys[S]](obj: ActionRaw[S])
-                            (implicit tx: S#Tx, universe: Universe[S],
-                          compiler: Code.Compiler): CodeFrame[S] = {
+  def actionRaw[T <: Txn[T]](obj: ActionRaw[T])
+                            (implicit tx: T, universe: Universe[T],
+                          compiler: Code.Compiler): CodeFrame[T] = {
     val codeObj = mkSource(obj = obj, codeTpe = Code.ActionRaw, key = ActionRaw.attrSource)()
     val code0   = codeObj.value match {
       case cs: Code.ActionRaw => cs
@@ -104,7 +104,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     }
 
     val objH  = tx.newHandle(obj)
-    val viewExecute = View.wrap[S, Button] {
+    val viewExecute = View.wrap[T, Button] {
       val actionExecute = swing.Action(null) {
         import universe.cursor
         cursor.step { implicit tx =>
@@ -123,7 +123,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val handlerOpt = obj match {
       case ActionRaw.Var(vr) =>
         val varH  = tx.newHandle(vr)
-        val handler = new CodeView.Handler[S, String, Array[Byte]] {
+        val handler = new CodeView.Handler[T, String, Array[Byte]] {
           def in(): String = {
             import universe.cursor
             cursor.step { implicit tx =>
@@ -133,14 +133,14 @@ object CodeFrameImpl extends CodeFrame.Companion {
             }
           }
 
-          def save(in: String, out: Array[Byte])(implicit tx: S#Tx): UndoableEdit = {
+          def save(in: String, out: Array[Byte])(implicit tx: T): UndoableEdit = {
             val obj = varH()
-            val value = ActionRawImpl.newConst[S](name = in, jar = out)
+            val value = ActionRawImpl.newConst[T](name = in, jar = out)
             import universe.cursor
-            EditVar[S, ActionRaw[S], ActionRaw.Var[S]](name = "Change Action Body", expr = obj, value = value)
+            EditVar[T, ActionRaw[T], ActionRaw.Var[T]](name = "Change Action Body", expr = obj, value = value)
           }
 
-          def dispose()(implicit tx: S#Tx): Unit = ()
+          def dispose()(implicit tx: T): Unit = ()
         }
 
         Some(handler)
@@ -159,9 +159,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- adapter for editing a Control.Graph's source ----
 
-  def control[S <: Sys[S]](obj: Control[S])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           compiler: Code.Compiler): CodeFrame[S] = {
+  def control[T <: Txn[T]](obj: Control[T])
+                          (implicit tx: T, universe: Universe[T],
+                           compiler: Code.Compiler): CodeFrame[T] = {
     val codeObj = mkSource(obj = obj, codeTpe = Code.Control, key = Control.attrSource)({
       val gv: Control.Graph = obj.graph.value
       if (gv.controls.isEmpty)
@@ -176,22 +176,22 @@ object CodeFrameImpl extends CodeFrame.Companion {
       case other => sys.error(s"Control source code does not produce Control.Graph: ${other.tpe.humanName}")
     }
 
-    val handler = new CodeView.Handler[S, Unit, Control.Graph] {
+    val handler = new CodeView.Handler[T, Unit, Control.Graph] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: Control.Graph)(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: Control.Graph)(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import universe.cursor
-        EditVar.Expr[S, Control.Graph, Control.GraphObj]("Change Control Graph", obj.graph,
-          Control.GraphObj.newConst[S](out))
+        EditVar.Expr[T, Control.Graph, Control.GraphObj]("Change Control Graph", obj.graph,
+          Control.GraphObj.newConst[T](out))
       }
 
-      def dispose()(implicit tx: S#Tx): Unit = ()
+      def dispose()(implicit tx: T): Unit = ()
     }
 
     implicit val undo: UndoManager = UndoManager()
-    val attrView    = AttrMapView     [S](obj)
-    val viewPower   = RunnerToggleButton[S](obj)
+    val attrView    = AttrMapView     [T](obj)
+    val viewPower   = RunnerToggleButton[T](obj)
     val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
@@ -202,9 +202,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- adapter for editing a Control.Graph's source ----
 
-  def action[S <: Sys[S]](obj: Action[S])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           compiler: Code.Compiler): CodeFrame[S] = {
+  def action[T <: Txn[T]](obj: Action[T])
+                          (implicit tx: T, universe: Universe[T],
+                           compiler: Code.Compiler): CodeFrame[T] = {
     val codeObj = mkSource(obj = obj, codeTpe = Code.Action, key = Action.attrSource)({
       val gv: Action.Graph = obj.graph.value
       if (gv.controls.isEmpty)
@@ -219,22 +219,22 @@ object CodeFrameImpl extends CodeFrame.Companion {
       case other => sys.error(s"Action source code does not produce Action.Graph: ${other.tpe.humanName}")
     }
 
-    val handler = new CodeView.Handler[S, Unit, Action.Graph] {
+    val handler = new CodeView.Handler[T, Unit, Action.Graph] {
       def in(): Unit = ()
 
-      def save(in: Unit, out: Action.Graph)(implicit tx: S#Tx): UndoableEdit = {
+      def save(in: Unit, out: Action.Graph)(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import universe.cursor
-        EditVar.Expr[S, Action.Graph, Action.GraphObj]("Change Action Graph", obj.graph,
-          Action.GraphObj.newConst[S](out))
+        EditVar.Expr[T, Action.Graph, Action.GraphObj]("Change Action Graph", obj.graph,
+          Action.GraphObj.newConst[T](out))
       }
 
-      def dispose()(implicit tx: S#Tx): Unit = ()
+      def dispose()(implicit tx: T): Unit = ()
     }
 
     implicit val undo: UndoManager = UndoManager()
-    val attrView    = AttrMapView[S](obj)
-    val viewPower   = RunnerToggleButton[S](obj, isAction = true)
+    val attrView    = AttrMapView[T](obj)
+    val viewPower   = RunnerToggleButton[T](obj, isAction = true)
     val rightView   = attrView // SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
@@ -245,36 +245,36 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- general constructor ----
 
-  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         compiler: Code.Compiler): CodeFrame[S] = {
+  def apply[T <: Txn[T]](obj: Code.Obj[T], bottom: ISeq[View[T]])
+                        (implicit tx: T, universe: Universe[T],
+                         compiler: Code.Compiler): CodeFrame[T] = {
     apply(obj, bottom, canBounce = false)
   }
 
-  def apply[S <: Sys[S]](obj: Code.Obj[S], bottom: ISeq[View[S]], canBounce: Boolean)
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         compiler: Code.Compiler): CodeFrame[S] = {
+  def apply[T <: Txn[T]](obj: Code.Obj[T], bottom: ISeq[View[T]], canBounce: Boolean)
+                        (implicit tx: T, universe: Universe[T],
+                         compiler: Code.Compiler): CodeFrame[T] = {
     val _codeEx = obj
 
     val _code: CodeT[_, _] = _codeEx.value    // IntelliJ highlight bug
     implicit val undo: UndoManager = UndoManager()
     val objH    = tx.newHandle(obj)
 
-    make[S, _code.In, _code.Out](pObj = obj, pObjH = objH, obj = obj, code0 = _code, handler = None,
+    make[T, _code.In, _code.Out](pObj = obj, pObjH = objH, obj = obj, code0 = _code, handler = None,
       bottom = bottom, rightViewOpt = None, debugMenuItems = Nil, canBounce = canBounce)
   }
 
-  private class PlainView[S <: Sys[S]](codeView: View[S], rightViewOpt: Option[(String, View[S])],
-                                       showEditor: Boolean, bottom: ISeq[View[S]])
-                                      (implicit val universe: Universe[S],
+  private class PlainView[T <: Txn[T]](codeView: View[T], rightViewOpt: Option[(String, View[T])],
+                                       showEditor: Boolean, bottom: ISeq[View[T]])
+                                      (implicit val universe: Universe[T],
                                        val undoManager: UndoManager)
-    extends View.Editable[S] with UniverseView[S] with ComponentHolder[Component] {
+    extends View.Editable[T] with UniverseView[T] with ComponentHolder[Component] {
 
     type C = Component
 
 //    private[this] var tabs: TabbedPane  = _
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx(guiInit())
       this
     }
@@ -331,21 +331,21 @@ object CodeFrameImpl extends CodeFrame.Companion {
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       codeView.dispose()
       rightViewOpt.foreach(_._2.dispose())
       bottom.foreach(_.dispose())
     }
   }
 
-  private final class CanBounceView[S <: Sys[S]](objH: stm.Source[S#Tx, Obj[S]], codeView: View[S],
-                                                 rightViewOpt: Option[(String, View[S])],
-                                                 showEditor: Boolean, bottom: ISeq[View[S]])
-                                                (implicit universe: Universe[S],
+  private final class CanBounceView[T <: Txn[T]](objH: Source[T, Obj[T]], codeView: View[T],
+                                                 rightViewOpt: Option[(String, View[T])],
+                                                 showEditor: Boolean, bottom: ISeq[View[T]])
+                                                (implicit universe: Universe[T],
                                                  undoManager: UndoManager)
-    extends PlainView[S](codeView, rightViewOpt, showEditor = showEditor, bottom = bottom) with CanBounce {
+    extends PlainView[T](codeView, rightViewOpt, showEditor = showEditor, bottom = bottom) with CanBounce {
 
-    object actionBounce extends ActionBounce[S](this, objH)
+    object actionBounce extends ActionBounce[T](this, objH)
   }
 
   // trying to minimize IntelliJ false error highlights
@@ -354,19 +354,19 @@ object CodeFrameImpl extends CodeFrame.Companion {
   /**
     * @param rightViewOpt optional title and component for a second tab view
     */
-  def make[S <: Sys[S], In0, Out0](pObj           : Obj[S],
-                                   pObjH          : stm.Source[S#Tx, Obj[S]],
-                                   obj            : Code.Obj[S],
+  def make[T <: Txn[T], In0, Out0](pObj           : Obj[T],
+                                   pObjH          : Source[T, Obj[T]],
+                                   obj            : Code.Obj[T],
                                    code0          : CodeT[In0, Out0],
-                                   handler        : Option[CodeView.Handler[S, In0, Out0]],
-                                   bottom         : ISeq[View[S]],
+                                   handler        : Option[CodeView.Handler[T, In0, Out0]],
+                                   bottom         : ISeq[View[T]],
 //                                   alwaysShowBottom: Boolean,
-                                   rightViewOpt   : Option[(String, View[S])] = None,
+                                   rightViewOpt   : Option[(String, View[T])] = None,
                                    debugMenuItems : ISeq[swing.Action]        = Nil,
                                    canBounce      : Boolean
                                   )
-                                  (implicit tx: S#Tx, universe: Universe[S],
-                                   undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[S] = {
+                                  (implicit tx: T, universe: Universe[T],
+                                   undoManager: UndoManager, compiler: Code.Compiler): CodeFrame[T] = {
     val showEditor  = pObj.attr.$[BooleanObj](Widget.attrEditMode).forall(_.value)
     val bottomCode  = if (showEditor) bottom else Nil
     val bottomView  = if (showEditor) Nil else bottom
@@ -388,17 +388,17 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- util ----
 
-  def mkSource[S <: Sys[S]](obj: Obj[S], codeTpe: Code.Type, key: String)(init: => String = codeTpe.defaultSource)
-                           (implicit tx: S#Tx): Code.Obj[S] = {
+  def mkSource[T <: Txn[T]](obj: Obj[T], codeTpe: Code.Type, key: String)(init: => String = codeTpe.defaultSource)
+                           (implicit tx: T): Code.Obj[T] = {
     // if there is no source code attached,
     // create a new code object and add it to the attribute map.
     // let's just do that without undo manager
     val codeObj = obj.attr.get(key) match {
-      case Some(c: Code.Obj[S]) => c
+      case Some(c: Code.Obj[T]) => c
       case _ =>
         val source  = init
         val code    = Code(codeTpe.id, source)
-        val c       = Code.Obj.newVar(Code.Obj.newConst[S](code))
+        val c       = Code.Obj.newVar(Code.Obj.newConst[T](code))
         obj.attr.put(key, c)
         c
     }
@@ -407,16 +407,16 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
   // ---- frame impl ----
 
-  private final class FrameImpl[S <: Sys[S]](val codeView   : CodeView[S, _],
-                                             val view       : View[S],
-                                             name           : CellView[S#Tx, String],
+  private final class FrameImpl[T <: Txn[T]](val codeView   : CodeView[T, _],
+                                             val view       : View[T],
+                                             name           : CellView[T, String],
                                              contextName    : String,
                                              debugMenuItems : ISeq[swing.Action],
                                              examples       : ISeq[Example]
                                             )
-    extends WindowImpl[S](name.map(n => s"$n : $contextName Code"))
-      with CodeFrameBase[S]
-      with CodeFrame[S] {
+    extends WindowImpl[T](name.map(n => s"$n : $contextName Code"))
+      with CodeFrameBase[T]
+      with CodeFrame[T] {
 
     override protected def initGUI(): Unit = {
       super.initGUI()

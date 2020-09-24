@@ -13,8 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.DragRubber
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
@@ -33,18 +33,18 @@ object TimelineTools {
   }
 
   private[mellite] trait Companion {
-    def apply  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTools[S]
-    def palette[S <: Sys[S]](control: TimelineTools[S], tools: Vec[TimelineTool[S, _]]): Component
+    def apply  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTools[T]
+    def palette[T <: Txn[T]](control: TimelineTools[T], tools: Vec[TimelineTool[T, _]]): Component
   }
 
-  sealed trait Update[S <: stm.Sys[S]]
-  final case class ToolChanged          [S <: stm.Sys[S]](change: Change[TimelineTool[S, _]]) extends Update[S]
-  final case class VisualBoostChanged   [S <: stm.Sys[S]](change: Change[Float             ]) extends Update[S]
-  final case class FadeViewModeChanged  [S <: stm.Sys[S]](change: Change[FadeViewMode      ]) extends Update[S]
-  final case class RegionViewModeChanged[S <: stm.Sys[S]](change: Change[RegionViewMode    ]) extends Update[S]
+  sealed trait Update[T <: LTxn[T]]
+  final case class ToolChanged          [T <: LTxn[T]](change: Change[TimelineTool[T, _]]) extends Update[T]
+  final case class VisualBoostChanged   [T <: LTxn[T]](change: Change[Float             ]) extends Update[T]
+  final case class FadeViewModeChanged  [T <: LTxn[T]](change: Change[FadeViewMode      ]) extends Update[T]
+  final case class RegionViewModeChanged[T <: LTxn[T]](change: Change[RegionViewMode    ]) extends Update[T]
 
-  def apply  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTools[S] = companion(canvas)
-  def palette[S <: Sys[S]](control: TimelineTools[S], tools: Vec[TimelineTool[S, _]]): Component =
+  def apply  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTools[T] = companion(canvas)
+  def palette[T <: Txn[T]](control: TimelineTools[T], tools: Vec[TimelineTool[T, _]]): Component =
     companion.palette(control, tools)
 }
 
@@ -82,7 +82,7 @@ sealed trait FadeViewMode {
   def id: Int
 }
 
-trait TimelineTools[S <: stm.Sys[S]] extends BasicTools[S, TimelineTool[S, _], TimelineTools.Update[S]] {
+trait TimelineTools[T <: LTxn[T]] extends BasicTools[T, TimelineTool[T, _], TimelineTools.Update[T]] {
   var visualBoost   : Float
   var fadeViewMode  : FadeViewMode
   var regionViewMode: RegionViewMode
@@ -97,15 +97,15 @@ object TimelineTool {
   }
 
   private[mellite] trait Companion {
-    def cursor  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Cursor  ]
-    def move    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Move    ]
-    def resize  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Resize  ]
-    def gain    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Gain    ]
-    def mute    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Mute    ]
-    def fade    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Fade    ]
-    def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Add]
-    def patch   [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Patch[S]]
-    def audition[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Unit]
+    def cursor  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Cursor  ]
+    def move    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Move    ]
+    def resize  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Resize  ]
+    def gain    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Gain    ]
+    def mute    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Mute    ]
+    def fade    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Fade    ]
+    def function[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Add]
+    def patch   [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Patch[T]]
+    def audition[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Unit]
   }
 
   trait Rectangular extends BasicTool.Rectangular[Int] {
@@ -140,27 +140,27 @@ object TimelineTool {
 
   object Patch {
     sealed trait Sink[+S]
-    case class Linked[S <: Sys[S]](proc: ObjTimelineView[S] /*ProcObjView.Timeline[S]*/) extends Sink[S]
+    case class Linked[T <: Txn[T]](proc: ObjTimelineView[T] /*ProcObjView.Timeline[T]*/) extends Sink[T]
     case class Unlinked(frame: Long, y: Int) extends Sink[Nothing]
   }
-  final case class Patch[S <: Sys[S]](source: ObjTimelineView[S] /*ProcObjView.Timeline[S]*/, sink: Patch.Sink[S])
+  final case class Patch[T <: Txn[T]](source: ObjTimelineView[T] /*ProcObjView.Timeline[T]*/, sink: Patch.Sink[T])
 
   final val EmptyFade = FadeSpec(numFrames = 0L)
 
   type Listener = Model.Listener[Update[Any]]
 
-  def cursor  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Cursor  ] = companion.cursor  (canvas)
-  def move    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Move    ] = companion.move    (canvas)
-  def resize  [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Resize  ] = companion.resize  (canvas)
-  def gain    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Gain    ] = companion.gain    (canvas)
-  def mute    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Mute    ] = companion.mute    (canvas)
-  def fade    [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Fade    ] = companion.fade    (canvas)
-  def patch   [S <: Sys[S]](canvas: TimelineTrackCanvas[S]): TimelineTool[S, Patch[S]] = companion.patch(   canvas)
+  def cursor  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Cursor  ] = companion.cursor  (canvas)
+  def move    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Move    ] = companion.move    (canvas)
+  def resize  [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Resize  ] = companion.resize  (canvas)
+  def gain    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Gain    ] = companion.gain    (canvas)
+  def mute    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Mute    ] = companion.mute    (canvas)
+  def fade    [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Fade    ] = companion.fade    (canvas)
+  def patch   [T <: Txn[T]](canvas: TimelineTrackCanvas[T]): TimelineTool[T, Patch[T]] = companion.patch(   canvas)
 
-  def function[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Add] =
+  def function[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Add] =
     companion.function(canvas, view)
 
-  def audition[S <: Sys[S]](canvas: TimelineTrackCanvas[S], view: TimelineView[S]): TimelineTool[S, Unit] =
+  def audition[T <: Txn[T]](canvas: TimelineTrackCanvas[T], view: TimelineView[T]): TimelineTool[T, Unit] =
     companion.audition(canvas, view)
 }
 
@@ -169,4 +169,4 @@ object TimelineTool {
   * @tparam A   the type of element that represents an ongoing
   *             edit state (typically during mouse drag).
   */
-trait TimelineTool[S <: stm.Sys[S], A] extends BasicTool[S, A]
+trait TimelineTool[T <: LTxn[T], A] extends BasicTool[T, A]

@@ -37,7 +37,7 @@ object IntObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: IntObj[S])(implicit tx: S#Tx): IntObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: IntObj[T])(implicit tx: T): IntObjView[T] with ObjListView[T] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -48,26 +48,26 @@ object IntObjView extends ObjListView.Factory {
     new ListImpl(tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Int, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Int, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val model   = new SpinnerNumberModel(0, Int.MinValue, Int.MaxValue, 1)
     val ggValue = new Spinner(model)
-    val res0    = ObjViewImpl.primitiveConfig[S, Int](window, tpe = prefix, ggValue = ggValue,
+    val res0    = ObjViewImpl.primitiveConfig[T, Int](window, tpe = prefix, ggValue = ggValue,
       prepare = Success(model.getNumber.intValue()))
-    val res     = res0.map(c => Config[S](name = c.name, value = c.value))
+    val res     = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
 //    // cf. https://github.com/scallop/scallop/issues/189
 //    val args1 = args match {
 //      case ("--help" | "-h") :: Nil => args
 //      case _ => "--ignore" +: args
 //    }
-    object p extends ObjViewCmdLineParser[Config[S]](this, args /*args1*/) {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args /*args1*/) {
 //      val ignore: Opt[Boolean]  = opt(hidden = true)
       val const: Opt[Boolean]   = opt(descr = s"Make constant instead of variable")
       val value: Opt[Int]       = trailArg(descr = "Initial int value")
@@ -75,28 +75,28 @@ object IntObjView extends ObjListView.Factory {
     p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = IntObj.newConst[S](value)
+    val obj0  = IntObj.newConst[T](value)
     val obj   = if (const) obj0 else IntObj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  private final class ListImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, IntObj[S]],
+  private final class ListImpl[T <: Txn[T]](val objH: Source[T, IntObj[T]],
                                             var value: Int,
                                             override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends IntObjView[S]
-    with ObjListView[S]
-    with ObjViewImpl.Impl[S]
-    with ObjListViewImpl.SimpleExpr[S, Int, IntObj]
+    extends IntObjView[T]
+    with ObjListView[T]
+    with ObjViewImpl.Impl[T]
+    with ObjListViewImpl.SimpleExpr[T, Int, IntObj]
     with ObjListViewImpl.StringRenderer {
 
     def factory: ObjView.Factory = IntObjView
 
     def exprType: Type.Expr[Int, IntObj] = IntObj
 
-    def expr(implicit tx: S#Tx): IntObj[S] = obj
+    def expr(implicit tx: T): IntObj[T] = obj
 
     def convertEditValue(v: Any): Option[Int] = v match {
       case num: Int     => Some(num)
@@ -104,6 +104,6 @@ object IntObjView extends ObjListView.Factory {
     }
   }
 }
-trait IntObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = IntObj[S]
+trait IntObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = IntObj[T]
 }

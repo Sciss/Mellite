@@ -27,14 +27,14 @@ import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
-  extends CollectionImpl[S, Unit] {
+final class CursorImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
+  extends CollectionImpl[T, Unit] {
 
   def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
 
-  protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: ObjGraphemeView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: ObjGraphemeView[T]): Unit =
 //    if (e.getClickCount == 2) {
 //      val ggText  = new TextField(region.name, 24)
 //      val panel   = new FlowPanel(new Label("Name:"), ggText)
@@ -64,6 +64,6 @@ final class CursorImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
       }
     }
 
-  protected def commitObj(drag: Unit)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = None
+  protected def commitObj(drag: Unit)(time: LongObj[T], child: Obj[T], parent: Grapheme[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None
 }

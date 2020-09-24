@@ -19,15 +19,13 @@ import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.equal.Implicits._
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{DragAndDrop, GUI, ObjListView}
-import de.sciss.mellite.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Disposable, Obj, Source}
+import de.sciss.mellite.edit.EditRemoveFScapeOutput
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
-import de.sciss.mellite.{FScapeOutputsView, MapView}
+import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
@@ -37,14 +35,14 @@ import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, TextField}
 
 object FScapeOutputsViewImpl {
-  def apply[S <: Sys[S]](obj: FScape[S])(implicit tx: S#Tx, universe: Universe[S],
-                                         undoManager: UndoManager): FScapeOutputsView[S] = {
+  def apply[T <: Txn[T]](obj: FScape[T])(implicit tx: T, universe: Universe[T],
+                                         undoManager: UndoManager): FScapeOutputsView[T] = {
     val list0 = obj.outputs.iterator.map { out =>
       (out.key, ObjListView(out))
     }  .toIndexedSeq
 
     new Impl(tx.newHandle(obj)) {
-      protected val observer: Disposable[S#Tx] = obj.changed.react { implicit tx =>upd =>
+      protected val observer: Disposable[T] = obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case FScape.OutputAdded  (out) => attrAdded(out.key, out)
           case FScape.OutputRemoved(out) => attrRemoved(out.key)
@@ -56,13 +54,13 @@ object FScapeOutputsViewImpl {
     }
   }
 
-  private abstract class Impl[S <: Sys[S]](objH: stm.Source[S#Tx, FScape[S]])
-                                          (implicit universe: Universe[S],
+  private abstract class Impl[T <: Txn[T]](objH: Source[T, FScape[T]])
+                                          (implicit universe: Universe[T],
                                            undoManager: UndoManager)
-    extends MapViewImpl[S, FScapeOutputsView[S]] with FScapeOutputsView[S] with ComponentHolder[Component] { impl =>
+    extends MapViewImpl[T, FScapeOutputsView[T]] with FScapeOutputsView[T] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = None
-    protected final def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit] = None
+    protected final def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true
@@ -151,7 +149,7 @@ object FScapeOutputsViewImpl {
       ggDrag        = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] =
           selection.headOption.map { case (key, _ /* view */) =>
-            DragAndDrop.Transferable(FScapeOutputsView.flavor)(FScapeOutputsView.Drag[S](
+            DragAndDrop.Transferable(FScapeOutputsView.flavor)(FScapeOutputsView.Drag[T](
               universe, objH, key))
           }
       }

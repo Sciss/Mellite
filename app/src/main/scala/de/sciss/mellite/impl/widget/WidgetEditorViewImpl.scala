@@ -35,44 +35,44 @@ import scala.swing.event.{Key, SelectionChanged}
 import scala.swing.{Action, BorderPanel, Button, Component, TabbedPane}
 
 object WidgetEditorViewImpl {
-  def apply[S <: SSys[S]](obj: Widget[S], showEditor: Boolean, bottom: ISeq[View[S]])
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          undoManager: UndoManager): WidgetEditorView[S] = {
+  def apply[S <: SSys[T]](obj: Widget[T], showEditor: Boolean, bottom: ISeq[View[T]])
+                         (implicit tx: T, universe: Universe[T],
+                          undoManager: UndoManager): WidgetEditorView[T] = {
 //    val editable = obj match {
 //      case Widget.Var(_) => true
 //      case _               => false
 //    }
 
-    implicit val undoManagerTx: stm.UndoManager[S] = stm.UndoManager()
-    val renderer  = WidgetRenderView[S](obj, embedded = true)
-    val res       = new Impl[S](renderer, tx.newHandle(obj), bottom = bottom)
+    implicit val undoManagerTx: stm.UndoManager[T] = stm.UndoManager()
+    val renderer  = WidgetRenderView[T](obj, embedded = true)
+    val res       = new Impl[T](renderer, tx.newHandle(obj), bottom = bottom)
     res.init(obj, showEditor = showEditor)
   }
 
-  private final class Impl[S <: SSys[S]](val renderer: WidgetRenderView[S],
-                                         widgetH: stm.Source[S#Tx, Widget[S]],
-                                         bottom: ISeq[View[S]])
-                                        (implicit undoManager: UndoManager, txUndo: stm.UndoManager[S])
-    extends ComponentHolder[Component] with WidgetEditorView[S] with ModelImpl[WidgetEditorView.Update] { impl =>
+  private final class Impl[S <: SSys[T]](val renderer: WidgetRenderView[T],
+                                         widgetH: Source[T, Widget[T]],
+                                         bottom: ISeq[View[T]])
+                                        (implicit undoManager: UndoManager, txUndo: stm.UndoManager[T])
+    extends ComponentHolder[Component] with WidgetEditorView[T] with ModelImpl[WidgetEditorView.Update] { impl =>
 
     type C = Component
 
-    implicit val universe: Universe[S] = renderer.universe
+    implicit val universe: Universe[T] = renderer.universe
 
-    private[this] var _codeView: CodeView[S, Widget.Graph] = _
+    private[this] var _codeView: CodeView[T, Widget.Graph] = _
 
-    def codeView: CodeView[S, Widget.Graph] = _codeView
+    def codeView: CodeView[T, Widget.Graph] = _codeView
 
     private[this] var actionRender: Action      = _
     private[this] var tabs        : TabbedPane  = _
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       codeView.dispose()
       renderer.dispose()
       txUndo  .dispose()
     }
 
-    def widget(implicit tx: S#Tx): Widget[S] = widgetH()
+    def widget(implicit tx: T): Widget[T] = widgetH()
 
     private def renderAndShow(): Unit = {
 //      val t = codeView.currentText
@@ -85,7 +85,7 @@ object WidgetEditorViewImpl {
       tabs.selection.index = 1
     }
 
-    def init(obj: Widget[S], /* initialText: String, */ showEditor: Boolean)(implicit tx: S#Tx): this.type = {
+    def init(obj: Widget[T], /* initialText: String, */ showEditor: Boolean)(implicit tx: T): this.type = {
       val codeObj = CodeFrameImpl.mkSource(obj = obj, codeTpe = Widget.Code, key = Widget.attrSource)()
       val code0   = codeObj.value match {
         case cs: Widget.Code => cs
@@ -93,18 +93,18 @@ object WidgetEditorViewImpl {
       }
       val objH = tx.newHandle(obj)
 
-      val handler = new CodeView.Handler[S, Unit, Widget.Graph] {
+      val handler = new CodeView.Handler[T, Unit, Widget.Graph] {
         def in(): Unit = ()
 
-        def save(in: Unit, out: Widget.Graph)(implicit tx: S#Tx): UndoableEdit = {
+        def save(in: Unit, out: Widget.Graph)(implicit tx: T): UndoableEdit = {
           val obj = objH()
-          EditVar.Expr[S, Widget.Graph, Widget.GraphObj]("Change Widget Graph", obj.graph, Widget.GraphObj.newConst[S](out))
+          EditVar.Expr[T, Widget.Graph, Widget.GraphObj]("Change Widget Graph", obj.graph, Widget.GraphObj.newConst[T](out))
         }
 
-        def dispose()(implicit tx: S#Tx): Unit = ()
+        def dispose()(implicit tx: T): Unit = ()
       }
 
-      val bot: View[S] = View.wrap {
+      val bot: View[T] = View.wrap {
         actionRender  = Action(null   )(renderAndShow())
         val ksRender  = KeyStrokes.shift + Key.F10
         val ttRender  = s"Build (${Util.keyStrokeText(ksRender)})"
@@ -116,7 +116,7 @@ object WidgetEditorViewImpl {
       }
 
       import de.sciss.mellite.Mellite.compiler
-      _codeView = CodeView[S](codeObj, code0, bottom = bot +: bottom)(Some(handler))
+      _codeView = CodeView[T](codeObj, code0, bottom = bot +: bottom)(Some(handler))
 
       deferTx(guiInit(/* initialText, */ showEditor = showEditor))
       this

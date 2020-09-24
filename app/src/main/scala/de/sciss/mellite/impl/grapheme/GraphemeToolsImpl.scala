@@ -26,20 +26,20 @@ object GraphemeToolsImpl extends GraphemeTools.Companion {
   def install(): Unit =
     GraphemeTools.peer = this
 
-  def apply  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTools[S] =
+  def apply  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTools[T] =
     new GraphemeToolsImpl(canvas)
 
-  def palette[S <: Sys[S]](control: GraphemeTools[S], tools: Vec[GraphemeTool[S, _]]): Component =
-    new ToolPaletteImpl[S, GraphemeTool[S, _]](control, tools)
+  def palette[T <: Txn[T]](control: GraphemeTools[T], tools: Vec[GraphemeTool[T, _]]): Component =
+    new ToolPaletteImpl[T, GraphemeTool[T, _]](control, tools)
 }
-final class GraphemeToolsImpl[S <: Sys[S]](canvas: GraphemeCanvas[S])
-  extends GraphemeTools[S] with ModelImpl[GraphemeTools.Update[S]] {
+final class GraphemeToolsImpl[T <: Txn[T]](canvas: GraphemeCanvas[T])
+  extends GraphemeTools[T] with ModelImpl[GraphemeTools.Update[T]] {
 
   import GraphemeTools._
 
-  private[this] var _currentTool: GraphemeTool[S, _] = GraphemeTool.cursor(canvas)
-  def currentTool: GraphemeTool[S, _] = _currentTool
-  def currentTool_=(value: GraphemeTool[S, _]): Unit =
+  private[this] var _currentTool: GraphemeTool[T, _] = GraphemeTool.cursor(canvas)
+  def currentTool: GraphemeTool[T, _] = _currentTool
+  def currentTool_=(value: GraphemeTool[T, _]): Unit =
     if (_currentTool != value) {
       val oldTool   = _currentTool
       _currentTool  = value

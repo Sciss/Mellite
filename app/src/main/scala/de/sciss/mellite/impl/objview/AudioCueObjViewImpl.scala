@@ -43,8 +43,8 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
   def install(): Unit =
     AudioCueObjView.peer = this
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     import universe.{cursor, workspace}
     val dirIn = cursor.step { implicit tx =>
       dirCache.get()
@@ -65,19 +65,19 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       if (fs.isEmpty) Failure(Aborted())
       else {
         @tailrec
-        def loop(rem: List[File], locSeq: List[LocationConfig[S]], res: Config[S]): MakeResult[S] =
+        def loop(rem: List[File], locSeq: List[LocationConfig[T]], res: Config[T]): MakeResult[T] =
           rem match {
             case head :: tail =>
               Try(AudioFile.readSpec(head)) match {
                 case Failure(ex) => Failure(ex)
                 case Success(spec) =>
-                  val locExist: Option[LocationConfig[S]] = locSeq.find { case (_, dir) =>
+                  val locExist: Option[LocationConfig[T]] = locSeq.find { case (_, dir) =>
                     val locOk = Try(Artifact.relativize(parent = dir, sub = head)).isSuccess
                     locOk
                   }
 
                   val locOpt = locExist.orElse(
-                    ActionArtifactLocation.query[S](file = head, window = window)(implicit tx => universe.workspace.root)
+                    ActionArtifactLocation.query[T](file = head, window = window)(implicit tx => universe.workspace.root)
                   )
 
                   locOpt match {
@@ -101,7 +101,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
 
   private lazy val dirCache = WorkspaceCache[File]()
 
-  def mkListView[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx): AudioCueObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T): AudioCueObjView[T] with ObjListView[T] = {
     val value = obj.value
     new Impl(tx.newHandle(obj), value).init(obj)
   }
@@ -111,7 +111,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
                                    gain: Double = 1.0,
                                    const: Boolean = false)
 
-  def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
+  def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
     // we do not support any number of files except one
     val default = Config2()
     object p extends ObjViewCmdLineParser[Config2](AudioCueObjView, args) {
@@ -141,14 +141,14 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       }
     }
 
-    def resolveLoc(f: File, opt: Option[(String, File)]): Try[LocationConfig[S]] = opt match {
+    def resolveLoc(f: File, opt: Option[(String, File)]): Try[LocationConfig[T]] = opt match {
       case Some((nm, base)) => Success((Right(nm), base))
       case None =>
         f.absolute.parentOption match {
           case Some(parent) =>
-            val vec = ActionArtifactLocation.find[S](file = f)(implicit tx => universe.workspace.root)
+            val vec = ActionArtifactLocation.find[T](file = f)(implicit tx => universe.workspace.root)
             val exist = vec.collectFirst {
-              case l if l.value._2 === parent => (Left(l.value._1), l.value._2): LocationConfig[S]
+              case l if l.value._2 === parent => (Left(l.value._1), l.value._2): LocationConfig[T]
             }
             val res = exist match {
               case Some(res0) => res0
@@ -175,9 +175,9 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     }
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
-    var locMade = Map.empty[(String, File), ArtifactLocation[S]]
-    var res     = List.empty[Obj[S]]
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
+    var locMade = Map.empty[(String, File), ArtifactLocation[T]]
+    var res     = List.empty[Obj[T]]
 
     config.foreach { c =>
       val loc = c.location match {
@@ -199,8 +199,8 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     res.reverse
   }
 
-  trait Basic[S <: Sys[S]] extends ObjViewImpl.Impl[S] with AudioCueObjView[S] {
-    final override def obj(implicit tx: S#Tx): AudioCue.Obj[S] = objH()
+  trait Basic[T <: Txn[T]] extends ObjViewImpl.Impl[T] with AudioCueObjView[T] {
+    final override def obj(implicit tx: T): AudioCue.Obj[T] = objH()
 
     final def factory: ObjView.Factory = AudioCueObjView
 
@@ -211,20 +211,20 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       Some(t)
     }
 
-    def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val frame = AudioCueFrame(obj)
       Some(frame)
     }
   }
 
-  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, AudioCue.Obj[S]],
+  private final class Impl[T <: Txn[T]](val objH: Source[T, AudioCue.Obj[T]],
                                         var value: AudioCue)
-    extends ObjListViewImpl.NonEditable[S]
-      with Basic[S] {
+    extends ObjListViewImpl.NonEditable[T]
+      with Basic[T] {
 
     type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
 
-    def init(obj: AudioCue.Obj[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: AudioCue.Obj[T])(implicit tx: T): this.type = {
       initAttrs(obj)
       addDisposable(obj.changed.react { implicit tx =>upd =>
         deferTx {

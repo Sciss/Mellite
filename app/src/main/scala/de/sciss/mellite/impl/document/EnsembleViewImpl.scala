@@ -27,33 +27,33 @@ import scala.swing.Swing._
 import scala.swing.{BoxPanel, Component, Label, Orientation}
 
 object EnsembleViewImpl {
-  def apply[S <: Sys[S]](ensObj: Ensemble[S])(implicit tx: S#Tx, universe: Universe[S],
-                                              undoManager: UndoManager): Impl[S] = {
+  def apply[T <: Txn[T]](ensObj: Ensemble[T])(implicit tx: T, universe: Universe[T],
+                                              undoManager: UndoManager): Impl[T] = {
     val ens       = ensObj
-    val folder1   = FolderEditorView[S](ens.folder)
+    val folder1   = FolderEditorView[T](ens.folder)
     import universe.cursor
     val playing   = BooleanCheckBoxView(ens.playing, "Playing State")
     val viewPower = RunnerToggleButton(ensObj)
-    new Impl[S](tx.newHandle(ensObj), viewPower, folder1, playing).init()
+    new Impl[T](tx.newHandle(ensObj), viewPower, folder1, playing).init()
   }
 
-  final class Impl[S <: Sys[S]](ensembleH: stm.Source[S#Tx, Ensemble[S]], viewPower: RunnerToggleButton[S],
-                                val view: FolderEditorView[S], playing: View[S])
-    extends ComponentHolder[Component] with EnsembleView[S] { impl =>
+  final class Impl[T <: Txn[T]](ensembleH: Source[T, Ensemble[T]], viewPower: RunnerToggleButton[T],
+                                val view: FolderEditorView[T], playing: View[T])
+    extends ComponentHolder[Component] with EnsembleView[T] { impl =>
 
     type C = Component
 
-    implicit val universe: Universe[S] = view.universe
+    implicit val universe: Universe[T] = view.universe
 
     def undoManager: UndoManager = view.undoManager
 
-    def ensemble(implicit tx: S#Tx): Ensemble[S] = ensembleH()
+    def ensemble(implicit tx: T): Ensemble[T] = ensembleH()
 
-    def folderView: FolderView[S] = view.peer
+    def folderView: FolderView[T] = view.peer
 
-//    def transport: Transport[S] = viewPower.transport
+//    def transport: Transport[T] = viewPower.transport
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
       deferTx {
         guiInit()
       }
@@ -76,7 +76,7 @@ object EnsembleViewImpl {
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       viewPower .dispose()
       view      .dispose()
       playing   .dispose()

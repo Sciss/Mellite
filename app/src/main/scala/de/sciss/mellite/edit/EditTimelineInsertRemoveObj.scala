@@ -20,10 +20,10 @@ import de.sciss.synth.proc.Timeline
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
-private[edit] class EditTimelineInsertRemoveObj[S <: Sys[S]](direction: Boolean,
-                                                           timelineH: stm.Source[S#Tx, Timeline.Modifiable[S]],
-                                                           spanH: stm.Source[S#Tx, SpanLikeObj[S]],
-                                                           elemH: stm.Source[S#Tx, Obj[S]])(implicit cursor: stm.Cursor[S])
+private[edit] class EditTimelineInsertRemoveObj[T <: Txn[T]](direction: Boolean,
+                                                           timelineH: Source[T, Timeline.Modifiable[T]],
+                                                           spanH: Source[T, SpanLikeObj[T]],
+                                                           elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {
@@ -46,15 +46,15 @@ private[edit] class EditTimelineInsertRemoveObj[S <: Sys[S]](direction: Boolean,
     }
   }
 
-  private def insert()(implicit tx: S#Tx): Unit = timelineH().add   (spanH(), elemH())
-  private def remove()(implicit tx: S#Tx): Unit = timelineH().remove(spanH(), elemH())
+  private def insert()(implicit tx: T): Unit = timelineH().add   (spanH(), elemH())
+  private def remove()(implicit tx: T): Unit = timelineH().remove(spanH(), elemH())
 
-  def perform()(implicit tx: S#Tx): Unit = if (direction) insert() else remove()
+  def perform()(implicit tx: T): Unit = if (direction) insert() else remove()
 }
 
 object EditTimelineInsertObj {
-  def apply[S <: Sys[S]](name: String, timeline: Timeline.Modifiable[S], span: SpanLikeObj[S], elem: Obj[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](name: String, timeline: Timeline.Modifiable[T], span: SpanLikeObj[T], elem: Obj[T])
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val spanH     = tx.newHandle(span)
     val timelineH = tx.newHandle(timeline)
     val elemH     = tx.newHandle(elem)
@@ -63,19 +63,19 @@ object EditTimelineInsertObj {
     res
   }
 
-  private class Impl[S <: Sys[S]](name: String,
-                                  timelineH: stm.Source[S#Tx, Timeline.Modifiable[S]],
-                                  spanH: stm.Source[S#Tx, SpanLikeObj[S]],
-                                  elemH: stm.Source[S#Tx, Obj[S]])(implicit cursor: stm.Cursor[S])
-    extends EditTimelineInsertRemoveObj[S](true, timelineH, spanH, elemH) {
+  private class Impl[T <: Txn[T]](name: String,
+                                  timelineH: Source[T, Timeline.Modifiable[T]],
+                                  spanH: Source[T, SpanLikeObj[T]],
+                                  elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+    extends EditTimelineInsertRemoveObj[T](true, timelineH, spanH, elemH) {
 
     override def getPresentationName: String = name
   }
 }
 
 object EditTimelineRemoveObj {
-  def apply[S <: Sys[S]](name: String, timeline: Timeline.Modifiable[S], span: SpanLikeObj[S], elem: Obj[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](name: String, timeline: Timeline.Modifiable[T], span: SpanLikeObj[T], elem: Obj[T])
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val spanH     = tx.newHandle(span)
     val timelineH = tx.newHandle(timeline)
     val elemH     = tx.newHandle(elem)
@@ -84,10 +84,10 @@ object EditTimelineRemoveObj {
     res
   }
 
-  private class Impl[S <: Sys[S]](name: String, timelineH: stm.Source[S#Tx, Timeline.Modifiable[S]],
-                                  spanH: stm.Source[S#Tx, SpanLikeObj[S]],
-                                  elemH: stm.Source[S#Tx, Obj[S]])(implicit cursor: stm.Cursor[S])
-    extends EditTimelineInsertRemoveObj[S](false, timelineH, spanH, elemH) {
+  private class Impl[T <: Txn[T]](name: String, timelineH: Source[T, Timeline.Modifiable[T]],
+                                  spanH: Source[T, SpanLikeObj[T]],
+                                  elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+    extends EditTimelineInsertRemoveObj[T](false, timelineH, spanH, elemH) {
 
     override def getPresentationName: String = name
   }

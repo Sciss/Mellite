@@ -14,8 +14,8 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.{Timeline, Universe}
@@ -31,14 +31,14 @@ object TimelineView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: Sys[S]](tl: Timeline[S])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           undoManager: UndoManager): TimelineView[S]
+    def apply[T <: Txn[T]](tl: Timeline[T])
+                          (implicit tx: T, universe: Universe[T],
+                           undoManager: UndoManager): TimelineView[T]
   }
 
-  def apply[S <: Sys[S]](tl: Timeline[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undoManager: UndoManager): TimelineView[S] =
+  def apply[T <: Txn[T]](tl: Timeline[T])
+                        (implicit tx: T, universe: Universe[T],
+                         undoManager: UndoManager): TimelineView[T] =
     companion(tl)
 
   /** Number of pixels for one unit of track height (convention). */
@@ -48,19 +48,19 @@ object TimelineView {
 
   final val DefaultTrackHeight = 8
 
-  final case class Drag[S <: stm.Sys[S]](universe: Universe[S], view: TimelineView[S])
+  final case class Drag[T <: LTxn[T]](universe: Universe[T], view: TimelineView[T])
 
   val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
 }
-trait TimelineView[S <: stm.Sys[S]] /*extends TimelineObjView[S]*/ extends ObjView[S]
-  with TimelineViewBase[S, Int, ObjTimelineView[S]] with CanBounce {
+trait TimelineView[T <: LTxn[T]] /*extends TimelineObjView[T]*/ extends ObjView[T]
+  with TimelineViewBase[T, Int, ObjTimelineView[T]] with CanBounce {
 
-  type Repr = Timeline[S]
+  type Repr = Timeline[T]
 
-  override def canvas: TimelineTrackCanvas[S]
+  override def canvas: TimelineTrackCanvas[T]
 
-  def globalView    : GlobalProcsView[S]
-  def transportView : TransportView  [S]
+  def globalView    : GlobalProcsView[T]
+  def transportView : TransportView  [T]
 
   // ---- further GUI actions ----
   def actionSplitObjects        : Action

@@ -16,11 +16,9 @@ package de.sciss.mellite
 import java.awt.datatransfer.Transferable
 
 import de.sciss.desktop
-import de.sciss.lucre.event.Observable
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Disposable, Obj, Observable, Source, Txn => LTxn}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.synth.proc.{Color, Universe}
 import javax.swing.Icon
@@ -40,7 +38,7 @@ object ObjView {
 
   final val Unnamed = "<unnamed>"
 
-  final case class Drag[S <: stm.Sys[S]](universe: Universe[S], view: ObjView[S])
+  final case class Drag[T <: LTxn[T]](universe: Universe[T], view: ObjView[T])
 
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
   val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor
@@ -51,11 +49,11 @@ object ObjView {
     def icon      : Icon
     def tpe       : Obj.Type
 
-    type Config[S <: stm.Sys[S]]
+    type Config[T <: LTxn[T]]
 
-    type MakeResult[S <: stm.Sys[S]] = Try[Config[S]]
+    type MakeResult[T <: LTxn[T]] = Try[Config[T]]
 
-    type E[~ <: stm.Sys[~]] <: Obj[~]
+    type E[~ <: LTxn[~]] <: Obj[~]
 
     /** Whether it is possible to create an instance of the object via
       * `initMakeDialog`, `initMakeCmdLine`, or `makeObj`. If this answers `false`, expect
@@ -63,7 +61,7 @@ object ObjView {
       */
     def canMakeObj: Boolean
 
-    // Note: we use a callback `done` instead of returning a `Future[Config[S]]` because the
+    // Note: we use a callback `done` instead of returning a `Future[Config[T]]` because the
     // latter means a lot of boiler plate (executionContext) and `Future { }` does not
     // guarantee execution on the EDT, so it's a mismatch.
 
@@ -72,29 +70,29 @@ object ObjView {
       * using the value of `Processor.Aborted` to indicate so. If only a message should be
       * shown instead of a full exception, use `MessageException`.
       */
-    def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
-                                   (implicit universe: Universe[S]): Unit
+    def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
+                                   (implicit universe: Universe[T]): Unit
 
     /** Tries to create a make-configuration from a command line string. */
-    def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S]
+    def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T]
 
     def category: String
 
     /** Creates an object from a configuration.
-      * The reason that the result type is not `Obj.T[S, E]` is
+      * The reason that the result type is not `Obj.T[T, E]` is
       * that we allow the returning of a number of auxiliary other objects as well.
       */
-    def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]]
+    def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]]
   }
 
-  trait Update[S <: stm.Sys[S]] {
-    def view: ObjView[S]
+  trait Update[T <: LTxn[T]] {
+    def view: ObjView[T]
   }
-  final case class Repaint[S <: stm.Sys[S]](view: ObjView[S]) extends Update[S]
+  final case class Repaint[T <: LTxn[T]](view: ObjView[T]) extends Update[T]
 }
-trait ObjView[S <: stm.Sys[S]]
-  extends Disposable[S#Tx]
-  with Observable[S#Tx, ObjView.Update[S]] /* Model[ObjView.Update[S]] */ {
+trait ObjView[T <: LTxn[T]]
+  extends Disposable[T]
+  with Observable[T, ObjView.Update[T]] /* Model[ObjView.Update[T]] */ {
 
   def factory: ObjView.Factory
 
@@ -116,12 +114,12 @@ trait ObjView[S <: stm.Sys[S]]
     */
   def icon: Icon
 
-  type Repr <: Obj[S]
+  type Repr <: Obj[T]
 
-  def objH: stm.Source[S#Tx, Repr]
+  def objH: Source[T, Repr]
 
   /** The view must store a handle to its underlying model. */
-  def obj(implicit tx: S#Tx): Repr
+  def obj(implicit tx: T): Repr
 
   /** Whether a dedicated view/editor window exists for this type of object. */
   def isViewable: Boolean
@@ -132,5 +130,5 @@ trait ObjView[S <: stm.Sys[S]]
     * The method should return an appropriate view for this object, or `None` if no editor or viewer window
     * can be produced.
     */
-  def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]]
+  def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]]
 }

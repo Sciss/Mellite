@@ -23,20 +23,20 @@ import de.sciss.synth.proc.{Universe, Widget}
 import scala.collection.immutable.{Seq => ISeq}
 
 object WidgetEditorFrame {
-  def apply[S <: Sys[S]](obj: Widget[S], bottom: ISeq[View[S]] = Nil)
-                        (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] =
+  def apply[T <: Txn[T]](obj: Widget[T], bottom: ISeq[View[T]] = Nil)
+                        (implicit tx: T, universe: Universe[T]): WidgetEditorFrame[T] =
     WidgetFrameImpl.editor(obj, bottom = bottom)
 }
 
-trait WidgetEditorFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-  override def view: WidgetEditorView[S]
+trait WidgetEditorFrame[S <: stm.Sys[T]] extends lucre.swing.Window[T] {
+  override def view: WidgetEditorView[T]
 }
 
 object WidgetRenderFrame {
-  def apply[S <: Sys[S]](obj: Widget[S])(implicit tx: S#Tx, universe: Universe[S]): WidgetRenderFrame[S] =
+  def apply[T <: Txn[T]](obj: Widget[T])(implicit tx: T, universe: Universe[T]): WidgetRenderFrame[T] =
     WidgetFrameImpl.render(obj)
 }
 
-trait WidgetRenderFrame[S <: stm.Sys[S]] extends lucre.swing.Window[S] {
-  override def view: WidgetRenderView[S]
+trait WidgetRenderFrame[S <: stm.Sys[T]] extends lucre.swing.Window[T] {
+  override def view: WidgetRenderView[T]
 }

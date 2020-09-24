@@ -37,29 +37,29 @@ object MuteImpl {
     tk.createCustomCursor(img, new Point(4, 4), "Mute")
   }
 }
-final class MuteImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends CollectionImpl[S, Mute]
-    with RubberBandTool[S, Mute, Int, ObjTimelineView[S]] {
+final class MuteImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends CollectionImpl[T, Mute]
+    with RubberBandTool[T, Mute, Int, ObjTimelineView[T]] {
 
   def defaultCursor: Cursor = MuteImpl.cursor
   val name                  = "Mute"
   val icon: Icon            = GUI.iconNormal(Shapes.Mute) // ToolsImpl.getIcon("mute")
 
-  protected def commitObj(mute: Mute)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
-    // val imp = ExprImplicits[S]
-    val newMute: BooleanObj[S] = obj.attr.$[BooleanObj](ObjKeys.attrMute) match {
+  protected def commitObj(mute: Mute)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+    // val imp = ExprImplicits[T]
+    val newMute: BooleanObj[T] = obj.attr.$[BooleanObj](ObjKeys.attrMute) match {
       // XXX TODO: BooleanObj should have `not` operator
       case Some(BooleanObj.Var(vr)) => val vOld = vr().value; !vOld
       case other => !other.exists(_.value)
     }
     import de.sciss.equal.Implicits._
-    val newMuteOpt = if (newMute === BooleanObj.newConst[S](false)) None else Some(newMute)
-    val edit = EditAttrMap.expr[S, Boolean, BooleanObj](s"Adjust $name", obj, ObjKeys.attrMute, newMuteOpt)
+    val newMuteOpt = if (newMute === BooleanObj.newConst[T](false)) None else Some(newMute)
+    val edit = EditAttrMap.expr[T, Boolean, BooleanObj](s"Adjust $name", obj, ObjKeys.attrMute, newMuteOpt)
     Some(edit)
   }
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[S]): Unit = region match {
+  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit = region match {
     case hm: ObjTimelineView.HasMute => dispatch(BasicTool.Adjust(Mute(!hm.muted)))
     case _ =>
   }

@@ -41,17 +41,17 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
   def install(): Unit =
     MarkdownRenderView.peer = this
 
-  def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
-                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
-    new Impl[S](bottom, embedded = embedded).init(init)
+  def apply[S <: SSys[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+                         (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T] =
+    new Impl[T](bottom, embedded = embedded).init(init)
 
-  def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): MarkdownRenderView.Basic[S] =
-    new BasicImpl[S](bottom, embedded = embedded).init(init)
+  def basic[T <: Txn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+                        (implicit tx: T, cursor: Cursor[T]): MarkdownRenderView.Basic[T] =
+    new BasicImpl[T](bottom, embedded = embedded).init(init)
 
-  private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val universe: Universe[S])
-    extends Base[S](bottom, embedded) with MarkdownRenderView[S] { impl =>
+  private final class Impl[S <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
+                                        (implicit val universe: Universe[T])
+    extends Base[T](bottom, embedded) with MarkdownRenderView[T] { impl =>
 
     protected def mkEditButton(): Option[Component] = {
       if (embedded) None else {
@@ -65,7 +65,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
       }
     }
 
-    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = {
+    protected def viewAttr(obj: Obj[T])(implicit tx: T): Option[Window[T]] = {
       val listView = ObjListView(obj)
       if (listView.isViewable) {
         listView.openView(Window.find(impl))
@@ -75,13 +75,13 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
     }
   }
 
-  private final class BasicImpl[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                             (implicit val cursor: stm.Cursor[S])
-    extends Base[S](bottom, embedded) {
+  private final class BasicImpl[T <: Txn[T]](bottom: ISeq[View[T]], embedded: Boolean)
+                                             (implicit val cursor: Cursor[T])
+    extends Base[T](bottom, embedded) {
 
     protected def mkEditButton(): Option[Component] = None
 
-    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]] = None
+    protected def viewAttr(obj: Obj[T])(implicit tx: T): Option[Window[T]] = None
   }
 
   private final case class Percent(value: Int) {
@@ -90,39 +90,39 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
     def fraction: Double = value * 0.01
   }
 
-  private abstract class Base[S <: Sys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-    extends MarkdownRenderView.Basic[S]
+  private abstract class Base[T <: Txn[T]](bottom: ISeq[View[T]], embedded: Boolean)
+    extends MarkdownRenderView.Basic[T]
       with ZoomSupport
       with ComponentHolder[Component]
-      with ObservableImpl[S, MarkdownRenderView.Update[S]] { impl =>
+      with ObservableImpl[T, MarkdownRenderView.Update[T]] { impl =>
 
     type C = Component
 
     // ---- abstract ----
 
-    def cursor: stm.Cursor[S]
+    def cursor: Cursor[T]
 
     protected def mkEditButton(): Option[Component]
 
-    protected def viewAttr(obj: Obj[S])(implicit tx: S#Tx): Option[Window[S]]
+    protected def viewAttr(obj: Obj[T])(implicit tx: T): Option[Window[T]]
 
     // ---- impl ----
 
-    private[this] val mdRef = Ref.make[(stm.Source[S#Tx, Markdown[S]], Disposable[S#Tx])]()
+    private[this] val mdRef = Ref.make[(Source[T, Markdown[T]], Disposable[T])]()
     private[this] var _editor: HTMLEditorPaneWithZoom = _
-    private[this] val nav   = NavigationHistory.empty[S, stm.Source[S#Tx, Markdown[S]]]
+    private[this] val nav   = NavigationHistory.empty[T, Source[T, Markdown[T]]]
     private[this] var actionBwd: Action = _
     private[this] var actionFwd: Action = _
-    private[this] var obsNav: Disposable[S#Tx] = _
+    private[this] var obsNav: Disposable[T] = _
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       mdRef()._2.dispose()
       obsNav    .dispose()
     }
 
-    def markdown(implicit tx: S#Tx): Markdown[S] = mdRef()._1.apply()
+    def markdown(implicit tx: T): Markdown[T] = mdRef()._1.apply()
 
-    def init(obj: Markdown[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: Markdown[T])(implicit tx: T): this.type = {
       deferTx(guiInit())
       markdown = obj
       obsNav = nav.react { implicit tx => upd =>
@@ -134,7 +134,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
       this
     }
 
-    def setInProgress(md: Markdown[S], value: String)(implicit tx: S#Tx): Unit = {
+    def setInProgress(md: Markdown[T], value: String)(implicit tx: T): Unit = {
       val obs = md.changed.react { implicit tx => upd =>
         val newText = upd.now
         deferTx(setText(newText))
@@ -145,16 +145,16 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
       deferTx(setText(value))
     }
 
-    def markdown_=(md: Markdown[S])(implicit tx: S#Tx): Unit =
+    def markdown_=(md: Markdown[T])(implicit tx: T): Unit =
       setMarkdown(md, reset = true)
 
-    private def setMarkdownFromNav()(implicit tx: S#Tx): Unit =
+    private def setMarkdownFromNav()(implicit tx: T): Unit =
       nav.current.foreach { mdH =>
         val md = mdH()
         setInProgress(md, md.value)
       }
 
-    private def setMarkdown(md: Markdown[S], reset: Boolean)(implicit tx: S#Tx): Unit = {
+    private def setMarkdown(md: Markdown[T], reset: Boolean)(implicit tx: T): Unit = {
       setInProgress(md, md.value)
       val mdH = tx.newHandle(md)
       if (reset) nav.resetTo(mdH) else nav.push(mdH)
@@ -203,7 +203,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
                     import proc.Implicits._
                     Left(s"Attribute '$key' not found in Markdown object '${obj.name}'")
                   } {
-                    case md: Markdown[S] =>
+                    case md: Markdown[T] =>
                       nav.push(tx.newHandle(md))
                       setMarkdownFromNav()
                       fire(MarkdownRenderView.FollowedLink(impl, md))

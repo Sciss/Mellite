@@ -18,15 +18,15 @@ import de.sciss.mellite.{FadeViewMode, RegionViewMode, TimelineTool, TimelineToo
 import de.sciss.model.Change
 import de.sciss.model.impl.ModelImpl
 
-final class ToolsImpl[S <: Sys[S]](canvas: TimelineTrackCanvas[S])
-  extends TimelineTools[S] with ModelImpl[TimelineTools.Update[S]] {
+final class ToolsImpl[T <: Txn[T]](canvas: TimelineTrackCanvas[T])
+  extends TimelineTools[T] with ModelImpl[TimelineTools.Update[T]] {
 
   import TimelineTools._
 
-  private[this] var _currentTool: TimelineTool[S, _] = TimelineTool.cursor(canvas)
+  private[this] var _currentTool: TimelineTool[T, _] = TimelineTool.cursor(canvas)
 
-  def currentTool: TimelineTool[S, _] = _currentTool
-  def currentTool_=(value: TimelineTool[S, _]): Unit =
+  def currentTool: TimelineTool[T, _] = _currentTool
+  def currentTool_=(value: TimelineTool[T, _]): Unit =
     if (_currentTool != value) {
       val oldTool   = _currentTool
       _currentTool  = value

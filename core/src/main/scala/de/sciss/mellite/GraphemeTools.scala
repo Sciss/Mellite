@@ -13,9 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Obj, Txn => LTxn}
 import de.sciss.mellite.BasicTool.DragRubber
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
@@ -33,19 +32,19 @@ object GraphemeTools {
   }
 
   private[mellite] trait Companion {
-    def apply  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTools[S]
-    def palette[S <: Sys[S]](control: GraphemeTools[S], tools: Vec[GraphemeTool[S, _]]): Component
+    def apply  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTools[T]
+    def palette[T <: Txn[T]](control: GraphemeTools[T], tools: Vec[GraphemeTool[T, _]]): Component
   }
 
-  sealed trait Update[S <: stm.Sys[S]]
-  final case class ToolChanged[S <: stm.Sys[S]](change: Change[GraphemeTool[S, _]]) extends Update[S]
+  sealed trait Update[T <: LTxn[T]]
+  final case class ToolChanged[T <: LTxn[T]](change: Change[GraphemeTool[T, _]]) extends Update[T]
 
-  def apply  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTools[S] = companion(canvas)
-  def palette[S <: Sys[S]](control: GraphemeTools[S], tools: Vec[GraphemeTool[S, _]]): Component =
+  def apply  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTools[T] = companion(canvas)
+  def palette[T <: Txn[T]](control: GraphemeTools[T], tools: Vec[GraphemeTool[T, _]]): Component =
     companion.palette(control, tools)
 }
 
-trait GraphemeTools[S <: stm.Sys[S]] extends BasicTools[S, GraphemeTool[S, _], GraphemeTools.Update[S]]
+trait GraphemeTools[T <: LTxn[T]] extends BasicTools[T, GraphemeTool[T, _], GraphemeTools.Update[T]]
 
 object GraphemeTool {
   private[mellite] var peer: Companion = _
@@ -76,14 +75,14 @@ object GraphemeTool {
   type Listener = Model.Listener[Update[Any]]
 
   private[mellite] trait Companion {
-    def cursor  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Unit]
-    def move    [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Move]
-    def add     [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Add ]
+    def cursor  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Unit]
+    def move    [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Move]
+    def add     [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Add ]
   }
 
-  def cursor  [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Unit] = companion.cursor(canvas)
-  def move    [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Move] = companion.move  (canvas)
-  def add     [S <: Sys[S]](canvas: GraphemeCanvas[S]): GraphemeTool[S, Add ] = companion.add   (canvas)
+  def cursor  [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Unit] = companion.cursor(canvas)
+  def move    [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Move] = companion.move  (canvas)
+  def add     [T <: Txn[T]](canvas: GraphemeCanvas[T]): GraphemeTool[T, Add ] = companion.add   (canvas)
 }
 
 /** A tool that operates on object inside the grapheme view.
@@ -91,4 +90,4 @@ object GraphemeTool {
   * @tparam A   the type of element that represents an ongoing
   *             edit state (typically during mouse drag).
   */
-trait GraphemeTool[S <: stm.Sys[S], A] extends BasicTool[S, A]
+trait GraphemeTool[T <: LTxn[T], A] extends BasicTool[T, A]

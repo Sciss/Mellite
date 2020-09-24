@@ -34,9 +34,9 @@ import scala.swing.{Action, Alignment, BorderPanel, Button, Component, Dialog, F
 import scala.tools.cmd.CommandLineParser
 import scala.util.{Failure, Success}
 
-trait CollectionViewImpl[S <: Sys[S]]
-  extends UniverseView[S]
-  with View.Editable[S]
+trait CollectionViewImpl[T <: Txn[T]]
+  extends UniverseView[T]
+  with View.Editable[T]
   with ComponentHolder[Component] {
 
   impl =>
@@ -45,11 +45,11 @@ trait CollectionViewImpl[S <: Sys[S]]
 
   // ---- abstract ----
 
-  protected def peer: View.Editable[S]
+  protected def peer: View.Editable[T]
 
   protected def actionDelete: Action
 
-  protected def selectedObjects: List[ObjView[S]]
+  protected def selectedObjects: List[ObjView[T]]
 
   /** Called after the main GUI has been initialized. */
   protected def initGUI2(): Unit
@@ -64,14 +64,14 @@ trait CollectionViewImpl[S <: Sys[S]]
     */
   protected def prepareInsertCmdLine(args: List[String]): Option[(InsertConfig, List[String])]
 
-  protected def editInsert(f: ObjView.Factory, xs: List[Obj[S]], config: InsertConfig)(implicit tx: S#Tx): Option[UndoableEdit]
+  protected def editInsert(f: ObjView.Factory, xs: List[Obj[T]], config: InsertConfig)(implicit tx: T): Option[UndoableEdit]
 
   // ---- implemented ----
 
   lazy final protected val actionAttr: Action = Action(null) {
     val sel = selectedObjects
     val sz  = sel.size
-    if (sz > 0) GUI.step[S](nameAttr, s"Opening ${if (sz == 1) "window" else "windows"}") { implicit tx =>
+    if (sz > 0) GUI.step[T](nameAttr, s"Opening ${if (sz == 1) "window" else "windows"}") { implicit tx =>
       sel.foreach(n => AttrMapFrame(n.obj))
     }
   }
@@ -81,13 +81,13 @@ trait CollectionViewImpl[S <: Sys[S]]
     val sz  = sel.size
     if (sz > 0) {
       val windowOption = Window.find(this)
-      GUI.step[S](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
+      GUI.step[T](nameView, s"Opening ${if (sz == 1) "window" else "windows"}")  { implicit tx =>
         sel.foreach(_.openView(windowOption))
       }
     }
   }
 
-  protected def selectionChanged(sel: List[ObjView[S]]): Unit = {
+  protected def selectionChanged(sel: List[ObjView[T]]): Unit = {
     val nonEmpty  = sel.nonEmpty
     actionAdd   .enabled = sel.size < 2
     actionDelete.enabled = nonEmpty
@@ -100,7 +100,7 @@ trait CollectionViewImpl[S <: Sys[S]]
   final protected var ggView  : Button = _
   final protected var ggAttr  : Button = _
 
-  final def init()(implicit tx: S#Tx): this.type = {
+  final def init()(implicit tx: T): this.type = {
     deferTx(guiInit())
     this
   }
@@ -123,7 +123,7 @@ trait CollectionViewImpl[S <: Sys[S]]
 
     def apply(): Unit = {
       val winOpt = desktop.Window.find(component)
-      f.initMakeDialog[S](/* workspace, */ /* parentH, */ winOpt) {
+      f.initMakeDialog[T](/* workspace, */ /* parentH, */ winOpt) {
         case Success(conf) =>
           val confOpt2  = prepareInsertDialog(f)
           confOpt2.foreach { insConf =>
@@ -239,7 +239,7 @@ trait CollectionViewImpl[S <: Sys[S]]
               factOpts match {
                 case f :: Nil =>
                   if (f.canMakeObj) {
-                    val res = f.initMakeCmdLine[S](rest)
+                    val res = f.initMakeCmdLine[T](rest)
                     res match {
                       case Success(conf) =>
                         val editOpt = cursor.step { implicit tx =>

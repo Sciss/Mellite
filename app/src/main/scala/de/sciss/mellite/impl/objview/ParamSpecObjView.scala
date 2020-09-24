@@ -19,21 +19,19 @@ import java.util.Locale
 import de.sciss.audiowidgets.RotaryKnob
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{CellView, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Obj, Txn => LTxn}
 import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
+import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
-import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
 import de.sciss.{desktop, numbers}
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
@@ -47,7 +45,7 @@ import scala.swing.{Action, Alignment, BorderPanel, BoxPanel, Component, Dialog,
 import scala.util.{Failure, Success}
 
 object ParamSpecObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = ParamSpec.Obj[~]
+  type E[~ <: LTxn[~]] = ParamSpec.Obj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Thermometer)
   val prefix        : String    = "ParamSpec"
   def humanName     : String    = "Param Spec"
@@ -55,13 +53,13 @@ object ParamSpecObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categOrganization
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: ParamSpec.Obj[S])(implicit tx: S#Tx): ParamSpecObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: ParamSpec.Obj[T])(implicit tx: T): ParamSpecObjView[T] with ObjListView[T] = {
     val value     = obj.value
     val editable  = ParamSpec.Obj.Var.unapply(obj).isDefined
     new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
 
   private final class PanelImpl(nameIn: Option[String], editable: Boolean) extends ModelImpl[Unit] {
 
@@ -252,9 +250,9 @@ object ParamSpecObjView extends ObjListView.Factory {
     def component: Component = box
   }
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val panel = new PanelImpl(nameIn = Some(prefix), editable = true)
 
     val pane = desktop.OptionPane.confirmation(panel.component, optionType = Dialog.Options.OkCancel,
@@ -263,7 +261,7 @@ object ParamSpecObjView extends ObjListView.Factory {
     val res = pane.show(window)
 
     val res1 = if (res == Dialog.Result.Ok) {
-      Success(Config[S](name = panel.name, value = panel.spec))
+      Success(Config[T](name = panel.name, value = panel.spec))
     } else {
       Failure(Aborted())
     }
@@ -291,9 +289,9 @@ object ParamSpecObjView extends ObjListView.Factory {
     })
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    val default: Config[S] = Config()
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    val default: Config[T] = Config()
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val unit    : Opt[String] = opt(descr = "Unit label", default = Some(default.value.unit))
       val low     : Opt[Double] = trailArg(descr = "Lowest parameter value" , default = Some(default.value.lo))
       val high    : Opt[Double] = trailArg(descr = "Highest parameter value", default = Some(default.value.hi))
@@ -308,18 +306,18 @@ object ParamSpecObjView extends ObjListView.Factory {
     ))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = ParamSpec.Obj.newConst[S](value)
+    val obj0  = ParamSpec.Obj.newConst[T](value)
     val obj   = if (const) obj0 else ParamSpec.Obj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  private final class ViewImpl[S <: Sys[S]](objH: stm.Source[S#Tx, ParamSpec.Obj[S]], val editable: Boolean)
-                                           (implicit val universe: Universe[S],
+  private final class ViewImpl[T <: Txn[T]](objH: Source[T, ParamSpec.Obj[T]], val editable: Boolean)
+                                           (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends UniverseView[S] with View.Editable[S] with ComponentHolder[Component] {
+    extends UniverseView[T] with View.Editable[T] with ComponentHolder[Component] {
 
     type C = Component
 
@@ -327,9 +325,9 @@ object ParamSpecObjView extends ObjListView.Factory {
     private[this] var panel       : PanelImpl         = _
     private[this] val _dirty      : Ref[Boolean]      = Ref(false)
     private[this] var actionApply : Action            = _
-    private[this] var observer    : Disposable[S#Tx]  = _
+    private[this] var observer    : Disposable[T]  = _
 
-    def init(spec0: ParamSpec.Obj[S])(implicit tx: S#Tx): this.type = {
+    def init(spec0: ParamSpec.Obj[T])(implicit tx: T): this.type = {
       val spec0V = spec0.value
       deferTx(guiInit(spec0V))
       observer = spec0.changed.react { implicit tx => upd =>
@@ -369,7 +367,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       }
     }
 
-    def dirty(implicit tx: S#Tx): Boolean = _dirty.get(tx.peer)
+    def dirty(implicit tx: T): Boolean = _dirty.get(tx.peer)
 
     private def updateDirty(): Unit = {
       val specNowV = panel.spec
@@ -384,8 +382,8 @@ object ParamSpecObjView extends ObjListView.Factory {
       val editOpt = cursor.step { implicit tx =>
         objH() match {
           case ParamSpec.Obj.Var(pVr) =>
-            val pVal  = ParamSpec.Obj.newConst[S](newSpec)
-            val edit  = EditVar.Expr[S, ParamSpec, ParamSpec.Obj](s"Edit $humanName", pVr, pVal)
+            val pVal  = ParamSpec.Obj.newConst[T](newSpec)
+            val edit  = EditVar.Expr[T, ParamSpec, ParamSpec.Obj](s"Edit $humanName", pVr, pVal)
             Some(edit)
           case _ => None
         }
@@ -397,23 +395,23 @@ object ParamSpecObjView extends ObjListView.Factory {
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = observer.dispose()
+    def dispose()(implicit tx: T): Unit = observer.dispose()
   }
 
-  private final class FrameImpl[S <: Sys[S]](val view: ViewImpl[S],
-                                             name: CellView[S#Tx, String])
-    extends WindowImpl[S](name) with Veto[S#Tx] {
+  private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
+                                             name: CellView[T, String])
+    extends WindowImpl[T](name) with Veto[T] {
 
 //    resizable = false
 
-    override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+    override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.editable || !view.dirty) None else Some(this)
 
     private def _vetoMessage = "The object has been edited."
 
-    def vetoMessage(implicit tx: S#Tx): String = _vetoMessage
+    def vetoMessage(implicit tx: T): String = _vetoMessage
 
-    def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] = {
+    def tryResolveVeto()(implicit tx: T): Future[Unit] = {
       val p = Promise[Unit]()
       deferTx {
         val message = s"${_vetoMessage}\nDo you want to save the changes?"
@@ -436,34 +434,34 @@ object ParamSpecObjView extends ObjListView.Factory {
     }
   }
 
-  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, ParamSpec.Obj[S]],
+  private final class Impl[T <: Txn[T]](val objH: Source[T, ParamSpec.Obj[T]],
                                         var value: ParamSpec, val isListCellEditable: Boolean)
-    extends ParamSpecObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.SimpleExpr[S, ParamSpec, ParamSpec.Obj]
+    extends ParamSpecObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.SimpleExpr[T, ParamSpec, ParamSpec.Obj]
       with ObjListViewImpl.StringRenderer { listObjView =>
 
     def factory: ObjView.Factory = ParamSpecObjView
 
     def exprType: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
 
-    def expr(implicit tx: S#Tx): ParamSpec.Obj[S] = obj
+    def expr(implicit tx: T): ParamSpec.Obj[T] = obj
 
     def isViewable: Boolean = true
 
     def convertEditValue(v: Any): Option[ParamSpec] = None
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       implicit val undo: UndoManager = UndoManager()
       val _obj  = obj
-      val view  = new ViewImpl[S](objH, editable = isListCellEditable).init(_obj)
+      val view  = new ViewImpl[T](objH, editable = isListCellEditable).init(_obj)
       val nameView = CellView.name(_obj)
-      val fr    = new FrameImpl[S](view, nameView).init()
+      val fr    = new FrameImpl[T](view, nameView).init()
       Some(fr)
     }
   }
 }
-trait ParamSpecObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = ParamSpec.Obj[S]
+trait ParamSpecObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = ParamSpec.Obj[T]
 }

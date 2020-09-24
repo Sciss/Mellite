@@ -14,16 +14,16 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.artifact.ArtifactLocation
+import de.sciss.lucre.ArtifactLocation
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.{ArtifactLocationViewImpl => Impl}
 import de.sciss.synth.proc.Universe
 
 object ArtifactLocationView {
-  def apply[S <: Sys[S]](obj: ArtifactLocation[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undo: UndoManager): ArtifactLocationView[S] =
+  def apply[T <: Txn[T]](obj: ArtifactLocation[T])
+                        (implicit tx: T, universe: Universe[T],
+                         undo: UndoManager): ArtifactLocationView[T] =
     Impl(obj)
 }
-trait ArtifactLocationView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S]
+trait ArtifactLocationView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]

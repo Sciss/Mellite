@@ -20,9 +20,9 @@ import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
 
 object NuagesEditorFrame {
-  def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S]): NuagesEditorFrame[S] =
-    Impl[S](obj)
+  def apply[T <: Txn[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T]): NuagesEditorFrame[T] =
+    Impl[T](obj)
 }
-trait NuagesEditorFrame[S <: Sys[S]] extends Window[S] {
-  override def view: NuagesEditorView[S]
+trait NuagesEditorFrame[T <: Txn[T]] extends Window[T] {
+  override def view: NuagesEditorView[T]
 }

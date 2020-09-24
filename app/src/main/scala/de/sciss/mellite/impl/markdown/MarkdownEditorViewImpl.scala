@@ -44,16 +44,16 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
   def install(): Unit =
     MarkdownEditorView.peer = this
 
-  def apply[S <: SSys[S]](obj: Markdown[S], showEditor: Boolean, bottom: ISeq[View[S]])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undoManager: UndoManager): MarkdownEditorView[S] = {
+  def apply[S <: SSys[T]](obj: Markdown[T], showEditor: Boolean, bottom: ISeq[View[T]])
+                        (implicit tx: T, universe: Universe[T],
+                         undoManager: UndoManager): MarkdownEditorView[T] = {
     val editable = obj match {
       case Markdown.Var(_) => true
       case _               => false
     }
     val textValue = obj.value
-    val renderer  = MarkdownRenderView[S](obj, embedded = true)
-    val res       = new Impl[S](renderer, tx.newHandle(obj), editable = editable, bottom = bottom)
+    val renderer  = MarkdownRenderView[T](obj, embedded = true)
+    val res       = new Impl[T](renderer, tx.newHandle(obj), editable = editable, bottom = bottom)
     res.init(textValue, showEditor = showEditor)
   }
 
@@ -71,16 +71,16 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
     protected def tabSize     : Int         = 4
   }
 
-  private final class Impl[S <: SSys[S]](val renderer: MarkdownRenderView[S],
-                                         markdownH: stm.Source[S#Tx, Markdown[S]],
+  private final class Impl[S <: SSys[T]](val renderer: MarkdownRenderView[T],
+                                         markdownH: Source[T, Markdown[T]],
                                          editable: Boolean,
-                                         bottom: ISeq[View[S]])
+                                         bottom: ISeq[View[T]])
                                         (implicit undoManager: UndoManager)
-    extends ComponentHolder[Component] with MarkdownEditorView[S] with ModelImpl[MarkdownEditorView.Update] { impl =>
+    extends ComponentHolder[Component] with MarkdownEditorView[T] with ModelImpl[MarkdownEditorView.Update] { impl =>
 
     type C = Component
 
-    implicit val universe: Universe[S] = renderer.universe
+    implicit val universe: Universe[T] = renderer.universe
 
     private[this] val _dirty = Ref(false)
 
@@ -104,15 +104,15 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
 
     protected def currentText: String = paneImpl.editor.text
 
-    def dispose()(implicit tx: S#Tx): Unit = ()
+    def dispose()(implicit tx: T): Unit = ()
 
     def undoAction: Action = Action.wrap(paneImpl.editor.peer.getActionMap.get("undo"))
     def redoAction: Action = Action.wrap(paneImpl.editor.peer.getActionMap.get("redo"))
 
-    private def saveText(newTextValue: String)(implicit tx: S#Tx): Option[UndoableEdit] =
+    private def saveText(newTextValue: String)(implicit tx: T): Option[UndoableEdit] =
       if (!editable) None else Markdown.Var.unapply(markdownH()).map { vr =>
-        val newMarkdown = Markdown.newConst[S](newTextValue)
-        EditVar.Expr[S, Markdown.Value, Markdown]("Change Source Markdown", vr, newMarkdown)
+        val newMarkdown = Markdown.newConst[T](newTextValue)
+        EditVar.Expr[T, Markdown.Value, Markdown]("Change Source Markdown", vr, newMarkdown)
       }
 
     private def addEditAndClear(edit: UndoableEdit): Unit = {
@@ -134,7 +134,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
       editOpt.foreach(addEditAndClear)
     }
 
-    def markdown(implicit tx: S#Tx): Markdown[S] = markdownH()
+    def markdown(implicit tx: T): Markdown[T] = markdownH()
 
     private def renderAndShow(): Unit = {
       val t = currentText
@@ -145,7 +145,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
       tabs.selection.index = 1
     }
 
-    def init(initialText: String, showEditor: Boolean)(implicit tx: S#Tx): this.type = {
+    def init(initialText: String, showEditor: Boolean)(implicit tx: T): this.type = {
       deferTx(guiInit(initialText, showEditor = showEditor))
       this
     }

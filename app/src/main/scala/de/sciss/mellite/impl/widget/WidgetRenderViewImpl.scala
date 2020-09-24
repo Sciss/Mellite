@@ -40,29 +40,29 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 object WidgetRenderViewImpl {
-  def apply[S <: SSys[S]](init: Widget[S], bottom: ISeq[View[S]], embedded: Boolean)
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          undoManager: UndoManager[S]): WidgetRenderView[S] =
-    new Impl[S](bottom, embedded = embedded).init(init)
+  def apply[S <: SSys[T]](init: Widget[T], bottom: ISeq[View[T]], embedded: Boolean)
+                         (implicit tx: T, universe: Universe[T],
+                          undoManager: UndoManager[T]): WidgetRenderView[T] =
+    new Impl[T](bottom, embedded = embedded).init(init)
 
-  private final class Impl[S <: SSys[S]](bottom: ISeq[View[S]], embedded: Boolean)
-                                        (implicit val universe: Universe[S], val undoManager: UndoManager[S])
-    extends WidgetRenderView[S]
+  private final class Impl[S <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
+                                        (implicit val universe: Universe[T], val undoManager: UndoManager[T])
+    extends WidgetRenderView[T]
       with ComponentHolder[Component]
-      /*with ObservableImpl[S, WidgetRenderView.Update[S]]*/ with ZoomSupport { impl =>
+      /*with ObservableImpl[T, WidgetRenderView.Update[T]]*/ with ZoomSupport { impl =>
 
     type C = Component
 
-    private[this] val widgetRef   = Ref.make[(stm.Source[S#Tx, Widget[S]], Disposable[S#Tx])]()
+    private[this] val widgetRef   = Ref.make[(Source[T, Widget[T]], Disposable[T])]()
     private[this] val graphRef    = Ref.make[Widget.Graph]()
-    private[this] val viewRef     = Ref(Option.empty[(View[S], Disposable[S#Tx])])
+    private[this] val viewRef     = Ref(Option.empty[(View[T], Disposable[T])])
 //    private[this] val viewInit    = Ref(-2) // -2 is special code for "no previous view"
 
     //    private[this] var paneRender: Component   = _
     private[this] var paneBorder: BorderPanelWithAdd = _
 
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       widgetRef()._2.dispose()
 //      universe.scheduler.cancel(viewInit.swap(-1))
       viewRef.swap(None).foreach { tup =>
@@ -71,15 +71,15 @@ object WidgetRenderViewImpl {
       }
     }
 
-    def widget(implicit tx: S#Tx): Widget[S] = widgetRef()._1.apply()
+    def widget(implicit tx: T): Widget[T] = widgetRef()._1.apply()
 
-    def init(obj: Widget[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: Widget[T])(implicit tx: T): this.type = {
       deferTx(guiInit())
       widget = obj
       this
     }
 
-    def widget_=(w: Widget[S])(implicit tx: S#Tx): Unit = {
+    def widget_=(w: Widget[T])(implicit tx: T): Unit = {
       val obs = w.changed.react { implicit tx => upd =>
         upd.changes.foreach {
           case GraphChange(Change(_, now)) =>
@@ -120,7 +120,7 @@ object WidgetRenderViewImpl {
         }
       }
 
-    def setGraph(g: Graph)(implicit tx: S#Tx): Unit = {
+    def setGraph(g: Graph)(implicit tx: T): Unit = {
       val old = graphRef.swap(g)
       if (g != old) {
 //        val sch = universe.scheduler
@@ -131,8 +131,8 @@ object WidgetRenderViewImpl {
         // N.B. we have to use `try` instead of `Try` because
         // `MissingIn` is a `ControlThrowable` which would not be caught.
         val vTry = try {
-          implicit val ctx: Context[S] = ExprContext(Some(tx.newHandle(widget)))
-          val res   = g.expand[S]
+          implicit val ctx: Context[T] = ExprContext(Some(tx.newHandle(widget)))
+          val res   = g.expand[T]
 
 //          if (hadOld) {
 //            // we give it a delay in order to work-around problems

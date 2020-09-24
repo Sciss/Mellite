@@ -24,10 +24,10 @@ import de.sciss.synth.proc.{Universe, Widget}
 import scala.collection.immutable.{Seq => ISeq}
 
 object WidgetEditorView {
-  def apply[S <: SSys[S]](obj: Widget[S], showEditor: Boolean = true, bottom: ISeq[View[S]] = Nil)
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          undoManager: UndoManager): WidgetEditorView[S] =
-    WidgetEditorViewImpl[S](obj, showEditor = showEditor, bottom = bottom)
+  def apply[S <: SSys[T]](obj: Widget[T], showEditor: Boolean = true, bottom: ISeq[View[T]] = Nil)
+                         (implicit tx: T, universe: Universe[T],
+                          undoManager: UndoManager): WidgetEditorView[T] =
+    WidgetEditorViewImpl[T](obj, showEditor = showEditor, bottom = bottom)
 
   sealed trait Update
   final case class DirtyChange(value: Boolean ) extends Update
@@ -37,10 +37,10 @@ object WidgetEditorView {
   final case object EditorTab   extends Tab
   final case object RendererTab extends Tab
 }
-trait WidgetEditorView[S <: Sys[S]] extends UniverseView[S] with Model[WidgetEditorView.Update] {
-  def codeView: CodeView[S, Widget.Graph]
+trait WidgetEditorView[T <: Txn[T]] extends UniverseView[T] with Model[WidgetEditorView.Update] {
+  def codeView: CodeView[T, Widget.Graph]
 
-  def renderer: WidgetRenderView[S]
+  def renderer: WidgetRenderView[T]
 
   def currentTab: WidgetEditorView.Tab
 

@@ -14,16 +14,16 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.audiocue.{AudioCueFrameImpl => Impl}
 import de.sciss.synth.proc.{AudioCue, Universe}
 
 object AudioCueFrame {
-  def apply[S <: Sys[S]](obj: AudioCue.Obj[S])(implicit tx: S#Tx, universe: Universe[S]): AudioCueFrame[S] =
+  def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueFrame[T] =
     Impl(obj)
 }
 
-trait AudioCueFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  def view: AudioCueView[S]
-  // def document : Workspace[S]
+trait AudioCueFrame[T <: Txn[T]] extends lucre.swing.Window[T] {
+  def view: AudioCueView[T]
+  // def document : Workspace[T]
 }

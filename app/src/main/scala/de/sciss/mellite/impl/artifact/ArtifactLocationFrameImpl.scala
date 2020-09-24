@@ -14,17 +14,17 @@
 package de.sciss.mellite.impl.artifact
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.artifact.ArtifactLocation
+import de.sciss.lucre.ArtifactLocation
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ArtifactLocationObjView.humanName
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationView}
 import de.sciss.synth.proc.Universe
 
 object ArtifactLocationFrameImpl {
-  def apply[S <: Sys[S]](obj: ArtifactLocation[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): ArtifactLocationFrame[S] = {
+  def apply[T <: Txn[T]](obj: ArtifactLocation[T])
+                        (implicit tx: T, universe: Universe[T]): ArtifactLocationFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
     val afv       = ArtifactLocationView(obj)
     val name      = CellView.name(obj)
@@ -33,8 +33,8 @@ object ArtifactLocationFrameImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](/* val document: Workspace[S], */ val view: ArtifactLocationView[S],
-                                        name: CellView[S#Tx, String])
-    extends WindowImpl[S](name.map(n => s"$n : $humanName"))
-      with ArtifactLocationFrame[S]
+  private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: ArtifactLocationView[T],
+                                        name: CellView[T, String])
+    extends WindowImpl[T](name.map(n => s"$n : $humanName"))
+      with ArtifactLocationFrame[T]
 }

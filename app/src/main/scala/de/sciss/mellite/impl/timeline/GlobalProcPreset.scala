@@ -29,7 +29,7 @@ object GlobalProcPreset {
   trait Controls {
     def component: Component
 
-    def make[S <: Sys[S]]()(implicit tx: S#Tx): Proc[S]
+    def make[T <: Txn[T]]()(implicit tx: T): Proc[T]
   }
 
   private trait Impl extends GlobalProcPreset {
@@ -38,17 +38,17 @@ object GlobalProcPreset {
     type Ctl <: Controls
 
     protected def source(controls: Ctl): Option[String]
-    protected def graph[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): SynthGraphObj[S]
+    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T]
     protected def hasOutput: Boolean
 
-    protected def configure[S <: Sys[S]](proc: Proc[S], controls: Ctl)(implicit tx: S#Tx): Unit
+    protected def configure[T <: Txn[T]](proc: Proc[T], controls: Ctl)(implicit tx: T): Unit
 
     // ---- impl ----
 
     override def toString: String = name
 
-    final def make[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): Proc[S] = {
-      val p = Proc[S]()
+    final def make[T <: Txn[T]](controls: Ctl)(implicit tx: T): Proc[T] = {
+      val p = Proc[T]()
       p.graph() = graph(controls)
       source(controls).foreach(s => p.attr.put(Proc.attrSource, Code.Obj.newVar(Code.SynthGraph(s))))
       if (hasOutput) p.outputs.add(Proc.mainOut)
@@ -62,19 +62,19 @@ object GlobalProcPreset {
 
     protected def source(controls: Ctl): Option[String] = None
 
-    protected def graph[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): SynthGraphObj[S] = SynthGraphObj.empty[S]
+    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T] = SynthGraphObj.empty[T]
 
     protected def hasOutput = false
 
     final class Ctl extends Controls {
       val component: Component = Swing.HGlue
 
-      def make[S <: Sys[S]]()(implicit tx: S#Tx): Proc[S] = self.make(this)
+      def make[T <: Txn[T]]()(implicit tx: T): Proc[T] = self.make(this)
     }
 
     def mkControls() = new Ctl
 
-    protected def configure[S <: Sys[S]](proc: Proc[S], controls: Ctl)(implicit tx: S#Tx): Unit = ()
+    protected def configure[T <: Txn[T]](proc: Proc[T], controls: Ctl)(implicit tx: T): Unit = ()
   }
 
   private trait MToN extends Impl { self =>
@@ -102,7 +102,7 @@ object GlobalProcPreset {
       )
     }
 
-    final protected def graph[S <: Sys[S]](controls: Ctl)(implicit tx: S#Tx): SynthGraphObj[S] = {
+    final protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T] = {
       val numInChannels  = numInputChannels (controls)
       val numOutChannels = numOutputChannels(controls)
       // Note: be careful when you change this to take care of the source code string above
@@ -131,12 +131,12 @@ object GlobalProcPreset {
 
       val component: Component = new FlowPanel(new Label("N:"), new Spinner(mNumChannels))
 
-      def make[S <: Sys[S]]()(implicit tx: S#Tx): Proc[S] = self.make(this)
+      def make[T <: Txn[T]]()(implicit tx: T): Proc[T] = self.make(this)
     }
 
     final def mkControls() = new Ctl
 
-    final protected def configure[S <: Sys[S]](proc: Proc[S], controls: Ctl)(implicit tx: S#Tx): Unit = ()
+    final protected def configure[T <: Txn[T]](proc: Proc[T], controls: Ctl)(implicit tx: T): Unit = ()
   }
 
   private object OneToN extends MToN {

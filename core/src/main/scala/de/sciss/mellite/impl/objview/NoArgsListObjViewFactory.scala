@@ -15,8 +15,8 @@ package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
 import de.sciss.desktop.OptionPane
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.{GUI, ObjListView}
 import de.sciss.synth.proc.Universe
@@ -29,10 +29,10 @@ import de.sciss.synth.proc.Universe
 trait NoArgsListObjViewFactory extends ObjListView.Factory {
   def canMakeObj  : Boolean   = true
 
-  type Config[S <: stm.Sys[S]] = String
+  type Config[T <: LTxn[T]] = String
 
-  override def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])(done: MakeResult[S] => Unit)
-                                          (implicit universe: Universe[S]): Unit = {
+  override def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
+                                          (implicit universe: Universe[T]): Unit = {
     val opt = OptionPane.textInput(message = s"Enter initial ${prefix.toLowerCase} name:",
       messageType = OptionPane.Message.Question, initial = prefix)
     opt.title = s"New $prefix"
@@ -40,8 +40,8 @@ trait NoArgsListObjViewFactory extends ObjListView.Factory {
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args)
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args)
     p.parse(p.name())
   }
 }

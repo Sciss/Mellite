@@ -23,7 +23,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.{confluent, stm}
+import de.sciss.lucre.{Cursor, Disposable, confluent, stm}
 import de.sciss.mellite.Mellite.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
@@ -40,14 +40,15 @@ import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, Formatted
 
 object CursorsFrameImpl {
   type S = proc.Confluent
-  type D = S#D
+  type T = proc.Confluent .Txn
+  type D = proc.Durable   .Txn
 
-  def apply(workspace: Workspace.Confluent)(implicit tx: D#Tx, universe: Universe[S]): DocumentCursorsFrame = {
+  def apply(workspace: Workspace.Confluent)(implicit tx: D, universe: Universe[T]): DocumentCursorsFrame = {
     val root      = workspace.cursors
     val rootView  = createView(workspace, parent = None, elem = root)
     val _view: ViewImpl = new ViewImpl(rootView)(workspace, tx.system, universe) {
       self =>
-      val observer: Disposable[D#Tx] = root.changed.react { implicit tx =>upd =>
+      val observer: Disposable[D] = root.changed.react { implicit tx =>upd =>
         log(s"DocumentCursorsFrame update $upd")
         self.elemUpdated(rootView, upd.changes)
       }
@@ -63,8 +64,8 @@ object CursorsFrameImpl {
     res
   }
 
-  private def createView(document: Workspace.Confluent, parent: Option[CursorView], elem: Cursors[S, D])
-                        (implicit tx: D#Tx): CursorView = {
+  private def createView(document: Workspace.Confluent, parent: Option[CursorView], elem: Cursors[T, D])
+                        (implicit tx: D): CursorView = {
     import document._
     val name    = elem.name.value
     val created = confluent.Access.info(elem.seminal        ).timeStamp
@@ -73,7 +74,7 @@ object CursorsFrameImpl {
       name = name, created = created, updated = updated)
   }
 
-  private final class CursorView(val elem: Cursors[S, D], val parent: Option[CursorView],
+  private final class CursorView(val elem: Cursors[T, D], val parent: Option[CursorView],
                                  var childViews: Vec[CursorView], var name: String,
                                  val created: Long, var updated: Long) extends TreeNode {
 
@@ -92,18 +93,18 @@ object CursorsFrameImpl {
     def isLeaf: Boolean = childViews.isEmpty
   }
 
-  private final class FrameImpl(val view: DocumentCursorsView) // (implicit cursor: stm.Cursor[D])
+  private final class FrameImpl(val view: DocumentCursorsView) // (implicit cursor: Cursor[D])
     extends WindowImpl[D]()
     with DocumentCursorsFrame {
 
     impl =>
 
-//    def workspace: Workspace[S] = view.workspace
+//    def workspace: Workspace[T] = view.workspace
 
     import view.{universe, workspace}
 
-    object WorkspaceClosed extends Disposable[S#Tx] {
-      def dispose()(implicit tx: S#Tx): Unit = impl.dispose()(workspace.system.durableTx(tx))
+    object WorkspaceClosed extends Disposable[T] {
+      def dispose()(implicit tx: T): Unit = impl.dispose()(workspace.system.durableTx(tx))
     }
 
     override protected def initGUI(): Unit = {
@@ -116,7 +117,7 @@ object CursorsFrameImpl {
       }
     }
 
-    override def dispose()(implicit tx: D#Tx): Unit = {
+    override def dispose()(implicit tx: D): Unit = {
       // missing from WindowImpl because of system mismatch
       workspace.removeDependent(WorkspaceClosed)
       super.dispose()
@@ -124,7 +125,7 @@ object CursorsFrameImpl {
 
     override protected def performClose(): Future[Unit] = {
       log(s"Closing workspace ${workspace.folder}")
-//      implicit val cursor: stm.Cursor[S] = workspace.cursor
+//      implicit val cursor: Cursor[T] = workspace.cursor
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }
 
@@ -132,22 +133,22 @@ object CursorsFrameImpl {
   }
 
   private abstract class ViewImpl(val _root: CursorView)
-                                 (implicit val workspace: Workspace.Confluent, cursorD: stm.Cursor[D],
-                                  val universe: Universe[S])
+                                 (implicit val workspace: Workspace.Confluent, cursorD: Cursor[D],
+                                  val universe: Universe[T])
     extends ComponentHolder[Component] with DocumentCursorsView {
 
     type Node = CursorView
     type C    = Component
 
-    protected def observer: Disposable[D#Tx]
+    protected def observer: Disposable[D]
 
-    private var mapViews = Map.empty[Cursors[S, D], Node]
+    private var mapViews = Map.empty[Cursors[T, D], Node]
 
 //    final def view   = this
 
-    final def cursor: stm.Cursor[S] = confluent.Cursor.wrap(workspace.cursors.cursor)(workspace.system)
+    final def cursor: Cursor[T] = confluent.Cursor.wrap(workspace.cursors.cursor)(workspace.system)
 
-    def dispose()(implicit tx: D#Tx): Unit = {
+    def dispose()(implicit tx: D): Unit = {
       // implicit val dtx = workspace.system.durableTx(tx)
       observer.dispose()
       //      // document.removeDependent(this)
@@ -205,7 +206,7 @@ object CursorsFrameImpl {
         case (Some(_), seminalDate: Date) =>
           val parentElem = parent.elem
           confluent.Cursor.wrap(parentElem.cursor)(workspace.system).step { implicit tx =>
-            implicit val dtx: D#Tx = tx.durable // proc.Confluent.durable(tx)
+            implicit val dtx: D = tx.durable // proc.Confluent.durable(tx)
             val seminal = tx.inputAccess.takeUntil(seminalDate.getTime)
             // lucre.event.showLog = true
             parentElem.addChild(seminal)
@@ -215,7 +216,7 @@ object CursorsFrameImpl {
       }
     }
 
-    private def elemRemoved(parent: Node, idx: Int, child: Cursors[S, D])(implicit tx: D#Tx): Unit =
+    private def elemRemoved(parent: Node, idx: Int, child: Cursors[T, D])(implicit tx: D): Unit =
       mapViews.get(child).foreach { cv =>
         // NOTE: parent.children is only updated on the GUI thread through the model.
         // no way we could verify the index here!!
@@ -231,12 +232,12 @@ object CursorsFrameImpl {
         }
       }
 
-    final def addChildren(parentView: Node, parent: Cursors[S, D])(implicit tx: D#Tx): Unit =
+    final def addChildren(parentView: Node, parent: Cursors[T, D])(implicit tx: D): Unit =
       parent.descendants.toList.zipWithIndex.foreach { case (c, ci) =>
         elemAdded(parent = parentView, idx = ci, child = c)
       }
 
-    private def elemAdded(parent: Node, idx: Int, child: Cursors[S, D])(implicit tx: D#Tx): Unit = {
+    private def elemAdded(parent: Node, idx: Int, child: Cursors[T, D])(implicit tx: D): Unit = {
       val cv   = createView(workspace, parent = Some(parent), elem = child)
       // NOTE: parent.children is only updated on the GUI thread through the model.
       // no way we could verify the index here!!
@@ -250,7 +251,7 @@ object CursorsFrameImpl {
       addChildren(cv, child)
     }
 
-    final def elemUpdated(v: Node, upd: Vec[Cursors.Change[S, D]])(implicit tx: D#Tx): Unit =
+    final def elemUpdated(v: Node, upd: Vec[Cursors.Change[T, D]])(implicit tx: D): Unit =
       upd.foreach {
         case Cursors.ChildAdded  (idx, child) => elemAdded  (v, idx, child)
         case Cursors.ChildRemoved(idx, child) => elemRemoved(v, idx, child)
@@ -264,7 +265,7 @@ object CursorsFrameImpl {
           }
       }
 
-    final def init()(implicit tx: D#Tx): Unit = deferTx(guiInit())
+    final def init()(implicit tx: D): Unit = deferTx(guiInit())
 
     private def guiInit(): Unit = {
       _model = new ElementTreeModel
@@ -340,14 +341,14 @@ object CursorsFrameImpl {
         t.selection.paths.foreach { path =>
           val view  = path.last
           val elem  = view.elem
-          implicit val cursor: confluent.Cursor[S, D] = confluent.Cursor.wrap(elem.cursor)(workspace.system)
-          GUI.step[S]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
+          implicit val cursor: confluent.Cursor[T, D] = confluent.Cursor.wrap(elem.cursor)(workspace.system)
+          GUI.step[T]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
             implicit val dtxView: Confluent.Txn => Durable.Txn = workspace.system.durableTx _ // (tx)
             implicit val dtx: Durable.Txn = dtxView(tx)
             // XXX TODO - every branch gets a fresh universe. Ok?
-            implicit val universe: Universe[S] = Universe(GenContext[S](), Scheduler[S](), Mellite.auralSystem)
-            val name = CellView.const[S, String](s"${workspace.name} / ${elem.name.value}")
-            FolderFrame[S](name = name, isWorkspaceRoot = false)
+            implicit val universe: Universe[T] = Universe(GenContext[T](), Scheduler[T](), Mellite.auralSystem)
+            val name = CellView.const[T, String](s"${workspace.name} / ${elem.name.value}")
+            FolderFrame[T](name = name, isWorkspaceRoot = false)
           }
         }
       }

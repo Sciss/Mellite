@@ -22,18 +22,18 @@ import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
 
 object NuagesEditorFrameImpl {
-  def apply[S <: Sys[S]](obj: Nuages[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): NuagesEditorFrame[S] = {
+  def apply[T <: Txn[T]](obj: Nuages[T])
+                        (implicit tx: T, universe: Universe[T]): NuagesEditorFrame[T] = {
     implicit val undo: UndoManager = UndoManager()
     val view          = NuagesEditorView(obj)
     val name          = CellView.name(obj)
-    val res           = new FrameImpl[S](view, name)
+    val res           = new FrameImpl[T](view, name)
     res.init()
     res
   }
 
-  private final class FrameImpl[S <: Sys[S]](val view: NuagesEditorView[S], name: CellView[S#Tx, String])
-    extends WindowImpl[S](name) with NuagesEditorFrame[S] {
+  private final class FrameImpl[T <: Txn[T]](val view: NuagesEditorView[T], name: CellView[T, String])
+    extends WindowImpl[T](name) with NuagesEditorFrame[T] {
 
     override protected def initGUI(): Unit = {
       FolderFrameImpl.addDuplicateAction(this, view.actionDuplicate) // XXX TODO -- all hackish

@@ -22,8 +22,8 @@ import de.sciss.span.Span
 import javax.swing.event.MouseInputAdapter
 
 // XXX TODO --- DRY with DraggingTool
-trait RubberBandTool[S <: Sys[S], A, Y, Child] {
-  _: CollectionToolLike[S, A, Y, Child] =>
+trait RubberBandTool[T <: Txn[T], A, Y, Child] {
+  _: CollectionToolLike[T, A, Y, Child] =>
 
   final protected def mkRubber(e: MouseEvent, modelY: Y, pos: Long): Unit =
     new Rubber(e, firstModelY = modelY, firstPos = pos)

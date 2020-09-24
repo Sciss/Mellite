@@ -41,10 +41,10 @@ class DocumentHandlerImpl
   def removeDocument(u: Document): Unit =
     Mellite.withUniverse(u)(removeUniverse(_))
 
-  private def addUniverse[S <: Sys[S]](u: Universe[S]): Unit =
+  private def addUniverse[T <: Txn[T]](u: Universe[T]): Unit =
     u.cursor.step { implicit tx => peer.addDocument(u) }
 
-  private def removeUniverse[S <: Sys[S]](u: Universe[S]): Unit =
+  private def removeUniverse[T <: Txn[T]](u: Universe[T]): Unit =
     u.cursor.step { implicit tx => u.workspace.dispose() }
 
   def documents: Iterator[Document] = peer.allDocuments

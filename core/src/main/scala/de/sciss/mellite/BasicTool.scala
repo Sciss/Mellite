@@ -13,10 +13,10 @@
 
 package de.sciss.mellite
 
-import java.awt.Cursor
+import java.awt
 
-import de.sciss.lucre.stm
 import de.sciss.model.Model
+import de.sciss.lucre.{Cursor, Txn => LTxn}
 import de.sciss.span.Span
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -45,9 +45,9 @@ object BasicTool {
   /** Direct adjustment without drag period. */
   case class Adjust[A](value: A) extends Update[A]
 }
-trait BasicTool[S <: stm.Sys[S], A] extends Model[BasicTool.Update[A]] {
+trait BasicTool[T <: LTxn[T], A] extends Model[BasicTool.Update[A]] {
   /** The mouse cursor used when the tool is active. */
-  def defaultCursor: Cursor
+  def defaultCursor: awt.Cursor
   /** The icon to use in a tool bar. */
   def icon: Icon
   /** The human readable name of the tool. */
@@ -58,7 +58,7 @@ trait BasicTool[S <: stm.Sys[S], A] extends Model[BasicTool.Update[A]] {
   /** Called to deactivate the tool before switching to a different tool. */
   def uninstall(component: Component): Unit
 
-  // def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[GraphemeProcView[S]]): Unit
+  // def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[GraphemeProcView[T]]): Unit
 
   /** Called after the end of a mouse drag gesture. If this constitutes a
     * valid edit, the method should return the resulting undoable edit.
@@ -68,5 +68,5 @@ trait BasicTool[S <: stm.Sys[S], A] extends Model[BasicTool.Update[A]] {
     * @return either `Some` edit or `None` if the action does not constitute an
     *         edit or the edit parameters are invalid.
     */
-  def commit(drag: A)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
+  def commit(drag: A)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit]
 }

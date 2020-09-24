@@ -15,17 +15,17 @@ package de.sciss.mellite
 
 import de.sciss.desktop.FileDialog
 import de.sciss.lucre
-import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.impl.artifact.{ArtifactFrameImpl => Impl}
+import de.sciss.lucre.Artifact
+import de.sciss.lucre.synth.Txn
+import de.sciss.mellite.impl.artifact.ArtifactFrameImpl
 import de.sciss.synth.proc.Universe
 
 object ArtifactFrame {
-  def apply[S <: Sys[S]](obj: Artifact[S], mode: Boolean, initMode: FileDialog.Mode = FileDialog.Save)
-                        (implicit tx: S#Tx, universe: Universe[S]): ArtifactFrame[S] =
-    Impl(obj, mode = mode, initMode = initMode)
+  def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode = FileDialog.Save)
+                        (implicit tx: T, universe: Universe[T]): ArtifactFrame[T] =
+    ArtifactFrameImpl(obj, mode = mode, initMode = initMode)
 }
 
-trait ArtifactFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  def view: ArtifactView[S]
+trait ArtifactFrame[T <: Txn[T]] extends lucre.swing.Window[T] {
+  def view: ArtifactView[T]
 }

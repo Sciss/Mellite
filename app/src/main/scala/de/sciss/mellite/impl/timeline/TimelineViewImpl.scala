@@ -66,9 +66,9 @@ object TimelineViewImpl extends TimelineView.Companion {
 
   import de.sciss.mellite.Mellite.{logTimeline => logT}
 
-  def apply[S <: Sys[S]](obj: Timeline[S])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undo: UndoManager): TimelineView[S] = {
+  def apply[T <: Txn[T]](obj: Timeline[T])
+                        (implicit tx: T, universe: Universe[T],
+                         undo: UndoManager): TimelineView[T] = {
     val sampleRate  = TimeRef.SampleRate
     val visStart    = 0L // obj.firstEvent.getOrElse(0L)
     val lastOpt     = obj.lastEvent
@@ -89,70 +89,70 @@ object TimelineViewImpl extends TimelineView.Companion {
     // (other than through a GUI driven data structure). thus, it
     // only call pv.disposeGUI() and the procMap and scanMap must be
     // freed directly...
-    val viewMap = tx.newInMemoryIdMap[ObjTimelineView[S]]
+    val viewMap = tx.newInMemoryIdMap[ObjTimelineView[T]]
 
-    val transport = Transport[S](universe) // = proc.Transport [S, workspace.I](group, sampleRate = sampleRate)
+    val transport = Transport[T](universe) // = proc.Transport [T, workspace.I](group, sampleRate = sampleRate)
     transport.addObject(obj)
 
-    // val globalSelectionModel = SelectionModel[S, ProcView[S]]
-    val selectionModel = SelectionModel[S, ObjTimelineView[S]]
+    // val globalSelectionModel = SelectionModel[T, ProcView[T]]
+    val selectionModel = SelectionModel[T, ObjTimelineView[T]]
     val global = GlobalProcsView(timeline, selectionModel)
 
     import universe.cursor
     val transportView = TransportView(transport, tlm, hasMillis = true, hasLoop = true)
-    val tlView = new Impl[S](timelineH, viewMap, /* scanMap, */ tlm, selectionModel, global, transportView, tx)
+    val tlView = new Impl[T](timelineH, viewMap, /* scanMap, */ tlm, selectionModel, global, transportView, tx)
 
     tlView.init(obj)
   }
 
-  private final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Timeline[S]],
-                                        val viewMap: ObjTimelineView.Map[S],
-                                        //                                        val scanMap: ProcObjView.ScanMap[S],
+  private final class Impl[T <: Txn[T]](val objH: Source[T, Timeline[T]],
+                                        val viewMap: ObjTimelineView.Map[T],
+                                        //                                        val scanMap: ProcObjView.ScanMap[T],
                                         val timelineModel: TimelineModel.Modifiable,
-                                        val selectionModel: SelectionModel[S, ObjTimelineView[S]],
-                                        val globalView: GlobalProcsView[S],
-                                        val transportView: TransportView[S], tx0: S#Tx)
-    extends TimelineView[S] with TimelineObjView.Basic[S]
-      with TimelineViewBaseImpl[S, Int, ObjTimelineView[S]]
-      with TimelineActions[S]
+                                        val selectionModel: SelectionModel[T, ObjTimelineView[T]],
+                                        val globalView: GlobalProcsView[T],
+                                        val transportView: TransportView[T], tx0: T)
+    extends TimelineView[T] with TimelineObjView.Basic[T]
+      with TimelineViewBaseImpl[T, Int, ObjTimelineView[T]]
+      with TimelineActions[T]
       with ComponentHolder[Component]
-      with ObjTimelineView.Context[S]
-      with AuxContextImpl[S] {
+      with ObjTimelineView.Context[T]
+      with AuxContextImpl[T] {
 
     impl =>
 
 
     type C = Component
 
-    override type Repr = Timeline[S]
+    override type Repr = Timeline[T]
 
-    implicit val universe: Universe[S] = globalView.universe
+    implicit val universe: Universe[T] = globalView.universe
 
     def undoManager: UndoManager = globalView.undoManager
 
-    private def transport: Transport[S] = transportView.transport
+    private def transport: Transport[T] = transportView.transport
 
-    private[this] var viewRange = RangedSeq.empty[ObjTimelineView[S], Long]
-    private[this] val viewSet   = TSet     .empty[ObjTimelineView[S]]
+    private[this] var viewRange = RangedSeq.empty[ObjTimelineView[T], Long]
+    private[this] val viewSet   = TSet     .empty[ObjTimelineView[T]]
 
-    var canvas      : TimelineTrackCanvasImpl[S]  = _
+    var canvas      : TimelineTrackCanvasImpl[T]  = _
 
-    protected val auxMap      : IdentifierMap[S#Id, S#Tx, Any]                = tx0.newInMemoryIdMap
-    protected val auxObservers: IdentifierMap[S#Id, S#Tx, List[AuxObserver]]  = tx0.newInMemoryIdMap
+    protected val auxMap      : IdentifierMap[S#Id, T, Any]                = tx0.newInMemoryIdMap
+    protected val auxObservers: IdentifierMap[S#Id, T, List[AuxObserver]]  = tx0.newInMemoryIdMap
 
-    private[this] lazy val toolCursor   = TimelineTool.cursor  [S](canvas)
-    private[this] lazy val toolMove     = TimelineTool.move    [S](canvas)
-    private[this] lazy val toolResize   = TimelineTool.resize  [S](canvas)
-    private[this] lazy val toolGain     = TimelineTool.gain    [S](canvas)
-    private[this] lazy val toolMute     = TimelineTool.mute    [S](canvas)
-    private[this] lazy val toolFade     = TimelineTool.fade    [S](canvas)
-    private[this] lazy val toolFunction = TimelineTool.function[S](canvas, this)
-    private[this] lazy val toolPatch    = TimelineTool.patch   [S](canvas)
-    private[this] lazy val toolAudition = TimelineTool.audition[S](canvas, this)
+    private[this] lazy val toolCursor   = TimelineTool.cursor  [T](canvas)
+    private[this] lazy val toolMove     = TimelineTool.move    [T](canvas)
+    private[this] lazy val toolResize   = TimelineTool.resize  [T](canvas)
+    private[this] lazy val toolGain     = TimelineTool.gain    [T](canvas)
+    private[this] lazy val toolMute     = TimelineTool.mute    [T](canvas)
+    private[this] lazy val toolFade     = TimelineTool.fade    [T](canvas)
+    private[this] lazy val toolFunction = TimelineTool.function[T](canvas, this)
+    private[this] lazy val toolPatch    = TimelineTool.patch   [T](canvas)
+    private[this] lazy val toolAudition = TimelineTool.audition[T](canvas, this)
 
-    def plainGroup(implicit tx: S#Tx): Timeline[S] = obj
+    def plainGroup(implicit tx: T): Timeline[T] = obj
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
+    override def dispose()(implicit tx: T): Unit = {
       super.dispose()
       transport .dispose()
       viewMap   .dispose()
@@ -165,10 +165,10 @@ object TimelineViewImpl extends TimelineView.Companion {
       clearSet(viewSet)
     }
 
-    private def clearSet[A](s: TSet[A])(implicit tx: S#Tx): Unit =
+    private def clearSet[A](s: TSet[A])(implicit tx: T): Unit =
       s.retain(_ => false)(tx.peer) // no `clear` method
 
-    private def debugCheckConsistency(info: => String)(implicit tx: S#Tx): Unit = if (DEBUG) {
+    private def debugCheckConsistency(info: => String)(implicit tx: T): Unit = if (DEBUG) {
       val check = BiGroupImpl.verifyConsistency(plainGroup, reportOnly = true)
       check.foreach { msg =>
         println(info)
@@ -177,7 +177,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       }
     }
 
-    def init(timeline: Timeline[S])(implicit tx: S#Tx): this.type = {
+    def init(timeline: Timeline[T])(implicit tx: T): this.type = {
       initAttrs(timeline)
 
       addDisposable(timeline.changed.react { implicit tx => upd =>
@@ -302,7 +302,7 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
-    private def objAdded(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]], repaint: Boolean)(implicit tx: S#Tx): Unit = {
+    private def objAdded(span: SpanLike, timed: BiGroup.Entry[T, Obj[T]], repaint: Boolean)(implicit tx: T): Unit = {
       logT(s"objAdded($span / ${TimeRef.spanToSecs(span)}, $timed)")
       // timed.span
       // val proc = timed.value
@@ -314,7 +314,7 @@ object TimelineViewImpl extends TimelineView.Companion {
 
       def doAdd(): Unit = {
         view match {
-          case pv: ProcObjView.Timeline[S] if pv.isGlobal =>
+          case pv: ProcObjView.Timeline[T] if pv.isGlobal =>
             globalView.add(pv)
           case _ =>
             viewRange += view
@@ -354,10 +354,10 @@ object TimelineViewImpl extends TimelineView.Companion {
       }}
     }
 
-    private def warnViewNotFound(action: String, timed: BiGroup.Entry[S, Obj[S]]): Unit =
+    private def warnViewNotFound(action: String, timed: BiGroup.Entry[T, Obj[T]]): Unit =
       Console.err.println(s"Warning: Timeline - $action. View for object $timed not found.")
 
-    private def objRemoved(span: SpanLike, timed: BiGroup.Entry[S, Obj[S]])(implicit tx: S#Tx): Unit = {
+    private def objRemoved(span: SpanLike, timed: BiGroup.Entry[T, Obj[T]])(implicit tx: T): Unit = {
       logT(s"objRemoved($span, $timed)")
       val id = timed.id
       viewMap.get(id).fold {
@@ -368,7 +368,7 @@ object TimelineViewImpl extends TimelineView.Companion {
         deferTx {
           selectionModel -= view
           view match {
-            case pv: ProcObjView.Timeline[S] if pv.isGlobal => globalView.remove(pv)
+            case pv: ProcObjView.Timeline[T] if pv.isGlobal => globalView.remove(pv)
             case _ =>
               viewRange -= view
               repaintAll() // XXX TODO: optimize dirty rectangle
@@ -380,15 +380,15 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     // insignificant changes are ignored, therefore one can just move the span without the track
     // by using trackCh = Change(0,0), and vice versa
-    private def objMoved(timed: BiGroup.Entry[S, Obj[S]], spanCh: Change[SpanLike], trackCh: Option[(Int, Int)])
-                (implicit tx: S#Tx): Unit = {
+    private def objMoved(timed: BiGroup.Entry[T, Obj[T]], spanCh: Change[SpanLike], trackCh: Option[(Int, Int)])
+                (implicit tx: T): Unit = {
       logT(s"objMoved(${spanCh.before} / ${TimeRef.spanToSecs(spanCh.before)} -> ${spanCh.now} / ${TimeRef.spanToSecs(spanCh.now)}, $timed)")
       viewMap.get(timed.id).fold {
         warnViewNotFound("move", timed)
       } { view =>
         deferTx {
           view match {
-            case pv: ProcObjView.Timeline[S] if pv.isGlobal => globalView.remove(pv)
+            case pv: ProcObjView.Timeline[T] if pv.isGlobal => globalView.remove(pv)
             case _ => viewRange -= view
           }
 
@@ -399,7 +399,7 @@ object TimelineViewImpl extends TimelineView.Companion {
           }
 
           view match {
-            case pv: ProcObjView.Timeline[S] if pv.isGlobal => globalView.add(pv)
+            case pv: ProcObjView.Timeline[T] if pv.isGlobal => globalView.add(pv)
             case _ =>
               viewRange += view
               repaintAll() // XXX TODO: optimize dirty rectangle
@@ -408,7 +408,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       }
     }
 
-    private def objUpdated(view: ObjTimelineView[S])(implicit tx: S#Tx): Unit = deferTx {
+    private def objUpdated(view: ObjTimelineView[T])(implicit tx: T): Unit = deferTx {
       //      if (view.isGlobal)
       //        globalView.updated(view)
       //      else
@@ -417,12 +417,12 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     // TODO - this could be defined by the view?
     // call on EDT!
-    private def defaultDropLength(view: ObjView[S], inProgress: Boolean): Long = {
+    private def defaultDropLength(view: ObjView[T], inProgress: Boolean): Long = {
       val d = view match {
-        case a: AudioCueObjView[S] =>
+        case a: AudioCueObjView[T] =>
           val v = a.value
           (v.numFrames * TimeRef.SampleRate / v.sampleRate).toLong
-        case _: ProcObjView[S] =>
+        case _: ProcObjView[T] =>
           timelineModel.sampleRate * 2 // two seconds
         case _ =>
           if (inProgress)
@@ -435,8 +435,8 @@ object TimelineViewImpl extends TimelineView.Companion {
       res
     }
 
-    private def insertAudioRegion(drop: DnD.Drop[S], drag: DnD.AudioDragLike[S],
-                                  audioCue: AudioCue.Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] =
+    private def insertAudioRegion(drop: DnD.Drop[T], drag: DnD.AudioDragLike[T],
+                                  audioCue: AudioCue.Obj[T])(implicit tx: T): Option[UndoableEdit] =
       plainGroup.modifiableOption.map { groupM =>
         logT(s"insertAudioRegion($drop, ${drag.selection}, $audioCue)")
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
@@ -448,8 +448,8 @@ object TimelineViewImpl extends TimelineView.Companion {
         edit
       }
 
-    private def performDrop(drop: DnD.Drop[S]): Boolean = {
-      def withRegions[A](fun: S#Tx => List[ObjTimelineView[S]] => Option[A]): Option[A] =
+    private def performDrop(drop: DnD.Drop[T]): Boolean = {
+      def withRegions[A](fun: T => List[ObjTimelineView[T]] => Option[A]): Option[A] =
         canvas.findChildView(drop.frame, canvas.screenToModelPos(drop.y)).flatMap { hitRegion =>
           val regions = if (selectionModel.contains(hitRegion)) selectionModel.iterator.toList else hitRegion :: Nil
           cursor.step { implicit tx =>
@@ -457,12 +457,12 @@ object TimelineViewImpl extends TimelineView.Companion {
           }
         }
 
-      def withProcRegions[A](fun: S#Tx => List[ProcObjView[S]] => Option[A]): Option[A] =
+      def withProcRegions[A](fun: T => List[ProcObjView[T]] => Option[A]): Option[A] =
         canvas.findChildView(drop.frame, canvas.screenToModelPos(drop.y)).flatMap {
-          case hitRegion: ProcObjView[S] =>
+          case hitRegion: ProcObjView[T] =>
             val regions = if (selectionModel.contains(hitRegion)) {
               selectionModel.iterator.collect {
-                case pv: ProcObjView[S] => pv
+                case pv: ProcObjView[T] => pv
               }.toList
             } else hitRegion :: Nil
 
@@ -475,12 +475,12 @@ object TimelineViewImpl extends TimelineView.Companion {
       // println(s"performDrop($drop)")
 
       val editOpt: Option[UndoableEdit] = drop.drag match {
-        case ad: DnD.AudioDrag[S] =>
+        case ad: DnD.AudioDrag[T] =>
           cursor.step { implicit tx =>
             insertAudioRegion(drop, ad, ad.source())
           }
 
-        case ed: DnD.ExtAudioRegionDrag[S] =>
+        case ed: DnD.ExtAudioRegionDrag[T] =>
           val file = ed.file
           val resOpt = cursor.step { implicit tx =>
             val ex = ObjectActions.findAudioFile(universe.workspace.root, file)
@@ -492,7 +492,7 @@ object TimelineViewImpl extends TimelineView.Companion {
           resOpt.orElse[UndoableEdit] {
             val tr = Try(AudioFile.readSpec(file)).toOption
             tr.flatMap { spec =>
-              ActionArtifactLocation.query[S](file)(implicit tx => universe.workspace.root).flatMap { either =>
+              ActionArtifactLocation.query[T](file)(implicit tx => universe.workspace.root).flatMap { either =>
                 cursor.step { implicit tx =>
                   ActionArtifactLocation.merge(either).flatMap { case (list0, locM) =>
                     val folder = universe.workspace.root
@@ -508,18 +508,18 @@ object TimelineViewImpl extends TimelineView.Companion {
             }
           }
 
-        case DnD.ObjectDrag(_, view: IntObjView[S]) => withRegions { implicit tx => regions =>
+        case DnD.ObjectDrag(_, view: IntObjView[T]) => withRegions { implicit tx => regions =>
           val intExpr = view.obj
-          Edits.setBus[S](regions.map(_.obj), intExpr)
+          Edits.setBus[T](regions.map(_.obj), intExpr)
         }
 
-        case DnD.ObjectDrag(_, view: CodeObjView[S]) => withProcRegions { implicit tx => regions =>
+        case DnD.ObjectDrag(_, view: CodeObjView[T]) => withProcRegions { implicit tx => regions =>
           val codeElem = view.obj
           import Mellite.compiler
-          Edits.setSynthGraph[S](regions.map(_.obj), codeElem)
+          Edits.setSynthGraph[T](regions.map(_.obj), codeElem)
         }
 
-        case DnD.ObjectDrag(ws, view: AudioCueObjView[S]) =>
+        case DnD.ObjectDrag(ws, view: AudioCueObjView[T]) =>
           val length  = defaultDropLength(view, inProgress = false)
           val span    = Span(0L, length)
           val ad      = DnD.AudioDrag(ws, view.objH, span)
@@ -531,21 +531,21 @@ object TimelineViewImpl extends TimelineView.Companion {
         // ; must be stated before the next match case!
         case DnD.ObjectDrag(_, `impl`) => None
 
-        case DnD.ObjectDrag(_, view /* : ObjView.Proc[S] */) => cursor.step { implicit tx =>
+        case DnD.ObjectDrag(_, view /* : ObjView.Proc[T] */) => cursor.step { implicit tx =>
           plainGroup.modifiableOption.map { group =>
             val length  = defaultDropLength(view, inProgress = false)
             val span    = Span(drop.frame, drop.frame + length)
-            val spanEx  = SpanLikeObj.newVar[S](SpanLikeObj.newConst(span))
+            val spanEx  = SpanLikeObj.newVar[T](SpanLikeObj.newConst(span))
             EditTimelineInsertObj(s"Insert ${view.humanName}", group, spanEx, view.obj)
           }
           // CompoundEdit(edits, "Insert Objects")
         }
 
-        case pd: DnD.GlobalProcDrag[S] => withProcRegions { implicit tx => regions =>
+        case pd: DnD.GlobalProcDrag[T] => withProcRegions { implicit tx => regions =>
           val in = pd.source()
           val edits = regions.flatMap { pv =>
             val out = pv.obj
-            Edits.linkOrUnlink[S](out, in)
+            Edits.linkOrUnlink[T](out, in)
           }
           CompoundEdit(edits, "Link Global Proc")
         }
@@ -557,17 +557,17 @@ object TimelineViewImpl extends TimelineView.Companion {
       editOpt.isDefined
     }
 
-    private final class View extends TimelineTrackCanvasImpl[S] {
+    private final class View extends TimelineTrackCanvasImpl[T] {
       canvasImpl =>
 
       def timelineModel : TimelineModel                         = impl.timelineModel
-      def selectionModel: SelectionModel[S, ObjTimelineView[S]] = impl.selectionModel
+      def selectionModel: SelectionModel[T, ObjTimelineView[T]] = impl.selectionModel
 
-      def timeline(implicit tx: S#Tx): Timeline[S] = impl.plainGroup
+      def timeline(implicit tx: T): Timeline[T] = impl.plainGroup
 
-      def iterator: Iterator[ObjTimelineView[S]] = viewRange.iterator
+      def iterator: Iterator[ObjTimelineView[T]] = viewRange.iterator
 
-      def intersect(span: Span.NonVoid): Iterator[ObjTimelineView[S]] = {
+      def intersect(span: Span.NonVoid): Iterator[ObjTimelineView[T]] = {
         val start = span match {
           case hs: Span.HasStart => hs.start
           case _ => Long.MinValue
@@ -579,13 +579,13 @@ object TimelineViewImpl extends TimelineView.Companion {
         viewRange.filterOverlaps((start, stop))
       }
 
-      def findChildView(pos: Long, modelY: Int): Option[ObjTimelineView[S]] = {
+      def findChildView(pos: Long, modelY: Int): Option[ObjTimelineView[T]] = {
         val span      = Span(pos, pos + 1)
         val children  = intersect(span)
         children.find(pv => pv.trackIndex <= modelY && (pv.trackIndex + pv.trackHeight) > modelY)
       }
 
-      def findChildViews(r: BasicTool.Rectangular[Int]): Iterator[ObjTimelineView[S]] = {
+      def findChildViews(r: BasicTool.Rectangular[Int]): Iterator[ObjTimelineView[T]] = {
         val children = intersect(r.span)
         children.filter(pv => pv.trackIndex < r.modelYOffset + r.modelYExtent && (pv.trackIndex + pv.trackHeight) > r.modelYOffset)
       }
@@ -613,14 +613,14 @@ object TimelineViewImpl extends TimelineView.Companion {
             case t: TimelineTool.Mute => toolMute commit t
             case t: TimelineTool.Fade => toolFade commit t
             case t: TimelineTool.Add => toolFunction commit t
-            case t: TimelineTool.Patch[S] => toolPatch commit t
+            case t: TimelineTool.Patch[T] => toolPatch commit t
             case _ => None
           }
         }
         editOpt.foreach(undoManager.add)
       }
 
-      private[this] val NoPatch = TimelineTool.Patch[S](null, null)
+      private[this] val NoPatch = TimelineTool.Patch[T](null, null)
       // not cool
       private[this] var _toolState = Option.empty[Any]
       private[this] var patchState = NoPatch
@@ -643,16 +643,16 @@ object TimelineViewImpl extends TimelineView.Companion {
           case s: TimelineTool.Gain      => r.ttGainState      = s
           case s: TimelineTool.Fade      => r.ttFadeState      = s
           case s: TimelineTool.Add  => r.ttFunctionState  = s
-          case s: TimelineTool.Patch[S]  => patchState         = s
+          case s: TimelineTool.Patch[T]  => patchState         = s
           case _ =>
         }
       }
 
-      object canvasComponent extends Component with DnD[S] {
+      object canvasComponent extends Component with DnD[T] {
         protected def timelineModel : TimelineModel = impl.timelineModel
-        protected def universe      : Universe[S]   = impl.universe
+        protected def universe      : Universe[T]   = impl.universe
 
-        private[this] var currentDrop = Option.empty[DnD.Drop[S]]
+        private[this] var currentDrop = Option.empty[DnD.Drop[T]]
 
         font = {
           val f = UIManager.getFont("Slider.font", Locale.US)
@@ -665,12 +665,12 @@ object TimelineViewImpl extends TimelineView.Companion {
           (b.width >> 1, b.height >> 1)
         }
 
-        protected def updateDnD(drop: Option[DnD.Drop[S]]): Unit = {
+        protected def updateDnD(drop: Option[DnD.Drop[T]]): Unit = {
           currentDrop = drop
           repaint()
         }
 
-        protected def acceptDnD(drop: DnD.Drop[S]): Boolean = performDrop(drop)
+        protected def acceptDnD(drop: DnD.Drop[T]): Boolean = performDrop(drop)
 
         final val rendering: TimelineRenderingImpl = new TimelineRenderingImpl(this, GUI.isDarkSkin)
 
@@ -703,13 +703,13 @@ object TimelineViewImpl extends TimelineView.Companion {
           // --- ongoing drag and drop / tools ---
           if (currentDrop.isDefined) currentDrop.foreach { drop =>
             drop.drag match {
-              case ad: DnD.AudioDragLike[S] =>
+              case ad: DnD.AudioDragLike[T] =>
                 val track   = screenToModelPos(drop.y)
                 val span    = Span(drop.frame, drop.frame + ad.selection.length)
                 drawDropFrame(g, modelYStart = track, modelYStop = track + TimelineView.DefaultTrackHeight,
                   span = span, rubber = false)
 
-              case DnD.ObjectDrag(_, view) /* : ObjView.Proc[S] */ =>
+              case DnD.ObjectDrag(_, view) /* : ObjView.Proc[T] */ =>
                 val track   = screenToModelPos(drop.y)
                 val length  = defaultDropLength(view, inProgress = true)
                 val span    = Span(drop.frame, drop.frame + length)
@@ -735,19 +735,19 @@ object TimelineViewImpl extends TimelineView.Companion {
             drawPatch(g, patchState)
         }
 
-        private def linkFrame(pv: ObjTimelineView[S]): Long = pv.spanValue match {
+        private def linkFrame(pv: ObjTimelineView[T]): Long = pv.spanValue match {
           case Span(start, stop) => (start + stop) / 2
           case hs: Span.HasStart => hs.start + (timelineModel.sampleRate * 0.1).toLong
           case _ => 0L
         }
 
-        private def linkY(view: ObjTimelineView[S], input: Boolean): Int =
+        private def linkY(view: ObjTimelineView[T], input: Boolean): Int =
           if (input)
             modelPosToScreen(view.trackIndex).toInt + 4
           else
             modelPosToScreen(view.trackIndex + view.trackHeight).toInt - 5
 
-//        private def drawLink(g: Graphics2D, source: ProcObjView.Timeline[S], sink: ProcObjView.Timeline[S]): Unit = {
+//        private def drawLink(g: Graphics2D, source: ProcObjView.Timeline[T], sink: ProcObjView.Timeline[T]): Unit = {
 //          val srcFrameC = linkFrame(source)
 //          val sinkFrameC = linkFrame(sink)
 //          val srcY = linkY(source, input = false)
@@ -770,7 +770,7 @@ object TimelineViewImpl extends TimelineView.Companion {
           g.draw(shape1)
         }
 
-        private def drawPatch(g: Graphics2D, patch: TimelineTool.Patch[S]): Unit = {
+        private def drawPatch(g: Graphics2D, patch: TimelineTool.Patch[T]): Unit = {
           val src = patch.source
           val srcFrameC = linkFrame(src)
           val srcY = linkY(src, input = false)

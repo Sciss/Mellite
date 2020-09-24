@@ -13,8 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing._
+import de.sciss.lucre.Txn
 import de.sciss.mellite.impl.DocumentViewHandlerImpl
 import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
@@ -27,17 +27,17 @@ import de.sciss.synth.proc.Universe
 //      case Desktop.OpenFiles(_, files) => files.foreach(ActionOpenWorkspace.perform)
 //    }
 //
-//    def apply[S <: Sys[S]](document: Workspace[S]): Iterator[DocumentView[S]] = {
+//    def apply[T <: Txn[T]](document: Workspace[T]): Iterator[DocumentView[T]] = {
 //      requireEDT()
-//      map(document).iterator.asInstanceOf[Iterator[DocumentView[S]]]
+//      map(document).iterator.asInstanceOf[Iterator[DocumentView[T]]]
 //    }
 //
-//    def add[S <: Sys[S]](view: DocumentView[S]): Unit = {
+//    def add[T <: Txn[T]](view: DocumentView[T]): Unit = {
 //      requireEDT()
 //      map += view.document -> (map(view.document) :+ view)
 //    }
 //
-//    def remove[S <: Sys[S]](view: DocumentView[S]): Unit = {
+//    def remove[T <: Txn[T]](view: DocumentView[T]): Unit = {
 //      requireEDT()
 //      val vec = map(view.document)
 //      val idx = vec.indexOf(view)
@@ -47,25 +47,25 @@ import de.sciss.synth.proc.Universe
 //  }
 //}
 //trait DocumentViewHandler /* extends Model... */ {
-//  def apply [S <: Sys[S]](document: Workspace[S]): Iterator[DocumentView[S]]
-//  def add   [S <: Sys[S]](view: DocumentView[S]): Unit
-//  def remove[S <: Sys[S]](view: DocumentView[S]): Unit
+//  def apply [T <: Txn[T]](document: Workspace[T]): Iterator[DocumentView[T]]
+//  def add   [T <: Txn[T]](view: DocumentView[T]): Unit
+//  def remove[T <: Txn[T]](view: DocumentView[T]): Unit
 //}
 
 object DocumentViewHandler {
-  type WorkspaceWindow[S <: Sys[S]] = Window[S] // MMM
+  type WorkspaceWindow[T <: Txn[T]] = Window[T] // MMM
 
-  type View[S <: Sys[S]] = WorkspaceWindow[S]
+  type View[T <: Txn[T]] = WorkspaceWindow[T]
 
   lazy val instance: DocumentViewHandler =
     DocumentViewHandlerImpl.instance
 
   sealed trait Update
-  case class Activated[S <: Sys[S]](u: Universe[S]) extends Update
+  case class Activated[T <: Txn[T]](u: Universe[T]) extends Update
 }
 trait DocumentViewHandler extends Model[DocumentViewHandler.Update] {
-  def getWindow[S <: Sys[S]](u: Universe[S]): Option[DocumentViewHandler.View[_]]
+  def getWindow[T <: Txn[T]](u: Universe[T]): Option[DocumentViewHandler.View[_]]
   // var activeDocument: Option[Document]
   def activeDocument: Option[DocumentHandler.Document]
-  def activeDocument_=[S <: Sys[S]](u: Option[Universe[S]]): Unit
+  def activeDocument_=[T <: Txn[T]](u: Option[Universe[T]]): Unit
 }

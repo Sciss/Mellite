@@ -13,15 +13,14 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Folder, Obj, Sys}
+import de.sciss.lucre.{Cursor, Folder, Obj, Source, Txn}
 import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException, UndoableEdit}
 
 // direction: true = insert, false = remove
-private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, nodeType: String,
-                         parentH: stm.Source[S#Tx, Folder[S]],
+private[edit] class EditFolderInsertRemoveObj[T <: Txn[T]](isInsert: Boolean, nodeType: String,
+                         parentH: Source[T, Folder[T]],
                          index: Int,
-                         childH: stm.Source[S#Tx, Obj[S]])(implicit cursor: stm.Cursor[S])
+                         childH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {
@@ -45,7 +44,7 @@ private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, no
     }
   }
 
-  private def insert()(implicit tx: S#Tx): Boolean = {
+  private def insert()(implicit tx: T): Boolean = {
     val parent = parentH()
     if (parent.size >= index) {
       val child = childH()
@@ -54,7 +53,7 @@ private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, no
     } else false
   }
 
-  private def remove()(implicit tx: S#Tx): Boolean = {
+  private def remove()(implicit tx: T): Boolean = {
     val parent = parentH()
     if (parent.size > index) {
       parent.removeAt(index)
@@ -62,7 +61,7 @@ private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, no
     } else false
   }
 
-  def perform()(implicit tx: S#Tx): Unit = {
+  def perform()(implicit tx: T): Unit = {
     val success = if (isInsert) insert() else remove()
     if (!success) throw new CannotRedoException()
   }
@@ -71,8 +70,8 @@ private[edit] class EditFolderInsertRemoveObj[S <: Sys[S]](isInsert: Boolean, no
 }
 
 object EditFolderInsertObj {
-  def apply[S <: Sys[S]](nodeType: String, parent: Folder[S], index: Int, child: Obj[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](nodeType: String, parent: Folder[T], index: Int, child: Obj[T])
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val parentH = tx.newHandle(parent)
     val childH  = tx.newHandle(child)
     val res     = new EditFolderInsertRemoveObj(true, nodeType, parentH, index, childH)
@@ -82,8 +81,8 @@ object EditFolderInsertObj {
 }
 
 object EditFolderRemoveObj {
-  def apply[S <: Sys[S]](nodeType: String, parent: Folder[S], index: Int, child: Obj[S])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](nodeType: String, parent: Folder[T], index: Int, child: Obj[T])
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val parentH = tx.newHandle(parent)
     val childH  = tx.newHandle(child)
     val res     = new EditFolderInsertRemoveObj(false, nodeType, parentH, index, childH)

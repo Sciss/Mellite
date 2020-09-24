@@ -34,14 +34,14 @@ import scala.language.existentials
 import scala.util.Try
 
 /** Mixin that provides a transfer handler for the folder view. */
-trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
+trait FolderViewTransferHandler[T <: Txn[T]] { fv =>
   protected def undoManager       : UndoManager
-  protected implicit val universe : Universe[S]
+  protected implicit val universe : Universe[T]
 
-  protected def treeView: TreeTableView[S, Obj[S], Folder[S], ObjListView[S]]
-  protected def selection: FolderView.Selection[S]
+  protected def treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]]
+  protected def selection: FolderView.Selection[T]
 
-  protected def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]]
+  protected def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]]
 
   protected object FolderTransferHandler extends TransferHandler {
     // ---- export ----
@@ -52,12 +52,12 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     override def createTransferable(c: JComponent): Transferable = {
       val sel     = selection
       val trans0  = DragAndDrop.Transferable(FolderView.SelectionFlavor) {
-        new FolderView.SelectionDnDData[S](fv.universe, sel)
+        new FolderView.SelectionDnDData[T](fv.universe, sel)
       }
       val trans1 = if (sel.size === 1) {
         val listView = sel.head.renderData
         val tmp0  = DragAndDrop.Transferable(ObjView.Flavor) {
-          new ObjView.Drag[S](fv.universe, listView)
+          new ObjView.Drag[T](fv.universe, listView)
         }
         val tmp1  = listView.createTransferable().toList
         val tmp   = trans0 :: tmp0 :: tmp1
@@ -143,16 +143,16 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- folder: link ----
 
-    private def insertFolderData(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+    private def insertFolderData(support: TransferSupport, parentH: Source[T, Folder[T]],
                                  index: Int): Option[UndoableEdit] = {
       val data = support.getTransferable.getTransferData(FolderView.SelectionFlavor)
-        .asInstanceOf[FolderView.SelectionDnDData[S]]
+        .asInstanceOf[FolderView.SelectionDnDData[T]]
 
       insertFolderData1(data.selection, parentH, idx = index, dropAction = support.getDropAction)
     }
 
     // XXX TODO: not sure whether removal should be in exportDone or something
-    private def insertFolderData1(sel0: FolderView.Selection[S], newParentH: stm.Source[S#Tx, Folder[S]], idx: Int,
+    private def insertFolderData1(sel0: FolderView.Selection[T], newParentH: Source[T, Folder[T]], idx: Int,
                                   dropAction: Int): Option[UndoableEdit] = {
       // println(s"insert into $parent at index $idx")
 
@@ -166,8 +166,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
       universe.cursor.step { implicit tx =>
         val newParent = newParentH()
 
-        def isNested(c: Obj[S]): Boolean = c match {
-          case objT: Folder[S] =>
+        def isNested(c: Obj[T]): Boolean = c match {
+          case objT: Folder[T] =>
             objT === newParent || objT.iterator.toList.exists(isNested)
           case _ => false
         }
@@ -188,7 +188,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
         val editRemove: List[UndoableEdit] = if (!isMove) Nil
         else sel1.flatMap { nv =>
-          val parent: Folder[S] = nv.parent
+          val parent: Folder[T] = nv.parent
           val childH = nv.modelData
           val idx = parent.indexOf(childH())
           if (idx < 0) {
@@ -196,26 +196,26 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
             None
           } else {
             import universe.cursor
-            val edit = EditFolderRemoveObj[S](nv.renderData.humanName, parent, idx, childH())
+            val edit = EditFolderRemoveObj[T](nv.renderData.humanName, parent, idx, childH())
             Some(edit)
           }
         }
 
         val selZip = sel1.zipWithIndex
         val editInsert = if (isCopy) {
-          val context = Copy[S, S]
+          val context = Copy[T, S]
           val res = selZip.map { case (nv, off) =>
             val in  = nv.modelData()
             val out = context(in)
             import universe.cursor
-            EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = out)
+            EditFolderInsertObj[T](nv.renderData.humanName, newParent, idx1 + off, child = out)
           }
           context.finish()
           res
         } else {
           selZip.map { case (nv, off) =>
             import universe.cursor
-            EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = nv.modelData())
+            EditFolderInsertObj[T](nv.renderData.humanName, newParent, idx1 + off, child = nv.modelData())
           }
         }
 
@@ -240,7 +240,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     }
 
     private def copyFolderData1[In <: Sys[In]](data: FolderView.SelectionDnDData[In]): Option[UndoableEdit] =
-      Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: S#Tx) => {
+      Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: T) => {
         parentOption(tx).flatMap { case (parent, idx) =>
           val sel0  = data.selection
           val sel   = FolderView.cleanSelection(sel0)
@@ -248,8 +248,8 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
         }
       }} (data.universe.cursor, fv.universe.cursor)
 
-    private def copyFolderData2[In <: Sys[In]](sel: FolderView.Selection[In], newParent: Folder[S], idx: Int)
-                                       (implicit txIn: In#Tx, tx: S#Tx): Option[UndoableEdit] = {
+    private def copyFolderData2[In <: Sys[In]](sel: FolderView.Selection[In], newParent: Folder[T], idx: Int)
+                                       (implicit txIn: In#Tx, tx: T): Option[UndoableEdit] = {
       val idx1 = if (idx >= 0) idx else newParent.size
 
       val context = Copy[In, S]
@@ -257,7 +257,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
         val in  = nv.modelData()
         val out = context(in)
         import universe.cursor
-        EditFolderInsertObj[S](nv.renderData.humanName, newParent, idx1 + off, child = out)
+        EditFolderInsertObj[T](nv.renderData.humanName, newParent, idx1 + off, child = out)
       }
       context.finish()
       val name = sel match {
@@ -269,10 +269,10 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- list: link ----
 
-    private def insertListData(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+    private def insertListData(support: TransferSupport, parentH: Source[T, Folder[T]],
                                index: Int): Option[UndoableEdit] = {
       val data = support.getTransferable.getTransferData(ObjView.Flavor)
-        .asInstanceOf[ObjView.Drag[S]]
+        .asInstanceOf[ObjView.Drag[T]]
 
       val edit = universe.cursor.step { implicit tx =>
         val parent = parentH()
@@ -282,13 +282,13 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     }
 
     // XXX TODO: not sure whether removal should be in exportDone or something
-    private def insertListData1(data: ObjView.Drag[S], parent: Folder[S], idx: Int, dropAction: Int)
-                               (implicit tx: S#Tx): UndoableEdit = {
+    private def insertListData1(data: ObjView.Drag[T], parent: Folder[T], idx: Int, dropAction: Int)
+                               (implicit tx: T): UndoableEdit = {
       val idx1    = if (idx >= 0) idx else parent.size
       val nv      = data.view
       val in      = nv.obj
       import universe.cursor
-      val edit    = EditFolderInsertObj[S](nv.name, parent, idx1, child = in)
+      val edit    = EditFolderInsertObj[T](nv.name, parent, idx1, child = in)
       edit
     }
 
@@ -302,7 +302,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
     }
 
     private def copyListData1[In <: Sys[In]](data: ObjView.Drag[In]): Option[UndoableEdit] =
-      Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: S#Tx) =>
+      Txn.copy[In, S, Option[UndoableEdit]] { (txIn: In#Tx, tx: T) =>
         parentOption(tx).map { case (parent, idx) =>
           implicit val txIn0 : In#Tx = txIn
           implicit val txOut0: S #Tx = tx
@@ -312,7 +312,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
           val in: Obj[In] = nv.obj
           val out     = context(in)
           import universe.cursor
-          val edit    = EditFolderInsertObj[S](nv.name, parent, idx1, child = out)
+          val edit    = EditFolderInsertObj[T](nv.name, parent, idx1, child = out)
           context.finish()
           edit
         }
@@ -320,7 +320,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
 
     // ---- files ----
 
-    private def importFiles(support: TransferSupport, parentH: stm.Source[S#Tx, Folder[S]],
+    private def importFiles(support: TransferSupport, parentH: Source[T, Folder[T]],
                             index: Int): Option[UndoableEdit] = {
       import scala.collection.JavaConverters._
       val data: List[File] = support.getTransferable.getTransferData(DataFlavor.javaFileListFlavor)
@@ -328,7 +328,7 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
       val tup: List[(File, AudioFileSpec)] = data.flatMap { f =>
         Try(AudioFile.readSpec(f)).toOption.map(f -> _)
       }
-      val trip: List[(File, AudioFileSpec, ActionArtifactLocation.QueryResult[S])] =
+      val trip: List[(File, AudioFileSpec, ActionArtifactLocation.QueryResult[T])] =
         tup.flatMap { case (f, spec) =>
           findLocation(f).map { loc => (f, spec, loc) }
         }
@@ -341,11 +341,11 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
             ActionArtifactLocation.merge(either).fold((idx0, list0)) { case (xs, locM) =>
               import universe.cursor
               val (idx2, list2) = xs.foldLeft((idx0, list0)) { case ((idx1, list1), x) =>
-                val edit1 = EditFolderInsertObj[S]("Location", parent, idx1, x)
+                val edit1 = EditFolderInsertObj[T]("Location", parent, idx1, x)
                 (idx1 + 1, list1 :+ edit1)
               }
               val obj   = ObjectActions.mkAudioFile(locM, f, spec)
-              val edit2 = EditFolderInsertObj[S]("Audio File", parent, idx2, obj)
+              val edit2 = EditFolderInsertObj[T]("Audio File", parent, idx2, obj)
               (idx2 + 1, list2 :+ edit2)
             }
           }
@@ -353,11 +353,11 @@ trait FolderViewTransferHandler[S <: Sys[S]] { fv =>
       CompoundEdit(edits, "Insert Audio Files")
     }
 
-    private def parentOption(implicit tx: S#Tx): Option[(Folder[S], Int)] =
+    private def parentOption(implicit tx: T): Option[(Folder[T], Int)] =
       treeView.dropLocation.flatMap { tdl =>
         val parentOpt = tdl.path.lastOption.fold(Option(treeView.root())) { nodeView =>
           nodeView.modelData() match {
-            case objT: Folder[S]  => Some(objT)
+            case objT: Folder[T]  => Some(objT)
             case _                => None
           }
         }

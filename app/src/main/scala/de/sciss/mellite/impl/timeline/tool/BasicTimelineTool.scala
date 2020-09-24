@@ -26,11 +26,11 @@ import de.sciss.mellite.impl.tool.DraggingTool
   * Sub-classes may choose to provide a custom dialog for double clicks by
   * and thus may return `Some` data if the dialog is positively confirmed.
   */
-trait BasicTimelineTool[S <: Sys[S], A] extends CollectionImpl[S, A] with DraggingTool[S, A, Int] {
+trait BasicTimelineTool[T <: Txn[T], A] extends CollectionImpl[T, A] with DraggingTool[T, A, Int] {
 
-  protected type Initial = ObjTimelineView[S]
+  protected type Initial = ObjTimelineView[T]
 
-  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: ObjTimelineView[S]): Unit =
+  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: ObjTimelineView[T]): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {

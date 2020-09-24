@@ -29,9 +29,9 @@ import de.sciss.synth.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class MoveImpl[S <: Sys[S]](protected val canvas: GraphemeCanvas[S])
-  extends BasicGraphemeTool[S, GraphemeTool.Move]
-    with RubberBandTool[S, GraphemeTool.Move, Double, ObjGraphemeView[S]]{
+final class MoveImpl[T <: Txn[T]](protected val canvas: GraphemeCanvas[T])
+  extends BasicGraphemeTool[T, GraphemeTool.Move]
+    with RubberBandTool[T, GraphemeTool.Move, Double, ObjGraphemeView[T]]{
 
   import GraphemeTool.Move
 
@@ -60,8 +60,8 @@ final class MoveImpl[S <: Sys[S]](protected val canvas: GraphemeCanvas[S])
   override protected def handleOutside(e: MouseEvent, modelY: Double, pos: Long): Unit =
     mkRubber(e, modelY = modelY, pos = pos)
 
-  protected def commitObj(drag: Move)(time: LongObj[S], child: Obj[S], parent: Grapheme[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  protected def commitObj(drag: Move)(time: LongObj[T], child: Obj[T], parent: Grapheme[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     val minStart = TimelineNavigation.minStart(canvas.timelineModel)
     Edits.graphemeMoveOrCopy(time, child, parent, drag, minStart = minStart)
   }

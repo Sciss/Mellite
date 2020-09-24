@@ -13,18 +13,18 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.mellite.{MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import org.rogach.scallop.exceptions.{Help, ScallopException, ScallopResult, Version}
 import org.rogach.scallop.{ScallopConf, ScallopOption, ValueConverter, throwError}
 
-import scala.util.{Failure, Success, Try}
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
+import scala.util.{Failure, Success, Try}
 
 object ObjViewCmdLineParser {
-  def apply[S <: Sys[S]](f: ObjView.Factory, args: ISeq[String]): ObjViewCmdLineParser[f.Config[S]] =
-    new ObjViewCmdLineParser[f.Config[S]](f, args)
+  def apply[T <: Txn[T]](f: ObjView.Factory, args: ISeq[String]): ObjViewCmdLineParser[f.Config[T]] =
+    new ObjViewCmdLineParser[f.Config[T]](f, args)
 }
 class ObjViewCmdLineParser[C](private val f: ObjView.Factory, args: ISeq[String])
   extends ScallopConf(args) {

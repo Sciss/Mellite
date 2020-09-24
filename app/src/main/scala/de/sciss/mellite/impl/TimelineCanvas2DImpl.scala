@@ -33,9 +33,9 @@ object TimelineCanvas2DImpl {
   final val colorDropRegionBg: Color =
     new Color(if (GUI.isDarkSkin) 0x7FFFFFFF else 0x7F000000, true)
 }
-trait TimelineCanvas2DImpl[S <: Sys[S], Y, Child]
+trait TimelineCanvas2DImpl[T <: Txn[T], Y, Child]
   extends TimelineCanvasImpl
-    with TimelineCanvas2D[S, Y, Child] {
+    with TimelineCanvas2D[T, Y, Child] {
 
   import TimelineCanvas2DImpl._
 
@@ -95,7 +95,7 @@ trait TimelineCanvas2DImpl[S <: Sys[S], Y, Child]
       repaint()
   }
 
-  private[this] val selectionListener: SelectionModel.Listener[S, Child] = {
+  private[this] val selectionListener: SelectionModel.Listener[T, Child] = {
     case SelectionModel.Update(_ /* added */, _ /* removed */) =>
       canvasComponent.repaint() // XXX TODO: dirty rectangle optimization
   }

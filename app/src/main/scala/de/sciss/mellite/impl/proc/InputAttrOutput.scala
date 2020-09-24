@@ -19,22 +19,22 @@ import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.Span
 import de.sciss.synth.proc
 
-final class InputAttrOutput[S <: Sys[S]](val parent: ProcObjView.Timeline[S], val key: String,
-                                         out: proc.Output[S], tx0: S#Tx)
-  extends InputAttrImpl[S] {
+final class InputAttrOutput[T <: Txn[T]](val parent: ProcObjView.Timeline[T], val key: String,
+                                         out: proc.Output[T], tx0: T)
+  extends InputAttrImpl[T] {
 
   override def toString: String = s"InputAttrOutput(parent = $parent, key = $key)"
 
-  type Entry = proc.Output[S]
+  type Entry = proc.Output[T]
 
-  protected def mkTarget(entry: proc.Output[S])(implicit tx: S#Tx): LinkTarget[S] =
-    new LinkTargetOutput[S](this)
+  protected def mkTarget(entry: proc.Output[T])(implicit tx: T): LinkTarget[T] =
+    new LinkTargetOutput[T](this)
 
   private[this] val outH = tx0.newHandle(out)
 
-  def output(implicit tx: S#Tx): proc.Output[S] = outH()
+  def output(implicit tx: T): proc.Output[T] = outH()
 
-  protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
+  protected val viewMap: IdentifierMap[S#Id, T, Elem] = tx0.newInMemoryIdMap
 
   // EDT
   private[this] var edtElem: Elem = _

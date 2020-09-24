@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.mellite.{DocumentHandler, DocumentViewHandler}
 import de.sciss.model.impl.ModelImpl
@@ -36,7 +36,7 @@ object DocumentViewHandlerImpl {
     private var _active = Option.empty[Document]
 
     def activeDocument: Option[DocumentHandler.Document] = _active
-    def activeDocument_=[S <: Sys[S]](value: Option[Universe[S]]): Unit = {
+    def activeDocument_=[T <: Txn[T]](value: Option[Universe[T]]): Unit = {
       requireEDT()
       if (_active != value) {
         _active = value
@@ -46,9 +46,9 @@ object DocumentViewHandlerImpl {
       }
     }
 
-    def getWindow[S <: Sys[S]](u: Universe[S]): Option[WorkspaceWindow[S]] = {
+    def getWindow[T <: Txn[T]](u: Universe[T]): Option[WorkspaceWindow[T]] = {
       requireEDT()
-      map.single.get(u).asInstanceOf[Option[WorkspaceWindow[S]]]
+      map.single.get(u).asInstanceOf[Option[WorkspaceWindow[T]]]
     }
   }
 }

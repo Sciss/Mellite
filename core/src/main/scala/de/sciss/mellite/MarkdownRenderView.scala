@@ -13,11 +13,10 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.event.Observable
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.{Cursor, Observable, synth}
 import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -31,31 +30,31 @@ object MarkdownRenderView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
-                           (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S]
+    def apply[T <: synth.Txn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+                           (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T]
 
-    def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]], embedded: Boolean)
-                          (implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S]
+    def basic[T <: Txn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+                          (implicit tx: T, cursor: Cursor[T]): Basic[T]
   }
 
-  def apply[S <: SSys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
-                         (implicit tx: S#Tx, universe: Universe[S]): MarkdownRenderView[S] =
+  def apply[T <: synth.Txn[T]](init: Markdown[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
+                         (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T] =
     companion(init, bottom, embedded = embedded)
 
-  def basic[S <: Sys[S]](init: Markdown[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): Basic[S] =
+  def basic[T <: Txn[T]](init: Markdown[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
+                        (implicit tx: T, cursor: Cursor[T]): Basic[T] =
     companion.basic(init, bottom, embedded = embedded)
 
-  sealed trait Update[S <: Sys[S]] { def view: Basic[S] }
-  final case class FollowedLink[S <: Sys[S]](view: Basic[S], now: Markdown[S]) extends Update[S]
+  sealed trait Update[T <: LTxn[T]] { def view: Basic[T] }
+  final case class FollowedLink[T <: LTxn[T]](view: Basic[T], now: Markdown[T]) extends Update[T]
 
-  trait Basic[S <: Sys[S]] extends View.Cursor[S] with Observable[S#Tx, MarkdownRenderView.Update[S]] {
-    def markdown(implicit tx: S#Tx): Markdown[S]
+  trait Basic[T <: LTxn[T]] extends View.Cursor[T] with Observable[T, MarkdownRenderView.Update[T]] {
+    def markdown(implicit tx: T): Markdown[T]
 
-    def markdown_=(md: Markdown[S])(implicit tx: S#Tx): Unit
+    def markdown_=(md: Markdown[T])(implicit tx: T): Unit
 
-    def setInProgress(md: Markdown[S], value: String)(implicit tx: S#Tx): Unit
+    def setInProgress(md: Markdown[T], value: String)(implicit tx: T): Unit
   }
 }
-trait MarkdownRenderView[S <: Sys[S]]
-  extends MarkdownRenderView.Basic[S] with UniverseView[S]
+trait MarkdownRenderView[T <: LTxn[T]]
+  extends MarkdownRenderView.Basic[T] with UniverseView[T]

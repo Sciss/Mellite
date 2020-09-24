@@ -15,21 +15,18 @@ package de.sciss.mellite.impl.document
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.ObjListView
-import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Disposable, Obj, Source}
+import de.sciss.mellite.{AttrMapView, ObjListView}
 import de.sciss.mellite.impl.MapViewImpl
-import de.sciss.mellite.AttrMapView
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.ScrollPane
 
 object AttrMapViewImpl {
-  def apply[S <: Sys[S]](_obj: Obj[S])(implicit tx: S#Tx, universe: Universe[S],
-                                       undoManager: UndoManager): AttrMapView[S] = {
+  def apply[T <: Txn[T]](_obj: Obj[T])(implicit tx: T, universe: Universe[T],
+                                       undoManager: UndoManager): AttrMapView[T] = {
     val map = _obj.attr
 
     val list0 = map.iterator.map {
@@ -38,12 +35,12 @@ object AttrMapViewImpl {
         (key, view)
     } .toIndexedSeq
 
-    val res: AttrMapView[S] = new MapViewImpl[S, AttrMapView[S]] with AttrMapView[S] {
-      protected val mapH: stm.Source[S#Tx, Obj[S]] = tx.newHandle(_obj)
+    val res: AttrMapView[T] = new MapViewImpl[T, AttrMapView[T]] with AttrMapView[T] {
+      protected val mapH: Source[T, Obj[T]] = tx.newHandle(_obj)
 
-      final def obj(implicit tx: S#Tx): Obj[S] = mapH()
+      final def obj(implicit tx: T): Obj[T] = mapH()
 
-      val observer: Disposable[S#Tx] = _obj.attr.changed.react { implicit tx =>upd =>
+      val observer: Disposable[T] = _obj.attr.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
           case Obj.AttrAdded   (key, value)       => attrAdded   (key, value)
           case Obj.AttrRemoved (key, _    )       => attrRemoved (key)
@@ -52,13 +49,13 @@ object AttrMapViewImpl {
         }
       }
 
-      protected def editImport(key: String, value: Obj[S], isInsert: Boolean)(implicit tx: S#Tx): Option[UndoableEdit] = {
+      protected def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = {
         val editName = if (isInsert) s"Create Attribute '$key'" else s"Change Attribute '$key'"
         val edit     = EditAttrMap(name = editName, obj = obj, key = key, value = Some(value))
         Some(edit)
       }
 
-      protected def editRenameKey(before: String, now: String, value: Obj[S])(implicit tx: S#Tx): Option[UndoableEdit] = {
+      protected def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit] = {
         val obj0  = obj
         val ed1   = EditAttrMap(name = "Remove", obj0, key = before, value = None)
         val ed2   = EditAttrMap(name = "Insert", obj0, key = now   , value = Some(value))

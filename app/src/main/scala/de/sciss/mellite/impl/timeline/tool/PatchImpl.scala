@@ -55,9 +55,9 @@ object PatchImpl {
   private lazy val cursor =
     Toolkit.getDefaultToolkit.createCustomCursor(mkImage(aa = Desktop.isMac), new Point(8, 8), "patch")
 }
-final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends CollectionImpl[S, TimelineTool.Patch[S]]
-    with DraggingTool[S, TimelineTool.Patch[S], Int] {
+final class PatchImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends CollectionImpl[T, TimelineTool.Patch[T]]
+    with DraggingTool[T, TimelineTool.Patch[T], Int] {
 
   import TimelineTool.Patch
 
@@ -65,12 +65,12 @@ final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
   val name                  = "Patch"
   val icon: Icon            = GUI.iconNormal(Shapes.Patch)
 
-  protected type Initial = ProcObjView.Timeline[S] // TimelineObjView[S]
+  protected type Initial = ProcObjView.Timeline[T] // TimelineObjView[T]
 
-  protected def dragToParam(d: Drag): Patch[S] = {
+  protected def dragToParam(d: Drag): Patch[T] = {
     val pos   = d.currentPos
     val sink  = canvas.findChildView(frame = pos, modelY = d.currentModelY) match {
-      case Some(r: ProcObjView.Timeline[S]) if r != d.initial /* && r.inputs.nonEmpty */ =>  // region.inputs only carries linked ones!
+      case Some(r: ProcObjView.Timeline[T]) if r != d.initial /* && r.inputs.nonEmpty */ =>  // region.inputs only carries linked ones!
         Patch.Linked(r)
       case _ =>
         Patch.Unlinked(frame = pos, y = d.currentEvent.getY)
@@ -78,16 +78,16 @@ final class PatchImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     Patch(d.initial, sink)
   }
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[S]): Unit =
+  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit =
     region match {
-      case pv: ProcObjView.Timeline[S] => new Drag(e, hitTrack, pos, pv) // region.outputs only carries linked ones!
+      case pv: ProcObjView.Timeline[T] => new Drag(e, hitTrack, pos, pv) // region.outputs only carries linked ones!
       case _ =>
     }
 
-  protected def commitObj(drag: Patch[S])(span: SpanLikeObj[S], outObj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+  protected def commitObj(drag: Patch[T])(span: SpanLikeObj[T], outObj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
     (drag.sink, outObj) match {
-      case (Patch.Linked(view: ProcObjView.Timeline[S]), out: Proc[S]) =>
+      case (Patch.Linked(view: ProcObjView.Timeline[T]), out: Proc[T]) =>
         val in = view.obj
         Edits.linkOrUnlink(out, in)
 

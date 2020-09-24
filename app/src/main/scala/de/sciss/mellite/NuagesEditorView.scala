@@ -24,8 +24,8 @@ import de.sciss.synth.proc.Universe
 import scala.swing.Action
 
 object NuagesEditorView {
-  def apply[S <: SSys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S],
-                                          undoManager: UndoManager): NuagesEditorView[S] =
+  def apply[S <: SSys[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T],
+                                          undoManager: UndoManager): NuagesEditorView[T] =
     Impl(obj)
 
   /** Key convention for a `BooleanObj` in the `Nuages` object
@@ -64,6 +64,6 @@ object NuagesEditorView {
     */
   final val attrLineOutputs = "line-outputs"
 }
-trait NuagesEditorView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S] with CanBounce {
+trait NuagesEditorView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T] with CanBounce {
   def actionDuplicate: Action
 }

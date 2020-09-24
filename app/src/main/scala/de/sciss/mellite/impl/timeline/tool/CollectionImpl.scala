@@ -27,12 +27,12 @@ import javax.swing.undo.UndoableEdit
   * It implements `commit` by aggregating individual region based
   * commits performed in the abstract method `commitObj`.
   */
-trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Int, ObjTimelineView[S]]
-  with TimelineTool[S, A]{
+trait CollectionImpl[T <: Txn[T], A] extends BasicCollectionTool[T, A, Int, ObjTimelineView[T]]
+  with TimelineTool[T, A]{
 
-  override protected def canvas: TimelineTrackCanvas[S]
+  override protected def canvas: TimelineTrackCanvas[T]
 
-  def commit(drag: A)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def commit(drag: A)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     lazy val tl = canvas.timeline
     val edits = canvas.selectionModel.iterator.flatMap { pv =>
       val span = pv.span
@@ -47,6 +47,6 @@ trait CollectionImpl[S <: Sys[S], A] extends BasicCollectionTool[S, A, Int, ObjT
     CompoundEdit(edits, name)
   }
 
-  protected def commitObj(drag: A)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
+  protected def commitObj(drag: A)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit]
 }

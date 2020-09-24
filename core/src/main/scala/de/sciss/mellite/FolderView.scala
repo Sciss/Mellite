@@ -16,10 +16,8 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.{TreeTableView, View}
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Folder, Obj, Source, Txn, synth}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.model.Model
 import de.sciss.synth.proc.Universe
@@ -35,29 +33,29 @@ object FolderView {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: SSys[S]](root: Folder[S])
-                           (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S]
+    def apply[T <: synth.Txn[T]](root: Folder[T])
+                                (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T]
 
-    def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S]
+    def cleanSelection[T <: Txn[T]](in: Selection[T]): Selection[T]
   }
 
-  def apply[S <: SSys[S]](root: Folder[S])
-                         (implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): FolderView[S] =
+  def apply[T <: synth.Txn[T]](root: Folder[T])
+                         (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T] =
     companion(root)
 
-  type NodeView[S <: Sys[S]] = TreeTableView.NodeView[S, Obj[S], Folder[S], ObjListView[S]]
+  type NodeView[T <: Txn[T]] = TreeTableView.NodeView[T, Obj[T], Folder[T], ObjListView[T]]
 
   /** A selection is a sequence of paths, where a path is a prefix of folders and a trailing element.
     * The prefix is guaranteed to be non-empty.
     */
-  // type Selection[S <: Sys[S]] = Vec[(Vec[ObjView.FolderLike[S]], ObjView[S])]
-  type Selection[S <: Sys[S]] = List[NodeView[S]]
+  // type Selection[T <: Txn[T]] = Vec[(Vec[ObjView.FolderLike[T]], ObjView[T])]
+  type Selection[T <: Txn[T]] = List[NodeView[T]]
 
   /** Removes children from the selection whose parents are already included. */
-  def cleanSelection[S <: Sys[S]](in: Selection[S]): Selection[S] = companion.cleanSelection(in)
+  def cleanSelection[T <: Txn[T]](in: Selection[T]): Selection[T] = companion.cleanSelection(in)
 
-  final case class SelectionDnDData[S <: Sys[S]](universe: Universe[S], selection: Selection[S]) {
-    type S1 = S
+  final case class SelectionDnDData[T <: Txn[T]](universe: Universe[T], selection: Selection[T]) {
+    type T1 = T
 
     lazy val types: Set[Int] = selection.iterator.map(_.renderData.factory.tpe.typeId).toSet
   }
@@ -65,18 +63,18 @@ object FolderView {
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
   val SelectionFlavor: Flavor[SelectionDnDData[_]] = DragAndDrop.internalFlavor
 
-  sealed trait Update[S <: Sys[S]] { def view: FolderView[S] }
-  final case class SelectionChanged[S <: Sys[S]](view: FolderView[S], selection: Selection[S])
-    extends Update[S]
+  sealed trait Update[T <: Txn[T]] { def view: FolderView[T] }
+  final case class SelectionChanged[T <: Txn[T]](view: FolderView[T], selection: Selection[T])
+    extends Update[T]
 }
-trait FolderView[S <: Sys[S]] extends Model[FolderView.Update[S]] with View.Editable[S] with UniverseView[S] {
-  def selection: FolderView.Selection[S]
+trait FolderView[T <: Txn[T]] extends Model[FolderView.Update[T]] with View.Editable[T] with UniverseView[T] {
+  def selection: FolderView.Selection[T]
 
-  def locations: Vec[ArtifactLocationObjView[S]]
+  def locations: Vec[ArtifactLocationObjView[T]]
 
-  def insertionPoint(implicit tx: S#Tx): (Folder[S], Int)
+  def insertionPoint(implicit tx: T): (Folder[T], Int)
 
-  def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[S]]
+  def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]]
 
-  def root: stm.Source[S#Tx, Folder[S]]
+  def root: Source[T, Folder[T]]
 }

@@ -35,41 +35,41 @@ import scala.swing.Component
 import scala.util.Try
 
 object DnD {
-  sealed trait Drag[S <: Sys[S]] {
-    def universe: Universe[S]
+  sealed trait Drag[T <: Txn[T]] {
+    def universe: Universe[T]
   }
 
-  sealed trait AudioDragLike[S <: Sys[S]] extends Drag[S] {
+  sealed trait AudioDragLike[T <: Txn[T]] extends Drag[T] {
     def selection: Span
   }
 
-  final case class AudioDrag[S <: Sys[S]](universe: Universe[S], source: stm.Source[S#Tx, AudioCue.Obj[S]],
+  final case class AudioDrag[T <: Txn[T]](universe: Universe[T], source: Source[T, AudioCue.Obj[T]],
                                           selection: Span)
-    extends AudioDragLike[S]
+    extends AudioDragLike[T]
 
-  final case class GlobalProcDrag[S <: Sys[S]](universe: Universe[S], source: stm.Source[S#Tx, Proc[S]])
-    extends Drag[S]
+  final case class GlobalProcDrag[T <: Txn[T]](universe: Universe[T], source: Source[T, Proc[T]])
+    extends Drag[T]
 
-  final case class ObjectDrag[S <: SSys[S]](universe: Universe[S], view: ObjView[S]) extends Drag[S]
+  final case class ObjectDrag[S <: SSys[T]](universe: Universe[T], view: ObjView[T]) extends Drag[T]
 
   /** Drag and Drop from Eisenkraut */
-  final case class ExtAudioRegionDrag[S <: Sys[S]](universe: Universe[S], file: File, selection: Span)
-    extends AudioDragLike[S]
+  final case class ExtAudioRegionDrag[T <: Txn[T]](universe: Universe[T], file: File, selection: Span)
+    extends AudioDragLike[T]
 
-  final case class Drop[S <: Sys[S]](frame: Long, y: Int, drag: Drag[S])
+  final case class Drop[T <: Txn[T]](frame: Long, y: Int, drag: Drag[T])
 
   final val flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor[Drag[_]]
 }
-trait DnD[S <: SSys[S]] {
+trait DnD[S <: SSys[T]] {
   _: Component =>
 
   import DnD._
 
-  protected def universe: Universe[S]
+  protected def universe: Universe[T]
   protected def timelineModel: TimelineModel
 
-  protected def updateDnD(drop: Option[Drop[S]]): Unit
-  protected def acceptDnD(drop:        Drop[S] ): Boolean
+  protected def updateDnD(drop: Option[Drop[T]]): Unit
+  protected def acceptDnD(drop:        Drop[T] ): Boolean
 
   private object Adaptor extends DropTargetAdapter {
     override def dragEnter(e: DropTargetDragEvent): Unit = process(e)
@@ -81,7 +81,7 @@ trait DnD[S <: SSys[S]] {
       e.rejectDrag()
     }
 
-    private def mkDrop(d: DnD.Drag[S], loc: Point): Drop[S] = {
+    private def mkDrop(d: DnD.Drag[T], loc: Point): Drop[T] = {
       val vis   = timelineModel.visible
       val w     = peer.getWidth
       val frame = (loc.x.toDouble / w * vis.length + vis.start).toLong
@@ -91,7 +91,7 @@ trait DnD[S <: SSys[S]] {
 
     private[this] var lastFile: AudioCue = _
 
-    private def mkExtStringDrag(t: Transferable, isDragging: Boolean): Option[DnD.ExtAudioRegionDrag[S]] = {
+    private def mkExtStringDrag(t: Transferable, isDragging: Boolean): Option[DnD.ExtAudioRegionDrag[T]] = {
       // stupid OS X doesn't give out the string data before drop actually happens
       if (isDragging && !Desktop.isLinux) {
         return Some(ExtAudioRegionDrag(universe, file(""), Span(0, 0)))
@@ -112,12 +112,12 @@ trait DnD[S <: SSys[S]] {
           val start = (arr(1).toLong * ratio + 0.5).toLong
           val stop  = (arr(2).toLong * ratio + 0.5).toLong
           val span  = Span(start, stop)
-          ExtAudioRegionDrag[S](universe, path, span)
+          ExtAudioRegionDrag[T](universe, path, span)
         } .toOption
       } else None
     }
 
-    private def acceptAndUpdate(e: DropTargetDragEvent, drag: Drag[S]): Unit = {
+    private def acceptAndUpdate(e: DropTargetDragEvent, drag: Drag[T]): Unit = {
       val loc   = e.getLocation
       val drop  = mkDrop(drag, loc)
       updateDnD(Some(drop))
@@ -130,16 +130,16 @@ trait DnD[S <: SSys[S]] {
       t.isDataFlavorSupported(ObjView.Flavor) ||
       t.isDataFlavorSupported(DataFlavor.stringFlavor)
 
-    private def mkDrag(t: Transferable, isDragging: Boolean): Option[Drag[S]] =
+    private def mkDrag(t: Transferable, isDragging: Boolean): Option[Drag[T]] =
       if (t.isDataFlavorSupported(DnD.flavor)) {
         t.getTransferData(DnD.flavor) match {
-          case d: DnD.Drag[_] if d.universe == universe => Some(d.asInstanceOf[DnD.Drag[S]])
+          case d: DnD.Drag[_] if d.universe == universe => Some(d.asInstanceOf[DnD.Drag[T]])
           case _ => None
         }
       } else if (t.isDataFlavorSupported(ObjView.Flavor)) {
         t.getTransferData(ObjView.Flavor) match {
           case ObjView.Drag(u, view) if u == universe =>
-            Some(DnD.ObjectDrag(universe, view.asInstanceOf[ObjView[S]]))
+            Some(DnD.ObjectDrag(universe, view.asInstanceOf[ObjView[T]]))
           case _ => None
         }
 

@@ -14,16 +14,16 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.{FileDialog, UndoManager}
-import de.sciss.lucre.artifact.Artifact
+import de.sciss.lucre.Artifact
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.{Sys, Txn}
 import de.sciss.mellite.impl.artifact.{ArtifactViewImpl => Impl}
 import de.sciss.synth.proc.Universe
 
 object ArtifactView {
-  def apply[S <: Sys[S]](obj: Artifact[S], mode: Boolean, initMode: FileDialog.Mode)
-                        (implicit tx: S#Tx, universe: Universe[S],
-                                           undo: UndoManager): ArtifactView[S] =
+  def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode)
+                        (implicit tx: T, universe: Universe[T],
+                                           undo: UndoManager): ArtifactView[T] =
     Impl(obj, mode = mode, initMode = initMode)
 }
-trait ArtifactView[S <: Sys[S]] extends UniverseView[S] with View.Editable[S]
+trait ArtifactView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]

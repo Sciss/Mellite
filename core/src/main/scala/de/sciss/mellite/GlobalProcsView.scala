@@ -14,9 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
 import de.sciss.synth.proc.{Timeline, Universe}
 
 import scala.swing.Table
@@ -30,30 +30,30 @@ object GlobalProcsView /*extends GlobalProcsView.Factory*/ {
   }
 
   private[mellite] trait Companion {
-    def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
-                          (implicit tx: S#Tx, universe: Universe[S],
-                           undoManager: UndoManager): GlobalProcsView[S]
+    def apply[T <: Txn[T]](group: Timeline[T], selectionModel: SelectionModel[T, ObjTimelineView[T]])
+                          (implicit tx: T, universe: Universe[T],
+                           undoManager: UndoManager): GlobalProcsView[T]
   }
 
-  def apply[S <: Sys[S]](group: Timeline[S], selectionModel: SelectionModel[S, ObjTimelineView[S]])
-                        (implicit tx: S#Tx, universe: Universe[S],
-                         undoManager: UndoManager): GlobalProcsView[S] =
+  def apply[T <: Txn[T]](group: Timeline[T], selectionModel: SelectionModel[T, ObjTimelineView[T]])
+                        (implicit tx: T, universe: Universe[T],
+                         undoManager: UndoManager): GlobalProcsView[T] =
     companion(group, selectionModel)
 }
-trait GlobalProcsView[S <: stm.Sys[S]] extends UniverseView[S] with View.Editable[S] {
+trait GlobalProcsView[T <: LTxn[T]] extends UniverseView[T] with View.Editable[T] {
   def tableComponent: Table
 
-//  def selectionModel: SelectionModel[S, ProcObjView.Timeline[S]]
-  def selectionModel: SelectionModel[S, ObjView[S]]
+//  def selectionModel: SelectionModel[T, ProcObjView.Timeline[T]]
+  def selectionModel: SelectionModel[T, ObjView[T]]
 
-//  def iterator: Iterator[ProcObjView.Timeline[S]]
-  def iterator: Iterator[ObjView[S]]
+//  def iterator: Iterator[ProcObjView.Timeline[T]]
+  def iterator: Iterator[ObjView[T]]
 
-//  def add    (proc: ProcObjView.Timeline[S]): Unit
-//  def remove (proc: ProcObjView.Timeline[S]): Unit
-//  def updated(proc: ProcObjView.Timeline[S]): Unit
+//  def add    (proc: ProcObjView.Timeline[T]): Unit
+//  def remove (proc: ProcObjView.Timeline[T]): Unit
+//  def updated(proc: ProcObjView.Timeline[T]): Unit
 
-  def add    (proc: ObjView[S]): Unit
-  def remove (proc: ObjView[S]): Unit
-  def updated(proc: ObjView[S]): Unit
+  def add    (proc: ObjView[T]): Unit
+  def remove (proc: ObjView[T]): Unit
+  def updated(proc: ObjView[T]): Unit
 }

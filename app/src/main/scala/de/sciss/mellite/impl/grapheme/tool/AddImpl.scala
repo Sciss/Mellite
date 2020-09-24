@@ -32,11 +32,11 @@ import javax.swing.undo.UndoableEdit
 
 import scala.swing.Component
 
-final class AddImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
-  extends GraphemeTool[S, GraphemeTool.Add] with ModelImpl[BasicTool.Update[GraphemeTool.Add]] {
+final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
+  extends GraphemeTool[T, GraphemeTool.Add] with ModelImpl[BasicTool.Update[GraphemeTool.Add]] {
 
   type Y      = Double
-  type Child  = ObjGraphemeView[S]
+  type Child  = ObjGraphemeView[T]
 
   def defaultCursor: AWTCursor  = AWTCursor.getPredefinedCursor(AWTCursor.CROSSHAIR_CURSOR)
   def name                      = "Add Envelope Segment"
@@ -77,11 +77,11 @@ final class AddImpl[S <: Sys[S]](val canvas: GraphemeCanvas[S])
     * @return either `Some` edit or `None` if the action does not constitute an
     *         edit or the edit parameters are invalid.
     */
-  def commit(drag: GraphemeTool.Add)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] =
+  def commit(drag: GraphemeTool.Add)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
     canvas.grapheme.modifiableOption.map { grMod =>
       assert (drag.tpe.typeId == EnvSegment.Obj.typeId)
-      val startLevel  = DoubleObj.newVar[S](drag.modelY)
-      val curve       = CurveObj .newVar[S](Curve.lin)
+      val startLevel  = DoubleObj.newVar[T](drag.modelY)
+      val curve       = CurveObj .newVar[T](Curve.lin)
       val elem        = EnvSegment.Obj.ApplySingle(startLevel, curve)
       EditGraphemeInsertObj(name, grMod, time = drag.time, elem = elem)
     }

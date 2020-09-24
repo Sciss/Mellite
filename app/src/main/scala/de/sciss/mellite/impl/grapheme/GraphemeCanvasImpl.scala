@@ -24,20 +24,20 @@ import de.sciss.numbers
 
 import scala.swing.Orientation
 
-trait GraphemeCanvasImpl[S <: Sys[S]] extends TimelineCanvas2DImpl[S, Double, ObjGraphemeView[S]]
-  with GraphemeCanvas[S] {
+trait GraphemeCanvasImpl[T <: Txn[T]] extends TimelineCanvas2DImpl[T, Double, ObjGraphemeView[T]]
+  with GraphemeCanvas[T] {
 
-  final val graphemeTools: GraphemeTools[S] = GraphemeTools(this)
+  final val graphemeTools: GraphemeTools[T] = GraphemeTools(this)
 
   protected def emptyRubber: DragRubber[Double] = EmptyRubber
 
-  def selectionModel: ObjGraphemeView.SelectionModel[S]
+  def selectionModel: ObjGraphemeView.SelectionModel[T]
 
-  // def intersect(span: Span): Iterator[TimelineObjView[S]]
+  // def intersect(span: Span): Iterator[TimelineObjView[T]]
 
-//  def findChildView(frame: Long): Option[GraphemeObjView[S]]
+//  def findChildView(frame: Long): Option[GraphemeObjView[T]]
 
-  // def findViews(r: TrackTool.Rectangular): Iterator[GraphemeObjView[S]]
+  // def findViews(r: TrackTool.Rectangular): Iterator[GraphemeObjView[T]]
 
   // ---- impl ----
 

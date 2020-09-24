@@ -14,19 +14,19 @@
 package de.sciss.mellite
 
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.lucre.stm
+import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.View
 
 import scala.swing.Action
 
 /** Common base for `TimelineView` and `GraphemeView`. */
-trait TimelineViewBase[S <: stm.Sys[S], Y, Child] extends UniverseView[S] with View.Editable[S] {
+trait TimelineViewBase[T <: Txn[T], Y, Child] extends UniverseView[T] with View.Editable[T] {
   def timelineModel   : TimelineModel
-  def selectionModel  : SelectionModel[S, Child]
+  def selectionModel  : SelectionModel[T, Child]
 
-  def canvas          : TimelineCanvas2D[S, Y, Child]
+  def canvas          : TimelineCanvas2D[T, Y, Child]
 
-//  def transportView : TransportView  [S]
+//  def transportView : TransportView  [T]
 
   // ---- GUI actions ----
   def actionSelectAll           : Action

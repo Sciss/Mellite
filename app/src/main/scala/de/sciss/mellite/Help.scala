@@ -13,12 +13,13 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm.InMemory
+import de.sciss.lucre.InMemory
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Markdown
 
 object Help {
   private type                  S = InMemory
+  private type                  T = InMemory.Txn
   private implicit val system:  S = InMemory()
 
   def shortcuts(): Unit = {
@@ -28,7 +29,7 @@ object Help {
     }
   }
 
-  private def markdownResource(name: String, title: String)(implicit tx: S#Tx): Markdown[S] = {
+  private def markdownResource(name: String, title: String)(implicit tx: T): Markdown[T] = {
     val mdValue = Option(Mellite.getClass.getResourceAsStream(name)).fold[String](
       s"__Could not find resource '$name'!__"
     ) { is =>
@@ -40,7 +41,7 @@ object Help {
         is.close()
       }
     }
-    val md = Markdown.newConst[S](mdValue)
+    val md = Markdown.newConst[T](mdValue)
     md.name = title
     md
   }

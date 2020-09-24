@@ -22,13 +22,13 @@ import de.sciss.synth.proc.AudioCue
 import de.sciss.synth.proc.Implicits._
 
 object ObjectActions {
-  def mkAudioFile[S <: Sys[S]](loc: ArtifactLocation[S], f: File, spec: AudioFileSpec, offset: Long = 0L,
+  def mkAudioFile[T <: Txn[T]](loc: ArtifactLocation[T], f: File, spec: AudioFileSpec, offset: Long = 0L,
                                gain: Double = 1.0, const: Boolean = false, name: Option[String] = None)
-                              (implicit tx: S#Tx): AudioCue.Obj[S] = {
-    val offset0   = LongObj.newConst[S](offset)
-    val offset1   = if (const) offset0 else LongObj.newVar[S](offset0)
-    val gain0     = DoubleObj.newConst[S](gain)
-    val gain1     = if (const) gain0 else DoubleObj.newVar[S](gain0)
+                              (implicit tx: T): AudioCue.Obj[T] = {
+    val offset0   = LongObj.newConst[T](offset)
+    val offset1   = if (const) offset0 else LongObj.newVar[T](offset0)
+    val gain0     = DoubleObj.newConst[T](gain)
+    val gain1     = if (const) gain0 else DoubleObj.newVar[T](gain0)
     val artifact  = Artifact(loc, f) // loc.add(f)
     val audio     = AudioCue.Obj(artifact, spec, offset1, gain1)
     val name1     = name.getOrElse(f.base)
@@ -37,12 +37,12 @@ object ObjectActions {
     audio
   }
 
-  def findAudioFile[S <: Sys[S]](root: Folder[S], file: File)
-                                (implicit tx: S#Tx): Option[AudioCue.Obj[S]] = {
-    def loop(folder: Folder[S]): Option[AudioCue.Obj[S]] = {
+  def findAudioFile[T <: Txn[T]](root: Folder[T], file: File)
+                                (implicit tx: T): Option[AudioCue.Obj[T]] = {
+    def loop(folder: Folder[T]): Option[AudioCue.Obj[T]] = {
       folder.iterator.flatMap {
-        case objT: AudioCue.Obj[S] if objT.value.artifact == file => Some(objT)
-        case objT: Folder[S] => loop(objT)
+        case objT: AudioCue.Obj[T] if objT.value.artifact == file => Some(objT)
+        case objT: Folder[T] => loop(objT)
         case _ => None
       } .toList.headOption
     }

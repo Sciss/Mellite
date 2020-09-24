@@ -44,7 +44,7 @@ object EnsembleObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categMisc
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Ensemble[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Ensemble[T])(implicit tx: T): ObjListView[T] = {
     val ens         = obj
     val playingEx   = ens.playing
     val playing     = playingEx.value
@@ -52,15 +52,15 @@ object EnsembleObjView extends ObjListView.Factory {
       case BooleanObj.Var(_)  => true
       case _            => false
     }
-    new Impl[S](tx.newHandle(obj), playing = playing, isListCellEditable = isEditable).init(obj)
+    new Impl[T](tx.newHandle(obj), playing = playing, isListCellEditable = isEditable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, offset: Long = 0L,
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, offset: Long = 0L,
                                            playing: Boolean = false, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val ggName    = new TextField(10)
     ggName.text   = prefix
     val offModel  = new SpinnerNumberModel(0.0, 0.0, 1.0e6 /* _Double.MaxValue */, 0.1)
@@ -92,15 +92,15 @@ object EnsembleObjView extends ObjListView.Factory {
       val seconds   = offModel.getNumber.doubleValue()
       val offset    = (seconds * TimeRef.SampleRate + 0.5).toLong
       val playing   = ggPlay.selected
-      Success(Config[S](name = name, offset = offset, playing = playing))
+      Success(Config[T](name = name, offset = offset, playing = playing))
     } else {
       Failure(Aborted())
     }
     done(res1)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val playing : Opt[Boolean] = boolOpt(descr = "Initial playing value (0, 1, false, true, F, T)")
       val offset  : Opt[TimeArg] = opt    (descr = "Offset value (frames, 1.3s, ...)",
         default = Some(TimeArg.Frames(0L)))
@@ -111,24 +111,24 @@ object EnsembleObjView extends ObjListView.Factory {
     p.parse(Config(name = p.name(), playing = p.playing(), const = p.const(), offset = p.offset().frames()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config.{const, name}
-    val folder    = Folder[S]() // XXX TODO - can we ask the user to pick one?
-    val offset0   = LongObj   .newConst[S](config.offset )
+    val folder    = Folder[T]() // XXX TODO - can we ask the user to pick one?
+    val offset0   = LongObj   .newConst[T](config.offset )
     val offset    = if (const) offset0 else LongObj.newVar(offset0)
-    val playing   = BooleanObj.newVar(BooleanObj.newConst[S](config.playing))
-    val obj       = Ensemble[S](folder, offset, playing)
+    val playing   = BooleanObj.newVar(BooleanObj.newConst[T](config.playing))
+    val obj       = Ensemble[T](folder, offset, playing)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Ensemble[S]],
+  final class Impl[T <: Txn[T]](val objH: Source[T, Ensemble[T]],
                                 var playing: Boolean, val isListCellEditable: Boolean)
-    extends ObjListView /* .Ensemble */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.BooleanExprLike[S] {
+    extends ObjListView /* .Ensemble */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.BooleanExprLike[T] {
 
-    override type Repr = Ensemble[S]
+    override type Repr = Ensemble[T]
 
     def factory: ObjView.Factory = EnsembleObjView
 
@@ -136,11 +136,11 @@ object EnsembleObjView extends ObjListView.Factory {
 
     protected def exprValue: Boolean = playing
     protected def exprValue_=(x: Boolean): Unit = playing = x
-    protected def expr(implicit tx: S#Tx): BooleanObj[S] = objH().playing
+    protected def expr(implicit tx: T): BooleanObj[T] = objH().playing
 
     def value: Any = ()
 
-    def init(obj: Ensemble[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: Ensemble[T])(implicit tx: T): this.type = {
       initAttrs(obj)
       addDisposable(obj.changed.react { implicit tx =>upd =>
         upd.changes.foreach {
@@ -155,8 +155,8 @@ object EnsembleObjView extends ObjListView.Factory {
       this
     }
 
-    override def openView(parent: Option[Window[S]])
-                         (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])
+                         (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val ens   = objH()
       val w     = EnsembleFrame(ens)
       Some(w)

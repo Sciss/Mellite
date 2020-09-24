@@ -21,11 +21,11 @@ import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditStreamPeer {
   @deprecated("Try to transition to stm.UndoManager", since = "1.17.0")
-  def apply[S <: Sys[S]](name: String, stream: LStream[S], value: PStream[S, Any])
-                        (implicit tx: S#Tx, cursor: stm.Cursor[S]): UndoableEdit = {
+  def apply[T <: Txn[T]](name: String, stream: LStream[T], value: PStream[T, Any])
+                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val streamH = tx.newHandle(stream)
-    implicit val ctx: PContext[S] = LContext[S](tx.system, tx)
-//    implicitly[Serializer[S#Tx, S#Acc, PStream[S, Any]]]
+    implicit val ctx: PContext[T] = LContext[T](tx.system, tx)
+//    implicitly[Serializer[T, S#Acc, PStream[T, Any]]]
     val beforeH = tx.newHandle(stream.peer())
     val nowH    = tx.newHandle(value)
     val res     = new Impl(name, streamH, beforeH, nowH)
@@ -33,10 +33,10 @@ object EditStreamPeer {
     res
   }
 
-  private final class Impl[S <: Sys[S]](name: String,
-                                        streamH: stm.Source[S#Tx, LStream[S]],
-                                        beforeH: stm.Source[S#Tx, PStream[S, Any]],
-                                        nowH   : stm.Source[S#Tx, PStream[S, Any]])(implicit cursor: stm.Cursor[S])
+  private final class Impl[T <: Txn[T]](name: String,
+                                        streamH: Source[T, LStream[T]],
+                                        beforeH: Source[T, PStream[T, Any]],
+                                        nowH   : Source[T, PStream[T, Any]])(implicit cursor: Cursor[T])
     extends AbstractUndoableEdit {
 
     override def undo(): Unit = {
@@ -52,7 +52,7 @@ object EditStreamPeer {
       cursor.step { implicit tx => perform() }
     }
 
-    def perform()(implicit tx: S#Tx): Unit = {
+    def perform()(implicit tx: T): Unit = {
       val stream    = streamH()
       stream.peer() = nowH()
     }

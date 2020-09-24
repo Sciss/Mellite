@@ -1,20 +1,19 @@
 package de.sciss.lucre
 
-import de.sciss.lucre.stm.Sys
 import de.sciss.synth.proc.Grapheme
 
 /** Cheesy work-around for Lucre #4 -- https://github.com/Sciss/Lucre/issues/4 */
 object GraphemeHasIterator {
-  implicit class Implicits[S <: Sys[S]](val `this`: Grapheme[S]) extends AnyVal { me =>
+  implicit class Implicits[T <: Txn[T]](val `this`: Grapheme[T]) extends AnyVal { me =>
     import me.{`this` => gr}
-    def iterator(implicit tx: S#Tx): Iterator[(Long, Grapheme.Entry[S])] = new Impl(gr)
+    def iterator(implicit tx: T): Iterator[(Long, Grapheme.Entry[T])] = new Impl(gr)
   }
 
-  private[this] final class Impl[S <: Sys[S]](gr: Grapheme[S])(implicit tx: S#Tx)
-    extends Iterator[(Long, Grapheme.Entry[S])] {
+  private[this] final class Impl[T <: Txn[T]](gr: Grapheme[T])(implicit tx: T)
+    extends Iterator[(Long, Grapheme.Entry[T])] {
 
     private[this] var nextTime  = Long.MinValue
-    private[this] var nextValue = Option.empty[(Long, Grapheme.Entry[S])]
+    private[this] var nextValue = Option.empty[(Long, Grapheme.Entry[T])]
 
     advance()
 
@@ -25,7 +24,7 @@ object GraphemeHasIterator {
 
     def hasNext: Boolean = nextValue.isDefined
 
-    def next(): (Long, Grapheme.Entry[S]) = {
+    def next(): (Long, Grapheme.Entry[T]) = {
       val res = nextValue.getOrElse(throw new NoSuchElementException("Exhausted iterator"))
       advance()
       res

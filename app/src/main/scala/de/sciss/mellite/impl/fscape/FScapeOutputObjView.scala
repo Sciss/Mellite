@@ -34,25 +34,25 @@ object FScapeOutputObjView extends NoMakeListObjViewFactory {
 
   def init(): Unit = _init
 
-  def mkListView[S <: Sys[S]](obj: FScape.Output[S])
-                             (implicit tx: S#Tx): FScapeOutputObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: FScape.Output[T])
+                             (implicit tx: T): FScapeOutputObjView[T] with ObjListView[T] = {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FScape.Output[S]], val value: String)
-    extends FScapeOutputObjView[S]
-      with ObjListView[S]
-      with ObjViewImpl    .Impl[S]
+  final class Impl[T <: Txn[T]](val objH: Source[T, FScape.Output[T]], val value: String)
+    extends FScapeOutputObjView[T]
+      with ObjListView[T]
+      with ObjViewImpl    .Impl[T]
       with ObjListViewImpl.StringRenderer
-      with ObjViewImpl    .NonViewable[S]
-      with ObjListViewImpl.NonEditable[S] {
+      with ObjViewImpl    .NonViewable[T]
+      with ObjListViewImpl.NonEditable[T] {
 
-    override def obj(implicit tx: S#Tx): FScape.Output[S] = objH()
+    override def obj(implicit tx: T): FScape.Output[T] = objH()
 
     def factory: ObjView.Factory = FScapeOutputObjView
   }
 }
-trait FScapeOutputObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = FScape.Output[S]
+trait FScapeOutputObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = FScape.Output[T]
 }

@@ -13,13 +13,12 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Cursor, Txn}
 import de.sciss.lucre.swing.View
 import de.sciss.synth.proc.Universe
 
-trait UniverseView[S <: Sys[S]] extends View.Cursor[S] {
-  implicit val universe: Universe[S]
+trait UniverseView[T <: Txn[T]] extends View.Cursor[T] {
+  implicit val universe: Universe[T]
 
-  implicit def cursor: stm.Cursor[S] = universe.cursor
+  implicit def cursor: Cursor[T] = universe.cursor
 }

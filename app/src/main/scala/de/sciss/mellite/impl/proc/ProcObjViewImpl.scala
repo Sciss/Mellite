@@ -19,20 +19,20 @@ import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
 import de.sciss.synth.proc.Universe
 
-trait ProcObjViewImpl[S <: Sys[S]]
-  extends ObjListView[S]
-    with ObjViewImpl.Impl[S]
-    with ObjListViewImpl.EmptyRenderer[S]
-    with ObjListViewImpl.NonEditable[S]
-    with ProcObjView[S] {
+trait ProcObjViewImpl[T <: Txn[T]]
+  extends ObjListView[T]
+    with ObjViewImpl.Impl[T]
+    with ObjListViewImpl.EmptyRenderer[T]
+    with ObjListViewImpl.NonEditable[T]
+    with ProcObjView[T] {
 
   final def factory   : ObjView.Factory = ProcObjView
   final def isViewable: Boolean         = true
 
   // currently this just opens a code editor. in the future we should
   // add a scans map editor, and a convenience button for the attributes
-  final def openView(parent: Option[Window[S]])
-                    (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+  final def openView(parent: Option[Window[T]])
+                    (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
     import de.sciss.mellite.Mellite.compiler
     val frame = CodeFrame.proc(obj)
     Some(frame)

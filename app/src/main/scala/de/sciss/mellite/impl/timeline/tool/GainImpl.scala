@@ -27,8 +27,8 @@ import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
-final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
-  extends BasicTimelineTool[S, TimelineTool.Gain] {
+final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
+  extends BasicTimelineTool[T, TimelineTool.Gain] {
 
   import TimelineTool.Gain
 
@@ -49,21 +49,21 @@ final class GainImpl[S <: Sys[S]](protected val canvas: TimelineTrackCanvas[S])
     Gain(factor)
   }
 
-  protected def commitObj(drag: Gain)(span: SpanLikeObj[S], obj: Obj[S], timeline: Timeline[S])
-                         (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  protected def commitObj(drag: Gain)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import drag.factor
     // ProcActions.adjustGain(obj, drag.factor)
-    // val imp = ExprImplicits[S]
+    // val imp = ExprImplicits[T]
     if (factor == 1f) None else {
       import expr.Ops._
-      val newGain: DoubleObj[S] = obj.attr.$[DoubleObj](ObjKeys.attrGain) match {
+      val newGain: DoubleObj[T] = obj.attr.$[DoubleObj](ObjKeys.attrGain) match {
         case Some(DoubleObj.Var(vr)) => vr() * factor.toDouble
         case other =>
           other.fold(1.0)(_.value) * factor
       }
       import de.sciss.equal.Implicits._
-      val newGainOpt = if (newGain === DoubleObj.newConst[S](1.0)) None else Some(newGain)
-      val edit = EditAttrMap.expr[S, Double, DoubleObj](s"Adjust $name", obj, ObjKeys.attrGain, newGainOpt)
+      val newGainOpt = if (newGain === DoubleObj.newConst[T](1.0)) None else Some(newGain)
+      val edit = EditAttrMap.expr[T, Double, DoubleObj](s"Adjust $name", obj, ObjKeys.attrGain, newGainOpt)
       Some(edit)
     }
   }

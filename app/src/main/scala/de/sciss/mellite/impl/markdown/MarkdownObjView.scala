@@ -15,10 +15,10 @@ package de.sciss.mellite.impl.markdown
 
 import de.sciss.desktop
 import de.sciss.lucre.expr.Type
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Obj, stm}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.{Sys, Txn}
 import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView}
 import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.ObjViewCmdLineParser
@@ -36,33 +36,33 @@ object MarkdownObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categOrganization
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Markdown[S])(implicit tx: S#Tx): MarkdownObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Markdown[T])(implicit tx: T): MarkdownObjView[T] with ObjListView[T] = {
     val ex    = obj
     val value = ex.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, contents: Option[String] = None, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, contents: Option[String] = None, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val pane    = desktop.OptionPane.textInput(message = "Name", initial = prefix)
     pane.title  = s"New $humanName"
     val res0    = GUI.optionToAborted(pane.show(window))
-    val res     = res0.map(name => Config[S](name = name))
+    val res     = res0.map(name => Config[T](name = name))
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val const   : Opt[Boolean]  = opt(descr = s"Make constant instead of variable")
       val contents: Opt[String]   = trailArg(required = false, descr = "Markdown text")
     }
     p.parse(Config(name = p.name(), contents = p.contents.toOption, const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
     val value = contents.getOrElse(
       """# Title
@@ -70,27 +70,27 @@ object MarkdownObjView extends ObjListView.Factory {
         |body
         |""".stripMargin
     )
-    val obj0  = Markdown.newConst[S](value)
+    val obj0  = Markdown.newConst[T](value)
     val obj   = if (const) obj0 else Markdown.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
   // XXX TODO make private
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Markdown[S]], var value: String)
-    extends ObjListView[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.SimpleExpr[S, Markdown.Value, Markdown]
+  final class Impl[T <: Txn[T]](val objH: Source[T, Markdown[T]], var value: String)
+    extends ObjListView[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.SimpleExpr[T, Markdown.Value, Markdown]
       with ObjListViewImpl.StringRenderer
-      with MarkdownObjView[S] {
+      with MarkdownObjView[T] {
 
-    override def obj(implicit tx: S#Tx): Markdown[S] = objH()
+    override def obj(implicit tx: T): Markdown[T] = objH()
 
     def factory: ObjView.Factory = MarkdownObjView
 
     def exprType: Type.Expr[Markdown.Value, Markdown] = Markdown
 
-    def expr(implicit tx: S#Tx): Markdown[S] = obj
+    def expr(implicit tx: T): Markdown[T] = obj
 
     def isListCellEditable: Boolean = false // never within the list view
 
@@ -98,12 +98,12 @@ object MarkdownObjView extends ObjListView.Factory {
 
     def convertEditValue(v: Any): Option[String] = None
 
-    override def openView(parent: Option[Window[S]])(implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val frame = MarkdownFrame.editor(obj)
       Some(frame)
     }
   }
 }
-trait MarkdownObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  override type Repr = Markdown[S]
+trait MarkdownObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  override type Repr = Markdown[T]
 }

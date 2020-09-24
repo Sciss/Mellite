@@ -13,11 +13,11 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.synth.proc.Grapheme
 
-trait GraphemeCanvas[S <: Sys[S]] extends TimelineCanvas2D[S, Double, ObjGraphemeView[S]] {
-  def grapheme(implicit tx: S#Tx): Grapheme[S]
+trait GraphemeCanvas[T <: Txn[T]] extends TimelineCanvas2D[T, Double, ObjGraphemeView[T]] {
+  def grapheme(implicit tx: T): Grapheme[T]
 
-  def graphemeTools: GraphemeTools[S]
+  def graphemeTools: GraphemeTools[T]
 }

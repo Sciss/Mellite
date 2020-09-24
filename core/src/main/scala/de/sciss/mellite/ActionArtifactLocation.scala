@@ -15,9 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.desktop.{FileDialog, OptionPane, Window}
 import de.sciss.file._
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Folder, Obj, Sys}
+import de.sciss.lucre.{Artifact, ArtifactLocation, Folder, Obj, Source, Txn}
 import de.sciss.swingplus.Labeled
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.Universe
@@ -30,12 +28,12 @@ import scala.util.Try
 
 object ActionArtifactLocation {
 
-  type LocationSource [S <: Sys[S]] = stm.Source[S#Tx, ArtifactLocation[S]]
-  type LocationSourceT[S <: Sys[S]] = (stm.Source[S#Tx, ArtifactLocation[S]], File)
-  type QueryResult    [S <: Sys[S]] = (Either[LocationSource[S], String], File)
+  type LocationSource [T <: Txn[T]] = Source[T, ArtifactLocation[T]]
+  type LocationSourceT[T <: Txn[T]] = (Source[T, ArtifactLocation[T]], File)
+  type QueryResult    [T <: Txn[T]] = (Either[LocationSource[T], String], File)
 
-  def merge[S <: Sys[S]](result: QueryResult[S])
-                        (implicit tx: S#Tx): Option[(Option[Obj[S]], ArtifactLocation[S])] = {
+  def merge[T <: Txn[T]](result: QueryResult[T])
+                        (implicit tx: T): Option[(Option[Obj[T]], ArtifactLocation[T])] = {
     val (list0, loc) = result match {
       case (Left(source), _) => (None, source())
       case (Right(name), directory) =>
@@ -45,13 +43,13 @@ object ActionArtifactLocation {
     Some(list0 -> loc) // loc.modifiableOption.map(list0 -> _)
   }
 
-  def query[S <: Sys[S]](file: File, window: Option[desktop.Window] = None, askName: Boolean = false)
-                        (root: S#Tx => Folder[S])
-                        (implicit universe: Universe[S]): Option[QueryResult[S]] = {
+  def query[T <: Txn[T]](file: File, window: Option[desktop.Window] = None, askName: Boolean = false)
+                        (root: T => Folder[T])
+                        (implicit universe: Universe[T]): Option[QueryResult[T]] = {
 
     def createNew(): Option[(String, File)] = queryNew(child = Some(file), window = window, askName = askName)
 
-    def createNewRes(): Option[QueryResult[S]] =
+    def createNewRes(): Option[QueryResult[T]] =
       createNew().map { case (name, base) => (Right(name), base) }
 
     val options = find(file = file)(root)
@@ -80,21 +78,21 @@ object ActionArtifactLocation {
     }
   }
 
-  def find[S <: Sys[S]](file: File)(root: S#Tx => Folder[S])
-                       (implicit universe: Universe[S]): Vec[Labeled[LocationSourceT[S]]] = {
+  def find[T <: Txn[T]](file: File)(root: T => Folder[T])
+                       (implicit universe: Universe[T]): Vec[Labeled[LocationSourceT[T]]] = {
     import universe.cursor
-    val options: Vec[Labeled[LocationSourceT[S]]] = cursor.step { implicit tx =>
-      /* @tailrec */ def loop(xs: List[Obj[S]], res: Vec[Labeled[LocationSourceT[S]]]): Vec[Labeled[LocationSourceT[S]]] =
+    val options: Vec[Labeled[LocationSourceT[T]]] = cursor.step { implicit tx =>
+      /* @tailrec */ def loop(xs: List[Obj[T]], res: Vec[Labeled[LocationSourceT[T]]]): Vec[Labeled[LocationSourceT[T]]] =
         xs match {
           case head :: tail =>
             val res1 = head match {
-              case objT: ArtifactLocation[S] =>
+              case objT: ArtifactLocation[T] =>
                 val parent = objT.directory
                 if (Try(Artifact.relativize(parent, file)).isSuccess) {
                   res :+ Labeled(tx.newHandle(objT) -> parent)(objT.name)
                 } else res
 
-              case objT: Folder[S] =>
+              case objT: Folder[T] =>
                 loop(objT.iterator.toList, res)
 
               case _ => res
@@ -135,8 +133,8 @@ object ActionArtifactLocation {
     }
   }
 
-  def create[S <: Sys[S]](name: String, directory: File)(implicit tx: S#Tx): ArtifactLocation[S] = {
-    val peer  = ArtifactLocation.newVar[S](directory)
+  def create[T <: Txn[T]](name: String, directory: File)(implicit tx: T): ArtifactLocation[T] = {
+    val peer  = ArtifactLocation.newVar[T](directory)
     peer.name = name
     peer
   }

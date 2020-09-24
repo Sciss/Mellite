@@ -27,10 +27,10 @@ import scala.collection.immutable.{IndexedSeq => Vec}
 /** These actions require being executed on the EDT. */
 object ProcGUIActions {
   // scalac still has bug finding Timeline.Modifiable
-  private type TimelineMod[S <: Sys[S]] = Timeline.Modifiable[S] // , Proc[S], Obj.UpdateT[S, Proc.Elem[S]]]
+  private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T] // , Proc[T], Obj.UpdateT[T, Proc.Elem[T]]]
 
-  def removeProcs[S <: Sys[S]](group: TimelineMod[S], views: TraversableOnce[ObjTimelineView[S]])
-                              (implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit] = {
+  def removeProcs[T <: Txn[T]](group: TimelineMod[T], views: TraversableOnce[ObjTimelineView[T]])
+                              (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     requireEDT()
     val name = "Remove Object"
     val edits = views.toIterator.flatMap { pv0 =>
@@ -38,7 +38,7 @@ object ProcGUIActions {
       val obj   = pv0.obj
 
       val editsUnlink: Vec[UndoableEdit] = pv0 match {
-        case pv: ProcObjView.Timeline[S] =>
+        case pv: ProcObjView.Timeline[T] =>
           val edits: Vec[UndoableEdit] = pv.targets.iterator.flatMap(_.remove()).toIndexedSeq
           edits
 

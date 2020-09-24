@@ -34,25 +34,25 @@ import scala.concurrent.stm.{Ref, TSet}
 import scala.swing.Graphics2D
 import scala.util.control.NonFatal
 
-final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc[S]],
-                                                 var busOption : Option[Int], val context: ObjTimelineView.Context[S])
-  extends ProcObjViewImpl[S]
-    with ObjTimelineViewImpl.HasGainImpl[S]
-    with ObjTimelineViewImpl.HasMuteImpl[S]
-    with ObjTimelineViewImpl.HasFadeImpl[S]
-    with ProcObjView.Timeline[S] { self =>
+final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
+                                                 var busOption : Option[Int], val context: ObjTimelineView.Context[T])
+  extends ProcObjViewImpl[T]
+    with ObjTimelineViewImpl.HasGainImpl[T]
+    with ObjTimelineViewImpl.HasMuteImpl[T]
+    with ObjTimelineViewImpl.HasFadeImpl[T]
+    with ProcObjView.Timeline[T] { self =>
 
   override def toString = s"ProcView($name, $spanValue, $audio)"
 
   private[this] var audio         = Option.empty[AudioCue]
   private[this] var failedAcquire = false
   private[this] var sonogram      = Option.empty[SonoOverview]
-  private[this] val _targets      = TSet.empty[LinkTarget[S]]
+  private[this] val _targets      = TSet.empty[LinkTarget[T]]
 
-  def addTarget   (tgt: LinkTarget[S])(implicit tx: TxnLike): Unit = _targets.add   (tgt)(tx.peer)
-  def removeTarget(tgt: LinkTarget[S])(implicit tx: TxnLike): Unit = _targets.remove(tgt)(tx.peer)
+  def addTarget   (tgt: LinkTarget[T])(implicit tx: TxnLike): Unit = _targets.add   (tgt)(tx.peer)
+  def removeTarget(tgt: LinkTarget[T])(implicit tx: TxnLike): Unit = _targets.remove(tgt)(tx.peer)
 
-  def targets(implicit tx: TxnLike): Set[LinkTarget[S]] = {
+  def targets(implicit tx: TxnLike): Set[LinkTarget[T]] = {
     import TxnLike.peer
     _targets.toSet
   }
@@ -68,13 +68,13 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     procS
   }
 
-  def fireRepaint()(implicit tx: S#Tx): Unit = fire(ObjView.Repaint(this))
+  def fireRepaint()(implicit tx: T): Unit = fire(ObjView.Repaint(this))
 
-  def init(id: S#Id, span: SpanLikeObj[S], obj: Proc[S])(implicit tx: S#Tx): this.type = {
+  def init(id: S#Id, span: SpanLikeObj[T], obj: Proc[T])(implicit tx: T): this.type = {
     initAttrs(id, span, obj)
 
     val attr    = obj.attr
-    val cueView = CellView.attr[S, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
+    val cueView = CellView.attr[T, AudioCue, AudioCue.Obj](attr, Proc.graphAudio)
     addDisposable(cueView.react { implicit tx =>newAudio =>
       deferAndRepaint {
         val newSonogram = audio.map(_.artifact) != newAudio.map(_.artifact)
@@ -109,16 +109,16 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     this
   }
 
-  private[this] def outputAdded(out: proc.Output[S])(implicit tx: S#Tx): Unit =
-    context.putAux[ProcObjView.Timeline[S]](out.id, this)
+  private[this] def outputAdded(out: proc.Output[T])(implicit tx: T): Unit =
+    context.putAux[ProcObjView.Timeline[T]](out.id, this)
 
-  private[this] def outputRemoved(out: proc.Output[S])(implicit tx: S#Tx): Unit =
+  private[this] def outputRemoved(out: proc.Output[T])(implicit tx: T): Unit =
     context.removeAux(out.id)
 
-  private[this] val attrInRef = Ref(Option.empty[InputAttrImpl[S]])
-  private[this] var attrInEDT =     Option.empty[InputAttrImpl[S]]
+  private[this] val attrInRef = Ref(Option.empty[InputAttrImpl[T]])
+  private[this] var attrInEDT =     Option.empty[InputAttrImpl[T]]
 
-  private[this] def removeAttrIn(value: Obj[S])(implicit tx: S#Tx): Unit = {
+  private[this] def removeAttrIn(value: Obj[T])(implicit tx: T): Unit = {
     import TxnLike.peer
     attrInRef.swap(None).foreach { view =>
       view.dispose()
@@ -128,22 +128,22 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     }
   }
 
-  private[this] def addAttrIn(key: String, value: Obj[S], fire: Boolean = true)(implicit tx: S#Tx): Unit = {
+  private[this] def addAttrIn(key: String, value: Obj[T], fire: Boolean = true)(implicit tx: T): Unit = {
     import TxnLike.peer
-    val viewOpt: Option[InputAttrImpl[S]] = value match {
-      case tl: proc.Timeline[S] =>
+    val viewOpt: Option[InputAttrImpl[T]] = value match {
+      case tl: proc.Timeline[T] =>
         val tlView  = new InputAttrTimeline(this, key, tl, tx)
         Some(tlView)
 
-      case _: proc.Grapheme[S] =>
+      case _: proc.Grapheme[T] =>
         println("addAttrIn: Grapheme")
         ???!
 
-      case f: Folder[S] =>
+      case f: Folder[T] =>
         val tlView  = new InputAttrFolder(this, key, f, tx)
         Some(tlView)
 
-      case out: proc.Output[S] =>
+      case out: proc.Output[T] =>
         val tlView  = new InputAttrOutput(this, key, out, tx)
         Some(tlView)
 
@@ -161,13 +161,13 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     }
   }
 
-  override def paintFront(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering): Unit =
+  override def paintFront(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering): Unit =
     if (pStart > Long.MinValue) attrInEDT.foreach { attrInView =>
       attrInView.paintInputAttr(g, tlv = tlv, r = r, px1c = px1c, px2c = px2c)
     }
 
   // paint sonogram
-  override protected def paintInner(g: Graphics2D, tlv: TimelineView[S], r: TimelineRendering,
+  override protected def paintInner(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering,
                                     selected: Boolean): Unit =
     audio.foreach { audioVal =>
       val sonogramOpt = sonogram.orElse(acquireSonogram())
@@ -233,7 +233,7 @@ final class ProcObjTimelineViewImpl[S <: Sys[S]](val objH: stm.Source[S#Tx, Proc
     sonogram
   }
 
-  override def dispose()(implicit tx: S#Tx): Unit = {
+  override def dispose()(implicit tx: T): Unit = {
     super.dispose()
     import TxnLike.peer
     val proc = obj

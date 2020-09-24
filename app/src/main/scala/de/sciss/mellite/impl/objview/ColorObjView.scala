@@ -44,25 +44,25 @@ object ColorObjView extends ObjListView.Factory {
   def category      : String   = ObjView.categOrganization
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Color.Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Color.Obj[T])(implicit tx: T): ObjListView[T] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
       case Color.Obj.Var(_)  => true
       case _                  => false
     }
-    new Impl[S](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
+    new Impl[T](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Color, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Color, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val (ggValue, ggChooser) = mkColorEditor()
-    val res0 = primitiveConfig[S, Color](window, tpe = prefix, ggValue = ggValue, prepare =
+    val res0 = primitiveConfig[T, Color](window, tpe = prefix, ggValue = ggValue, prepare =
       Success(fromAWT(ggChooser.color)))
-    val res = res0.map(c => Config[S](name = c.name, value = c.value))
+    val res = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)
   }
 
@@ -98,8 +98,8 @@ object ColorObjView extends ObjListView.Factory {
     parseString(s).get
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
       val value: Opt[Color]   = trailArg(
         descr = s"Initial color value (0-${Color.Palette.size - 1}, #rrggbb, red, rgb(), hsl(), ...)")
@@ -107,9 +107,9 @@ object ColorObjView extends ObjListView.Factory {
     p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = Color.Obj.newConst[S](value)
+    val obj0  = Color.Obj.newConst[T](value)
     val obj   = if (const) obj0 else Color.Obj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
@@ -275,13 +275,13 @@ object ColorObjView extends ObjListView.Factory {
     }
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Color.Obj[S]],
+  final class Impl[T <: Txn[T]](val objH: Source[T, Color.Obj[T]],
                                 var value: Color, isEditable0: Boolean)
-    extends ObjListView /* .Color */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.SimpleExpr[S, Color, Color.Obj] { listView =>
+    extends ObjListView /* .Color */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.SimpleExpr[T, Color, Color.Obj] { listView =>
 
-    type Repr = Color.Obj[S]
+    type Repr = Color.Obj[T]
 
     def isListCellEditable = false    // not until we have proper editing components
 
@@ -289,7 +289,7 @@ object ColorObjView extends ObjListView.Factory {
 
     def exprType: Type.Expr[Color, Color.Obj] = Color.Obj
 
-    def expr(implicit tx: S#Tx): Color.Obj[S] = objH()
+    def expr(implicit tx: T): Color.Obj[T] = objH()
 
     def configureListCellRenderer(label: Label): Component = {
       // renderers are used for "stamping", so we can reuse a single object.
@@ -305,16 +305,16 @@ object ColorObjView extends ObjListView.Factory {
 
     def isViewable: Boolean = isEditable0
 
-    override def openView(parent: Option[Window[S]])
-                         (implicit tx: S#Tx, _universe: Universe[S]): Option[Window[S]] = {
+    override def openView(parent: Option[Window[T]])
+                         (implicit tx: T, _universe: Universe[T]): Option[Window[T]] = {
       //        val opt = OptionPane.confirmation(message = component, optionType = OptionPane.Options.OkCancel,
       //          messageType = OptionPane.Message.Plain)
       //        opt.show(parent) === OptionPane.Result.Ok
       val title = CellView.name(obj)
-      val w: WindowImpl[S] = new WindowImpl[S](title) { self =>
-        val view: UniverseView[S] = new UniverseView[S] with ComponentHolder[Component] {
+      val w: WindowImpl[T] = new WindowImpl[T](title) { self =>
+        val view: UniverseView[T] = new UniverseView[T] with ComponentHolder[Component] {
           type C = Component
-          val universe: Universe[S] = _universe
+          val universe: Universe[T] = _universe
 
           deferTx {
             val (compColor, chooser) = mkColorEditor()
@@ -329,14 +329,14 @@ object ColorObjView extends ObjListView.Factory {
               val editOpt = cursor.step { implicit tx =>
                 objH() match {
                   case Color.Obj.Var(vr) =>
-                    Some(EditVar.Expr[S, Color, Color.Obj]("Change Color", vr, Color.Obj.newConst[S](colr)))
+                    Some(EditVar.Expr[T, Color, Color.Obj]("Change Color", vr, Color.Obj.newConst[T](colr)))
                   case _ => None
                 }
               }
               editOpt.foreach { edit =>
                 parent.foreach { p =>
                   p.view match {
-                    case e: View.Editable[S] => e.undoManager.add(edit)
+                    case e: View.Editable[T] => e.undoManager.add(edit)
                   }
                 }
               }
@@ -357,7 +357,7 @@ object ColorObjView extends ObjListView.Factory {
             component = pane
           }
 
-          def dispose()(implicit tx: S#Tx): Unit = ()
+          def dispose()(implicit tx: T): Unit = ()
         }
 
         def closeMe(): Unit = {

@@ -13,9 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Cursor, Obj, Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.objview.ObjListViewImpl
 import javax.swing.undo.UndoableEdit
 
@@ -23,16 +22,16 @@ import scala.swing.{Component, Label}
 
 object ObjListView {
   trait Factory extends ObjView.Factory {
-    def mkListView[S <: SSys[S]](obj: E[S])(implicit tx: S#Tx): ObjListView[S]
+    def mkListView[T <: Txn[T]](obj: E[T])(implicit tx: T): ObjListView[T]
   }
 
   def addFactory(f: Factory): Unit = ObjListViewImpl.addFactory(f)
 
   def factories: Iterable[Factory] = ObjListViewImpl.factories
 
-  def apply[S <: SSys[S]](obj: Obj[S])(implicit tx: S#Tx): ObjListView[S] = ObjListViewImpl(obj)
+  def apply[T <: Txn[T]](obj: Obj[T])(implicit tx: T): ObjListView[T] = ObjListViewImpl(obj)
 }
-trait ObjListView[S <: stm.Sys[S]] extends ObjView[S] {
+trait ObjListView[T <: LTxn[T]] extends ObjView[T] {
   /** The opaque view value passed into the renderer. */
   def value: Any
 
@@ -51,5 +50,5 @@ trait ObjListView[S <: stm.Sys[S]] extends ObjView[S] {
     * the editing being done. It is then the duty of the view to issue a corresponding transactional
     * mutation, returned in an undoable edit. Views that do not support editing should just return `None`.
     */
-  def tryEditListCell(value: Any)(implicit tx: S#Tx, cursor: stm.Cursor[S]): Option[UndoableEdit]
+  def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit]
 }

@@ -15,8 +15,8 @@ package de.sciss.mellite.impl.grapheme
 
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Source, stm}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{Application, GraphemeView}
 import de.sciss.mellite.GraphemeFrame
 import de.sciss.mellite.impl.WindowImpl
@@ -25,22 +25,22 @@ import de.sciss.synth.proc.{Grapheme, Universe}
 import scala.swing.event.Key
 
 object GraphemeFrameImpl {
-  def apply[S <: Sys[S]](group: Grapheme[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): GraphemeFrame[S] = {
+  def apply[T <: Txn[T]](group: Grapheme[T])
+                        (implicit tx: T, universe: Universe[T]): GraphemeFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
-    val tlv     = GraphemeView[S](group)
+    val tlv     = GraphemeView[T](group)
     val name    = CellView.name(group)
-    import Grapheme.serializer
+    import Grapheme.format
     val groupH  = tx.newHandle(group)
     val res     = new Impl(tlv, name, groupH)
     res.init()
     res
   }
 
-  private final class Impl[S <: Sys[S]](val view: GraphemeView[S], name: CellView[S#Tx, String],
-                                        groupH: stm.Source[S#Tx, Grapheme[S]])
-    extends WindowImpl[S](name.map(n => s"$n : Grapheme"))
-      with GraphemeFrame[S] {
+  private final class Impl[T <: Txn[T]](val view: GraphemeView[T], name: CellView[T, String],
+                                        groupH: Source[T, Grapheme[T]])
+    extends WindowImpl[T](name.map(n => s"$n : Grapheme"))
+      with GraphemeFrame[T] {
 
     override protected def initGUI(): Unit = {
       val mf = Application.windowHandler.menuFactory

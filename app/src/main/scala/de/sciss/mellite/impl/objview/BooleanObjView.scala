@@ -30,7 +30,7 @@ import scala.swing.CheckBox
 import scala.util.Success
 
 object BooleanObjView extends ObjListView.Factory {
-  type E[S <: stm.Sys[S]] = BooleanObj[S]
+  type E[S <: stm.Sys[T]] = BooleanObj[T]
   val icon          : Icon      = raphaelIcon(Shapes.BooleanNumber)
   val prefix        : String   = "Boolean"
   def humanName     : String   = prefix
@@ -38,7 +38,7 @@ object BooleanObjView extends ObjListView.Factory {
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean  = true
 
-  def mkListView[S <: Sys[S]](obj: BooleanObj[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: BooleanObj[T])(implicit tx: T): ObjListView[T] = {
     val ex          = obj
     val value       = ex.value
     val isEditable  = ex match {
@@ -46,48 +46,48 @@ object BooleanObjView extends ObjListView.Factory {
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new Impl[S](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
+    new Impl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Boolean, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Boolean, const: Boolean = false)
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val ggValue = new CheckBox()
-    val res0 = primitiveConfig[S, Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.selected))
-    val res = res0.map(c => Config[S](name = c.name, value = c.value))
+    val res0 = primitiveConfig[T, Boolean](window, tpe = prefix, ggValue = ggValue, prepare = Success(ggValue.selected))
+    val res = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
       val value: Opt[Boolean] = boolArg (descr = "Initial boolean value (0, 1, false, true, F, T)")
     }
     p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = BooleanObj.newConst[S](value)
+    val obj0  = BooleanObj.newConst[T](value)
     val obj   = if (const) obj0 else BooleanObj.newVar(obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, BooleanObj[S]],
+  final class Impl[T <: Txn[T]](val objH: Source[T, BooleanObj[T]],
                                 var value: Boolean,
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
-    extends ObjListView /* .Boolean */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.BooleanExprLike[S]
-      with ObjListViewImpl.SimpleExpr[S, Boolean, BooleanObj] {
+    extends ObjListView /* .Boolean */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.BooleanExprLike[T]
+      with ObjListViewImpl.SimpleExpr[T, Boolean, BooleanObj] {
 
-    type Repr = BooleanObj[S]
+    type Repr = BooleanObj[T]
 
     def factory: ObjView.Factory = BooleanObjView
 
-    def expr(implicit tx: S#Tx): BooleanObj[S] = objH()
+    def expr(implicit tx: T): BooleanObj[T] = objH()
   }
 }

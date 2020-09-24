@@ -27,10 +27,10 @@ import de.sciss.synth.proc.{Timeline, Universe}
 import scala.swing.Action
 
 object TimelineFrameImpl {
-  def apply[S <: Sys[S]](group: Timeline[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): TimelineFrame[S] = {
+  def apply[T <: Txn[T]](group: Timeline[T])
+                        (implicit tx: T, universe: Universe[T]): TimelineFrame[T] = {
     implicit val undoMgr: UndoManager = UndoManager()
-    val tlv     = TimelineView[S](group)
+    val tlv     = TimelineView[T](group)
     val name    = CellView.name(group)
     import Timeline.serializer
     val groupH  = tx.newHandle(group)
@@ -39,10 +39,10 @@ object TimelineFrameImpl {
     res
   }
 
-  private final class Impl[S <: Sys[S]](val view: TimelineView[S], name: CellView[S#Tx, String],
-                                        groupH: stm.Source[S#Tx, Timeline[S]])
-    extends WindowImpl[S](name.map(n => s"$n : Timeline"))
-    with TimelineFrame[S] {
+  private final class Impl[T <: Txn[T]](val view: TimelineView[T], name: CellView[T, String],
+                                        groupH: Source[T, Timeline[T]])
+    extends WindowImpl[T](name.map(n => s"$n : Timeline"))
+    with TimelineFrame[T] {
 
     import view.{cursor => _cursor}
 
@@ -60,7 +60,7 @@ object TimelineFrameImpl {
           val it = view.selectionModel.iterator
           if (it.hasNext)
             it.foreach {
-              case pv: ProcObjView.Timeline[S] =>
+              case pv: ProcObjView.Timeline[T] =>
                 println(pv.debugString)
                 println(_cursor.step { implicit tx => pv.obj.toString() })
                 println("--- targets ---")

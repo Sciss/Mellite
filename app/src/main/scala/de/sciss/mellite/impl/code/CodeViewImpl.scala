@@ -132,11 +132,11 @@ object CodeViewImpl extends CodeView.Companion {
     b.result().sorted
   }
 
-  def apply[S <: Sys[S]](obj: Code.Obj[S], code0: Code, bottom: ISeq[View[S]])
-                        (handlerOpt: Option[CodeView.Handler[S, code0.In, code0.Out]])
-                        (implicit tx: S#Tx, universe: Universe[S],
+  def apply[T <: Txn[T]](obj: Code.Obj[T], code0: Code, bottom: ISeq[View[T]])
+                        (handlerOpt: Option[CodeView.Handler[T, code0.In, code0.Out]])
+                        (implicit tx: T, universe: Universe[T],
                          compiler: Code.Compiler,
-                         undoManager: UndoManager): CodeView[S, code0.Out] = {
+                         undoManager: UndoManager): CodeView[T, code0.Out] = {
 
     val codeEx      = obj
     val codeVarHOpt = codeEx match {
@@ -144,18 +144,18 @@ object CodeViewImpl extends CodeView.Companion {
         Some(tx.newHandle(vr))
       case _            => None
     }
-    val res     = new Impl[S, code0.In, code0.Out](codeVarHOpt,
+    val res     = new Impl[T, code0.In, code0.Out](codeVarHOpt,
       code0, handlerOpt, bottom = bottom) // IntelliJ highlight bug
     res.init()
   }
 
-  private final class Impl[S <: Sys[S], In0, Out0](codeVarHOpt: Option[stm.Source[S#Tx, Code.Obj.Var[S]]],
+  private final class Impl[T <: Txn[T], In0, Out0](codeVarHOpt: Option[Source[T, Code.Obj.Var[T]]],
                                                    private var code: Code { type In = In0; type Out = Out0 },
-                                                   handlerOpt: Option[CodeView.Handler[S, In0, Out0]],
-                                                   bottom: ISeq[View[S]])
-                                                  (implicit undoManager: UndoManager, val universe: Universe[S],
+                                                   handlerOpt: Option[CodeView.Handler[T, In0, Out0]],
+                                                   bottom: ISeq[View[T]])
+                                                  (implicit undoManager: UndoManager, val universe: Universe[T],
                                                    compiler: Code.Compiler)
-    extends CodeView[S, Out0] with ModelImpl[CodeView.Update] {
+    extends CodeView[T, Out0] with ModelImpl[CodeView.Update] {
 
     type C = Component
 
@@ -254,7 +254,7 @@ object CodeViewImpl extends CodeView.Companion {
     def isCompiling(implicit tx: TxnLike): Boolean =
       futCompile.get(tx.peer).isDefined
 
-    def dispose()(implicit tx: S#Tx): Unit = {
+    def dispose()(implicit tx: T): Unit = {
       bottom.foreach(_.dispose())
       deferTx {
         if (_guiInitialized) {
@@ -264,13 +264,13 @@ object CodeViewImpl extends CodeView.Companion {
       }
     }
     
-    private def saveSource(newSource: String)(implicit tx: S#Tx): Option[UndoableEdit] = {
-      // val expr  = ExprImplicits[S]
+    private def saveSource(newSource: String)(implicit tx: T): Option[UndoableEdit] = {
+      // val expr  = ExprImplicits[T]
       // import StringObj.{varSerializer, serializer}
-      // val imp = ExprImplicits[S]
+      // val imp = ExprImplicits[T]
       codeVarHOpt.map { source =>
-        val newCode = Code.Obj.newConst[S](code.updateSource(newSource))
-        EditVar.Expr[S, Code, Code.Obj]("Change Source Code", source(), newCode)
+        val newCode = Code.Obj.newConst[T](code.updateSource(newSource))
+        EditVar.Expr[T, Code, Code.Obj]("Change Source Code", source(), newCode)
       }
     }
 
@@ -284,7 +284,7 @@ object CodeViewImpl extends CodeView.Companion {
       editorPanel.history.clear()
     }
     
-    private def saveSourceAndObject(newCode: String, in: In0, out: Out0)(implicit tx: S#Tx): Option[UndoableEdit] = {
+    private def saveSourceAndObject(newCode: String, in: In0, out: Out0)(implicit tx: T): Option[UndoableEdit] = {
       val edit1 = saveSource(newCode)
       val edit2 = handlerOpt.map { handler =>
         handler.save(in, out)
@@ -383,7 +383,7 @@ object CodeViewImpl extends CodeView.Companion {
 
     private[this] var clearGreen = false
 
-    def init()(implicit tx: S#Tx): this.type = {
+    def init()(implicit tx: T): this.type = {
 //      deferTx(guiInit())
       this
     }

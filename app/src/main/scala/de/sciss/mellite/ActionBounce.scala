@@ -21,13 +21,10 @@ import java.text.ParseException
 import de.sciss.audiowidgets.TimeField
 import de.sciss.desktop.{Desktop, DialogSource, FileDialog, OptionPane, PathField, Window}
 import de.sciss.file._
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.expr.{BooleanObj, DoubleObj, IntObj, LongObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.{Buffer, Server, Synth, Sys}
+import de.sciss.lucre.synth.{Buffer, Server, Synth, Txn}
+import de.sciss.lucre.{Artifact, ArtifactLocation, BooleanObj, DoubleObj, IntObj, LongObj, Obj, Source, SpanLikeObj, StringObj}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain
@@ -56,7 +53,7 @@ object ActionBounce {
 
   final val title = "Export as Audio File"
 
-  def presetAllTimeline[S <: Sys[S]](tl: Timeline[S])(implicit tx: S#Tx): List[SpanPreset] = {
+  def presetAllTimeline[T <: Txn[T]](tl: Timeline[T])(implicit tx: T): List[SpanPreset] = {
     val opt = for {
       start <- tl.firstEvent
       stop  <- tl.lastEvent
@@ -149,7 +146,7 @@ object ActionBounce {
     * @param q    the settings to store
     * @param obj  the object into whose attribute map the settings are stored
     */
-  def storeSettings[S <: Sys[S]](q: QuerySettings[S], obj: Obj[S])(implicit tx: S#Tx): Unit = {
+  def storeSettings[T <: Txn[T]](q: QuerySettings[T], obj: Obj[T])(implicit tx: T): Unit = {
     val attr = obj.attr
     import equal.Implicits._
 
@@ -158,7 +155,7 @@ object ActionBounce {
         case Some(a) if a.value === value =>
         case Some(StringObj.Var(vr)) => vr() = value
         case Some(_) if value == default => attr.remove(key)
-        case None    if value != default => attr.put(key, StringObj.newVar[S](value))
+        case None    if value != default => attr.put(key, StringObj.newVar[T](value))
         case _ =>
       }
 
@@ -167,7 +164,7 @@ object ActionBounce {
         case Some(a) if a.value === value =>
         case Some(IntObj.Var(vr)) => vr() = value
         case Some(_) if value == default => attr.remove(key)
-        case None    if value != default => attr.put(key, IntObj.newVar[S](value))
+        case None    if value != default => attr.put(key, IntObj.newVar[T](value))
         case _ =>
       }
 
@@ -176,7 +173,7 @@ object ActionBounce {
         case Some(a) if a.value === value =>
         case Some(BooleanObj.Var(vr)) => vr() = value
         case Some(_) if value == default => attr.remove(key)
-        case None    if value != default => attr.put(key, BooleanObj.newVar[S](value))
+        case None    if value != default => attr.put(key, BooleanObj.newVar[T](value))
         case _ =>
       }
 
@@ -185,7 +182,7 @@ object ActionBounce {
         case Some(a) if a.value === value =>
         case Some(DoubleObj.Var(vr)) => vr() = value
         case Some(_) if value == default => attr.remove(key)
-        case None    if value != default => attr.put(key, DoubleObj.newVar[S](value))
+        case None    if value != default => attr.put(key, DoubleObj.newVar[T](value))
         case _ =>
       }
 
@@ -194,7 +191,7 @@ object ActionBounce {
         case Some(a) if a.value === value =>
         case Some(SpanLikeObj.Var(vr)) => vr() = value
         case Some(_) if value == default => attr.remove(key)
-        case None    if value != default => attr.put(key, SpanLikeObj.newVar[S](value))
+        case None    if value != default => attr.put(key, SpanLikeObj.newVar[T](value))
         case _ =>
       }
 
@@ -232,9 +229,9 @@ object ActionBounce {
     }
   }
 
-  def recallSettings[S <: Sys[S]](obj: Obj[S], defaultRealtime: Boolean = false,
+  def recallSettings[T <: Txn[T]](obj: Obj[T], defaultRealtime: Boolean = false,
                                   defaultFile: File = file(""), defaultChannels: Vec[Range.Inclusive] = Vector(0 to 1))
-                                 (implicit tx: S#Tx): QuerySettings[S] = {
+                                 (implicit tx: T): QuerySettings[T] = {
     val attr = obj.attr
     import equal.Implicits._
 
@@ -302,7 +299,7 @@ object ActionBounce {
       location = location)
   }
 
-  final case class QuerySettings[S <: Sys[S]](
+  final case class QuerySettings[T <: Txn[T]](
                                                file        : Option[File]          = None,
                                                fileFormat  : FileFormat            = FileFormat.PCM(),
                                                sampleRate  : Int                   = 44100,
@@ -312,9 +309,9 @@ object ActionBounce {
                                                realtime    : Boolean               = false,
                                                fineControl : Boolean               = false,
                                                importFile  : Boolean               = false,
-                                               location    : Option[stm.Source[S#Tx, ArtifactLocation[S]]] = None
+                                               location    : Option[Source[T, ArtifactLocation[T]]] = None
   ) {
-    def prepare(group: IIterable[stm.Source[S#Tx, Obj[S]]], f: File)(mkSpan: => Span): PerformSettings[S] = {
+    def prepare(group: IIterable[Source[T, Obj[T]]], f: File)(mkSpan: => Span): PerformSettings[T] = {
       val sConfig = Server.Config()
       val cConfig = Client.Config()
       Mellite.applyAudioPreferences(sConfig, cConfig, useDevice = realtime, pickPort = realtime)
@@ -332,10 +329,10 @@ object ActionBounce {
     }
   }
 
-  final case class PerformSettings[S <: Sys[S]](
+  final case class PerformSettings[T <: Txn[T]](
     realtime    : Boolean,
     fileFormat  : FileFormat,
-    group       : IIterable[stm.Source[S#Tx, Obj[S]]],
+    group       : IIterable[Source[T, Obj[T]]],
     server      : Server.Config,
     client      : Client.Config,
     gain        : Gain = Gain.normalized(-0.2f),
@@ -400,11 +397,11 @@ object ActionBounce {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def query[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
-                         init: QuerySettings[S], selectionType: Selection,
-                         spanPresets: ISeq[SpanPreset])(callback: (QuerySettings[S], Boolean) => Unit): Unit = {
+  def query[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
+                         init: QuerySettings[T], selectionType: Selection,
+                         spanPresets: ISeq[SpanPreset])(callback: (QuerySettings[T], Boolean) => Unit): Unit = {
 
-    val viewU: UniverseView[S] = view
+    val viewU: UniverseView[T] = view
     import view.undoManager
     import viewU.{cursor, universe}
     val window          = Window.find(view.component)
@@ -752,7 +749,7 @@ object ActionBounce {
               ok
 
             case _ => // either no location was set, or it's not parent of the file
-              ActionArtifactLocation.query[S](f)(implicit tx => universe.workspace.root) match {
+              ActionArtifactLocation.query[T](f)(implicit tx => universe.workspace.root) match {
                 case Some((either, directory)) =>
                   either match {
                     case Left(source) =>
@@ -764,7 +761,7 @@ object ActionBounce {
                         val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
                         val folder  = universe.workspace.root
                         val index   = folder.size
-                        val _edit   = EditFolderInsertObj[S]("Location", folder, index, locObj)
+                        val _edit   = EditFolderInsertObj[T]("Location", folder, index, locObj)
                         (_edit, tx.newHandle(locObj))
                       }
                       undoManager.add(edit0)
@@ -827,9 +824,9 @@ object ActionBounce {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def performGUI[S <: Sys[S]](view: UniverseView[S],
-                              settings: QuerySettings[S],
-                              group: IIterable[stm.Source[S#Tx, Obj[S]]], file: File, span: Span): Unit = {
+  def performGUI[T <: Txn[T]](view: UniverseView[T],
+                              settings: QuerySettings[T],
+                              group: IIterable[Source[T, Obj[T]]], file: File, span: Span): Unit = {
 
     import view.{cursor, universe}
     import universe.workspace
@@ -884,9 +881,9 @@ object ActionBounce {
           cursor.step { implicit tx =>
             val loc       = locSource()
             val depArtif  = Artifact(loc, file)
-            val depOffset = LongObj  .newVar[S](0L)
-            val depGain   = DoubleObj.newVar[S](1.0)
-            val deployed  = AudioCue.Obj[S](depArtif, spec, depOffset, depGain)
+            val depOffset = LongObj  .newVar[T](0L)
+            val depGain   = DoubleObj.newVar[T](1.0)
+            val deployed  = AudioCue.Obj[T](depArtif, spec, depOffset, depGain)
             deployed.name = file.base
             workspace.root.addLast(deployed)
           }
@@ -910,8 +907,8 @@ object ActionBounce {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def perform[S <: Sys[S]](settings: PerformSettings[S])
-                          (implicit universe: Universe[S]): Processor[File] = {
+  def perform[T <: Txn[T]](settings: PerformSettings[T])
+                          (implicit universe: Universe[T]): Processor[File] = {
 
     // for real-time, we generally have to overshoot because in SC 3.6, DiskOut's
     // buffer is not flushed after synth is stopped.
@@ -927,7 +924,7 @@ object ActionBounce {
     val fileFrames0   = (span.length * sampleRate / TimeRef.SampleRate + 0.5).toLong
     val fileFrames    = fileFrames0 // - (fileFrames0 % settings.server.blockSize)
 
-    val settings1: PerformSettings[S] = if (!needsTemp) settings else {
+    val settings1: PerformSettings[T] = if (!needsTemp) settings else {
       val fTmp    = File.createTempFile("bounce", ".w64")
       fTmp.deleteOnExit()
       val sConfig = Server.ConfigBuilder(settings.server)
@@ -938,8 +935,8 @@ object ActionBounce {
       settings.copy(server = sConfig)
     }
 
-    val bounce    = Bounce[S]() // workspace.I
-    val bnc       = Bounce.Config[S]()
+    val bounce    = Bounce[T]() // workspace.I
+    val bnc       = Bounce.Config[T]()
     bnc.group     = settings1.group
     bnc.realtime  = realtime
     bnc.server.read(settings1.server)
@@ -959,7 +956,7 @@ object ActionBounce {
     }
     bnc.span    = span1
     bnc.beforePrepare = { (_tx, s) =>
-      implicit val tx: S#Tx = _tx
+      implicit val tx: T = _tx
       // make sure no private bus overlaps with the virutal output
       if (numInChans > numChannels) {
         s.allocAudioBus(numInChans - numChannels)
@@ -1007,7 +1004,7 @@ object ActionBounce {
 
   // XXX TODO --- could use filtered console output via Poll to
   // measure max gain already during bounce
-  private final class PostProcessor[S <: Sys[S]](bounce: Processor[File],
+  private final class PostProcessor[T <: Txn[T]](bounce: Processor[File],
                                               fileOut: File, fileFormat: FileFormat,
                                               gain: Gain, numFrames: Long)
     extends ProcessorImpl[File, Processor[File]] with Processor[File] {
@@ -1130,15 +1127,15 @@ object ActionBounce {
     }
   }
 }
-class ActionBounce[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
-                                objH: stm.Source[S#Tx, Obj[S]], storeSettings: Boolean = true)
+class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
+                                objH: Source[T, Obj[T]], storeSettings: Boolean = true)
   extends scala.swing.Action(ActionBounce.title) {
 
   import ActionBounce.{storeSettings => _, _}
 
-  private[this] var settings = QuerySettings[S]()
+  private[this] var settings = QuerySettings[T]()
 
-  protected def prepare(settings: QuerySettings[S]): QuerySettings[S] = settings
+  protected def prepare(settings: QuerySettings[T]): QuerySettings[T] = settings
 
   protected type SpanPresets = ISeq[SpanPreset]
 
@@ -1146,9 +1143,9 @@ class ActionBounce[S <: Sys[S]](view: UniverseView[S] with View.Editable[S],
 
   protected def selectionType: Selection = SpanSelection
 
-  protected def defaultRealtime(implicit tx: S#Tx): Boolean               = false
-  protected def defaultFile    (implicit tx: S#Tx): File                  = file("")
-  protected def defaultChannels(implicit tx: S#Tx): Vec[Range.Inclusive]  = Vector(0 to 1)
+  protected def defaultRealtime(implicit tx: T): Boolean               = false
+  protected def defaultFile    (implicit tx: T): File                  = file("")
+  protected def defaultChannels(implicit tx: T): Vec[Range.Inclusive]  = Vector(0 to 1)
 
   import view.cursor
 

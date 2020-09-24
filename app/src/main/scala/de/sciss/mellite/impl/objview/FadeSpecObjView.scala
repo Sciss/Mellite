@@ -33,24 +33,24 @@ object FadeSpecObjView extends NoMakeListObjViewFactory {
   def tpe           : Obj.Type  = FadeSpec.Obj
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: FadeSpec.Obj[S])(implicit tx: S#Tx): ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: FadeSpec.Obj[T])(implicit tx: T): ObjListView[T] = {
     val value   = obj.value
-    new Impl[S](tx.newHandle(obj), value).init(obj)
+    new Impl[T](tx.newHandle(obj), value).init(obj)
   }
 
   private val timeFmt = AxisFormat.Time(hours = false, millis = true)
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, FadeSpec.Obj[S]], var value: FadeSpec)
-    extends ObjListView /* .FadeSpec */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.NonEditable[S]
-      with NonViewable[S] {
+  final class Impl[T <: Txn[T]](val objH: Source[T, FadeSpec.Obj[T]], var value: FadeSpec)
+    extends ObjListView /* .FadeSpec */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.NonEditable[T]
+      with NonViewable[T] {
 
-    type Repr = FadeSpec.Obj[S]
+    type Repr = FadeSpec.Obj[T]
 
     def factory: ObjView.Factory = FadeSpecObjView
 
-    def init(obj: FadeSpec.Obj[S])(implicit tx: S#Tx): this.type = {
+    def init(obj: FadeSpec.Obj[T])(implicit tx: T): this.type = {
       initAttrs(obj)
       addDisposable(obj.changed.react { implicit tx =>upd =>
         deferAndRepaint {

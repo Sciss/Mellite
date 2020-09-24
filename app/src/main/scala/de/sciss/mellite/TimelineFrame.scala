@@ -19,10 +19,10 @@ import de.sciss.mellite.impl.timeline.{TimelineFrameImpl => Impl}
 import de.sciss.synth.proc.{Timeline, Universe}
 
 object TimelineFrame {
-  def apply[S <: Sys[S]](group: Timeline[S])
-                        (implicit tx: S#Tx, universe: Universe[S]): TimelineFrame[S] =
+  def apply[T <: Txn[T]](group: Timeline[T])
+                        (implicit tx: T, universe: Universe[T]): TimelineFrame[T] =
     Impl(group)
 }
-trait TimelineFrame[S <: Sys[S]] extends lucre.swing.Window[S] {
-  def view: TimelineView[S]
+trait TimelineFrame[T <: Txn[T]] extends lucre.swing.Window[T] {
+  def view: TimelineView[T]
 }

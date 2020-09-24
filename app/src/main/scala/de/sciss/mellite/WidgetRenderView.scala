@@ -23,25 +23,25 @@ import de.sciss.synth.proc.{Universe, Widget}
 import scala.collection.immutable.{Seq => ISeq}
 
 object WidgetRenderView {
-  def apply[S <: SSys[S]](init: Widget[S], bottom: ISeq[View[S]] = Nil, embedded: Boolean = false)
-                         (implicit tx: S#Tx, universe: Universe[S],
-                          undoManager: UndoManager[S]): WidgetRenderView[S] =
-    WidgetRenderViewImpl[S](init, bottom, embedded = embedded)
+  def apply[S <: SSys[T]](init: Widget[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
+                         (implicit tx: T, universe: Universe[T],
+                          undoManager: UndoManager[T]): WidgetRenderView[T] =
+    WidgetRenderViewImpl[T](init, bottom, embedded = embedded)
 
-//  sealed trait Update[S <: Sys[S]] { def view: WidgetRenderView[S] }
-//  final case class FollowedLink[S <: Sys[S]](view: WidgetRenderView[S], now: Widget[S]) extends Update[S]
+//  sealed trait Update[T <: Txn[T]] { def view: WidgetRenderView[T] }
+//  final case class FollowedLink[T <: Txn[T]](view: WidgetRenderView[T], now: Widget[T]) extends Update[T]
 }
-trait WidgetRenderView[S <: Sys[S]]
-  extends UniverseView[S] /*with Observable[S#Tx, WidgetRenderView.Update[S]]*/ {
+trait WidgetRenderView[T <: Txn[T]]
+  extends UniverseView[T] /*with Observable[T, WidgetRenderView.Update[T]]*/ {
 
-  def widget(implicit tx: S#Tx): Widget[S]
+  def widget(implicit tx: T): Widget[T]
 
-  def widget_=(md: Widget[S])(implicit tx: S#Tx): Unit
+  def widget_=(md: Widget[T])(implicit tx: T): Unit
 
-  // def setInProgress(md: Widget[S], value: String)(implicit tx: S#Tx): Unit
+  // def setInProgress(md: Widget[T], value: String)(implicit tx: T): Unit
 
   // XXX TODO --- we should update View.Editor to use stm.UndoManager
-  def undoManager: stm.UndoManager[S]
+  def undoManager: stm.UndoManager[T]
 
-  def setGraph(g: Widget.Graph)(implicit tx: S#Tx): Unit
+  def setGraph(g: Widget.Graph)(implicit tx: T): Unit
 }

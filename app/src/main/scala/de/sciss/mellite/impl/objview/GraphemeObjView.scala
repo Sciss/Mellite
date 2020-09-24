@@ -26,40 +26,40 @@ import de.sciss.synth.proc.{Grapheme, Universe}
 import javax.swing.Icon
 
 object GraphemeObjView extends NoArgsListObjViewFactory {
-  type E[S <: stm.Sys[S]] = Grapheme[S]
+  type E[S <: stm.Sys[T]] = Grapheme[T]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
   val prefix        : String    = "Grapheme"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Grapheme
   def category      : String    = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Grapheme[S])(implicit tx: S#Tx): ObjListView[S] =
+  def mkListView[T <: Txn[T]](obj: Grapheme[T])(implicit tx: T): ObjListView[T] =
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
-  def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val obj = Grapheme[S]() // .Modifiable[S]
+  def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
+    val obj = Grapheme[T]() // .Modifiable[T]
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Grapheme[S]])
-    extends ObjListView /* .Grapheme */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.EmptyRenderer[S]
-      with ObjListViewImpl.NonEditable[S]
-      with GraphemeObjView[S] {
+  final class Impl[T <: Txn[T]](val objH: Source[T, Grapheme[T]])
+    extends ObjListView /* .Grapheme */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.EmptyRenderer[T]
+      with ObjListViewImpl.NonEditable[T]
+      with GraphemeObjView[T] {
 
     def factory: ObjView.Factory = GraphemeObjView
 
     def isViewable = true
 
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
-      val frame = GraphemeFrame[S](objH())
+    def openView(parent: Option[Window[T]])
+                (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
+      val frame = GraphemeFrame[T](objH())
       Some(frame)
     }
   }
 }
-trait GraphemeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Grapheme[S]
+trait GraphemeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = Grapheme[T]
 }

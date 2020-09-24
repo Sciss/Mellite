@@ -19,22 +19,22 @@ import de.sciss.lucre.synth.Sys
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.synth.proc
 
-final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], val key: String,
-                                           tl: proc.Timeline[S], tx0: S#Tx)
-  extends InputAttrImpl[S] {
+final class InputAttrTimeline[T <: Txn[T]](val parent: ProcObjView.Timeline[T], val key: String,
+                                           tl: proc.Timeline[T], tx0: T)
+  extends InputAttrImpl[T] {
 
   override def toString: String = s"InputAttrTimeline(parent = $parent, key = $key)"
 
-  type Entry = proc.Timeline.Timed[S]
+  type Entry = proc.Timeline.Timed[T]
 
-  protected def mkTarget(entry: Entry)(implicit tx: S#Tx): LinkTarget[S] =
-    new LinkTargetTimeline[S](this, tx.newHandle(entry.span), tx.newHandle(entry.value))
+  protected def mkTarget(entry: Entry)(implicit tx: T): LinkTarget[T] =
+    new LinkTargetTimeline[T](this, tx.newHandle(entry.span), tx.newHandle(entry.value))
 
   private[this] val tlH = tx0.newHandle(tl)
 
-  def timeline(implicit tx: S#Tx): proc.Timeline[S] = tlH()
+  def timeline(implicit tx: T): proc.Timeline[T] = tlH()
 
-  protected val viewMap: IdentifierMap[S#Id, S#Tx, Elem] = tx0.newInMemoryIdMap
+  protected val viewMap: IdentifierMap[S#Id, T, Elem] = tx0.newInMemoryIdMap
 
   // EDT
   private[this] var edtRange = RangedSeq.empty[Elem, Long](_.point, Ordering.Long)
@@ -45,7 +45,7 @@ final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], 
   protected def elemAddedEDT  (elem: Elem): Unit = edtRange += elem
   protected def elemRemovedEDT(elem: Elem): Unit = edtRange -= elem
 
-  private[this] val observer: Disposable[S#Tx] =
+  private[this] val observer: Disposable[T] =
     tl.changed.react { implicit tx => upd => upd.changes.foreach {
       case proc.Timeline.Added  (span  , entry) =>
         addAttrIn(span, entry = entry, value = entry.value, fire = true)
@@ -55,7 +55,7 @@ final class InputAttrTimeline[S <: Sys[S]](val parent: ProcObjView.Timeline[S], 
         addAttrIn   (spanCh.now, entry = entry, value = entry.value, fire = true)
     }} (tx0)
 
-  override def dispose()(implicit tx: S#Tx): Unit = {
+  override def dispose()(implicit tx: T): Unit = {
     super.dispose()
     observer.dispose()
   }

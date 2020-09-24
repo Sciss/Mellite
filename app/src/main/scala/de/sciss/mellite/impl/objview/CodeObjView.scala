@@ -41,12 +41,12 @@ object CodeObjView extends ObjListView.Factory {
   def category      : String    = ObjView.categMisc
   def canMakeObj    : Boolean   = true
 
-  def mkListView[S <: Sys[S]](obj: Code.Obj[S])(implicit tx: S#Tx): CodeObjView[S] with ObjListView[S] = {
+  def mkListView[T <: Txn[T]](obj: Code.Obj[T])(implicit tx: T): CodeObjView[T] with ObjListView[T] = {
     val value   = obj.value
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  final case class Config[S <: stm.Sys[S]](name: String = prefix, value: Code, const: Boolean = false)
+  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Code, const: Boolean = false)
 
   private def defaultCode(tpe: Code.Type): Code =
     Code(tpe.id, tpe.defaultSource)
@@ -60,14 +60,14 @@ object CodeObjView extends ObjListView.Factory {
       nm -> tpe
     } .toMap
 
-  def initMakeDialog[S <: Sys[S]](window: Option[desktop.Window])
-                                 (done: MakeResult[S] => Unit)
-                                 (implicit universe: Universe[S]): Unit = {
+  def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
+                                 (done: MakeResult[T] => Unit)
+                                 (implicit universe: Universe[T]): Unit = {
     val ggValue = new ComboBox(codeNames)
-    val res0 = ObjViewImpl.primitiveConfig[S, Code](window, tpe = prefix, ggValue = ggValue, prepare =
+    val res0 = ObjViewImpl.primitiveConfig[T, Code](window, tpe = prefix, ggValue = ggValue, prepare =
       Try(defaultCode(Code.getType(ggValue.selection.index)))
     )
-    val res = res0.map(c => Config[S](name = c.name, value = c.value))
+    val res = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)
   }
 
@@ -76,38 +76,38 @@ object CodeObjView extends ObjListView.Factory {
     defaultCode(tpe)
   }
 
-  override def initMakeCmdLine[S <: Sys[S]](args: List[String])(implicit universe: Universe[S]): MakeResult[S] = {
-    object p extends ObjViewCmdLineParser[Config[S]](this, args) {
+  override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val const: Opt[Boolean] = opt     (descr = s"Make constant instead of variable")
       val value: Opt[Code]    = trailArg("type", descr = codeMap.keysIterator.mkString("Code type (", ",", ")"))
     }
     p.parse(Config(name = p.name(), value = p.value(), const = p.const()))
   }
 
-  def makeObj[S <: Sys[S]](config: Config[S])(implicit tx: S#Tx): List[Obj[S]] = {
+  def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     import config._
-    val obj0  = Code.Obj.newConst[S](value)
-    val obj   = if (const) obj0 else Code.Obj.newVar[S](obj0)
+    val obj0  = Code.Obj.newConst[T](value)
+    val obj   = if (const) obj0 else Code.Obj.newVar[T](obj0)
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Code.Obj[S]], var value: Code)
-    extends CodeObjView[S]
-    with ObjListView /* .Code */[S]
-    with ObjViewImpl.Impl[S]
-    with ObjListViewImpl.NonEditable[S] {
+  final class Impl[T <: Txn[T]](val objH: Source[T, Code.Obj[T]], var value: Code)
+    extends CodeObjView[T]
+    with ObjListView /* .Code */[T]
+    with ObjViewImpl.Impl[T]
+    with ObjListViewImpl.NonEditable[T] {
 
-    override def obj(implicit tx: S#Tx): Code.Obj[S] = objH()
+    override def obj(implicit tx: T): Code.Obj[T] = objH()
 
     def factory: ObjView.Factory = CodeObjView
 
-    // def isUpdateVisible(update: Any)(implicit tx: S#Tx): Boolean = false
+    // def isUpdateVisible(update: Any)(implicit tx: T): Boolean = false
 
     def isViewable = true
 
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[T]])
+                (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       import de.sciss.mellite.Mellite.compiler
       val frame = CodeFrame(obj, bottom = Nil)
       Some(frame)
@@ -119,6 +119,6 @@ object CodeObjView extends ObjListView.Factory {
     }
   }
 }
-trait CodeObjView[S <: stm.Sys[S]] extends ObjView[S] {
-  type Repr = Code.Obj[S]
+trait CodeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+  type Repr = Code.Obj[T]
 }

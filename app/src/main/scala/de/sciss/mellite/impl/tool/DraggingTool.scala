@@ -30,8 +30,8 @@ import javax.swing.event.MouseInputAdapter
   *
   * All the sub-class must do is call `new Drag` and provide the body of method `dragToParam`.
   */
-trait DraggingTool[S <: Sys[S], A, Y] {
-  _: CollectionToolLike[S, A, Y, _] =>
+trait DraggingTool[T <: Txn[T], A, Y] {
+  _: CollectionToolLike[T, A, Y, _] =>
 
   protected def dragToParam(d: Drag): A
 

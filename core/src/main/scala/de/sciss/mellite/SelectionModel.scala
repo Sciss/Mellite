@@ -13,21 +13,21 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.Txn
 import de.sciss.mellite.impl.SelectionModelImpl
 import de.sciss.model.Model
 
 object SelectionModel {
-  def apply[S <: Sys[S], Repr]: SelectionModel[S, Repr] =
-    new SelectionModelImpl[S, Repr]
+  def apply[T <: Txn[T], Repr]: SelectionModel[T, Repr] =
+    new SelectionModelImpl[T, Repr]
 
-  type Listener[S <: Sys[S], Repr] = Model.Listener[Update[S, Repr]]
-  final case class Update[S <: Sys[S], Repr](added: Set[Repr], removed: Set[Repr])
+  type Listener[T <: Txn[T], Repr] = Model.Listener[Update[T, Repr]]
+  final case class Update[T <: Txn[T], Repr](added: Set[Repr], removed: Set[Repr])
 }
 /** An observable unordered set of (visually selected) objects.
   */
-trait SelectionModel[S <: Sys[S], Repr]
-  extends Model[SelectionModel.Update[S, Repr]] {
+trait SelectionModel[T <: Txn[T], Repr]
+  extends Model[SelectionModel.Update[T, Repr]] {
 
   def contains(view: Repr): Boolean
 

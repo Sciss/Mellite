@@ -40,36 +40,36 @@ import scala.swing.Swing._
 import scala.swing.{Action, BoxPanel, Button, Component, Dialog, Label, Orientation}
 
 object NuagesEditorViewImpl {
-  def apply[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx, universe: Universe[S], undoManager: UndoManager): NuagesEditorView[S] = {
-    val folder  = FolderEditorView[S](obj.folder)
-    val res     = new Impl[S](tx.newHandle(obj), folder)
+  def apply[T <: Txn[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T], undoManager: UndoManager): NuagesEditorView[T] = {
+    val folder  = FolderEditorView[T](obj.folder)
+    val res     = new Impl[T](tx.newHandle(obj), folder)
     deferTx {
       res.guiInit()
     }
     res
   }
 
-  private final class Impl[S <: Sys[S]](nuagesH: stm.Source[S#Tx, Nuages[S]],
-                                        folderView: FolderEditorView[S])
-    extends NuagesEditorView[S] with ComponentHolder[Component] {
+  private final class Impl[T <: Txn[T]](nuagesH: Source[T, Nuages[T]],
+                                        folderView: FolderEditorView[T])
+    extends NuagesEditorView[T] with ComponentHolder[Component] {
     impl =>
 
     type C = Component
 
-    implicit val universe: Universe[S] = folderView.universe
+    implicit val universe: Universe[T] = folderView.universe
 
     def undoManager: UndoManager = folderView.undoManager
 
     def actionDuplicate: Action = folderView.actionDuplicate
 
-    private def buildConfiguration()(implicit tx: S#Tx): Nuages.ConfigBuilder = {
+    private def buildConfiguration()(implicit tx: T): Nuages.ConfigBuilder = {
       val n               = nuagesH()
       val attr            = n.attr
 
       def mkBusConfigs(key: String): Vec[NamedBusConfig] =
         attr.$[Folder](key).fold(Vec.empty[NamedBusConfig]) { f =>
           f.iterator.collect {
-            case i: IntVector[S] =>
+            case i: IntVector[T] =>
               import proc.Implicits._
               val name    = i.name
               val indices = i.value
@@ -153,7 +153,7 @@ object NuagesEditorViewImpl {
           sCfg.genNumChannels     = genNumChannels
           sCfg.audioFilesFolder   = audioFilesFolder
           // sCfg.mainGroups       = ...
-          ScissProcs[S](n, nCfg, sCfg)
+          ScissProcs[T](n, nCfg, sCfg)
         }
 
         import equal.Implicits._
@@ -210,7 +210,7 @@ object NuagesEditorViewImpl {
       }
     }
 
-    def dispose()(implicit tx: S#Tx): Unit = folderView.dispose()
+    def dispose()(implicit tx: T): Unit = folderView.dispose()
 
     object actionBounce extends ActionBounce(this, nuagesH) {
       import ActionBounce._
@@ -225,22 +225,22 @@ object NuagesEditorViewImpl {
       }
     }
 
-    private def openLive()(implicit tx: S#Tx): Option[Window[S]] = {
+    private def openLive()(implicit tx: T): Option[Window[T]] = {
       val n     = nuagesH()
       val nCfg  = buildConfiguration()
-      val frame: WindowImpl[S] = new WindowImpl[S] with Veto[S#Tx] {
+      val frame: WindowImpl[T] = new WindowImpl[T] with Veto[T] {
         val view = NuagesView(n, nCfg)
         override val undecorated = true
 
         override protected def initGUI(): Unit =
           view.installFullScreenKey(window.component)
 
-        override def prepareDisposal()(implicit tx: S#Tx): Option[Veto[S#Tx]] =
+        override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
           if (!view.panel.transport.isPlaying) None else Some(this)
 
-        def vetoMessage(implicit tx: S#Tx): String = "Cannot close a running performance."
+        def vetoMessage(implicit tx: T): String = "Cannot close a running performance."
 
-        def tryResolveVeto()(implicit tx: S#Tx): Future[Unit] =
+        def tryResolveVeto()(implicit tx: T): Future[Unit] =
           Future.failed(Aborted())
       }
       frame.init()

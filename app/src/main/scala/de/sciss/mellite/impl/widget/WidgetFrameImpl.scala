@@ -29,29 +29,29 @@ import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.Action
 
 object WidgetFrameImpl {
-  def editor[S <: Sys[S]](obj: Widget[S], bottom: ISeq[View[S]])
-                         (implicit tx: S#Tx, universe: Universe[S]): WidgetEditorFrame[S] = {
+  def editor[T <: Txn[T]](obj: Widget[T], bottom: ISeq[View[T]])
+                         (implicit tx: T, universe: Universe[T]): WidgetEditorFrame[T] = {
     implicit val undo: UndoManager = UndoManager()
     val showEditor  = obj.attr.$[BooleanObj](Widget.attrEditMode).forall(_.value)
     val view        = WidgetEditorView(obj, showEditor = showEditor, bottom = bottom)
-    val res         = new EditorFrameImpl[S](view, tx).init()
+    val res         = new EditorFrameImpl[T](view, tx).init()
     trackTitle(res, view.renderer)
     res
   }
 
-  def render[S <: Sys[S]](obj: Widget[S])
-                         (implicit tx: S#Tx, universe: Universe[S]): WidgetRenderFrame[S] = {
-    implicit val undoManagerTx: stm.UndoManager[S] = stm.UndoManager()
+  def render[T <: Txn[T]](obj: Widget[T])
+                         (implicit tx: T, universe: Universe[T]): WidgetRenderFrame[T] = {
+    implicit val undoManagerTx: stm.UndoManager[T] = stm.UndoManager()
     val view  = WidgetRenderView(obj)
-    val res   = new RenderFrameImpl[S](view).init()
+    val res   = new RenderFrameImpl[T](view).init()
     trackTitle(res, view)
     res
   }
 
-  private def setTitle[S <: Sys[S]](win: WindowImpl[S], md: Widget[S])(implicit tx: S#Tx): Unit =
+  private def setTitle[T <: Txn[T]](win: WindowImpl[T], md: Widget[T])(implicit tx: T): Unit =
     win.setTitleExpr(Some(CellView.name(md)))
 
-  private def trackTitle[S <: Sys[S]](win: WindowImpl[S], renderer: WidgetRenderView[S])(implicit tx: S#Tx): Unit = {
+  private def trackTitle[T <: Txn[T]](win: WindowImpl[T], renderer: WidgetRenderView[T])(implicit tx: T): Unit = {
     setTitle(win, renderer.widget)
 //    renderer.react { implicit tx => {
 //      case WidgetRenderView.FollowedLink(_, now) => setTitle(win, now)
@@ -60,8 +60,8 @@ object WidgetFrameImpl {
 
   // ---- frame impl ----
 
-//  private abstract class FrameBase[S <: Sys[S]] extends WindowImpl[S] {
-//    protected def renderer: WidgetRenderView[S]
+//  private abstract class FrameBase[T <: Txn[T]] extends WindowImpl[T] {
+//    protected def renderer: WidgetRenderView[T]
 //
 //    override protected def initGUI(): Unit = {
 //      super.initGUI()
@@ -69,19 +69,19 @@ object WidgetFrameImpl {
 //    }
 //  }
 
-  private final class RenderFrameImpl[S <: Sys[S]](val view: WidgetRenderView[S])
-    extends WindowImpl[S] with WidgetRenderFrame[S] {
+  private final class RenderFrameImpl[T <: Txn[T]](val view: WidgetRenderView[T])
+    extends WindowImpl[T] with WidgetRenderFrame[T] {
 
-//    protected def renderer: WidgetRenderView[S] = view
+//    protected def renderer: WidgetRenderView[T] = view
   }
 
-  private final class EditorFrameImpl[S <: Sys[S]](val view: WidgetEditorView[S], tx0: S#Tx)
-    extends WindowImpl[S] with CodeFrameBase[S] with WidgetEditorFrame[S] {
+  private final class EditorFrameImpl[T <: Txn[T]](val view: WidgetEditorView[T], tx0: T)
+    extends WindowImpl[T] with CodeFrameBase[T] with WidgetEditorFrame[T] {
     
     import view.cursor
 
-    protected def codeView: CodeView[S, _]      = view.codeView
-    protected def renderer: WidgetRenderView[S] = view.renderer
+    protected def codeView: CodeView[T, _]      = view.codeView
+    protected def renderer: WidgetRenderView[T] = view.renderer
     
     private[this] var rUndoName   = Option.empty[String]
     private[this] var rRedoName   = Option.empty[String]
@@ -98,7 +98,7 @@ object WidgetFrameImpl {
       }
     } (tx0)
 
-    override def dispose()(implicit tx: S#Tx): Unit = {
+    override def dispose()(implicit tx: T): Unit = {
       super.dispose()
       rUndoObs.dispose()
     }

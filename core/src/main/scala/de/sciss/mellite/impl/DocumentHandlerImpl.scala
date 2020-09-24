@@ -14,8 +14,8 @@
 package de.sciss.mellite.impl
 
 import de.sciss.file._
-import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.stm.{Disposable, Sys, TxnLike}
+import de.sciss.lucre.Txn.peer
+import de.sciss.lucre.{Disposable, Txn, TxnLike}
 import de.sciss.mellite.DocumentHandler
 import de.sciss.mellite.DocumentHandler.Document
 import de.sciss.model.impl.ModelImpl
@@ -31,20 +31,20 @@ object DocumentHandlerImpl {
   private final class Impl extends DocumentHandler with ModelImpl[DocumentHandler.Update] {
     override def toString = "DocumentHandler"
 
-    private val all   = STMRef(Vec.empty[Document])
-    private val map   = TMap.empty[File, Document] // path to document
+    private val all   = STMRef(Vec.empty[Universe[_] /*Document*/])
+    private val map   = TMap.empty[File, Universe[_]] // Document] // path to document
 
     // def openRead(path: String): Document = ...
 
-    def addDocument[S <: Sys[S]](u: Universe[S])(implicit tx: S#Tx): Unit = {
+    def addDocument[T <: Txn[T]](u: Universe[T])(implicit tx: T): Unit = {
       u.workspace.folder.foreach { p =>
         require(!map.contains(p), s"Workspace for path '$p' is already registered")
         map += p -> u
       }
       all.transform(_ :+ u)
 
-      u.workspace.addDependent(new Disposable[S#Tx] {
-        def dispose()(implicit tx: S#Tx): Unit = removeDoc(u)
+      u.workspace.addDependent(new Disposable[T] {
+        def dispose()(implicit tx: T): Unit = removeDoc(u)
       })
 
       deferTx {
@@ -54,7 +54,7 @@ object DocumentHandlerImpl {
 
     private def deferTx(code: => Unit)(implicit tx: TxnLike): Unit = tx.afterCommit(code)
 
-    private def removeDoc[S <: Sys[S]](u: Universe[S])(implicit tx: S#Tx): Unit = {
+    private def removeDoc[T <: Txn[T]](u: Universe[T])(implicit tx: T): Unit = {
       all.transform { in =>
         val idx = in.indexOf(u)
         require(idx >= 0, s"Workspace ${u.workspace.folder.fold("") { p => s"for path '$p'" }} was not registered")

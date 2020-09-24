@@ -14,6 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
+import de.sciss.lucre.Workspace
 import de.sciss.lucre.swing.View
 import de.sciss.mellite.impl.document.{CursorsFrameImpl => Impl}
 import de.sciss.synth.proc
@@ -21,18 +22,19 @@ import de.sciss.synth.proc.{Universe, Workspace}
 
 object DocumentCursorsFrame {
   type S = proc.Confluent
-  type D = S#D
+  type T = proc.Confluent .Txn
+  type D = proc.Durable   .Txn
 
-  def apply(document: Workspace.Confluent)(implicit tx: D#Tx, universe: Universe[S]): DocumentCursorsFrame =
+  def apply(document: proc.Workspace.Confluent)(implicit tx: D, universe: Universe[T]): DocumentCursorsFrame =
     Impl(document)
 }
-trait DocumentCursorsFrame extends lucre.swing.Window[DocumentCursorsFrame.D] /* [S <: Sys[S]] */ {
+trait DocumentCursorsFrame extends lucre.swing.Window[DocumentCursorsFrame.D] /* [T <: Txn[T]] */ {
 //  def window: desktop.Window
 //  def view: DocumentCursorsView
-//  def workspace: Workspace.Confluent // Document[S]
+//  def workspace: Workspace.Confluent // Document[T]
 }
 
 trait DocumentCursorsView extends View[DocumentCursorsFrame.D] {
-  def universe  : Universe  [DocumentCursorsFrame.S]
-  def workspace : Workspace [DocumentCursorsFrame.S]
+  def universe  : Universe  [DocumentCursorsFrame.T]
+  def workspace : Workspace [DocumentCursorsFrame.T]
 }

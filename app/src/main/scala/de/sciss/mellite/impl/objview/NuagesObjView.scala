@@ -27,37 +27,37 @@ import de.sciss.synth.proc.{Timeline, Universe}
 import javax.swing.Icon
 
 object NuagesObjView extends NoArgsListObjViewFactory {
-  type E[S <: stm.Sys[S]] = Nuages[S]
+  type E[S <: stm.Sys[T]] = Nuages[T]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.CloudWhite)
   val prefix        : String   = "Nuages"
   val humanName     : String   = "Wolkenpumpe"
   def tpe           : Obj.Type  = Nuages
   def category      : String   = ObjView.categComposition
 
-  def mkListView[S <: Sys[S]](obj: Nuages[S])(implicit tx: S#Tx): ObjListView[S] =
-    new Impl[S](tx.newHandle(obj)).initAttrs(obj)
+  def mkListView[T <: Txn[T]](obj: Nuages[T])(implicit tx: T): ObjListView[T] =
+    new Impl[T](tx.newHandle(obj)).initAttrs(obj)
 
-  def makeObj[S <: Sys[S]](name: String)(implicit tx: S#Tx): List[Obj[S]] = {
-    val tl  = Timeline[S]()
-    val obj = Nuages[S](Nuages.Surface.Timeline(tl))
+  def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
+    val tl  = Timeline[T]()
+    val obj = Nuages[T](Nuages.Surface.Timeline(tl))
     if (!name.isEmpty) obj.name = name
     obj :: Nil
   }
 
-  final class Impl[S <: Sys[S]](val objH: stm.Source[S#Tx, Nuages[S]])
-    extends ObjListView /* .Nuages */[S]
-      with ObjViewImpl.Impl[S]
-      with ObjListViewImpl.NonEditable[S]
-      with ObjListViewImpl.EmptyRenderer[S] {
+  final class Impl[T <: Txn[T]](val objH: Source[T, Nuages[T]])
+    extends ObjListView /* .Nuages */[T]
+      with ObjViewImpl.Impl[T]
+      with ObjListViewImpl.NonEditable[T]
+      with ObjListViewImpl.EmptyRenderer[T] {
 
-    type Repr = Nuages[S]
+    type Repr = Nuages[T]
 
     def factory: ObjView.Factory = NuagesObjView
 
     def isViewable = true
 
-    def openView(parent: Option[Window[S]])
-                (implicit tx: S#Tx, universe: Universe[S]): Option[Window[S]] = {
+    def openView(parent: Option[Window[T]])
+                (implicit tx: T, universe: Universe[T]): Option[Window[T]] = {
       val frame = NuagesEditorFrameImpl(objH())
       Some(frame)
     }
