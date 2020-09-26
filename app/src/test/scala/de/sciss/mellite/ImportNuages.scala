@@ -1,8 +1,8 @@
 package de.sciss.mellite
 
 import de.sciss.file._
-import de.sciss.lucre.stm.store.BerkeleyDB
-import de.sciss.lucre.stm.{Copy, Txn}
+import de.sciss.lucre.store.BerkeleyDB
+import de.sciss.lucre.{Copy, Txn}
 import de.sciss.nuages.Nuages
 import de.sciss.nuages.Nuages.Surface
 import de.sciss.synth.proc.{Durable, Workspace}
@@ -19,8 +19,8 @@ object ImportNuages extends App {
   Mellite.initTypes()
 
   val factIn  = BerkeleyDB.factory(fIn, createIfNecessary = false)
-  type In     = Durable
-  type Out    = Durable
+  type In     = Durable.Txn
+  type Out    = Durable.Txn
 
   val sysIn   = Durable(factIn)
   try {
@@ -30,8 +30,8 @@ object ImportNuages extends App {
     val ds      = BerkeleyDB.factory(fOut, dsc)
     val wOut    = Workspace.Durable.empty(fOut, ds)
     try {
-      Txn.copy[In, Out, Unit] { (txIn: In#Tx, tx: Out#Tx) =>
-        val cpy   = Copy[In, Out](txIn, tx)
+      Txn.copy[In, Out, Unit] { (txIn: In, tx: Out) =>
+        val cpy   = Copy[In, Out]()(txIn, tx)
         val nIn   = nInH()(txIn)
         val infoIn = nIn.surface match {
           case Surface.Timeline(tl) => s"Timeline: ${tl.iterator(txIn).size}"
