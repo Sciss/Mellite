@@ -14,8 +14,7 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.audiowidgets.AxisFormat
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}

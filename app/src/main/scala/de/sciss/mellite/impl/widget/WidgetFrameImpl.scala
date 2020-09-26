@@ -14,15 +14,15 @@
 package de.sciss.mellite.impl.widget
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.swing.View
+import de.sciss.lucre.BooleanObj
+import de.sciss.lucre.edit.{UndoManager => LUndoManager}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.CodeView
-import de.sciss.mellite.impl.code.CodeFrameBase
-import de.sciss.mellite.{WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.code.CodeFrameBase
+import de.sciss.mellite.{CodeView, WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
 import de.sciss.synth.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -41,7 +41,7 @@ object WidgetFrameImpl {
 
   def render[T <: Txn[T]](obj: Widget[T])
                          (implicit tx: T, universe: Universe[T]): WidgetRenderFrame[T] = {
-    implicit val undoManagerTx: stm.UndoManager[T] = stm.UndoManager()
+    implicit val undoManagerTx: LUndoManager[T] = LUndoManager()
     val view  = WidgetRenderView(obj)
     val res   = new RenderFrameImpl[T](view).init()
     trackTitle(res, view)

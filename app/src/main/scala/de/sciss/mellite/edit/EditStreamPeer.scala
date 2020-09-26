@@ -13,8 +13,7 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.LTxn
+import de.sciss.lucre.{Cursor, Source, Txn}
 import de.sciss.patterns.lucre.{Context => LContext, Stream => LStream}
 import de.sciss.patterns.{Context => PContext, Stream => PStream}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
@@ -24,7 +23,7 @@ object EditStreamPeer {
   def apply[T <: Txn[T]](name: String, stream: LStream[T], value: PStream[T, Any])
                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val streamH = tx.newHandle(stream)
-    implicit val ctx: PContext[T] = LContext[T](tx.system, tx)
+    implicit val ctx: PContext[T] = LContext[T]()
 //    implicitly[Serializer[T, S#Acc, PStream[T, Any]]]
     val beforeH = tx.newHandle(stream.peer())
     val nowH    = tx.newHandle(value)

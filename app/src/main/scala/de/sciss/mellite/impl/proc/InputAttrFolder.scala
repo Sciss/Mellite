@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.proc
 
-import de.sciss.lucre.stm.{Disposable, Folder, IdentifierMap, Obj}
+import de.sciss.lucre.{Disposable, Folder, IdentMap, Obj}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.Span
@@ -33,7 +33,7 @@ final class InputAttrFolder[T <: Txn[T]](val parent: ProcObjView.Timeline[T], va
 
   def folder(implicit tx: T): Folder[T] = fH()
 
-  protected val viewMap: IdentifierMap[S#Id, T, Elem] = tx0.newInMemoryIdMap
+  protected val viewMap: IdentMap[T, Elem] = tx0.newIdentMap
 
   // EDT
   private[this] var edtSet = Set.empty[Elem]  // XXX TODO --- do we need a multi-set in theory?

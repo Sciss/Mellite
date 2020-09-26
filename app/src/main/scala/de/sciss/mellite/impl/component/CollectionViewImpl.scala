@@ -18,7 +18,7 @@ import java.util.Locale
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.equal.Implicits._
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.Obj
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}

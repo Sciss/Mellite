@@ -46,7 +46,7 @@ object CodeView {
     def installFonts(): Unit
   }
 
-  trait Handler[T <: Txn[T], In, -Out] extends Disposable[T] {
+  trait Handler[T <: LTxn[T], In, -Out] extends Disposable[T] {
     def in(): In
     def save(in: In, out: Out)(implicit tx: T): UndoableEdit
   }

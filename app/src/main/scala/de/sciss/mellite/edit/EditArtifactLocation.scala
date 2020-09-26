@@ -14,9 +14,7 @@
 package de.sciss.mellite.edit
 
 import de.sciss.file.File
-import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.LTxn
+import de.sciss.lucre.{ArtifactLocation, Cursor, Source, Txn}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditArtifactLocation {

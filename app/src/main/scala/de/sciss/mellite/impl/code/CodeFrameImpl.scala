@@ -15,28 +15,23 @@ package de.sciss.mellite.impl.code
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
 
-import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Util}
-import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{IdPeek, Obj}
+import de.sciss.desktop.{Menu, UndoManager, Util}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{CanBounce, CodeFrame, CodeView, GUI, ProcActions, UniverseView}
-import de.sciss.mellite.{ActionBounce, AttrMapView, ProcOutputsView, RunnerToggleButton, SplitPaneView}
+import de.sciss.lucre.{BooleanObj, Obj, Source}
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseView}
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
-import de.sciss.synth.proc.impl.ActionRawImpl
-import de.sciss.synth.proc.{Action, ActionRaw, Code, Control, Proc, SynthGraphObj, Universe, Widget}
+import de.sciss.synth.proc.{Action, Code, Control, Proc, SynthGraphObj, Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
-import scala.swing.event.Key
-import scala.swing.{BorderPanel, Button, Component, FlowPanel, Orientation, TabbedPane}
+import scala.swing.{BorderPanel, Component, FlowPanel, Orientation, TabbedPane}
 import scala.util.control.NonFatal
 
 object CodeFrameImpl extends CodeFrame.Companion {
@@ -88,71 +83,6 @@ object CodeFrameImpl extends CodeFrame.Companion {
 
     make(obj, objH, codeObj, code0, Some(handler), bottom = viewPower :: Nil,
       rightViewOpt = Some(("In/Out", rightView)), canBounce = true,
-//      alwaysShowBottom = true
-    )
-  }
-
-  // ---- adapter for editing a ActionRaw's source ----
-
-  def actionRaw[T <: Txn[T]](obj: ActionRaw[T])
-                            (implicit tx: T, universe: Universe[T],
-                          compiler: Code.Compiler): CodeFrame[T] = {
-    val codeObj = mkSource(obj = obj, codeTpe = Code.ActionRaw, key = ActionRaw.attrSource)()
-    val code0   = codeObj.value match {
-      case cs: Code.ActionRaw => cs
-      case other => sys.error(s"Action source code does not produce plain function: ${other.tpe.humanName}")
-    }
-
-    val objH  = tx.newHandle(obj)
-    val viewExecute = View.wrap[T, Button] {
-      val actionExecute = swing.Action(null) {
-        import universe.cursor
-        cursor.step { implicit tx =>
-          val obj = objH()
-          val au = Action.Universe(obj)
-          obj.execute(au)
-        }
-      }
-      val ksPower = KeyStrokes.shift + Key.F10
-      val ggPower = GUI.toolButton(actionExecute, raphael.Shapes.Bolt,
-        tooltip = s"Run body (${GUI.keyStrokeText(ksPower)})")
-      Util.addGlobalKey(ggPower, ksPower)
-      ggPower
-    }
-
-    val handlerOpt = obj match {
-      case ActionRaw.Var(vr) =>
-        val varH  = tx.newHandle(vr)
-        val handler = new CodeView.Handler[T, String, Array[Byte]] {
-          def in(): String = {
-            import universe.cursor
-            cursor.step { implicit tx =>
-              val id = tx.newId()
-              val cnt = IdPeek(id)
-              s"Action$cnt"
-            }
-          }
-
-          def save(in: String, out: Array[Byte])(implicit tx: T): UndoableEdit = {
-            val obj = varH()
-            val value = ActionRawImpl.newConst[T](name = in, jar = out)
-            import universe.cursor
-            EditVar[T, ActionRaw[T], ActionRaw.Var[T]](name = "Change Action Body", expr = obj, value = value)
-          }
-
-          def dispose()(implicit tx: T): Unit = ()
-        }
-
-        Some(handler)
-
-      case _ => None
-    }
-
-    val bottom = viewExecute :: Nil
-
-    implicit val undo: UndoManager = UndoManager()
-    make(obj, objH, codeObj, code0, handlerOpt, bottom = bottom, rightViewOpt = None,
-      canBounce = false,
 //      alwaysShowBottom = true
     )
   }

@@ -17,13 +17,11 @@ import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.{Cursor => AWTCursor}
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.DoubleObj
-import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Cursor, DoubleObj}
 import de.sciss.mellite.BasicTool.Adjust
-import de.sciss.mellite.Shapes
 import de.sciss.mellite.edit.EditGraphemeInsertObj
-import de.sciss.mellite.{BasicTool, GUI, GraphemeCanvas, GraphemeTool, ObjGraphemeView}
+import de.sciss.mellite.{BasicTool, GUI, GraphemeCanvas, GraphemeTool, ObjGraphemeView, Shapes}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{CurveObj, EnvSegment}
@@ -83,6 +81,6 @@ final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
       val startLevel  = DoubleObj.newVar[T](drag.modelY)
       val curve       = CurveObj .newVar[T](Curve.lin)
       val elem        = EnvSegment.Obj.ApplySingle(startLevel, curve)
-      EditGraphemeInsertObj(name, grMod, time = drag.time, elem = elem)
+        EditGraphemeInsertObj(name, grMod, time = drag.time, elem = elem)
     }
 }

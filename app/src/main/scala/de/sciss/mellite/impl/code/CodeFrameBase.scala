@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.code
 
 import de.sciss.desktop.{Menu, OptionPane}
 import de.sciss.kollflitz.ISeq
-import de.sciss.lucre.LTxn
+import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.{CodeView, Veto}
 import de.sciss.mellite.impl.WindowImpl

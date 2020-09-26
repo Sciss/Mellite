@@ -13,21 +13,21 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
+import java.awt
 import java.awt.event.{MouseAdapter, MouseEvent}
-import java.awt.{Cursor, Point, Toolkit}
+import java.awt.{Point, Toolkit}
 
-import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.Cursor
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.impl.tool.{CollectionToolLike, RubberBandTool}
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.span.Span
 import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 object AuditionImpl {
-  private lazy val cursor: Cursor = {
+  private lazy val cursor: awt.Cursor = {
     val tk  = Toolkit.getDefaultToolkit
     val img = GUI.getImage("cursor-audition.png")
     tk.createCustomCursor(img, new Point(4, 4), "Audition")
@@ -57,7 +57,7 @@ class AuditionImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tl
 
   // import TrackTool.{Cursor => _}
 
-  def defaultCursor: Cursor = AuditionImpl.cursor
+  def defaultCursor: awt.Cursor = AuditionImpl.cursor
   val name                  = "Audition"
   val icon: Icon            = GUI.iconNormal(Shapes.Audition)
 

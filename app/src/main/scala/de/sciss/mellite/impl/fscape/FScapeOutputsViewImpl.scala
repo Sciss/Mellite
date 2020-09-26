@@ -22,7 +22,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Obj, Source}
-import de.sciss.mellite.edit.EditRemoveFScapeOutput
+import de.sciss.mellite.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView}

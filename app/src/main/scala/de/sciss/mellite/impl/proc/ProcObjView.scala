@@ -43,8 +43,8 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
   }
 
 //  type LinkMap[T <: LTxn[T]] = Map[String, Vec[ProcObjView.Link[T]]]
-//  type ProcMap[T <: LTxn[T]] = IdentifierMap[S#Id, T, ProcObjView[T]]
-//  type ScanMap[T <: LTxn[T]] = IdentifierMap[S#Id, T, (String, Source[T, S#Id])]
+//  type ProcMap[T <: LTxn[T]] = IdentMap[Ident[T], T, ProcObjView[T]]
+//  type ScanMap[T <: LTxn[T]] = IdentMap[Ident[T], T, (String, Source[T, Ident[T]])]
 
   type SelectionModel[T <: Txn[T]] = mellite.SelectionModel[T, ProcObjView[T]]
 

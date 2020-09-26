@@ -13,18 +13,16 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 import java.awt.event.MouseEvent
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.tool.RubberBandTool
+import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -35,7 +33,7 @@ final class MoveImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Move
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.HAND_CURSOR)
   val name                  = "Move"
   val icon: Icon            = GUI.iconNormal(raphael.Shapes.Hand) // ToolsImpl.getIcon("openhand")
 

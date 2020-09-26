@@ -16,7 +16,7 @@ package de.sciss.mellite
 import de.sciss.desktop.{FileDialog, UndoManager}
 import de.sciss.lucre.Artifact
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.{Sys, Txn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.{ArtifactViewImpl => Impl}
 import de.sciss.synth.proc.Universe
 

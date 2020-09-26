@@ -13,18 +13,15 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 import java.awt.event.MouseEvent
 
 import de.sciss.desktop.OptionPane
 import de.sciss.equal.Implicits._
-import de.sciss.lucre.expr.{SpanLikeObj, StringObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, ObjView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj, StringObj}
 import de.sciss.mellite.edit.Edits
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, ObjView, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
@@ -35,7 +32,7 @@ import scala.swing.{FlowPanel, Label, TextField}
 final class CursorImpl[T <: Txn[T]](val canvas: TimelineTrackCanvas[T])
   extends CollectionImpl[T, TimelineTool.Cursor] {
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
 

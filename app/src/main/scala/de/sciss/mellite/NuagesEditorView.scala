@@ -14,9 +14,8 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.LTxn
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Txn, synth}
 import de.sciss.mellite.impl.document.{NuagesEditorViewImpl => Impl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe
@@ -24,7 +23,7 @@ import de.sciss.synth.proc.Universe
 import scala.swing.Action
 
 object NuagesEditorView {
-  def apply[T <: SSys[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T],
+  def apply[T <: synth.Txn[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T],
                                           undoManager: UndoManager): NuagesEditorView[T] =
     Impl(obj)
 

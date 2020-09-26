@@ -13,16 +13,13 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.EditAttrMap
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.Curve
 import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
@@ -34,7 +31,7 @@ final class FadeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.{EmptyFade, Fade}
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.NW_RESIZE_CURSOR)
   val name                  = "Fade"
   val icon: Icon            = GUI.iconNormal(Shapes.Aperture) // ToolsImpl.getIcon("fade")
 

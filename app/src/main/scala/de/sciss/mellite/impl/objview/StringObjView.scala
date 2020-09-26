@@ -16,7 +16,7 @@ package de.sciss.mellite.impl.objview
 import de.sciss.desktop
 import de.sciss.icons.raphael
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Obj, StringObj, Txn => LTxn}
+import de.sciss.lucre.{Expr, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.{ObjListView, ObjView}

@@ -23,12 +23,13 @@ import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
-import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, Shapes}
+import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.{Pattern, Stream}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.{Code, Universe}
+import de.sciss.synth.proc.Implicits._
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerNumberModel}
 
@@ -107,6 +108,7 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
       def save(in: Unit, out: Pat[_])(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import obj.context
+        import universe.cursor
         val v   = out.expand[T]
         EditStreamPeer[T]("Change Stream Graph", obj, v)
       }
@@ -140,7 +142,7 @@ object StreamObjView extends NoArgsListObjViewFactory with ObjTimelineView.Facto
         def apply(): Unit = {
           val n = mEvalN.getNumber.intValue()
           val res = cursor.step { implicit tx =>
-            implicit val ctx: patterns.Context[T] = patterns.lucre.Context[T](tx.system, tx)
+            implicit val ctx: patterns.Context[T] = patterns.lucre.Context[T]()
             val obj = objH()
             val st  = obj.peer()
             if (n == 1) {

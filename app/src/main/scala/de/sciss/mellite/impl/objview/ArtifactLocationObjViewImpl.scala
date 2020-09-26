@@ -17,9 +17,7 @@ import java.awt.datatransfer.Transferable
 
 import de.sciss.desktop
 import de.sciss.file.{File, file}
-import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{ArtifactLocation, Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn

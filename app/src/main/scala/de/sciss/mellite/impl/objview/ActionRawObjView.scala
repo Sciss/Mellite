@@ -71,7 +71,7 @@
 //  private final class ListImpl[T <: Txn[T]](val objH: Source[T, ActionRaw[T]])
 //    extends Impl[T]
 //
-//  def mkTimelineView[T <: Txn[T]](id: S#Id, span: SpanLikeObj[T], obj: ActionRaw[T],
+//  def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: ActionRaw[T],
 //                                  context: ObjTimelineView.Context[T])(implicit tx: T): ObjTimelineView[T] = {
 //    val res = new TimelineImpl[T](tx.newHandle(obj)).initAttrs(id, span, obj)
 //    res

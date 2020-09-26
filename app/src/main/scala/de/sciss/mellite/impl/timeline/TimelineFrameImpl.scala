@@ -14,14 +14,13 @@
 package de.sciss.mellite.impl.timeline
 
 import de.sciss.desktop.{Menu, OptionPane, UndoManager, Window}
-import de.sciss.lucre.bitemp.impl.BiGroupImpl
+import de.sciss.lucre.Source
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.impl.BiGroupImpl
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{Application, TimelineView}
-import de.sciss.mellite.TimelineFrame
-import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.proc.ProcObjView
+import de.sciss.mellite.{Application, TimelineFrame, TimelineView}
 import de.sciss.synth.proc.{Timeline, Universe}
 
 import scala.swing.Action
@@ -32,7 +31,7 @@ object TimelineFrameImpl {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = TimelineView[T](group)
     val name    = CellView.name(group)
-    import Timeline.serializer
+    import Timeline.format
     val groupH  = tx.newHandle(group)
     val res     = new Impl(tlv, name, groupH)
     res.init()

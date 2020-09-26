@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.desktop.KeyStrokes.{menu1, shift}
 import de.sciss.desktop.{Desktop, KeyStrokes, Menu}
-import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.synth.RT
 import de.sciss.osc
 import javax.swing.KeyStroke
 
@@ -118,7 +118,7 @@ object MenuBar {
 
   private def dumpOSC(): Unit = {
     val sOpt = TxnExecutor.defaultAtomic { itx =>
-      implicit val tx: Txn = Txn.wrap(itx)
+      implicit val tx: RT = RT.wrap(itx)
       Mellite.auralSystem.serverOption
     }
     sOpt.foreach { s =>

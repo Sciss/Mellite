@@ -14,16 +14,13 @@
 package de.sciss.mellite.edit
 
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.expr.Ops._
-import de.sciss.lucre.expr.{DoubleObj, DoubleVector, IntObj, LongObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.{Folder, Obj, Sys}
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.{expr, stm}
+import de.sciss.lucre.{Cursor, DoubleObj, DoubleVector, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.mellite.Mellite.{???!, log}
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Output, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, SynthGraphObj, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
 import javax.swing.undo.UndoableEdit
 
@@ -116,7 +113,7 @@ object Edits {
                           (implicit tx: T, cursor: Cursor[T]): UndoableEdit =
     EditAttrMap.expr[T, String, StringObj]("Rename Object", obj, ObjKeys.attrName, nameOpt)
 
-  def addLink[T <: Txn[T]](source: Output[T], sink: Proc[T], key: String = Proc.mainIn)
+  def addLink[T <: Txn[T]](source: Proc.Output[T], sink: Proc[T], key: String = Proc.mainIn)
                           (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     log(s"Link $source to $sink / $key")
     // source.addSink(Scan.Link.Scan(sink))
@@ -152,7 +149,7 @@ object Edits {
   final case class SinkDirect[T <: Txn[T]]() extends SinkType[T]
   final case class SinkFolder[T <: Txn[T]](f: Folder[T], index: Int) extends SinkType[T]
 
-  final case class Link[T <: Txn[T]](source: Output[T], sink: Proc[T], key: String, sinkType: SinkType[T])
+  final case class Link[T <: Txn[T]](source: Proc.Output[T], sink: Proc[T], key: String, sinkType: SinkType[T])
 
   def findLink[T <: Txn[T]](out: Proc[T], in: Proc[T], keys: ISeq[String] = Proc.mainIn :: Nil)
                            (implicit tx: T): Option[Link[T]] = {
@@ -213,6 +210,8 @@ object Edits {
     val objEdit = EditTimelineRemoveObj(name, timeline, span, obj)
     CompoundEdit(scanEdits :+ objEdit, name).get // XXX TODO - not nice, `get`
   }
+
+  private def any2stringadd: Any = ()
 
   def resize[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], amount: Resize, minStart: Long)
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
@@ -346,7 +345,7 @@ object Edits {
       // val expr = ExprImplicits[T]
 
       import de.sciss.equal.Implicits._
-      import expr.Ops._
+//      import expr.Ops._
       val newTrackOpt: Option[IntObj[T]] = obj.attr.$[IntObj](ObjTimelineView.attrTrackIndex) match {
         case Some(IntObj.Var(vr)) => Some(vr() + deltaTrack)
         case other =>
@@ -366,7 +365,7 @@ object Edits {
       span match {
         case SpanLikeObj.Var(vr) =>
           // s.transform(_ shift deltaC)
-          import expr.Ops._
+//          import expr.Ops._
           val newSpan = vr() shift deltaC
           val edit    = EditVar.Expr[T, SpanLike, SpanLikeObj](name, vr, newSpan)
           edits ::= edit
@@ -484,7 +483,7 @@ object Edits {
     if (hasDeltaTime || newValueOpt.isDefined) {
       val newTimeOpt: Option[LongObj[T]] = time match {
         case LongObj.Var(vr) =>
-          import expr.Ops._
+//          import expr.Ops._
           val newTime = vr() + deltaC
           edits ::= EditVar.Expr[T, Long, LongObj](name, vr, newTime)
           None

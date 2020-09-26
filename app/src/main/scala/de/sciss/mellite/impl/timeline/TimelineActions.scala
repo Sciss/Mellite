@@ -18,9 +18,9 @@ import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, OptionPane, Window}
 import de.sciss.fingertree.RangedSeq
-import de.sciss.lucre.bitemp.BiGroup
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
-import de.sciss.lucre.stm.{Folder, Obj}
+import de.sciss.lucre.BiGroup
+import de.sciss.lucre.{IntObj, SpanLikeObj, StringObj}
+import de.sciss.lucre.{Folder, Obj}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjTimelineView, ProcActions, TimelineView}

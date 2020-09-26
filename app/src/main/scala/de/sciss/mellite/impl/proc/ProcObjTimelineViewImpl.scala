@@ -16,11 +16,11 @@ package de.sciss.mellite.impl.proc
 import java.awt.RenderingHints
 
 import de.sciss.file._
-import de.sciss.lucre.expr.{CellView, SpanLikeObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
+import de.sciss.lucre.{Folder, Ident, Obj, Source, SpanLikeObj, TxnLike}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.Txn.peer
 import de.sciss.mellite.Mellite.???!
 import de.sciss.mellite.impl.ObjTimelineViewImpl
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
@@ -53,7 +53,6 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
   def removeTarget(tgt: LinkTarget[T])(implicit tx: TxnLike): Unit = _targets.remove(tgt)(tx.peer)
 
   def targets(implicit tx: TxnLike): Set[LinkTarget[T]] = {
-    import TxnLike.peer
     _targets.toSet
   }
 
@@ -70,7 +69,7 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
 
   def fireRepaint()(implicit tx: T): Unit = fire(ObjView.Repaint(this))
 
-  def init(id: S#Id, span: SpanLikeObj[T], obj: Proc[T])(implicit tx: T): this.type = {
+  def init(id: Ident[T], span: SpanLikeObj[T], obj: Proc[T])(implicit tx: T): this.type = {
     initAttrs(id, span, obj)
 
     val attr    = obj.attr
@@ -109,17 +108,16 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
     this
   }
 
-  private[this] def outputAdded(out: proc.Output[T])(implicit tx: T): Unit =
+  private[this] def outputAdded(out: Proc.Output[T])(implicit tx: T): Unit =
     context.putAux[ProcObjView.Timeline[T]](out.id, this)
 
-  private[this] def outputRemoved(out: proc.Output[T])(implicit tx: T): Unit =
+  private[this] def outputRemoved(out: Proc.Output[T])(implicit tx: T): Unit =
     context.removeAux(out.id)
 
   private[this] val attrInRef = Ref(Option.empty[InputAttrImpl[T]])
   private[this] var attrInEDT =     Option.empty[InputAttrImpl[T]]
 
   private[this] def removeAttrIn(value: Obj[T])(implicit tx: T): Unit = {
-    import TxnLike.peer
     attrInRef.swap(None).foreach { view =>
       view.dispose()
       deferAndRepaint {
@@ -129,7 +127,6 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
   }
 
   private[this] def addAttrIn(key: String, value: Obj[T], fire: Boolean = true)(implicit tx: T): Unit = {
-    import TxnLike.peer
     val viewOpt: Option[InputAttrImpl[T]] = value match {
       case tl: proc.Timeline[T] =>
         val tlView  = new InputAttrTimeline(this, key, tl, tx)
@@ -143,7 +140,7 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
         val tlView  = new InputAttrFolder(this, key, f, tx)
         Some(tlView)
 
-      case out: proc.Output[T] =>
+      case out: Proc.Output[T] =>
         val tlView  = new InputAttrOutput(this, key, out, tx)
         Some(tlView)
 
@@ -235,7 +232,6 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
 
   override def dispose()(implicit tx: T): Unit = {
     super.dispose()
-    import TxnLike.peer
     val proc = obj
     proc.outputs.iterator.foreach(outputRemoved)
     attrInRef.swap(None).foreach(_.dispose())

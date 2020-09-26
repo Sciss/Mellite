@@ -18,10 +18,10 @@ import java.awt.event.MouseEvent
 import java.util.EventObject
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
-import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Disposable, Obj}
 import de.sciss.mellite.{DragAndDrop, MapView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
@@ -75,7 +75,7 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
   }
 
   def dispose()(implicit tx: T): Unit = {
-    import TxnLike.peer
+    import de.sciss.lucre.Txn.peer
     observer.dispose()
     viewMap.foreach(_._2.dispose())
     viewMap.clear()
@@ -188,7 +188,7 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
   }
 
   final protected def init(list0: Vec[(String, ObjListView[T])])(implicit tx: T): this.type = {
-    import TxnLike.peer
+    import de.sciss.lucre.Txn.peer
     modelEDT  = list0
     viewMap ++= list0
     list0.foreach(tup => observeView(tup._1, tup._2))

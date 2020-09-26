@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.LTxn
+import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder

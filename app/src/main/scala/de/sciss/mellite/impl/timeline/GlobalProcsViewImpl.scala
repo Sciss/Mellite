@@ -18,12 +18,11 @@ import java.awt.datatransfer.Transferable
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{Menu, OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{IntObj, Obj, Source, SpanLikeObj, TxnLike, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.Txn.{peer => txPeer}
 import de.sciss.mellite.AttrMapFrame
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.objview.IntObjView
@@ -85,6 +84,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
     private[this] val tlSelListener: SelectionModel.Listener[T, ObjTimelineView[T]] = {
       case SelectionModel.Update(_, _) =>
         val items: Set[ProcObjView.Timeline[T]] = TxnExecutor.defaultAtomic { implicit itx =>
+          implicit val tx: TxnLike = LTxn.wrap(itx)
           tlSelModel.iterator.flatMap {
             case pv: ProcObjView.Timeline[T] =>
               pv.targets.flatMap { link =>

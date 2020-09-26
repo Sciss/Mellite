@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.proc
 
 import de.sciss.fingertree.RangedSeq
-import de.sciss.lucre.stm.{Disposable, IdentifierMap}
+import de.sciss.lucre.{Disposable, IdentMap}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.synth.proc
@@ -34,7 +34,7 @@ final class InputAttrTimeline[T <: Txn[T]](val parent: ProcObjView.Timeline[T], 
 
   def timeline(implicit tx: T): proc.Timeline[T] = tlH()
 
-  protected val viewMap: IdentifierMap[S#Id, T, Elem] = tx0.newInMemoryIdMap
+  protected val viewMap: IdentMap[T, Elem] = tx0.newIdentMap
 
   // EDT
   private[this] var edtRange = RangedSeq.empty[Elem, Long](_.point, Ordering.Long)

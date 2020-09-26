@@ -13,17 +13,15 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.expr.LongObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.{Cursor, LongObj, Obj, Source, Txn => LTxn}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
-private[edit] class EditGraphemeInsertRemoveObj[T <: Txn[T]](direction: Boolean,
-                                                             graphemeH: Source[T, Grapheme.Modifiable[T]],
-                                                             timeH: Source[T, LongObj[T]],
-                                                             elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+private[edit] class EditGraphemeInsertRemoveObj[T <: LTxn[T]](direction: Boolean,
+                                                              graphemeH: Source[T, Grapheme.Modifiable[T]],
+                                                              timeH: Source[T, LongObj[T]],
+                                                              elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {
@@ -53,8 +51,8 @@ private[edit] class EditGraphemeInsertRemoveObj[T <: Txn[T]](direction: Boolean,
 }
 
 object EditGraphemeInsertObj {
-  def apply[T <: Txn[T]](name: String, grapheme: Grapheme.Modifiable[T], time: LongObj[T], elem: Obj[T])
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+  def apply[T <: LTxn[T]](name: String, grapheme: Grapheme.Modifiable[T], time: LongObj[T], elem: Obj[T])
+                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val timeH     = tx.newHandle(time)
     val graphemeH = tx.newHandle(grapheme)
     val elemH     = tx.newHandle(elem)
@@ -63,10 +61,10 @@ object EditGraphemeInsertObj {
     res
   }
 
-  private class Impl[T <: Txn[T]](name: String,
-                                  graphemeH: Source[T, Grapheme.Modifiable[T]],
-                                  timeH: Source[T, LongObj[T]],
-                                  elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+  private class Impl[T <: LTxn[T]](name: String,
+                                   graphemeH: Source[T, Grapheme.Modifiable[T]],
+                                   timeH: Source[T, LongObj[T]],
+                                   elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
     extends EditGraphemeInsertRemoveObj[T](true, graphemeH, timeH, elemH) {
 
     override def getPresentationName: String = name
@@ -74,8 +72,8 @@ object EditGraphemeInsertObj {
 }
 
 object EditGraphemeRemoveObj {
-  def apply[T <: Txn[T]](name: String, grapheme: Grapheme.Modifiable[T], time: LongObj[T], elem: Obj[T])
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+  def apply[T <: LTxn[T]](name: String, grapheme: Grapheme.Modifiable[T], time: LongObj[T], elem: Obj[T])
+                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val timeH     = tx.newHandle(time)
     val graphemeH = tx.newHandle(grapheme)
     val elemH     = tx.newHandle(elem)
@@ -84,9 +82,9 @@ object EditGraphemeRemoveObj {
     res
   }
 
-  private class Impl[T <: Txn[T]](name: String, graphemeH: Source[T, Grapheme.Modifiable[T]],
-                                  timeH: Source[T, LongObj[T]],
-                                  elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+  private class Impl[T <: LTxn[T]](name: String, graphemeH: Source[T, Grapheme.Modifiable[T]],
+                                   timeH: Source[T, LongObj[T]],
+                                   elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
     extends EditGraphemeInsertRemoveObj[T](false, graphemeH, timeH, elemH) {
 
     override def getPresentationName: String = name

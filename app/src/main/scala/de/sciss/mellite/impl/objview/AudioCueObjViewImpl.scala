@@ -19,9 +19,7 @@ import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
 import de.sciss.file._
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Artifact, ArtifactLocation, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn

@@ -15,8 +15,7 @@ package de.sciss.mellite.impl.fscape
 
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.objview.{NoMakeListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.{ObjListView, ObjView}

@@ -20,9 +20,9 @@ import de.sciss.audiowidgets.PeakMeter
 import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm.TxnLike
+import de.sciss.lucre.TxnLike
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.synth.{Bus, Group, Server, Synth, Txn}
+import de.sciss.lucre.synth.{Bus, Group, RT, Server, Synth}
 import de.sciss.mellite.Mellite.{executionContext, log, showTimelineLog}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.impl.component.NoMenuBarActions
@@ -248,15 +248,15 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   private[this] val smallFont   = new Font("SansSerif", Font.PLAIN, 9)
 
-  private def step[A](fun: Txn => A): A = atomic { implicit itx =>
-    implicit val tx: Txn = Txn.wrap(itx)
+  private def step[A](fun: RT => A): A = atomic { implicit itx =>
+    implicit val tx: RT = RT.wrap(itx)
     fun(tx)
   }
 
   private[this] val synOpt          = Ref(Option.empty[Synth])
   private[this] var ggMainVolumeOpt = Option.empty[Slider]
 
-  def setMainVolume(linear: Double)(implicit tx: Txn): Unit = {
+  def setMainVolume(linear: Double)(implicit tx: RT): Unit = {
     synOpt.get(tx.peer).foreach { syn => syn.set("amp" -> linear) }
     deferTx {
       ggMainVolumeOpt.foreach { slid =>
@@ -266,7 +266,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     }
   }
 
-  private def auralSystemStarted(s: Server)(implicit tx: Txn): Unit = {
+  private def auralSystemStarted(s: Server)(implicit tx: RT): Unit = {
     log("MainFrame: AuralSystem started")
 
     val numIns  = s.peer.config.inputBusChannels
@@ -482,7 +482,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     sl
   }
 
-  private def auralSystemStopped()(implicit tx: Txn): Unit = {
+  private def auralSystemStopped()(implicit tx: RT): Unit = {
     log("MainFrame: AuralSystem stopped")
     metersRef .swap(Nil)(tx.peer).foreach(_.dispose())
     synOpt.swap(None)(tx.peer)
@@ -545,8 +545,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
 
   step { implicit tx =>
     auralSystem.addClient(new AuralSystem.Client {
-      def auralStarted(s: Server)(implicit tx: Txn): Unit = me.auralSystemStarted(s)
-      def auralStopped()         (implicit tx: Txn): Unit = me.auralSystemStopped()
+      def auralStarted(s: Server)(implicit tx: RT): Unit = me.auralSystemStarted(s)
+      def auralStopped()         (implicit tx: RT): Unit = me.auralSystemStopped()
     })
     sensorSystem.addClient(new SensorSystem.Client {
       def sensorsStarted(s: SensorSystem.Server)(implicit tx: TxnLike): Unit = me.sensorSystemStarted(s)

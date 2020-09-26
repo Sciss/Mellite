@@ -14,15 +14,14 @@
 package de.sciss.mellite.edit
 
 import de.sciss.fscape.lucre.FScape
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
 // XXX TODO - should disconnect links and restore them in undo
-private[edit] final class EditAddRemoveFScapeOutput[T <: Txn[T]](isAdd: Boolean,
-                                                               fscapeH: Source[T, FScape[T]],
-                                                               key: String, tpe: Obj.Type)(implicit cursor: Cursor[T])
+private[edit] final class EditAddRemoveFScapeOutput[T <: LTxn[T]](isAdd: Boolean,
+                                                                  fscapeH: Source[T, FScape[T]],
+                                                                  key: String, tpe: Obj.Type)(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {
@@ -57,8 +56,8 @@ private[edit] final class EditAddRemoveFScapeOutput[T <: Txn[T]](isAdd: Boolean,
   override def getPresentationName = s"${if (isAdd) "Add" else "Remove"} Output"
 }
 object EditAddFScapeOutput {
-  def apply[T <: Txn[T]](fscape: FScape[T], key: String, tpe: Obj.Type)
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+  def apply[T <: LTxn[T]](fscape: FScape[T], key: String, tpe: Obj.Type)
+                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val fscapeH = tx.newHandle(fscape)
     val res = new EditAddRemoveFScapeOutput(isAdd = true, fscapeH = fscapeH, key = key, tpe = tpe)
     res.perform()
@@ -67,8 +66,8 @@ object EditAddFScapeOutput {
 }
 
 object EditRemoveFScapeOutput {
-  def apply[T <: Txn[T]](output: FScape.Output[T])
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+  def apply[T <: LTxn[T]](output: FScape.Output[T])
+                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val fscape  = output.fscape
     val key     = output.key
     val tpe     = output.tpe

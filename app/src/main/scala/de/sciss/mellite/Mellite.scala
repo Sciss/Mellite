@@ -19,8 +19,8 @@ import java.util.{Date, Locale}
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
-import de.sciss.lucre.synth.{Server, Txn}
-import de.sciss.lucre.{Cursor, Txn => LTxn, TxnLike, Workspace}
+import de.sciss.lucre.synth.{RT, Server, Txn}
+import de.sciss.lucre.{Cursor, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
 import de.sciss.synth.Client
@@ -193,7 +193,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
 
     TxnExecutor.defaultAtomic { implicit itx =>
-      implicit val tx: Txn = Txn.wrap(itx)
+      implicit val tx: RT = RT.wrap(itx)
       auralSystem.start(serverCfg, clientCfg)
     }
     true
@@ -241,7 +241,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     config.command        = Prefs.sensorCommand.getOrElse(Prefs.defaultSensorCommand)
 
     atomic { implicit itx =>
-      implicit val tx: TxnLike = Txn.wrap(itx)
+      implicit val tx: TxnLike = RT.wrap(itx)
       sensorSystem.start(config.build)
     }
   }
@@ -392,6 +392,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     u.cursor.step { implicit tx =>
       val f = u.workspace.root
       config.autoRun.foreach { name =>
+        import de.sciss.synth.proc.Implicits._
 
         (f / name).fold[Unit] {
           tx.afterCommit(println(s"Warning: auto-run object '$name' does not exist."))

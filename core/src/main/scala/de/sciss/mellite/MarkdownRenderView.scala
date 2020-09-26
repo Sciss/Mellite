@@ -14,9 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.{Cursor, Observable, synth}
+import de.sciss.lucre.{Cursor, Observable, synth, Txn => LTxn}
 import de.sciss.synth.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -33,16 +31,16 @@ object MarkdownRenderView {
     def apply[T <: synth.Txn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
                            (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T]
 
-    def basic[T <: Txn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
-                          (implicit tx: T, cursor: Cursor[T]): Basic[T]
+    def basic[T <: LTxn[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+                           (implicit tx: T, cursor: Cursor[T]): Basic[T]
   }
 
   def apply[T <: synth.Txn[T]](init: Markdown[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
                          (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T] =
     companion(init, bottom, embedded = embedded)
 
-  def basic[T <: Txn[T]](init: Markdown[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
-                        (implicit tx: T, cursor: Cursor[T]): Basic[T] =
+  def basic[T <: LTxn[T]](init: Markdown[T], bottom: ISeq[View[T]] = Nil, embedded: Boolean = false)
+                         (implicit tx: T, cursor: Cursor[T]): Basic[T] =
     companion.basic(init, bottom, embedded = embedded)
 
   sealed trait Update[T <: LTxn[T]] { def view: Basic[T] }

@@ -20,10 +20,9 @@ import de.sciss.desktop
 import de.sciss.desktop.Window
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm.Disposable
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.{Cursor, Disposable, confluent, stm}
+import de.sciss.lucre.{Cursor, Disposable, confluent}
 import de.sciss.mellite.Mellite.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
@@ -104,7 +103,7 @@ object CursorsFrameImpl {
     import view.{universe, workspace}
 
     object WorkspaceClosed extends Disposable[T] {
-      def dispose()(implicit tx: T): Unit = impl.dispose()(workspace.system.durableTx(tx))
+      def dispose()(implicit tx: T): Unit = impl.dispose() (tx.durable)// (workspace.system.durableTx(tx))
     }
 
     override protected def initGUI(): Unit = {

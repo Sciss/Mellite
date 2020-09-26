@@ -13,14 +13,12 @@
 
 package de.sciss.mellite.impl.proc
 
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Identifiable, IdentifierMap, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.mellite.{TimelineRendering, TimelineView}
+import de.sciss.lucre.{Ident, IdentMap, Identified, Obj, Txn => LTxn}
 import de.sciss.mellite.impl.proc.ProcObjView.{InputAttr, LinkTarget}
+import de.sciss.mellite.{TimelineRendering, TimelineView}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.AuxContext
+import de.sciss.synth.proc.{AuxContext, Proc}
 
 import scala.annotation.switch
 import scala.concurrent.stm.TSet
@@ -29,7 +27,7 @@ import scala.swing.Graphics2D
 trait InputAttrImpl[T <: LTxn[T]] extends InputAttr[T] {
   // ---- abstract ----
 
-  protected def viewMap: IdentifierMap[S#Id, T, Elem]
+  protected def viewMap: IdentMap[T, Elem]
 
   protected def elemOverlappingEDT(start: Long, stop: Long): Iterator[Elem]
   protected def elemAddedEDT  (elem: Elem): Unit
@@ -352,20 +350,20 @@ trait InputAttrImpl[T <: LTxn[T]] extends InputAttr[T] {
   }
 
   def dispose()(implicit tx: T): Unit = {
-    import TxnLike.peer
+    import LTxn.peer
     viewSet.foreach(_.dispose())
     viewSet.clear()
   }
 
-  type Entry <: Identifiable[S#Id]
+  type Entry <: Identified[T]
 
   protected def mkTarget(entry: Entry)(implicit tx: T): LinkTarget[T]
 
   final protected def addAttrIn(span: SpanLike, entry: Entry, value: Obj[T], fire: Boolean)
                                (implicit tx: T): Unit =
     value match {
-      case out: proc.Output[T] =>
-        import TxnLike.peer
+      case out: Proc.Output[T] =>
+        import LTxn.peer
         val entryId   = entry.id
         val idH       = tx.newHandle(entryId)
         val viewInit  = parent.context.getAux    [ProcObjView.Timeline[T]](out.id)
@@ -404,9 +402,9 @@ trait InputAttrImpl[T <: LTxn[T]] extends InputAttr[T] {
       case _ => // no others supported ATM
     }
 
-  final protected def removeAttrIn(/* span: SpanLike, */ entryId: S#Id)(implicit tx: T): Unit =
+  final protected def removeAttrIn(/* span: SpanLike, */ entryId: Ident[T])(implicit tx: T): Unit =
     viewMap.get(entryId).foreach { elem0 =>
-      import TxnLike.peer
+      import LTxn.peer
       viewMap.remove(entryId)
       viewSet.remove(elem0)
       deferTx {

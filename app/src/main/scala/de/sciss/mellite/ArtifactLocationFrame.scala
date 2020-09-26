@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.lucre
 import de.sciss.lucre.ArtifactLocation
-import de.sciss.lucre.synth.{Sys, Txn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.{ArtifactLocationFrameImpl => Impl}
 import de.sciss.synth.proc.Universe
 

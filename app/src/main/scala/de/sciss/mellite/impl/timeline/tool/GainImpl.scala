@@ -13,15 +13,12 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 
-import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{expr, stm}
-import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, DoubleObj, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.EditAttrMap
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
@@ -32,7 +29,7 @@ final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Gain
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.N_RESIZE_CURSOR)
   val name                  = "Gain"
   val icon: Icon            = GUI.iconNormal(Shapes.Gain) // ToolsImpl.getIcon("vresize")
 
@@ -55,7 +52,7 @@ final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
     // ProcActions.adjustGain(obj, drag.factor)
     // val imp = ExprImplicits[T]
     if (factor == 1f) None else {
-      import expr.Ops._
+//      import expr.Ops._
       val newGain: DoubleObj[T] = obj.attr.$[DoubleObj](ObjKeys.attrGain) match {
         case Some(DoubleObj.Var(vr)) => vr() * factor.toDouble
         case other =>

@@ -16,10 +16,8 @@ package de.sciss.mellite.impl.document
 import java.io.File
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.expr.{CellView, StringObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Disposable, Folder, Obj}
+import de.sciss.lucre.{Artifact, Disposable, Folder, Obj, Source, StringObj, Txn => LTxn}
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
@@ -29,7 +27,7 @@ import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, Folder
 import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.model.impl.ModelImpl
-import de.sciss.serial.Serializer
+import de.sciss.serial.TFormat
 import de.sciss.synth.proc.{ObjKeys, Universe}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
@@ -48,7 +46,7 @@ object FolderViewImpl extends FolderView.Companion {
 
   def apply[T <: Txn[T]](root0: Folder[T])
                         (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T] = {
-    implicit val folderSer: Serializer[T, S#Acc, Folder[T]] = Folder.serializer[T]
+    implicit val folderFmt: TFormat[T, Folder[T]] = Folder.format[T]
 
     new Impl[T] {
       val treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]] = TreeTableView(root0, TTHandler)

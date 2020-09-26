@@ -28,6 +28,7 @@ import de.sciss.patterns
 import de.sciss.patterns.Pat
 import de.sciss.patterns.lucre.Pattern
 import de.sciss.synth.proc.{Code, Universe}
+import de.sciss.synth.proc.Implicits._
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

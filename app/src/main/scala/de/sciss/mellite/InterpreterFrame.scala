@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.desktop
-import de.sciss.lucre.stm.Workspace
+import de.sciss.lucre.Workspace
 import de.sciss.mellite.impl.code.{InterpreterFrameImpl => Impl}
 import de.sciss.synth.proc
 

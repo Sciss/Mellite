@@ -13,17 +13,15 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.{Cursor, Obj, Source, SpanLikeObj, Txn}
 import de.sciss.synth.proc.Timeline
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove
 private[edit] class EditTimelineInsertRemoveObj[T <: Txn[T]](direction: Boolean,
-                                                           timelineH: Source[T, Timeline.Modifiable[T]],
-                                                           spanH: Source[T, SpanLikeObj[T]],
-                                                           elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
+                                                             timelineH: Source[T, Timeline.Modifiable[T]],
+                                                             spanH: Source[T, SpanLikeObj[T]],
+                                                             elemH: Source[T, Obj[T]])(implicit cursor: Cursor[T])
   extends AbstractUndoableEdit {
 
   override def undo(): Unit = {

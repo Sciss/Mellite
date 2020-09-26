@@ -23,16 +23,12 @@ import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.equal.Implicits._
 import de.sciss.fingertree.RangedSeq
-import de.sciss.lucre.bitemp.BiGroup
-import de.sciss.lucre.bitemp.impl.BiGroupImpl
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{IdentifierMap, Obj}
+import de.sciss.lucre.impl.BiGroupImpl
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.edit.EditFolderInsertObj
-import de.sciss.mellite.edit.{EditTimelineInsertObj, Edits}
+import de.sciss.lucre.{BiGroup, IdentMap, IntObj, Obj, Source, SpanLikeObj}
+import de.sciss.mellite.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.impl.proc.ProcObjView
@@ -89,7 +85,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     // (other than through a GUI driven data structure). thus, it
     // only call pv.disposeGUI() and the procMap and scanMap must be
     // freed directly...
-    val viewMap = tx.newInMemoryIdMap[ObjTimelineView[T]]
+    val viewMap = tx.newIdentMap[ObjTimelineView[T]]
 
     val transport = Transport[T](universe) // = proc.Transport [T, workspace.I](group, sampleRate = sampleRate)
     transport.addObject(obj)
@@ -137,8 +133,8 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     var canvas      : TimelineTrackCanvasImpl[T]  = _
 
-    protected val auxMap      : IdentifierMap[S#Id, T, Any]                = tx0.newInMemoryIdMap
-    protected val auxObservers: IdentifierMap[S#Id, T, List[AuxObserver]]  = tx0.newInMemoryIdMap
+    protected val auxMap      : IdentMap[T, Any]                = tx0.newIdentMap
+    protected val auxObservers: IdentMap[T, List[AuxObserver]]  = tx0.newIdentMap
 
     private[this] lazy val toolCursor   = TimelineTool.cursor  [T](canvas)
     private[this] lazy val toolMove     = TimelineTool.move    [T](canvas)

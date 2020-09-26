@@ -13,24 +13,22 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
+import java.awt
 import java.awt.event.MouseEvent
-import java.awt.{Cursor, Point, Toolkit}
+import java.awt.{Point, Toolkit}
 
-import de.sciss.lucre.expr.{BooleanObj, SpanLikeObj}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, TimelineTrackCanvas}
+import de.sciss.lucre.{BooleanObj, Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.TimelineTool.Mute
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.tool.RubberBandTool
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, Shapes, TimelineTrackCanvas}
 import de.sciss.synth.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 object MuteImpl {
-  private lazy val cursor: Cursor = {
+  private lazy val cursor: awt.Cursor = {
     val tk  = Toolkit.getDefaultToolkit
     // val img = tk.createImage(Mellite.getClass.getResource("cursor-mute.png"))
     val img = GUI.getImage("cursor-mute.png")
@@ -41,7 +39,7 @@ final class MuteImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
   extends CollectionImpl[T, Mute]
     with RubberBandTool[T, Mute, Int, ObjTimelineView[T]] {
 
-  def defaultCursor: Cursor = MuteImpl.cursor
+  def defaultCursor: awt.Cursor = MuteImpl.cursor
   val name                  = "Mute"
   val icon: Icon            = GUI.iconNormal(Shapes.Mute) // ToolsImpl.getIcon("mute")
 

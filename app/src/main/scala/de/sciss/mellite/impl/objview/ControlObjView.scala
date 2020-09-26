@@ -14,8 +14,7 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Cursor, Obj}
+import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}

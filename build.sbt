@@ -18,7 +18,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val common = new {
-    val audioFile           = "1.5.5"
+    val audioFile           = "2.0.0-SNAPSHOT"
     val audioWidgets        = "2.0.0-SNAPSHOT"
     val desktop             = "0.10.7"
     val equal               = "0.1.5"
@@ -42,20 +42,20 @@ lazy val deps = new {
     val swingPlus           = "0.4.2"
   }
   val app = new {
-    val akka                = "2.6.8"
+    val akka                = "2.6.9"
     val appDirs             = "1.2.0"
     val dejaVuFonts         = "2.37"    // directly included
     val dotterweide         = "0.3.0"
-    val fileCache           = "0.5.1"
-    val fingerTree          = "1.5.4"
-    val freesound           = "1.25.1"
+    val fileCache           = "1.0.0-SNAPSHOT"
+    val fingerTree          = "1.5.5"
+    val freesound           = "2.0.0-SNAPSHOT"
     val fscape              = "3.0.0-SNAPSHOT"
     val interpreterPane     = "1.10.1"
 //    val jline               = "2.14.6"
     val jump3r              = "1.0.5"
-    val kollFlitz           = "0.2.3"
-    val linKernighan        = "0.1.2"
-    val lucrePi             = "0.1.0"
+    val kollFlitz           = "0.2.4"
+    val linKernighan        = "0.1.3"
+    val lucrePi             = "1.0.0-SNAPSHOT"
     val negatum             = "1.0.0-SNAPSHOT"
     val patterns            = "1.0.0-SNAPSHOT"
     val pdflitz             = "1.4.1"
@@ -63,16 +63,16 @@ lazy val deps = new {
 //    val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
     val raphael             = "1.0.6"
-    val scalaColliderSwing  = "1.41.7"
+    val scalaColliderSwing  = "2.0.0-SNAPSHOT"
     val scissDSP            = "2.0.0-SNAPSHOT"
     val slf4j               = "1.7.30"
     val submin              = "0.3.4"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.5.1"
-    val topology            = "1.1.2"
+    val topology            = "1.1.3"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "2.41.3"
+    val wolkenpumpe         = "3.0.0-SNAPSHOT"
   }
 }
 

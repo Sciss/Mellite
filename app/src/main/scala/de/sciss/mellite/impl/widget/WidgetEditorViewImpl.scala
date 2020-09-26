@@ -17,12 +17,12 @@ import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.edit.{UndoManager => LUndoManager}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Source, synth}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
@@ -35,7 +35,7 @@ import scala.swing.event.{Key, SelectionChanged}
 import scala.swing.{Action, BorderPanel, Button, Component, TabbedPane}
 
 object WidgetEditorViewImpl {
-  def apply[T <: SSys[T]](obj: Widget[T], showEditor: Boolean, bottom: ISeq[View[T]])
+  def apply[T <: synth.Txn[T]](obj: Widget[T], showEditor: Boolean, bottom: ISeq[View[T]])
                          (implicit tx: T, universe: Universe[T],
                           undoManager: UndoManager): WidgetEditorView[T] = {
 //    val editable = obj match {
@@ -43,16 +43,16 @@ object WidgetEditorViewImpl {
 //      case _               => false
 //    }
 
-    implicit val undoManagerTx: stm.UndoManager[T] = stm.UndoManager()
+    implicit val undoManagerTx: LUndoManager[T] = LUndoManager()
     val renderer  = WidgetRenderView[T](obj, embedded = true)
     val res       = new Impl[T](renderer, tx.newHandle(obj), bottom = bottom)
     res.init(obj, showEditor = showEditor)
   }
 
-  private final class Impl[T <: SSys[T]](val renderer: WidgetRenderView[T],
+  private final class Impl[T <: synth.Txn[T]](val renderer: WidgetRenderView[T],
                                          widgetH: Source[T, Widget[T]],
                                          bottom: ISeq[View[T]])
-                                        (implicit undoManager: UndoManager, txUndo: stm.UndoManager[T])
+                                        (implicit undoManager: UndoManager, txUndo: LUndoManager[T])
     extends ComponentHolder[Component] with WidgetEditorView[T] with ModelImpl[WidgetEditorView.Update] { impl =>
 
     type C = Component

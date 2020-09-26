@@ -46,5 +46,5 @@ object OutputObjView extends NoMakeListObjViewFactory {
   }
 }
 trait OutputObjView[T <: LTxn[T]] extends ObjView[T] {
-  type Repr = Output[T]
+  type Repr = Proc.Output[T]
 }

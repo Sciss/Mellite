@@ -13,16 +13,13 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 
 import de.sciss.audiowidgets.impl.TimelineNavigation
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.Edits
-import de.sciss.mellite.Shapes
+import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.proc.Timeline
 import javax.swing.Icon
@@ -33,7 +30,7 @@ final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T]
 
   import TimelineTool.Resize
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.W_RESIZE_CURSOR)
   val name                  = "Resize"
   val icon: Icon            = GUI.iconNormal(Shapes.Crop) // ToolsImpl.getIcon("hresize")
 

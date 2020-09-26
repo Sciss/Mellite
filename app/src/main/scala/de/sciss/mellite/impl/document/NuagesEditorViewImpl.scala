@@ -16,16 +16,14 @@ package de.sciss.mellite.impl.document
 import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{BooleanObj, CellView, IntVector}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Folder
+import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{FolderEditorView, GUI, Prefs, Veto}
-import de.sciss.mellite.{ActionBounce, FolderFrame, NuagesEditorView, TimelineFrame}
+import de.sciss.lucre.{BooleanObj, Folder, IntVector, Source}
 import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.{ActionBounce, FolderEditorView, FolderFrame, GUI, NuagesEditorView, Prefs, TimelineFrame, Veto}
 import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}

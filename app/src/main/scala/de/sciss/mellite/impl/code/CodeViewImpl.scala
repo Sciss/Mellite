@@ -20,11 +20,10 @@ import java.util.Locale
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Sys, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx, requireEDT}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.{Source, Txn, TxnLike}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.{CodeView, GUI, Prefs}
@@ -133,8 +132,8 @@ object CodeViewImpl extends CodeView.Companion {
   }
 
   def apply[T <: Txn[T]](obj: Code.Obj[T], code0: Code, bottom: ISeq[View[T]])
-                        (handlerOpt: Option[CodeView.Handler[T, code0.In, code0.Out]])
-                        (implicit tx: T, universe: Universe[T],
+                         (handlerOpt: Option[CodeView.Handler[T, code0.In, code0.Out]])
+                         (implicit tx: T, universe: Universe[T],
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[T, code0.Out] = {
 

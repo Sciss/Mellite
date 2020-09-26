@@ -40,7 +40,7 @@ object ExprHistoryView {
 
   def apply[A, Ex[~ <: Txn[~]] <: Expr[~, A]](workspace: proc.Workspace.Confluent, expr: Ex[T])
               (implicit tx: T, universe: Universe[T], format: TFormat[T, Ex[T]]): UniverseView[T] = {
-    val sys       = workspace.system
+//    val sys       = workspace.system
     // LUCRE4
     val cursor    = Cursor[T, D](tx.inputAccess)(tx.durable, ??? /*tx.system*/)
     val exprH: Source[T, Expr[T, A]] = tx.newHandle(expr)  // IntelliJ highlight bug

@@ -25,7 +25,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Obj, Txn => LTxn}
+import de.sciss.lucre.{Disposable, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
 import de.sciss.model.impl.ModelImpl
@@ -33,6 +33,7 @@ import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, Int
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.proc.Universe
+import de.sciss.synth.proc.Implicits._
 import de.sciss.{desktop, numbers}
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop

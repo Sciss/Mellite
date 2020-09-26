@@ -13,8 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.stm.TxnLike.peer
-import de.sciss.lucre.stm.{Disposable, NoSys, Sys, TxnLike, Workspace}
+import de.sciss.lucre.Txn.peer
+import de.sciss.lucre.{AnyTxn, Disposable, Txn, TxnLike, Workspace}
 
 import scala.concurrent.stm.TMap
 
@@ -64,8 +64,8 @@ object WorkspaceCache {
     }
 
     private def removeValue(workspace0: Workspace[_], v0: Value[_, A])(implicit tx: TxnLike): Unit = {
-      val workspace = workspace0.asInstanceOf[Workspace[NoSys]]
-      val v         = v0.asInstanceOf[Disposable[NoSys#Tx]]
+      val workspace = workspace0.cast[AnyTxn]
+      val v         = v0.asInstanceOf[Disposable[AnyTxn]]
       workspace.removeDependent(v)
     }
 

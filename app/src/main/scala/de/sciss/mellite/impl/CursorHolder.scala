@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.lucre.stm.{Cursor, Sys}
+import de.sciss.lucre.{Cursor, Txn}
 
 trait CursorHolder[T <: Txn[T]] {
   protected def cursor: Cursor[T]

@@ -14,8 +14,8 @@
 package de.sciss.mellite.impl.markdown
 
 import de.sciss.desktop.{OptionPane, UndoManager}
-import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.{BooleanObj, Cursor, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn

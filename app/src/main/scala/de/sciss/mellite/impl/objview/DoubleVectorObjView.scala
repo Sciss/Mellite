@@ -17,7 +17,7 @@ import java.awt.geom.Area
 
 import de.sciss.desktop
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.{DoubleVector, Obj, Source, Txn => LTxn}
+import de.sciss.lucre.{DoubleVector, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, MessageException, ObjGraphemeView, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}

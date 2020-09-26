@@ -14,7 +14,6 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.Workspace
 import de.sciss.lucre.swing.View
 import de.sciss.mellite.impl.document.{CursorsFrameImpl => Impl}
 import de.sciss.synth.proc

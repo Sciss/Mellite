@@ -13,13 +13,12 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt.Cursor
+import java.awt
 import java.awt.event.MouseEvent
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Cursor, IntObj, SpanLikeObj}
 import de.sciss.mellite.Mellite.log
 import de.sciss.mellite.edit.EditTimelineInsertObj
 import de.sciss.mellite.impl.tool.{CollectionToolLike, DraggingTool}
@@ -36,7 +35,7 @@ final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], t
 
   import TimelineTool.Add
 
-  def defaultCursor: Cursor = Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)
+  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.CROSSHAIR_CURSOR)
   val name                  = "Add Process" // "Function"
 //  val icon: Icon            = GUI.iconNormal(raphael.Shapes.Cogs)
   val icon: Icon            = GUI.iconNormal(Shapes.plus(raphael.Shapes.Cogs))

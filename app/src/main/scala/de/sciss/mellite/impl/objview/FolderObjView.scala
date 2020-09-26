@@ -14,8 +14,7 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.{Folder, Obj}
+import de.sciss.lucre.{Folder, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}

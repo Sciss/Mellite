@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.proc
 
 import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Disposable
+import de.sciss.lucre.Disposable
 import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.SpanLike

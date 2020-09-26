@@ -24,7 +24,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Artifact, ArtifactLocation, Source, Workspace}
+import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, Source}
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
@@ -46,7 +46,7 @@ object AudioCueViewImpl {
   def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] = {
     val value         = obj.value // .artifact // store.resolve(element.entity.value.artifact)
     // val sampleRate    = f.spec.sampleRate
-    val system: S     = tx.system
+//    val system: S     = tx.system
     type I            = tx.I // _workspace.I
     implicit val itx: I = tx.inMemory // inMemoryBridge(tx)
     val timeline      = Timeline[I]() // proc.ProcGroup.Modifiable[I]
@@ -92,9 +92,9 @@ object AudioCueViewImpl {
     diff.attr.put(Proc.mainIn, output)
     // val transport     = Transport[I, I](group, sampleRate = sampleRate)
 
-//    implicit val cursorI: Cursor[I] = Cursor.inMemory(system)
-    implicit val systemI: I = system.inMemory
-    implicit val workspaceI: Workspace[I] = Workspace.Implicits.dummy[I]
+    implicit val cursorI: Cursor[I] = ??? // LUCRE4 Cursor.inMemory(system)
+//    implicit val systemI: I = system.inMemory
+    implicit val workspaceI: Workspace[I] = ??? // LUCRE4 Workspace.Implicits.dummy[I](tx.system, itx)
     val genI        = GenContext[I]() // (itx, cursorI, workspaceI)
     val schI        = Scheduler[I]()
     val universeI   = Universe[I](genI, schI, universe.auralSystem)
@@ -103,7 +103,7 @@ object AudioCueViewImpl {
     transport.addObject(diff)
 
     val objH = tx.newHandle(obj)
-    val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, inMemoryBridge = system.inMemoryTx) {
+    val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, inMemoryBridge = tx.inMemoryBridge) {
       val timelineModel: TimelineModel =
         TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
           sampleRate = TimeRef.SampleRate)

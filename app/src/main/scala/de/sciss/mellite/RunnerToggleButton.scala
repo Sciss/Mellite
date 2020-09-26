@@ -15,11 +15,10 @@ package de.sciss.mellite
 
 import de.sciss.desktop.{KeyStrokes, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.{Sys => SSys}
+import de.sciss.lucre.{Disposable, Obj, Txn, synth}
 import de.sciss.synth.proc.Runner.{Done, Failed, State}
 import de.sciss.synth.proc.{Runner, Universe}
 
@@ -28,7 +27,7 @@ import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
   /** A button view toggling between `run` and `stop` an a runner created from the `obj` argument. */
-  def apply[T <: SSys[T]](obj: Obj[T], isAction: Boolean = false)
+  def apply[T <: synth.Txn[T]](obj: Obj[T], isAction: Boolean = false)
                          (implicit tx: T, universe: Universe[T]): RunnerToggleButton[T] = {
     val r = Runner(obj)
     new Impl[T](r, disposeRunner = true, isAction = isAction).init()

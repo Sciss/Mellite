@@ -14,9 +14,8 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.expr.{CellView, Type}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.deferTx

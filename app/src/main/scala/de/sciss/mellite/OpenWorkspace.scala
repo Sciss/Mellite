@@ -22,14 +22,13 @@ import de.sciss.lucre.Cursor
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
-import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.synth.{AnyTxn, Txn}
 import de.sciss.synth.proc
 import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
 import javax.swing.SwingUtilities
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
-import scala.language.existentials
 import scala.swing.event.Key
 import scala.swing.{Action, Dialog}
 import scala.util.{Failure, Success}
@@ -75,9 +74,9 @@ object OpenWorkspace extends  {
     universe.workspace match {
       case cf: Workspace.Confluent =>
         implicit val workspace: Workspace.Confluent  = cf
-        implicit val cursor: Cursor[Durable] = workspace.system.durable
-        GUI.step[proc.Durable](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
-          implicit val u: Universe[Confluent] = universe.asInstanceOf[Universe[Confluent]]
+        implicit val cursor: Cursor[Durable.Txn] = workspace.system.durable
+        GUI.step[proc.Durable.Txn](fullTitle, s"Opening cursor window for '${cf.name}'") { implicit tx =>
+          implicit val u: Universe[Confluent.Txn] = universe.cast[Confluent.Txn]
           DocumentCursorsFrame(cf)
         }
       case eph =>
@@ -116,11 +115,11 @@ object OpenWorkspace extends  {
 //    config.readOnly     = true
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
     val ds              = BerkeleyDB.factory(folder, config)
-    val fut: Future[Universe[~] forSome { type ~ <: Txn[~] }] = Future {  // IntelliJ highlight bug
+    val fut: Future[Universe[_]] = Future {  // IntelliJ highlight bug
       val w = blocking {
-        Workspace.read(folder, ds)
+        Workspace.read(folder, ds).cast[AnyTxn]
       }
-      Mellite.mkUniverse(w)
+      Mellite.mkUniverse[w.Tx](w)
     }
 
     var opt: OptionPane[Unit] = null
@@ -137,7 +136,9 @@ object OpenWorkspace extends  {
           if (w != null) w.dispose()
         }
         tr match {
-          case Success(ws) => if (!headless) openGUI(ws)
+          case Success(u) => if (!headless) {
+            openGUI(u.cast[AnyTxn])
+          }
 //          case Success(cf : Workspace.Confluent) => openGUI(cf )
 //          case Success(eph: Workspace.Durable)   => openGUI(eph)
 //          case Success(eph: Workspace.InMemory)  => openGUI(eph)

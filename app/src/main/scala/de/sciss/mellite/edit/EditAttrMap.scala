@@ -13,24 +13,22 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.expr.{Expr, Type}
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.{Obj, Sys}
+import de.sciss.lucre.{Cursor, Expr, Obj, Source, Txn => LTxn}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 import scala.reflect.ClassTag
 
 object EditAttrMap {
-  def add[T <: Txn[T]](name: String, obj: Obj[T], key: String, value: Obj[T])
-                      (implicit tx: T, cursor: Cursor[T]): UndoableEdit =
+  def add[T <: LTxn[T]](name: String, obj: Obj[T], key: String, value: Obj[T])
+                       (implicit tx: T, cursor: Cursor[T]): UndoableEdit =
     apply(name = s"Add $name", obj = obj, key = key, value = Some(value))
 
-  def remove[T <: Txn[T]](name: String, obj: Obj[T], key: String)
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit =
+  def remove[T <: LTxn[T]](name: String, obj: Obj[T], key: String)
+                          (implicit tx: T, cursor: Cursor[T]): UndoableEdit =
     apply(name = s"Remove $name", obj = obj, key = key, value = None)
 
-  def apply[T <: Txn[T]](name: String, obj: Obj[T], key: String, value: Option[Obj[T]])
-                        (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
+  def apply[T <: LTxn[T]](name: String, obj: Obj[T], key: String, value: Option[Obj[T]])
+                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val before    = obj.attr.get(key)
     val objH      = tx.newHandle(obj)
     val beforeH   = tx.newHandle(before)
@@ -40,9 +38,9 @@ object EditAttrMap {
     res
   }
 
-  def expr[T <: Txn[T], A, E[~ <: Sys[~]] <: Expr[~, A]](name: String, obj: Obj[T],
-                                                      key: String, value: Option[E[T]])
-                          (implicit tx: T, cursor: Cursor[T], tpe: Expr.Type[A, E], ct: ClassTag[E[T]]): UndoableEdit = {
+  def expr[T <: LTxn[T], A, E[~ <: LTxn[~]] <: Expr[~, A]](name: String, obj: Obj[T],
+                                                          key: String, value: Option[E[T]])
+                                                         (implicit tx: T, cursor: Cursor[T], tpe: Expr.Type[A, E], ct: ClassTag[E[T]]): UndoableEdit = {
     // what we do in `expr` is preserve an existing variable.
     // that is, if there is an existing value which is a variable,
     // we do not overwrite that value, but preserve that
@@ -52,7 +50,7 @@ object EditAttrMap {
       case Some(tpe.Var(vr)) => Some(vr())
       case other => other
     }
-    import tpe.serializer
+    import tpe.format
     val objH      = tx.newHandle(obj)
     val beforeH   = tx.newHandle(before)
     val nowH      = tx.newHandle(value)
@@ -61,23 +59,23 @@ object EditAttrMap {
     res
   }
 
-  private final class ApplyImpl[T <: Txn[T]](val name: String, val key: String,
-                                             val objH   : Source[T, Obj[T]],
-                                             val beforeH: Source[T, Option[Obj[T]]],
-                                             val nowH   : Source[T, Option[Obj[T]]])
-                                            (implicit val cursor: Cursor[T])
+  private final class ApplyImpl[T <: LTxn[T]](val name: String, val key: String,
+                                              val objH   : Source[T, Obj[T]],
+                                              val beforeH: Source[T, Option[Obj[T]]],
+                                              val nowH   : Source[T, Option[Obj[T]]])
+                                             (implicit val cursor: Cursor[T])
     extends Impl[T, Obj[T]] {
 
     protected def put(map: Obj.AttrMap[T], elem: Obj[T])(implicit tx: T): Unit =
       map.put(key, elem)
   }
 
-  private final class ExprImpl[T <: Txn[T], B, E[~ <: Sys[~]] <: Expr[~, B]](
+  private final class ExprImpl[T <: LTxn[T], B, E[~ <: LTxn[~]] <: Expr[~, B]](
                                                val name: String, val key: String,
                                                val objH   : Source[T, Obj[T]],
                                                val beforeH: Source[T, Option[E[T]]],
                                                val nowH   : Source[T, Option[E[T]]])
-                                              (implicit val cursor: Cursor[T], tpe: Expr.Type[B, E], ct: ClassTag[E[T]])
+                                                                             (implicit val cursor: Cursor[T], tpe: Expr.Type[B, E], ct: ClassTag[E[T]])
     extends Impl[T, E[T]] {
 
     protected def put(map: Obj.AttrMap[T], elem: E[T])(implicit tx: T): Unit = {
@@ -93,7 +91,7 @@ object EditAttrMap {
     }
   }
 
-  private abstract class Impl[T <: Txn[T], A] extends AbstractUndoableEdit {
+  private abstract class Impl[T <: LTxn[T], A] extends AbstractUndoableEdit {
     protected def name   : String
     protected def key    : String
     protected def objH   : Source[T, Obj[T]]

@@ -17,8 +17,9 @@ import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Obj, Source}
-import de.sciss.mellite.{AttrMapView, ObjListView}
+import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.MapViewImpl
+import de.sciss.mellite.{AttrMapView, ObjListView}
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
 

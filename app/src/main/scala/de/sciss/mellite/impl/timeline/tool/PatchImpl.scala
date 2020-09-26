@@ -13,21 +13,19 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
+import java.awt
 import java.awt.event.MouseEvent
 import java.awt.geom.{Area, Ellipse2D}
 import java.awt.image.BufferedImage
-import java.awt.{Color, Cursor, Point, RenderingHints, Toolkit}
+import java.awt.{Color, Point, RenderingHints, Toolkit}
 
 import de.sciss.desktop.Desktop
-import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.Edits
-import de.sciss.mellite.impl.tool.DraggingTool
-import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.proc.ProcObjView
+import de.sciss.mellite.impl.tool.DraggingTool
+import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth.proc.{Proc, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
@@ -61,7 +59,7 @@ final class PatchImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Patch
 
-  def defaultCursor: Cursor = PatchImpl.cursor
+  def defaultCursor: awt.Cursor = PatchImpl.cursor
   val name                  = "Patch"
   val icon: Icon            = GUI.iconNormal(Shapes.Patch)
 

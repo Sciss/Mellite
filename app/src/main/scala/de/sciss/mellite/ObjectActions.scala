@@ -14,9 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.file._
-import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.expr.{DoubleObj, LongObj}
-import de.sciss.lucre.stm.{Folder, Sys}
+import de.sciss.lucre.{Artifact, ArtifactLocation}
+import de.sciss.lucre.{DoubleObj, LongObj}
+import de.sciss.lucre.{Folder, Txn}
 import de.sciss.synth.io.AudioFileSpec
 import de.sciss.synth.proc.AudioCue
 import de.sciss.synth.proc.Implicits._
