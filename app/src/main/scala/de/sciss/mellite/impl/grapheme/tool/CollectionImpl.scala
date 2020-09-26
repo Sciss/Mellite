@@ -15,9 +15,9 @@ package de.sciss.mellite.impl.grapheme.tool
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.LongObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GraphemeCanvas, GraphemeTool, ObjGraphemeView}
 import de.sciss.mellite.impl.tool.BasicCollectionTool
 import de.sciss.synth.proc.Grapheme

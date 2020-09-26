@@ -20,12 +20,12 @@ import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
 import de.sciss.file._
 import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.AudioCueObjView.{Config, LocationConfig, MakeResult, SingleConfig}
 import de.sciss.mellite.AudioCueFrame
 import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
@@ -222,7 +222,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     extends ObjListViewImpl.NonEditable[T]
       with Basic[T] {
 
-    type E[~ <: stm.Sys[~]] = AudioCue.Obj[~]
+    type E[~ <: LTxn[~]] = AudioCue.Obj[~]
 
     def init(obj: AudioCue.Obj[T])(implicit tx: T): this.type = {
       initAttrs(obj)

@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.tool
 
 import java.awt.event.MouseEvent
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 
 /** A more complete implementation for tools that process selected children.
   * It implements `handlePress` to update the child selection and then

@@ -14,10 +14,10 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Folder, Obj}
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.{Folder, Obj}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.FolderFrame
 import de.sciss.synth.proc.Implicits._
@@ -25,7 +25,7 @@ import de.sciss.synth.proc.Universe
 import javax.swing.{Icon, UIManager}
 
 object FolderObjView extends NoArgsListObjViewFactory {
-  type E[~ <: stm.Sys[~]] = Folder[~]
+  type E[~ <: LTxn[~]] = Folder[~]
   def icon          : Icon      = UIManager.getIcon("Tree.openIcon")  // Swing.EmptyIcon
   val prefix        : String   = "Folder"
   def humanName     : String   = prefix

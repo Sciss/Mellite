@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.grapheme
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.GraphemeTool.{Add, Move}
 import de.sciss.mellite.impl.grapheme.tool.{AddImpl, CursorImpl, MoveImpl}
 import de.sciss.mellite.{GraphemeCanvas, GraphemeTool}

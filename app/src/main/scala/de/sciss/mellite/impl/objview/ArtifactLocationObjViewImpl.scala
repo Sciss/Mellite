@@ -18,11 +18,11 @@ import java.awt.datatransfer.Transferable
 import de.sciss.desktop
 import de.sciss.file.{File, file}
 import de.sciss.lucre.artifact.ArtifactLocation
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ArtifactLocationObjView.{Config, MakeResult}
 import de.sciss.mellite.edit.EditArtifactLocation
 import de.sciss.mellite.impl.ObjViewCmdLineParser
@@ -77,7 +77,7 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
 
     override def obj(implicit tx: T): ArtifactLocation[T] = objH()
 
-    type E[~ <: stm.Sys[~]] = ArtifactLocation[~]
+    type E[~ <: LTxn[~]] = ArtifactLocation[~]
 
     def factory: ObjView.Factory = ArtifactLocationObjView
 

@@ -15,9 +15,9 @@ package de.sciss.mellite.impl.timeline.tool
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.impl.tool.BasicCollectionTool
 import de.sciss.synth.proc.Timeline

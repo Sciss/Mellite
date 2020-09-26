@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.grapheme
 
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.tool.ToolPaletteImpl
 import de.sciss.mellite.{GraphemeCanvas, GraphemeTool, GraphemeTools}
 import de.sciss.model.Change

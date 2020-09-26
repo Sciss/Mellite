@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.timeline
 
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.tool.ToolPaletteImpl
 import de.sciss.mellite.{TimelineTool, TimelineTools, TimelineTrackCanvas}
 

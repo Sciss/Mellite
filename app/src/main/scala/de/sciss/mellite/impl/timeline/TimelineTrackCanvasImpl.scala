@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.timeline
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.DragRubber
 import de.sciss.mellite.TimelineTool.EmptyRubber
 import de.sciss.mellite.impl.TimelineCanvas2DImpl

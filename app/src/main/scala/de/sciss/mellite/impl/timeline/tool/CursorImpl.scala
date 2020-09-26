@@ -19,9 +19,9 @@ import java.awt.event.MouseEvent
 import de.sciss.desktop.OptionPane
 import de.sciss.equal.Implicits._
 import de.sciss.lucre.expr.{SpanLikeObj, StringObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, ObjView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.Shapes

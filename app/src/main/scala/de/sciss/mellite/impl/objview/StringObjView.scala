@@ -47,7 +47,7 @@ object StringObjView extends ObjListView.Factory {
     new Impl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: String, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: String, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -87,7 +87,7 @@ object StringObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = StringObjView
 
-    def exprType: Type.Expr[String, StringObj] = StringObj
+    def exprType: Expr.Type[String, StringObj] = StringObj
 
     def convertEditValue(v: Any): Option[String] = Some(v.toString)
 

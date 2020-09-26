@@ -13,8 +13,8 @@
 
 package de.sciss.mellite.impl.proc
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import javax.swing.undo.UndoableEdit

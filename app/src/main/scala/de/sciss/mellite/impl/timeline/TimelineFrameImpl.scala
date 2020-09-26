@@ -16,8 +16,8 @@ package de.sciss.mellite.impl.timeline
 import de.sciss.desktop.{Menu, OptionPane, UndoManager, Window}
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{Application, TimelineView}
 import de.sciss.mellite.TimelineFrame
 import de.sciss.mellite.impl.proc.ProcObjView

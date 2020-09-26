@@ -18,8 +18,8 @@ import java.awt.event.MouseEvent
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.Mellite.log
 import de.sciss.mellite.edit.EditTimelineInsertObj
 import de.sciss.mellite.impl.tool.{CollectionToolLike, DraggingTool}

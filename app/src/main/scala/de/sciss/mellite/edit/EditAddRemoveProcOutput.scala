@@ -13,8 +13,8 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.LTxn
 import de.sciss.synth.proc.Proc
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 

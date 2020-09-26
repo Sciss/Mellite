@@ -15,13 +15,13 @@ package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{CellView, Type}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{MessageException, ObjListView, ObjView, UniverseView}
 import de.sciss.mellite.impl.component.PaintIcon
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
@@ -36,7 +36,7 @@ import scala.swing.{Action, BorderPanel, Button, ColorChooser, Component, FlowPa
 import scala.util.{Failure, Success, Try}
 
 object ColorObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = Color.Obj[~]
+  type E[~ <: LTxn[~]] = Color.Obj[~]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Paint)
   val prefix        : String   = "Color"
   def humanName     : String   = prefix
@@ -54,7 +54,7 @@ object ColorObjView extends ObjListView.Factory {
     new Impl[T](tx.newHandle(obj), value, isEditable0 = isEditable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Color, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Color, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -287,7 +287,7 @@ object ColorObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = ColorObjView
 
-    def exprType: Type.Expr[Color, Color.Obj] = Color.Obj
+    def exprType: Expr.Type[Color, Color.Obj] = Color.Obj
 
     def expr(implicit tx: T): Color.Obj[T] = objH()
 

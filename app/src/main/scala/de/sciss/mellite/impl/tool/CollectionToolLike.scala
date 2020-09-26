@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.tool
 
 import java.awt.event.{MouseAdapter, MouseEvent}
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{BasicTool, TimelineCanvas2D}
 import de.sciss.model.impl.ModelImpl
 

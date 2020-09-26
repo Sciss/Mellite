@@ -17,10 +17,10 @@ import java.util.Locale
 
 import de.sciss.desktop
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.swingplus.ComboBox
@@ -33,7 +33,7 @@ import scala.swing.{Component, Label}
 import scala.util.Try
 
 object CodeObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = Code.Obj[~]
+  type E[~ <: LTxn[~]] = Code.Obj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Code)
   val prefix        : String    = "Code"
   def humanName     : String    = "Source Code"
@@ -46,7 +46,7 @@ object CodeObjView extends ObjListView.Factory {
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Code, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Code, const: Boolean = false)
 
   private def defaultCode(tpe: Code.Type): Code =
     Code(tpe.id, tpe.defaultSource)
@@ -119,6 +119,6 @@ object CodeObjView extends ObjListView.Factory {
     }
   }
 }
-trait CodeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait CodeObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Code.Obj[T]
 }

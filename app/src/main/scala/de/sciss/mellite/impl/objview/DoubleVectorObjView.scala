@@ -17,10 +17,8 @@ import java.awt.geom.Area
 
 import de.sciss.desktop
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.expr.{DoubleVector, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{DoubleVector, Obj, Source, Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, MessageException, ObjGraphemeView, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.Shapes
@@ -34,7 +32,7 @@ import scala.swing.{Component, Graphics2D, Label, TextField}
 import scala.util.{Failure, Try}
 
 object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
-  type E[S <: stm.Sys[T]]       = DoubleVector[T]
+  type E[T <: LTxn[T]]       = DoubleVector[T]
   type V                        = Vec[Double]
   val icon          : Icon      = raphaelIcon(Shapes.RealNumberVector)
   val prefix        : String    = "DoubleVector"
@@ -54,7 +52,7 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
     new ListImpl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: V, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: V, const: Boolean = false)
 
   private def parseString(s: String): Try[V] =
     Try(s.split(",").iterator.map(x => x.trim().toDouble).toIndexedSeq)
@@ -102,7 +100,7 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
 
     final def factory: ObjView.Factory = DoubleVectorObjView
 
-    final def exprType: Type.Expr[V, E] = DoubleVector
+    final def exprType: Expr.Type[V, E] = DoubleVector
 
     final def expr(implicit tx: T): E[T] = objH()
   }

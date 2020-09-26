@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.document.{NuagesEditorFrameImpl => Impl}
 import de.sciss.nuages.Nuages
 import de.sciss.synth.proc.Universe

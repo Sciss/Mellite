@@ -19,7 +19,7 @@ import java.io.File
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.equal.Implicits._
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Copy, Folder, Obj, Sys, Txn}
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}

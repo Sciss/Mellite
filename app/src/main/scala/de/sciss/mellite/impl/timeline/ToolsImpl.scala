@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.timeline
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{FadeViewMode, RegionViewMode, TimelineTool, TimelineTools, TimelineTrackCanvas}
 import de.sciss.model.Change
 import de.sciss.model.impl.ModelImpl

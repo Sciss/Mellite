@@ -19,11 +19,11 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{Menu, OptionPane, UndoManager}
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.AttrMapFrame
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.objview.IntObjView

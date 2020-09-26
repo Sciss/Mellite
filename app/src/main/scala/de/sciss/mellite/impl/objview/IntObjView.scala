@@ -14,13 +14,10 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
-import de.sciss.lucre.expr.{IntObj, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.mellite.Shapes
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Expr, IntObj, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.{ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
@@ -29,7 +26,7 @@ import javax.swing.{Icon, SpinnerNumberModel}
 import scala.util.{Success, Try}
 
 object IntObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = IntObj[~]
+  type E[~ <: LTxn[~]] = IntObj[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.IntegerNumber)
   val prefix        : String    = "Int"
   def humanName     : String    = prefix
@@ -48,7 +45,7 @@ object IntObjView extends ObjListView.Factory {
     new ListImpl(tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Int, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Int, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -94,7 +91,7 @@ object IntObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = IntObjView
 
-    def exprType: Type.Expr[Int, IntObj] = IntObj
+    def exprType: Expr.Type[Int, IntObj] = IntObj
 
     def expr(implicit tx: T): IntObj[T] = obj
 
@@ -104,6 +101,6 @@ object IntObjView extends ObjListView.Factory {
     }
   }
 }
-trait IntObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait IntObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = IntObj[T]
 }

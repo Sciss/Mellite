@@ -42,9 +42,9 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
     obj :: Nil
   }
 
-//  type LinkMap[S <: stm.Sys[T]] = Map[String, Vec[ProcObjView.Link[T]]]
-//  type ProcMap[S <: stm.Sys[T]] = IdentifierMap[S#Id, T, ProcObjView[T]]
-//  type ScanMap[S <: stm.Sys[T]] = IdentifierMap[S#Id, T, (String, Source[T, S#Id])]
+//  type LinkMap[T <: LTxn[T]] = Map[String, Vec[ProcObjView.Link[T]]]
+//  type ProcMap[T <: LTxn[T]] = IdentifierMap[S#Id, T, ProcObjView[T]]
+//  type ScanMap[T <: LTxn[T]] = IdentifierMap[S#Id, T, (String, Source[T, S#Id])]
 
   type SelectionModel[T <: Txn[T]] = mellite.SelectionModel[T, ProcObjView[T]]
 
@@ -69,19 +69,19 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
     def remove()(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit]
   }
 
-  trait InputAttr[S <: stm.Sys[T]] extends Disposable[T] {
+  trait InputAttr[T <: LTxn[T]] extends Disposable[T] {
     def parent: ProcObjView.Timeline[T]
     def key: String
   }
 
-//  final case class Link[S <: stm.Sys[T]](target: ProcObjView.Timeline[T], targetKey: String)
+//  final case class Link[T <: LTxn[T]](target: ProcObjView.Timeline[T], targetKey: String)
 
   /** A data set for graphical display of a proc. Accessors and mutators should
     * only be called on the event dispatch thread. Mutators are plain variables
     * and do not affect the underlying model. They should typically only be called
     * in response to observing a change in the model.
     */
-  trait Timeline[S <: stm.Sys[T]]
+  trait Timeline[T <: LTxn[T]]
     extends ProcObjView[T] with ObjTimelineView[T]
     with ObjTimelineView.HasMute
     with ObjTimelineView.HasGain
@@ -112,6 +112,6 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
     def targets(implicit tx: TxnLike): Set[LinkTarget[T]]
   }
 }
-trait ProcObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait ProcObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Proc[T]
 }

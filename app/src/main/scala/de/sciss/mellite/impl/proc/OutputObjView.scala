@@ -45,6 +45,6 @@ object OutputObjView extends NoMakeListObjViewFactory {
     def factory: ObjView.Factory = OutputObjView
   }
 }
-trait OutputObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait OutputObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Output[T]
 }

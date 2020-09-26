@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.proc
 
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Disposable
 import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
@@ -22,7 +22,7 @@ import de.sciss.span.SpanLike
 /* Reference to an element referred to by an input-attr.
  * Source views are updated by calling `copy` as they appear and disappear
  */
-final class InputElem[S <: stm.Sys[T]](val span: SpanLike, val source: Option[ProcObjView.Timeline[T]],
+final class InputElem[T <: LTxn[T]](val span: SpanLike, val source: Option[ProcObjView.Timeline[T]],
                                        val target: LinkTarget[T], obs: Disposable[T], tx0: T)
   extends Disposable[T] {
 

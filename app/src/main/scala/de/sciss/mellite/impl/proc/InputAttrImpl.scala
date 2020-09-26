@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.proc
 
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Identifiable, IdentifierMap, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.{TimelineRendering, TimelineView}
@@ -26,7 +26,7 @@ import scala.annotation.switch
 import scala.concurrent.stm.TSet
 import scala.swing.Graphics2D
 
-trait InputAttrImpl[S <: stm.Sys[T]] extends InputAttr[T] {
+trait InputAttrImpl[T <: LTxn[T]] extends InputAttr[T] {
   // ---- abstract ----
 
   protected def viewMap: IdentifierMap[S#Id, T, Elem]

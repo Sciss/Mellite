@@ -16,7 +16,7 @@ package de.sciss.mellite.impl.document
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.EnsembleFrame
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.synth.proc.{Ensemble, Universe}

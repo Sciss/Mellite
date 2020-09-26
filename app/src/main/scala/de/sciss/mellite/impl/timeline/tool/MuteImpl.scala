@@ -17,9 +17,9 @@ import java.awt.event.MouseEvent
 import java.awt.{Cursor, Point, Toolkit}
 
 import de.sciss.lucre.expr.{BooleanObj, SpanLikeObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, TimelineTrackCanvas}
 import de.sciss.mellite.TimelineTool.Mute
 import de.sciss.mellite.edit.EditAttrMap

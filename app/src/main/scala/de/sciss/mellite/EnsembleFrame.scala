@@ -14,7 +14,7 @@
 //package de.sciss.mellite
 //
 //import de.sciss.lucre
-//import de.sciss.lucre.synth.Sys
+//import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.impl.document.{EnsembleFrameImpl => Impl}
 //import de.sciss.synth.proc.{Ensemble, Universe}
 //

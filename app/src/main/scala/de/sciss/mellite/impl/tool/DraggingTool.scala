@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.tool
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
 import javax.swing.event.MouseInputAdapter
 

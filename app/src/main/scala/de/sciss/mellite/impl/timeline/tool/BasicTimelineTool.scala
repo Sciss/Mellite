@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.timeline.tool
 
 import java.awt.event.MouseEvent
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragEnd}
 import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.impl.tool.DraggingTool

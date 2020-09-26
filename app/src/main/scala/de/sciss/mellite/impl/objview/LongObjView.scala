@@ -27,7 +27,7 @@ import javax.swing.{Icon, SpinnerNumberModel}
 import scala.util.{Success, Try}
 
 object LongObjView extends ObjListView.Factory {
-  type E[S <: LTxn[T]] = LongObj[T]
+  type E[T <: LTxn[T]] = LongObj[T]
   val icon          : Icon      = raphaelIcon(Shapes.IntegerNumber)  // XXX TODO
   val prefix        : String   = "Long"
   def humanName     : String   = prefix
@@ -87,7 +87,7 @@ object LongObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = LongObjView
 
-    def exprType: Type.Expr[Long, LongObj] = LongObj
+    def exprType: Expr.Type[Long, LongObj] = LongObj
 
     def expr(implicit tx: T): LongObj[T] = objH()
 

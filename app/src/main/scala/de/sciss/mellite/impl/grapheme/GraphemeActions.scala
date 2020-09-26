@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.grapheme
 
 import de.sciss.desktop.KeyStrokes.menu2
 import de.sciss.desktop.edit.CompoundEdit
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GraphemeView, ObjGraphemeView}
 import de.sciss.mellite.edit.EditGraphemeRemoveObj
 import de.sciss.mellite.impl.TimelineViewBaseImpl

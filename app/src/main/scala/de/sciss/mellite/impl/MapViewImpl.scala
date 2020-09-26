@@ -21,7 +21,7 @@ import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.lucre.stm.{Disposable, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{DragAndDrop, MapView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode

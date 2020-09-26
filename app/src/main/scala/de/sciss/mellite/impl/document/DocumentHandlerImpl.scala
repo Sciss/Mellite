@@ -16,7 +16,7 @@ package de.sciss.mellite.impl.document
 import de.sciss.desktop
 import de.sciss.desktop.{Desktop, DocumentHandler => DH}
 import de.sciss.lucre.swing.LucreSwing.defer
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ActionCloseAllWorkspaces
 import de.sciss.mellite.{DocumentHandler, Mellite}
 import de.sciss.model.impl.ModelImpl

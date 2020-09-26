@@ -22,12 +22,12 @@ import de.sciss.desktop.UndoManager
 import de.sciss.equal.Implicits._
 import de.sciss.fingertree.OrderedSeq
 import de.sciss.lucre.bitemp.BiPin
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.TimelineViewBaseImpl
 import de.sciss.mellite.{BasicTool, GUI, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel}

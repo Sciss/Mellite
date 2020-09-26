@@ -14,9 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.widget.WidgetFrameImpl
 import de.sciss.synth.proc.{Universe, Widget}
 
@@ -28,7 +28,7 @@ object WidgetEditorFrame {
     WidgetFrameImpl.editor(obj, bottom = bottom)
 }
 
-trait WidgetEditorFrame[S <: stm.Sys[T]] extends lucre.swing.Window[T] {
+trait WidgetEditorFrame[T <: LTxn[T]] extends lucre.swing.Window[T] {
   override def view: WidgetEditorView[T]
 }
 
@@ -37,6 +37,6 @@ object WidgetRenderFrame {
     WidgetFrameImpl.render(obj)
 }
 
-trait WidgetRenderFrame[S <: stm.Sys[T]] extends lucre.swing.Window[T] {
+trait WidgetRenderFrame[T <: LTxn[T]] extends lucre.swing.Window[T] {
   override def view: WidgetRenderView[T]
 }

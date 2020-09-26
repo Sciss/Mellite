@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl
 
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GUI, ObjView, TimelineViewBase}
 import de.sciss.mellite.AttrMapFrame
 

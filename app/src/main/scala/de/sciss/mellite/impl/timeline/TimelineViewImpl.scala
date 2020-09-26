@@ -26,11 +26,11 @@ import de.sciss.fingertree.RangedSeq
 import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.bitemp.impl.BiGroupImpl
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{IdentifierMap, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.edit.EditFolderInsertObj
 import de.sciss.mellite.edit.{EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.component.DragSourceButton

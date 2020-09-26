@@ -25,7 +25,7 @@ import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
 import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownObjView, MarkdownRenderViewImpl}
-import de.sciss.mellite.impl.objview.{ActionObjView, ActionRawObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, ControlObjView, DoubleObjView, DoubleVectorObjView, EnsembleObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.impl.objview.{ActionObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, ControlObjView, DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
 import de.sciss.mellite.impl.patterns.{PatternObjView, StreamObjView}
 import de.sciss.mellite.impl.proc.{OutputObjView, ProcObjView}
 import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
@@ -51,7 +51,7 @@ trait Init {
   private[this] lazy val _initObjViews: Unit = {
     val obj = List(
       ActionObjView,
-      ActionRawObjView,
+//      ActionRawObjView,
       ArtifactLocationObjView,
       ArtifactObjView,
       AudioCueObjView,
@@ -61,7 +61,7 @@ trait Init {
       ControlObjView,
       DoubleObjView,
       DoubleVectorObjView,
-      EnsembleObjView,
+//      EnsembleObjView,
       EnvSegmentObjView,
       FadeSpecObjView,
       FolderObjView,
@@ -95,7 +95,7 @@ trait Init {
 
     val tl = List(
       ProcObjView,
-      ActionRawObjView,
+//      ActionRawObjView,
       PatternObjView,
       StreamObjView,
     )

@@ -28,7 +28,7 @@ import scala.swing.event.{ButtonClicked, Key}
 
 object RunnerToggleButton {
   /** A button view toggling between `run` and `stop` an a runner created from the `obj` argument. */
-  def apply[S <: SSys[T]](obj: Obj[T], isAction: Boolean = false)
+  def apply[T <: SSys[T]](obj: Obj[T], isAction: Boolean = false)
                          (implicit tx: T, universe: Universe[T]): RunnerToggleButton[T] = {
     val r = Runner(obj)
     new Impl[T](r, disposeRunner = true, isAction = isAction).init()

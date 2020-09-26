@@ -16,11 +16,9 @@ package de.sciss.mellite.impl.objview
 import de.sciss.desktop
 import de.sciss.file._
 import de.sciss.icons.raphael
-import de.sciss.lucre.artifact.Artifact
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Artifact, Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.artifact.ArtifactViewImpl
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactFrame, MessageException, ObjListView, ObjView}
@@ -33,7 +31,7 @@ import javax.swing.undo.UndoableEdit
 import scala.util.{Failure, Success}
 
 object ArtifactObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = Artifact[~]
+  type E[~ <: LTxn[~]] = Artifact[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.PagePortrait)
   val prefix        : String    = "Artifact"
   def humanName     : String    = "File"
@@ -48,8 +46,8 @@ object ArtifactObjView extends ObjListView.Factory {
     new Impl[T](tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
-  type LocationConfig[S <: stm.Sys[T]] = ActionArtifactLocation.QueryResult[T]
-  final case class Config[S <: stm.Sys[T]](name: String, file: File, location: LocationConfig[T])
+  type LocationConfig[T <: LTxn[T]] = ActionArtifactLocation.QueryResult[T]
+  final case class Config[T <: LTxn[T]](name: String, file: File, location: LocationConfig[T])
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
                                  (implicit universe: Universe[T]): Unit = {
@@ -113,7 +111,7 @@ object ArtifactObjView extends ObjListView.Factory {
       with ObjViewImpl.Impl[T]
       with ObjListViewImpl.StringRenderer {
 
-    type E[~ <: stm.Sys[~]] = Artifact[~]
+    type E[~ <: LTxn[~]] = Artifact[~]
 
     def factory: ObjView.Factory = ArtifactObjView
 
@@ -141,6 +139,6 @@ object ArtifactObjView extends ObjListView.Factory {
     def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = None // XXX TODO
   }
 }
-trait ArtifactObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait ArtifactObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Artifact[T]
 }

@@ -22,7 +22,7 @@ import de.sciss.lucre.stm.Obj
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{Application, AttrMapFrame, GUI, MessageException, ObjListView, ObjView, UniverseView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu

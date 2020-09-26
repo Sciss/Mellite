@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.timeline.{TimelineFrameImpl => Impl}
 import de.sciss.synth.proc.{Timeline, Universe}
 

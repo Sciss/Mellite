@@ -21,8 +21,8 @@ import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.Desktop
 import de.sciss.equal.Implicits._
 import de.sciss.file._
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.LTxn
 import de.sciss.lucre.synth.{Sys => SSys}
 import de.sciss.mellite.{DragAndDrop, ObjView}
 import de.sciss.mellite.DragAndDrop.Flavor
@@ -50,7 +50,7 @@ object DnD {
   final case class GlobalProcDrag[T <: Txn[T]](universe: Universe[T], source: Source[T, Proc[T]])
     extends Drag[T]
 
-  final case class ObjectDrag[S <: SSys[T]](universe: Universe[T], view: ObjView[T]) extends Drag[T]
+  final case class ObjectDrag[T <: SSys[T]](universe: Universe[T], view: ObjView[T]) extends Drag[T]
 
   /** Drag and Drop from Eisenkraut */
   final case class ExtAudioRegionDrag[T <: Txn[T]](universe: Universe[T], file: File, selection: Span)
@@ -60,7 +60,7 @@ object DnD {
 
   final val flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor[Drag[_]]
 }
-trait DnD[S <: SSys[T]] {
+trait DnD[T <: SSys[T]] {
   _: Component =>
 
   import DnD._

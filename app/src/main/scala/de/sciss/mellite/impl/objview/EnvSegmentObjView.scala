@@ -21,14 +21,13 @@ import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.equal.Implicits._
 import de.sciss.icons.raphael
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.expr.{CellView, DoubleObj, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.{Disposable, Obj}
+import de.sciss.lucre.expr.CellView
+import de.sciss.lucre.{Disposable, DoubleObj, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseView}
 import de.sciss.mellite.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
@@ -50,7 +49,7 @@ import scala.swing.{Alignment, Component, Dialog, Graphics2D, Label, Swing, Text
 import scala.util.{Failure, Success}
 
 object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
-  type E[S <: stm.Sys[T]]       = EnvSegment.Obj[T]
+  type E[T <: LTxn[T]]       = EnvSegment.Obj[T]
   type V                        = EnvSegment
   val icon          : Icon      = raphaelIcon(raphael.Shapes.Connect)
   val prefix        : String    = "EnvSegment"
@@ -65,7 +64,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     new ListImpl[T](tx.newHandle(obj), value = value, isEditable = editable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String       = prefix,
+  final case class Config[T <: LTxn[T]](name: String       = prefix,
                                            value: EnvSegment  = EnvSegment.Single(0.0, Curve.lin),
                                            const: Boolean     = false)
 
@@ -412,7 +411,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 
     final def factory: ObjView.Factory = EnvSegmentObjView
 
-    final def exprType: Type.Expr[V, E] = EnvSegment.Obj
+    final def exprType: Expr.Type[V, E] = EnvSegment.Obj
 
     final def expr(implicit tx: T): E[T] = objH()
 
@@ -579,6 +578,6 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     }
   }
 }
-trait EnvSegmentObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait EnvSegmentObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = EnvSegment.Obj[T]
 }

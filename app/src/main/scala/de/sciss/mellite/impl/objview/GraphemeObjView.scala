@@ -14,10 +14,9 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.GraphemeFrame
@@ -26,7 +25,7 @@ import de.sciss.synth.proc.{Grapheme, Universe}
 import javax.swing.Icon
 
 object GraphemeObjView extends NoArgsListObjViewFactory {
-  type E[S <: stm.Sys[T]] = Grapheme[T]
+  type E[T <: LTxn[T]] = Grapheme[T]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.LineChart)
   val prefix        : String    = "Grapheme"
   def humanName     : String    = prefix
@@ -60,6 +59,6 @@ object GraphemeObjView extends NoArgsListObjViewFactory {
     }
   }
 }
-trait GraphemeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait GraphemeObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Grapheme[T]
 }

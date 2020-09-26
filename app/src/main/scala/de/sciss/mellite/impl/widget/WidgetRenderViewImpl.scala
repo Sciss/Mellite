@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.widget
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.Context
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, UndoManager}
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -40,12 +40,12 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 object WidgetRenderViewImpl {
-  def apply[S <: SSys[T]](init: Widget[T], bottom: ISeq[View[T]], embedded: Boolean)
+  def apply[T <: SSys[T]](init: Widget[T], bottom: ISeq[View[T]], embedded: Boolean)
                          (implicit tx: T, universe: Universe[T],
                           undoManager: UndoManager[T]): WidgetRenderView[T] =
     new Impl[T](bottom, embedded = embedded).init(init)
 
-  private final class Impl[S <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
+  private final class Impl[T <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
                                         (implicit val universe: Universe[T], val undoManager: UndoManager[T])
     extends WidgetRenderView[T]
       with ComponentHolder[Component]

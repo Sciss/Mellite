@@ -13,8 +13,8 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.LTxn
 import de.sciss.patterns.lucre.{Context => LContext, Stream => LStream}
 import de.sciss.patterns.{Context => PContext, Stream => PStream}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}

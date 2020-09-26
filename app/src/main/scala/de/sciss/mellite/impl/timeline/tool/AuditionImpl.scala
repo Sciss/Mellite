@@ -16,8 +16,8 @@ package de.sciss.mellite.impl.timeline.tool
 import java.awt.event.{MouseAdapter, MouseEvent}
 import java.awt.{Cursor, Point, Toolkit}
 
-import de.sciss.lucre.stm
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.impl.tool.{CollectionToolLike, RubberBandTool}
 import de.sciss.mellite.Shapes

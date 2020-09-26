@@ -17,10 +17,10 @@ import java.awt.RenderingHints
 
 import de.sciss.file._
 import de.sciss.lucre.expr.{CellView, SpanLikeObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Folder, Obj, TxnLike}
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.Mellite.???!
 import de.sciss.mellite.impl.ObjTimelineViewImpl
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget

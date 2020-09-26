@@ -18,12 +18,11 @@ import de.sciss.fscape.lucre.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.{AttrMapView, FScapeOutputsView, Shapes, SplitPaneView}
@@ -42,7 +41,7 @@ import scala.util.Failure
 object FScapeObjView extends NoArgsListObjViewFactory {
   final val DEBUG_LAUNCH = false
 
-  type E[~ <: stm.Sys[~]] = FScape[~]
+  type E[~ <: LTxn[~]] = FScape[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Sparks)
   val prefix        : String    = "FScape"
   def humanName     : String    = prefix
@@ -73,7 +72,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
     override def obj(implicit tx: T): FScape[T] = objH()
 
-    type E[~ <: stm.Sys[~]] = FScape[~]
+    type E[~ <: LTxn[~]] = FScape[~]
 
     def factory: ObjView.Factory = FScapeObjView
 
@@ -254,6 +253,6 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     )
   }
 }
-trait FScapeObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait FScapeObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = FScape[T]
 }

@@ -14,11 +14,9 @@
 package de.sciss.mellite.impl.markdown
 
 import de.sciss.desktop
-import de.sciss.lucre.expr.Type
-import de.sciss.lucre.{Obj, stm}
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.{Sys, Txn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView}
 import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.ObjViewCmdLineParser
@@ -28,7 +26,7 @@ import de.sciss.synth.proc.{Markdown, Universe}
 import javax.swing.Icon
 
 object MarkdownObjView extends ObjListView.Factory {
-  type E[~ <: stm.Sys[~]] = Markdown[~]
+  type E[~ <: LTxn[~]] = Markdown[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(Shapes.Markdown)
   val prefix        : String    = "Markdown"
   def humanName     : String    = s"$prefix Text"
@@ -42,7 +40,7 @@ object MarkdownObjView extends ObjListView.Factory {
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, contents: Option[String] = None, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, contents: Option[String] = None, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -88,7 +86,7 @@ object MarkdownObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = MarkdownObjView
 
-    def exprType: Type.Expr[Markdown.Value, Markdown] = Markdown
+    def exprType: Expr.Type[Markdown.Value, Markdown] = Markdown
 
     def expr(implicit tx: T): Markdown[T] = obj
 
@@ -104,6 +102,6 @@ object MarkdownObjView extends ObjListView.Factory {
     }
   }
 }
-trait MarkdownObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait MarkdownObjView[T <: LTxn[T]] extends ObjView[T] {
   override type Repr = Markdown[T]
 }

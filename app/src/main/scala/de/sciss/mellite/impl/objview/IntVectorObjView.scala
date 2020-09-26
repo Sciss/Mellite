@@ -15,14 +15,11 @@ package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.expr.{IntVector, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{MessageException, ObjListView, ObjView}
-import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.Shapes
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Expr, IntVector, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
+import de.sciss.mellite.{MessageException, ObjListView, ObjView, Shapes}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.Icon
@@ -31,7 +28,7 @@ import scala.swing.{Component, Label, TextField}
 import scala.util.{Failure, Try}
 
 object IntVectorObjView extends ObjListView.Factory {
-  type E[S <: stm.Sys[T]] = IntVector[T]
+  type E[T <: LTxn[T]] = IntVector[T]
   val icon          : Icon      = raphaelIcon(Shapes.IntegerNumberVector)
   val prefix        : String   = "IntVector"
   def humanName     : String   = prefix
@@ -50,7 +47,7 @@ object IntVectorObjView extends ObjListView.Factory {
     new Impl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Vec[Int], const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Vec[Int], const: Boolean = false)
 
   private def parseString(s: String): Try[Vec[Int]] =
     Try(s.split(",").iterator.map(x => x.trim().toInt).toIndexedSeq)
@@ -91,7 +88,7 @@ object IntVectorObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = IntVectorObjView
 
-    def exprType: Type.Expr[Vec[Int], IntVector] = IntVector
+    def exprType: Expr.Type[Vec[Int], IntVector] = IntVector
 
     def expr(implicit tx: T): IntVector[T] = objH()
 

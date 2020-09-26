@@ -15,10 +15,10 @@ package de.sciss.mellite.impl.markdown
 
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{MarkdownEditorView, MarkdownFrame, MarkdownRenderView, Veto}
 import de.sciss.processor.Processor.Aborted
@@ -49,7 +49,7 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
     res
   }
 
-  def basic[S <: stm.Sys[T]](obj: Markdown[T])
+  def basic[T <: LTxn[T]](obj: Markdown[T])
                         (implicit tx: T, cursor: Cursor[T]): MarkdownFrame.Basic[T] = {
     val view  = MarkdownRenderView.basic(obj)
     val res   = new BasicImpl[T](view).init()
@@ -57,10 +57,10 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
     res
   }
 
-  private def setTitle[S <: stm.Sys[T]](win: WindowImpl[T], md: Markdown[T])(implicit tx: T): Unit =
+  private def setTitle[T <: LTxn[T]](win: WindowImpl[T], md: Markdown[T])(implicit tx: T): Unit =
     win.setTitleExpr(Some(CellView.name(md)))
 
-  private def trackTitle[S <: stm.Sys[T]](win: WindowImpl[T], renderer: MarkdownRenderView.Basic[T])
+  private def trackTitle[T <: LTxn[T]](win: WindowImpl[T], renderer: MarkdownRenderView.Basic[T])
                                      (implicit tx: T): Unit = {
     setTitle(win, renderer.markdown)
     renderer.react { implicit tx => {
@@ -73,7 +73,7 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
   private final class RenderFrameImpl[T <: Txn[T]](val view: MarkdownRenderView[T])
     extends WindowImpl[T] with MarkdownFrame.Render[T] {
   }
-  private final class BasicImpl[S <: stm.Sys[T]](val view: MarkdownRenderView.Basic[T])
+  private final class BasicImpl[T <: LTxn[T]](val view: MarkdownRenderView.Basic[T])
     extends WindowImpl[T] with MarkdownFrame.Basic[T]
 
   private final class EditorFrameImpl[T <: Txn[T]](val view: MarkdownEditorView[T])

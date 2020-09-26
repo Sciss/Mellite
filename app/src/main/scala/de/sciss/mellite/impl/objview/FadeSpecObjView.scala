@@ -14,9 +14,9 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.audiowidgets.AxisFormat
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}
 import de.sciss.mellite.Shapes
@@ -26,7 +26,7 @@ import javax.swing.Icon
 import scala.swing.{Component, Label}
 
 object FadeSpecObjView extends NoMakeListObjViewFactory {
-  type E[~ <: stm.Sys[~]] = FadeSpec.Obj[~]
+  type E[~ <: LTxn[~]] = FadeSpec.Obj[~]
   val icon          : Icon      = raphaelIcon(Shapes.Aperture)
   val prefix        : String    = "FadeSpec"
   val humanName     : String    = "Fade"

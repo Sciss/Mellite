@@ -14,7 +14,7 @@
 package de.sciss.mellite.edit
 
 import de.sciss.lucre.expr.LongObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Obj, Sys}
 import de.sciss.synth.proc.Grapheme
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}

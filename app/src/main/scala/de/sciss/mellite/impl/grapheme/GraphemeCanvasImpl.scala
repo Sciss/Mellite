@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.grapheme
 
 import de.sciss.audiowidgets.Axis
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.DragRubber
 import de.sciss.mellite.GraphemeTool.EmptyRubber
 import de.sciss.mellite.GraphemeTools.ToolChanged

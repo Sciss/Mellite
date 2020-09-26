@@ -14,10 +14,9 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.document.NuagesEditorFrameImpl
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
@@ -27,7 +26,7 @@ import de.sciss.synth.proc.{Timeline, Universe}
 import javax.swing.Icon
 
 object NuagesObjView extends NoArgsListObjViewFactory {
-  type E[S <: stm.Sys[T]] = Nuages[T]
+  type E[T <: LTxn[T]] = Nuages[T]
   val icon          : Icon      = raphaelIcon(raphael.Shapes.CloudWhite)
   val prefix        : String   = "Nuages"
   val humanName     : String   = "Wolkenpumpe"

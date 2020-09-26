@@ -18,7 +18,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.swing._
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Ident, Obj, Plain, Source, SpanLikeObj}
+import de.sciss.lucre.{Ident, Obj, Plain, Source, SpanLikeObj, Txn => LTxn}
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
@@ -79,7 +79,7 @@ object PatternObjView extends NoArgsListObjViewFactory with ObjTimelineView.Fact
 
     override def obj(implicit tx: T): Pattern[T] = objH()
 
-    type E[~ <: stm.Sys[~]] = Pattern[~]
+    type E[~ <: LTxn[~]] = Pattern[~]
 
     final def factory: ObjView.Factory = PatternObjView
 

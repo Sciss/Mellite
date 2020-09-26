@@ -18,13 +18,13 @@ import java.io.File
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.artifact.Artifact
 import de.sciss.lucre.expr.{CellView, StringObj}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Disposable, Folder, Obj}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
 import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.edit.EditAttrMap
@@ -59,7 +59,7 @@ object FolderViewImpl extends FolderView.Companion {
     }
   }
 
-  def cleanSelection[S <: stm.Sys[T]](in: Selection[T]): Selection[T] = {
+  def cleanSelection[T <: LTxn[T]](in: Selection[T]): Selection[T] = {
     type NodeView = FolderView.NodeView[T]
     type Sel      = Selection[T]
 

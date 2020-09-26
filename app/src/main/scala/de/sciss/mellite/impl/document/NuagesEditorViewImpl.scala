@@ -17,12 +17,12 @@ import de.sciss.desktop.{FileDialog, OptionPane, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.{BooleanObj, CellView, IntVector}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Folder
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{FolderEditorView, GUI, Prefs, Veto}
 import de.sciss.mellite.{ActionBounce, FolderFrame, NuagesEditorView, TimelineFrame}
 import de.sciss.mellite.impl.WindowImpl

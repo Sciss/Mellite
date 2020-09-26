@@ -19,7 +19,7 @@ import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.expr
 import de.sciss.lucre.expr.StringObj
 import de.sciss.lucre.stm.{Folder, Obj}
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{FolderEditorView, FolderView, ObjView}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.impl.component.CollectionViewImpl

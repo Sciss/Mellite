@@ -17,9 +17,9 @@ import java.awt.Cursor
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.Shapes

@@ -19,9 +19,9 @@ import java.awt.event.MouseEvent
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.SpanLikeObj
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.tool.RubberBandTool

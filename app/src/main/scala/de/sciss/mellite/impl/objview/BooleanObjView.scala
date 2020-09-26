@@ -14,10 +14,8 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
-import de.sciss.lucre.expr.BooleanObj
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.{BooleanObj, Obj, Source, Txn => LTxn}
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.Shapes
@@ -30,7 +28,7 @@ import scala.swing.CheckBox
 import scala.util.Success
 
 object BooleanObjView extends ObjListView.Factory {
-  type E[S <: stm.Sys[T]] = BooleanObj[T]
+  type E[T <: LTxn[T]] = BooleanObj[T]
   val icon          : Icon      = raphaelIcon(Shapes.BooleanNumber)
   val prefix        : String   = "Boolean"
   def humanName     : String   = prefix
@@ -49,7 +47,7 @@ object BooleanObjView extends ObjListView.Factory {
     new Impl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Boolean, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Boolean, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)

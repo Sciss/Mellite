@@ -15,7 +15,7 @@
 //
 //import de.sciss.desktop.UndoManager
 //import de.sciss.lucre.swing.View
-//import de.sciss.lucre.synth.Sys
+//import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.impl.document.{EnsembleViewImpl => Impl}
 //import de.sciss.synth.proc.{Ensemble, Universe}
 //

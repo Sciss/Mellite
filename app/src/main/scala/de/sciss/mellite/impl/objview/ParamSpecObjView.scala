@@ -59,7 +59,7 @@ object ParamSpecObjView extends ObjListView.Factory {
     new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
 
   private final class PanelImpl(nameIn: Option[String], editable: Boolean) extends ModelImpl[Unit] {
 
@@ -444,7 +444,7 @@ object ParamSpecObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = ParamSpecObjView
 
-    def exprType: Type.Expr[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
+    def exprType: Expr.Type[ParamSpec, ParamSpec.Obj] = ParamSpec.Obj
 
     def expr(implicit tx: T): ParamSpec.Obj[T] = obj
 
@@ -462,6 +462,6 @@ object ParamSpecObjView extends ObjListView.Factory {
     }
   }
 }
-trait ParamSpecObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait ParamSpecObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = ParamSpec.Obj[T]
 }

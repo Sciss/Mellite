@@ -17,7 +17,7 @@ import java.awt.Cursor
 
 import de.sciss.lucre.expr.{DoubleObj, SpanLikeObj}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{expr, stm}
 import de.sciss.mellite.{GUI, TimelineTool, TimelineTrackCanvas}
 import de.sciss.mellite.edit.EditAttrMap

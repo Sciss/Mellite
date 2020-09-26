@@ -22,7 +22,7 @@ import de.sciss.lucre.bitemp.BiGroup
 import de.sciss.lucre.expr.{IntObj, SpanLikeObj, StringObj}
 import de.sciss.lucre.stm.{Folder, Obj}
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjTimelineView, ProcActions, TimelineView}
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, EditTimelineRemoveObj, Edits}
 import de.sciss.mellite.impl.TimelineViewBaseImpl

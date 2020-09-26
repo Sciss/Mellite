@@ -17,7 +17,7 @@ import de.sciss.desktop
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.TxnLike.peer
 import de.sciss.lucre.stm.{Disposable, Obj, Sys}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
@@ -41,7 +41,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
   def install(): Unit =
     MarkdownRenderView.peer = this
 
-  def apply[S <: SSys[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
+  def apply[T <: SSys[T]](init: Markdown[T], bottom: ISeq[View[T]], embedded: Boolean)
                          (implicit tx: T, universe: Universe[T]): MarkdownRenderView[T] =
     new Impl[T](bottom, embedded = embedded).init(init)
 
@@ -49,7 +49,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
                         (implicit tx: T, cursor: Cursor[T]): MarkdownRenderView.Basic[T] =
     new BasicImpl[T](bottom, embedded = embedded).init(init)
 
-  private final class Impl[S <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
+  private final class Impl[T <: SSys[T]](bottom: ISeq[View[T]], embedded: Boolean)
                                         (implicit val universe: Universe[T])
     extends Base[T](bottom, embedded) with MarkdownRenderView[T] { impl =>
 

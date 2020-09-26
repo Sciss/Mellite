@@ -18,10 +18,10 @@ import java.awt.datatransfer.Transferable
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Disposable, Obj}
 import de.sciss.lucre.swing.impl.ComponentHolder
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{DragAndDrop, GUI, ObjListView}
 import de.sciss.mellite.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.impl.MapViewImpl

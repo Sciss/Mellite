@@ -15,15 +15,15 @@ package de.sciss.mellite.impl.fscape
 
 import de.sciss.fscape.lucre.FScape
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.objview.{NoMakeListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.{ObjListView, ObjView}
 import javax.swing.Icon
 
 object FScapeOutputObjView extends NoMakeListObjViewFactory {
-  type E[~ <: stm.Sys[~]] = FScape.Output[~]
+  type E[~ <: LTxn[~]] = FScape.Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
   val prefix        : String    = "FScape.Output"
   def humanName     : String    = prefix
@@ -53,6 +53,6 @@ object FScapeOutputObjView extends NoMakeListObjViewFactory {
     def factory: ObjView.Factory = FScapeOutputObjView
   }
 }
-trait FScapeOutputObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait FScapeOutputObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = FScape.Output[T]
 }

@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.timeline
 
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.mellite.TimelineTool.{Add, Cursor, Fade, Gain, Move, Mute, Patch, Resize}
 import de.sciss.mellite.impl.timeline.tool.{AddImpl, AuditionImpl, CursorImpl, FadeImpl, GainImpl, MoveImpl, MuteImpl, PatchImpl, ResizeImpl}

@@ -15,17 +15,13 @@ package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.expr.{DoubleObj, Type}
-import de.sciss.lucre.stm
-import de.sciss.lucre.stm.Obj
-import de.sciss.lucre.synth.Sys
-import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView}
+import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{DoubleObj, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
 import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Confluent, Universe}
 import javax.swing.{Icon, SpinnerNumberModel}
 
@@ -33,7 +29,7 @@ import scala.swing.{Component, Graphics2D, Label}
 import scala.util.{Success, Try}
 
 object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
-  type E[S <: stm.Sys[T]]       = DoubleObj[T]
+  type E[T <: LTxn[T]]          = DoubleObj[T]
   type V                        = Double
   val icon          : Icon      = raphaelIcon(Shapes.RealNumber)
   val prefix        : String    = "Double"
@@ -53,7 +49,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
     new ListImpl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
-  final case class Config[S <: stm.Sys[T]](name: String = prefix, value: Double, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: Double, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -105,7 +101,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
 
     final def factory: ObjView.Factory = DoubleObjView
 
-    final def exprType: Type.Expr[V, E] = DoubleObj
+    final def exprType: Expr.Type[V, E] = DoubleObj
 
     final def expr(implicit tx: T): E[T] = objH()
   }

@@ -15,10 +15,10 @@ package de.sciss.mellite.impl.widget
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.{BooleanObj, CellView}
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.CodeView
 import de.sciss.mellite.impl.code.CodeFrameBase
 import de.sciss.mellite.{WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}

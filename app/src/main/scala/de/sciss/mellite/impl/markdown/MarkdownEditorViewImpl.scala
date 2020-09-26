@@ -17,7 +17,7 @@ import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.TxnLike
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.View
@@ -44,7 +44,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
   def install(): Unit =
     MarkdownEditorView.peer = this
 
-  def apply[S <: SSys[T]](obj: Markdown[T], showEditor: Boolean, bottom: ISeq[View[T]])
+  def apply[T <: SSys[T]](obj: Markdown[T], showEditor: Boolean, bottom: ISeq[View[T]])
                         (implicit tx: T, universe: Universe[T],
                          undoManager: UndoManager): MarkdownEditorView[T] = {
     val editable = obj match {
@@ -71,7 +71,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
     protected def tabSize     : Int         = 4
   }
 
-  private final class Impl[S <: SSys[T]](val renderer: MarkdownRenderView[T],
+  private final class Impl[T <: SSys[T]](val renderer: MarkdownRenderView[T],
                                          markdownH: Source[T, Markdown[T]],
                                          editable: Boolean,
                                          bottom: ISeq[View[T]])

@@ -14,9 +14,9 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.impl.proc.OutputsViewImpl
 import de.sciss.synth.proc.{Proc, Universe}

@@ -14,11 +14,11 @@
 package de.sciss.mellite.impl.document
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{BooleanCheckBoxView, View}
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ActionBounce, EnsembleView, FolderEditorView, FolderView, RunnerToggleButton}
 import de.sciss.swingplus.Separator
 import de.sciss.synth.proc.{Ensemble, Universe}

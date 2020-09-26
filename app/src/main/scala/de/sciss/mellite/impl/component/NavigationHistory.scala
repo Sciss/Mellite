@@ -15,7 +15,7 @@ package de.sciss.mellite.impl.component
 
 import de.sciss.lucre.event.Observable
 import de.sciss.lucre.event.impl.ObservableImpl
-import de.sciss.lucre.stm.Sys
+import de.sciss.lucre.LTxn
 import de.sciss.lucre.stm.TxnLike.peer
 
 import scala.collection.immutable.{IndexedSeq => Vec}

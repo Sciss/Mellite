@@ -14,10 +14,10 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.stm
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.stm.{Cursor, Obj}
 import de.sciss.lucre.swing.Window
-import de.sciss.lucre.synth.Sys
+import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Action, Universe}
@@ -25,7 +25,7 @@ import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 object ActionObjView extends NoArgsListObjViewFactory {
-  type E[~ <: stm.Sys[~]] = Action[~]
+  type E[~ <: LTxn[~]] = Action[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Bolt)
   val prefix        : String    = "Action"
   def humanName     : String    = prefix
@@ -67,6 +67,6 @@ object ActionObjView extends NoArgsListObjViewFactory {
     }
   }
 }
-trait ActionObjView[S <: stm.Sys[T]] extends ObjView[T] {
+trait ActionObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Action[T]
 }
