@@ -28,7 +28,7 @@ import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
 import de.sciss.model.Change
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Confluent, Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
+import de.sciss.synth.proc.{Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.tree.TreeNode
 
@@ -342,11 +342,7 @@ object CursorsFrameImpl {
           val elem  = view.elem
           implicit val cursor: confluent.Cursor[T, D] = confluent.Cursor.wrap(elem.cursor)(workspace.system)
           GUI.step[T]("View Elements", s"Opening root elements window for '${view.name}'") { implicit tx =>
-            implicit val dtxView: Confluent.Txn => Durable.Txn = {
-              val dSys = workspace.system // scalac bug, we need an intermediary value here
-              dSys.durableTx _
-            } // (tx)
-            implicit val dtx: Durable.Txn = dtxView(tx)
+            implicit val dtx: Durable.Txn = tx.durable
             // XXX TODO - every branch gets a fresh universe. Ok?
             implicit val universe: Universe[T] = Universe(GenContext[T](), Scheduler[T](), Mellite.auralSystem)
             val name = CellView.const[T, String](s"${workspace.name} / ${elem.name.value}")
