@@ -18,7 +18,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val common = new {
-    val audioFile           = "2.0.0"
+    val audioFile           = "2.0.1"
     val audioWidgets        = "2.0.0"
     val desktop             = "0.10.7"
     val equal               = "0.1.5"
