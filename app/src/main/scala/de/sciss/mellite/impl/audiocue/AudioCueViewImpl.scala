@@ -24,7 +24,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, Source}
+import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, Source, Workspace}
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
@@ -34,7 +34,7 @@ import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.graph.ScanIn
 import de.sciss.synth.proc.gui.TransportView
-import de.sciss.synth.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe, Workspace}
+import de.sciss.synth.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
 import de.sciss.{sonogram, synth}
 
 import scala.annotation.tailrec
@@ -92,9 +92,8 @@ object AudioCueViewImpl {
     diff.attr.put(Proc.mainIn, output)
     // val transport     = Transport[I, I](group, sampleRate = sampleRate)
 
-    implicit val cursorI: Cursor[I] = ??? // LUCRE4 Cursor.inMemory(system)
-//    implicit val systemI: I = system.inMemory
-    implicit val workspaceI: Workspace[I] = ??? // LUCRE4 Workspace.Implicits.dummy[I](tx.system, itx)
+    implicit val cursorI: Cursor[I] = tx.inMemoryCursor
+    implicit val workspaceI: Workspace[I] = Workspace.Implicits.dummy[I](tx.system, cursorI)
     val genI        = GenContext[I]() // (itx, cursorI, workspaceI)
     val schI        = Scheduler[I]()
     val universeI   = Universe[I](genI, schI, universe.auralSystem)
