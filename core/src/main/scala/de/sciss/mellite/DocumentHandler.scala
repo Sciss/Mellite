@@ -13,7 +13,8 @@
 
 package de.sciss.mellite
 
-import de.sciss.file.File
+import java.net.URI
+
 import de.sciss.lucre.Txn
 import de.sciss.mellite.impl.DocumentHandlerImpl
 import de.sciss.model.Model
@@ -41,7 +42,7 @@ trait DocumentHandler extends Model[DocumentHandler.Update] {
   def addDocument[T <: Txn[T]](universe: Universe[T])(implicit tx: T): Unit
 
   def allDocuments: Iterator[Document]
-  def getDocument(folder: File): Option[Document]
+  def getDocument(folder: URI): Option[Document]
 
   def isEmpty: Boolean
 }

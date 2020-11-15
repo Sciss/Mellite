@@ -13,6 +13,7 @@
 
 package de.sciss.mellite.impl.document
 
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 
@@ -36,6 +37,7 @@ import scala.collection.JavaConverters.asJavaEnumerationConverter
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.Future
 import scala.swing.{Action, BorderPanel, Button, Component, FlowPanel, FormattedTextField, ScrollPane}
+import scala.util.Try
 
 object CursorsFrameImpl {
   type S = proc.Confluent
@@ -108,7 +110,8 @@ object CursorsFrameImpl {
 
     override protected def initGUI(): Unit = {
       title       = s"${view.workspace.name} : Cursors"
-      windowFile  = workspace.folder
+      val dirOpt  = workspace.folder.flatMap(uri => Try(new File(uri)).toOption)
+      windowFile  = dirOpt
       // missing from WindowImpl because of system mismatch
       window.reactions += {
         case desktop.Window.Activated(_) =>

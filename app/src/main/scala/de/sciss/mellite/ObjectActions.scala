@@ -13,25 +13,28 @@
 
 package de.sciss.mellite
 
+import java.net.URI
+
+import de.sciss.asyncfile.Ops._
 import de.sciss.file._
 import de.sciss.lucre.{Artifact, ArtifactLocation}
 import de.sciss.lucre.{DoubleObj, LongObj}
 import de.sciss.lucre.{Folder, Txn}
-import de.sciss.synth.io.AudioFileSpec
+import de.sciss.audiofile.AudioFileSpec
 import de.sciss.synth.proc.AudioCue
 import de.sciss.synth.proc.Implicits._
 
 object ObjectActions {
-  def mkAudioFile[T <: Txn[T]](loc: ArtifactLocation[T], f: File, spec: AudioFileSpec, offset: Long = 0L,
+  def mkAudioFile[T <: Txn[T]](loc: ArtifactLocation[T], uri: URI, spec: AudioFileSpec, offset: Long = 0L,
                                gain: Double = 1.0, const: Boolean = false, name: Option[String] = None)
                               (implicit tx: T): AudioCue.Obj[T] = {
     val offset0   = LongObj.newConst[T](offset)
     val offset1   = if (const) offset0 else LongObj.newVar[T](offset0)
     val gain0     = DoubleObj.newConst[T](gain)
     val gain1     = if (const) gain0 else DoubleObj.newVar[T](gain0)
-    val artifact  = Artifact(loc, f) // loc.add(f)
+    val artifact  = Artifact(loc, uri) // loc.add(f)
     val audio     = AudioCue.Obj(artifact, spec, offset1, gain1)
-    val name1     = name.getOrElse(f.base)
+    val name1     = name.getOrElse(uri.base)
     audio.name    = name1
     // if (index == -1) folder.addLast(obj) else folder.insert(index, obj)
     audio

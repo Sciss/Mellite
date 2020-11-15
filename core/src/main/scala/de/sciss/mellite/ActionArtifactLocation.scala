@@ -13,8 +13,11 @@
 
 package de.sciss.mellite
 
+import java.net.URI
+
 import de.sciss.desktop.{FileDialog, OptionPane, Window}
-import de.sciss.file._
+import de.sciss.asyncfile.Ops._
+import de.sciss.file.File
 import de.sciss.lucre.{Artifact, ArtifactLocation, Folder, Obj, Source, Txn}
 import de.sciss.swingplus.Labeled
 import de.sciss.synth.proc.Implicits._
@@ -29,8 +32,8 @@ import scala.util.Try
 object ActionArtifactLocation {
 
   type LocationSource [T <: Txn[T]] = Source[T, ArtifactLocation[T]]
-  type LocationSourceT[T <: Txn[T]] = (Source[T, ArtifactLocation[T]], File)
-  type QueryResult    [T <: Txn[T]] = (Either[LocationSource[T], String], File)
+  type LocationSourceT[T <: Txn[T]] = (Source[T, ArtifactLocation[T]], URI)
+  type QueryResult    [T <: Txn[T]] = (Either[LocationSource[T], String], URI)
 
   def merge[T <: Txn[T]](result: QueryResult[T])
                         (implicit tx: T): Option[(Option[Obj[T]], ArtifactLocation[T])] = {
@@ -43,11 +46,11 @@ object ActionArtifactLocation {
     Some(list0 -> loc) // loc.modifiableOption.map(list0 -> _)
   }
 
-  def query[T <: Txn[T]](file: File, window: Option[desktop.Window] = None, askName: Boolean = false)
+  def query[T <: Txn[T]](file: URI, window: Option[desktop.Window] = None, askName: Boolean = false)
                         (root: T => Folder[T])
                         (implicit universe: Universe[T]): Option[QueryResult[T]] = {
 
-    def createNew(): Option[(String, File)] = queryNew(child = Some(file), window = window, askName = askName)
+    def createNew(): Option[(String, URI)] = queryNew(child = Some(file), window = window, askName = askName)
 
     def createNewRes(): Option[QueryResult[T]] =
       createNew().map { case (name, base) => (Right(name), base) }
@@ -78,7 +81,7 @@ object ActionArtifactLocation {
     }
   }
 
-  def find[T <: Txn[T]](file: File)(root: T => Folder[T])
+  def find[T <: Txn[T]](file: URI)(root: T => Folder[T])
                        (implicit universe: Universe[T]): Vec[Labeled[LocationSourceT[T]]] = {
     import universe.cursor
     val options: Vec[Labeled[LocationSourceT[T]]] = cursor.step { implicit tx =>
@@ -88,7 +91,7 @@ object ActionArtifactLocation {
             val res1 = head match {
               case objT: ArtifactLocation[T] =>
                 val parent = objT.directory
-                if (Try(Artifact.relativize(parent, file)).isSuccess) {
+                if (Try(Artifact.Value.relativize(parent, file)).isSuccess) {
                   res :+ Labeled(tx.newHandle(objT) -> parent)(objT.name)
                 } else res
 
@@ -111,29 +114,32 @@ object ActionArtifactLocation {
   }
 
   @tailrec
-  def queryNew(child: Option[File] = None, window: Option[Window] = None, askName: Boolean = false): Option[(String, File)] = {
-    val dlg = FileDialog.folder(init = child.flatMap(_.parentOption), title = "Choose Artifact Base Location")
+  def queryNew(child: Option[URI] = None, window: Option[Window] = None, askName: Boolean = false): Option[(String, URI)] = {
+    val parentOpt   = child.flatMap(_.parentOption)
+    val parentOptF  = parentOpt.flatMap(uri => Try(new File(uri)).toOption)
+    val dlg = FileDialog.folder(init = parentOptF, title = "Choose Artifact Base Location")
     dlg.show(None) match {
       case Some(dir) =>
+        val dirU = dir.toURI
         child match {
-          case Some(file) if Try(Artifact.relativize(dir, file)).isFailure =>
+          case Some(file) if Try(Artifact.Value.relativize(dirU, file)).isFailure =>
             queryNew(child, window, askName = askName) // try again
           case _ =>
-            val defaultName = dir.name
+            val defaultName = dirU.name
             if (askName) {
               val res = Dialog.showInput[String](null,
                 "Enter initial store name:", "New Artifact Location",
-                Dialog.Message.Question, initial = dir.name)
-              res.map(_ -> dir)
+                Dialog.Message.Question, initial = dirU.name)
+              res.map(_ -> dirU)
             } else {
-              Some((defaultName, dir))
+              Some((defaultName, dirU))
             }
         }
       case _=> None
     }
   }
 
-  def create[T <: Txn[T]](name: String, directory: File)(implicit tx: T): ArtifactLocation[T] = {
+  def create[T <: Txn[T]](name: String, directory: URI)(implicit tx: T): ArtifactLocation[T] = {
     val peer  = ArtifactLocation.newVar[T](directory)
     peer.name = name
     peer

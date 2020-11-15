@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.impl.artifact
 
+import java.net.URI
+
 import de.sciss.desktop.{Desktop, FileDialog, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
@@ -30,6 +32,7 @@ import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoEx
 
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Button, Component, FlowPanel}
+import scala.util.Try
 
 object ArtifactViewImpl {
   def mkPathField(reveal: Boolean, mode: Boolean,
@@ -117,15 +120,17 @@ object ArtifactViewImpl {
       deferTx(guiInit(value0))
       observer = obj0.changed.react { implicit tx => upd =>
         deferTx {
-          ggPath.value = upd.now
+          val fileNowOpt = Try(new File(upd.now)).toOption
+          ggPath.valueOption = fileNowOpt
         }
       }
       this
     }
 
-    private def guiInit(value0: File): Unit = {
+    private def guiInit(value0: URI): Unit = {
       val (_ggPath, p) = mkPathField(reveal = true, mode = mode, initMode = initMode)
-      _ggPath.value = value0
+      val file0Opt = Try(new File(value0)).toOption
+      _ggPath.valueOption = file0Opt
 
       val ggLoc: Button = new Button(Action(null) {
         cursor.step { implicit tx =>
@@ -147,13 +152,13 @@ object ArtifactViewImpl {
 
     def save(): Unit = {
       requireEDT()
-      val newPath = ggPath.value
+      val newPath = ggPath.valueOption.map(_.toURI)
       val editOpt = cursor.step { implicit tx =>
         val title = s"Edit $humanName"
         objH().modifiableOption match {
-          case Some(pVr) =>
+          case Some(pVr) if newPath.isDefined =>
             val oldVal = pVr.child
-            val newVal = Artifact.relativize(pVr.location.value, newPath)
+            val newVal = Artifact.Value.relativize(pVr.location.value, newPath.get)
             import de.sciss.equal.Implicits._
             if (newVal === oldVal) None else {
               val edit = new UpdateChild[T](title, tx.newHandle(pVr), oldChild = oldVal, newChild = newVal)

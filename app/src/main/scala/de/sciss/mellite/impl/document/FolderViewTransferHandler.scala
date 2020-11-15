@@ -15,6 +15,7 @@ package de.sciss.mellite.impl.document
 
 import java.awt.datatransfer.{DataFlavor, Transferable}
 import java.io.File
+import java.net.URI
 
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
@@ -23,7 +24,7 @@ import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.{Copy, Folder, Obj, Source, Txn}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.{ActionArtifactLocation, DragAndDrop, FolderView, ObjListView, ObjView, ObjectActions}
-import de.sciss.synth.io.{AudioFile, AudioFileSpec}
+import de.sciss.audiofile.{AudioFile, AudioFileSpec}
 import de.sciss.synth.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.undo.UndoableEdit
@@ -40,7 +41,7 @@ trait FolderViewTransferHandler[T <: Txn[T]] { fv =>
   protected def treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]]
   protected def selection: FolderView.Selection[T]
 
-  protected def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]]
+  protected def findLocation(f: URI): Option[ActionArtifactLocation.QueryResult[T]]
 
   protected object FolderTransferHandler extends TransferHandler {
     // ---- export ----
@@ -324,10 +325,10 @@ trait FolderViewTransferHandler[T <: Txn[T]] { fv =>
       import scala.collection.JavaConverters._
       val data: List[File] = support.getTransferable.getTransferData(DataFlavor.javaFileListFlavor)
         .asInstanceOf[java.util.List[File]].asScala.toList
-      val tup: List[(File, AudioFileSpec)] = data.flatMap { f =>
-        Try(AudioFile.readSpec(f)).toOption.map(f -> _)
+      val tup: List[(URI, AudioFileSpec)] = data.flatMap { f =>
+        Try(AudioFile.readSpec(f)).toOption.map(f.toURI -> _)
       }
-      val trip: List[(File, AudioFileSpec, ActionArtifactLocation.QueryResult[T])] =
+      val trip: List[(URI, AudioFileSpec, ActionArtifactLocation.QueryResult[T])] =
         tup.flatMap { case (f, spec) =>
           findLocation(f).map { loc => (f, spec, loc) }
         }

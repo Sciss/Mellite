@@ -13,19 +13,19 @@
 
 package de.sciss.mellite.impl.document
 
-import java.io.File
+import java.net.URI
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.{Artifact, Disposable, Folder, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.TreeTableView
 import de.sciss.lucre.swing.TreeTableView.ModelUpdate
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
+import de.sciss.lucre.{Artifact, Disposable, Folder, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.TFormat
 import de.sciss.synth.proc.{ObjKeys, Universe}
@@ -300,11 +300,11 @@ object FolderViewImpl extends FolderView.Companion {
       }
     } .toIndexedSeq
 
-    def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]] = {
+    def findLocation(uri: URI): Option[ActionArtifactLocation.QueryResult[T]] = {
       val locationsOk = locations.flatMap { view =>
         try {
           val dir = view.directory
-          Artifact.relativize(dir, f)
+          Artifact.Value.relativize(dir, uri)
           Some((Left(view.objH), dir))
         } catch {
           case NonFatal(_) => None
@@ -312,7 +312,7 @@ object FolderViewImpl extends FolderView.Companion {
       } .headOption
 
       locationsOk.orElse {
-        ActionArtifactLocation.query[T](file = f /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
+        ActionArtifactLocation.query[T](file = uri /*, folder = parent */)(implicit tx => treeView.root()) // , window = Some(comp))
       }
     }
   }

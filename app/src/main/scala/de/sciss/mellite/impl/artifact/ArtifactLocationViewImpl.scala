@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.impl.artifact
 
+import java.net.URI
+
 import de.sciss.desktop.{Desktop, FileDialog, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
@@ -29,6 +31,7 @@ import de.sciss.synth.proc.Universe
 
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Button, Component, FlowPanel}
+import scala.util.Try
 
 object ArtifactLocationViewImpl {
   def mkPathField(reveal: Boolean, mode: Boolean,
@@ -87,25 +90,29 @@ object ArtifactLocationViewImpl {
       deferTx(guiInit(value0))
       observer = obj0.changed.react { implicit tx => upd =>
         deferTx {
-          ggPath.value = upd.now
+          ggPath.valueOption = Try(new File(upd.now)).toOption
         }
       }
       this
     }
 
-    private def value: File = {
+    private def valueOption: Option[URI] = {
       requireEDT()
-      ggPath.value
+      ggPath.valueOption.map(_.toURI)
     }
 
-    private def guiInit(value0: File): Unit = {
+    private def guiInit(value0: URI): Unit = {
       val _ggPath      = new PathField
       _ggPath.mode     = FileDialog.Folder
       _ggPath.enabled  = editable
-      _ggPath.value    = value0
+      val file0Opt = Try(new File(value0)).toOption
+      _ggPath.valueOption = file0Opt
       ggPath = _ggPath
 
-      val ggReveal: Button = new Button(Action(null)(Desktop.revealFile(value))) {
+      val ggReveal: Button = new Button(Action(null) {
+        val fileOpt = valueOption.flatMap(uri => Try(new File(uri)).toOption)
+        fileOpt.foreach(Desktop.revealFile)
+      }) {
         icon      = iconNormal(raphael.Shapes.Inbox)
         tooltip   = s"Reveal in ${if (Desktop.isMac) "Finder" else "File Manager"}"
       }
@@ -121,16 +128,15 @@ object ArtifactLocationViewImpl {
 
     def save(): Unit = {
       requireEDT()
-      val newValue = value
+      val newValue = valueOption
       val editOpt = cursor.step { implicit tx =>
         val title = s"Edit $humanName"
         objH() match {
           case ArtifactLocation.Var(pVr) =>
             val oldVal  = pVr.value
-            import de.sciss.equal.Implicits._
-            if (newValue === oldVal) None else {
-              val pVal    = ArtifactLocation.newConst[T](newValue)
-              val edit    = EditVar.Expr[T, File, ArtifactLocation](title, pVr, pVal)
+            if (newValue.isEmpty || newValue.contains(oldVal)) None else {
+              val pVal    = ArtifactLocation.newConst[T](newValue.get)
+              val edit    = EditVar.Expr[T, URI, ArtifactLocation](title, pVr, pVal)
               Some(edit)
             }
 

@@ -16,9 +16,10 @@ package de.sciss.mellite.impl.audiocue
 import java.awt.Color
 import java.awt.datatransfer.Transferable
 
+import de.sciss.asyncfile.Ops._
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.{Desktop, FileDialog, Util}
-import de.sciss.file._
+import de.sciss.file.File
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.graph.AudioFileIn
@@ -40,6 +41,7 @@ import de.sciss.{sonogram, synth}
 import scala.annotation.tailrec
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, Label, Orientation, Swing}
+import scala.util.Try
 import scala.util.control.NonFatal
 
 object AudioCueViewImpl {
@@ -68,7 +70,7 @@ object AudioCueViewImpl {
 
     // ---- we go through a bit of a mess here to convert S -> I ----
      val artifact     = value.artifact
-     val artifactDir  = artifact.parent //  artifact.location.directory
+     val artifactDir  = artifact.parentOption.get //  artifact.location.directory
      val iLoc         = ArtifactLocation.newVar[I](artifactDir)
      val iArtifact    = Artifact(iLoc, artifact) // iLoc.add(artifact.value)
 
@@ -152,7 +154,8 @@ object AudioCueViewImpl {
       var ggVisualBoost : Component     = null
 
       try {
-        _sonogram     = SonogramManager.acquire(snapshot.artifact)
+        val artF      = new File(snapshot.artifact)
+        _sonogram     = SonogramManager.acquire(artF)
         sonogramView  = new AudioCueViewJ(_sonogram, timelineModel)
         ggVisualBoost = GUI.boostRotary()(sonogramView.visualBoost = _)
       } catch {
@@ -163,21 +166,24 @@ object AudioCueViewImpl {
       // val ggDragRegion = new DnD.Button(holder, snapshot, timelineModel)
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
-          val t2 = DragAndDrop.Transferable.files(snapshot.artifact)
-          val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
-          val spOpt = timelineModel.selection match {
-            case sp0: Span if sp0.nonEmpty => Some(sp0)
-            case _ => timelineModel.bounds match {
-              case sp0: Span => Some(sp0)
-              case _ => None
+          val artFOpt = Try(new File(snapshot.artifact)).toOption
+          artFOpt.map { artF =>
+            val t2 = DragAndDrop.Transferable.files(artF)
+            val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
+            val spOpt = timelineModel.selection match {
+              case sp0: Span if sp0.nonEmpty => Some(sp0)
+              case _ => timelineModel.bounds match {
+                case sp0: Span  => Some(sp0)
+                case _          => None
+              }
             }
+            val t1Opt = spOpt.map { sp =>
+              val drag = timeline.DnD.AudioDrag[T](universe, objH, selection = sp)
+              DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
+            }
+            val t = t2 :: t3 :: t1Opt.toList
+            DragAndDrop.Transferable.seq(t: _*)
           }
-          val t1Opt = spOpt.map { sp =>
-            val drag  = timeline.DnD.AudioDrag[T](universe, objH, selection = sp)
-            DragAndDrop.Transferable(timeline.DnD.flavor)(drag)
-          }
-          val t = t2 :: t3 :: t1Opt.toList
-          Some(DragAndDrop.Transferable.seq(t: _*))
         }
         tooltip = "Drag Selected Region or File"
       }
@@ -199,7 +205,10 @@ object AudioCueViewImpl {
         )
       }
 
-      val ggReveal        = new Button(Action(null)(Desktop.revealFile(value.artifact)))
+      val ggReveal        = new Button(Action(null) {
+        val fileOpt = Try(new File(value.artifact)).toOption
+        fileOpt.foreach(Desktop.revealFile)
+      })
       ggReveal.peer.putClientProperty("styleId", "icon-hover")
       ggReveal.icon       = iconNormal(raphael.Shapes.Inbox)
       ggReveal.tooltip    = s"Reveal in ${if (Desktop.isMac) "Finder" else "File Manager"}"

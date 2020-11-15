@@ -15,6 +15,7 @@ package de.sciss.mellite.impl.proc
 
 import java.awt.RenderingHints
 
+import de.sciss.asyncfile.Ops.URIOps
 import de.sciss.file._
 import de.sciss.lucre.{Folder, Ident, Obj, Source, SpanLikeObj, TxnLike}
 import de.sciss.lucre.expr.CellView
@@ -218,7 +219,8 @@ final class ProcObjTimelineViewImpl[T <: Txn[T]](val objH: Source[T, Proc[T]],
     releaseSonogram()
     sonogram = audio.flatMap { audioVal =>
       try {
-        val ovr = SonogramManager.acquire(audioVal./* value. */artifact)  // XXX TODO: remove `Try` once manager is fixed
+        val f   = new File(audioVal.artifact)
+        val ovr = SonogramManager.acquire(f)
         failedAcquire = false
         Some(ovr)
       } catch {

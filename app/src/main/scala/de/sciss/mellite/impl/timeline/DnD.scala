@@ -25,7 +25,7 @@ import de.sciss.lucre.{Source, Txn, synth}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.{DragAndDrop, ObjView}
 import de.sciss.span.Span
-import de.sciss.synth.io.AudioFile
+import de.sciss.audiofile.AudioFile
 import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}
 import javax.swing.TransferHandler._
 
@@ -100,17 +100,19 @@ trait DnD[T <: synth.Txn[T]] {
       val arr   = str.split(java.io.File.pathSeparator)
       if (arr.length == 3) {
         Try {
-          val path = file(arr(0))
+          val path  = arr(0)
+          val f     = new File(path)
+          val uri   = f.toURI
           // cheesy caching so we read spec only once during drag
-          if (lastFile == null || (lastFile.artifact !== path)) {
+          if (lastFile == null || (lastFile.artifact !== uri)) {
             val spec = AudioFile.readSpec(path)
-            lastFile = AudioCue(path, spec, 0L, 1.0)
+            lastFile = AudioCue(uri, spec, 0L, 1.0)
           }
           val ratio = TimeRef.SampleRate / lastFile.spec.sampleRate
           val start = (arr(1).toLong * ratio + 0.5).toLong
           val stop  = (arr(2).toLong * ratio + 0.5).toLong
           val span  = Span(start, stop)
-          ExtAudioRegionDrag[T](universe, path, span)
+          ExtAudioRegionDrag[T](universe, f, span)
         } .toOption
       } else None
     }

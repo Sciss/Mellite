@@ -22,16 +22,16 @@ import de.sciss.lucre.Cursor
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
-import de.sciss.lucre.synth.{AnyTxn, Txn}
+import de.sciss.lucre.synth.{AnyTxn, Executor, Txn}
 import de.sciss.synth.proc
-import de.sciss.synth.proc.{Confluent, Durable, SoundProcesses, Universe, Workspace}
+import de.sciss.synth.proc.{Confluent, Durable, Universe, Workspace}
 import javax.swing.SwingUtilities
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
 import scala.swing.event.Key
 import scala.swing.{Action, Dialog}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object OpenWorkspace extends  {
   // N.B.: we want `OpenWorkspace` to be usable in headless mode,
@@ -69,7 +69,10 @@ object OpenWorkspace extends  {
 
   // XXX TODO: should be in another place
   def openGUI[T <: Txn[T]](universe: Universe[T]): Unit = {
-    universe.workspace.folder.foreach(recentFiles.add)
+    universe.workspace.folder.foreach { uri =>
+      val dirOpt = Try(new File(uri)).toOption
+      dirOpt.foreach(recentFiles.add)
+    }
     dh.addDocument(universe)
     universe.workspace match {
       case cf: Workspace.Confluent =>
@@ -109,7 +112,7 @@ object OpenWorkspace extends  {
   }
 
   def open(folder: File, headless: Boolean): Future[Universe[_]] = {
-    import SoundProcesses.executionContext
+    import Executor.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
 //    config.readOnly     = true

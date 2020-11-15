@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 
-import java.io.File
+import java.net.URI
 
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.swing.{TreeTableView, View}
@@ -74,7 +74,7 @@ trait FolderView[T <: Txn[T]] extends Model[FolderView.Update[T]] with View.Edit
 
   def insertionPoint(implicit tx: T): (Folder[T], Int)
 
-  def findLocation(f: File): Option[ActionArtifactLocation.QueryResult[T]]
+  def findLocation(f: URI): Option[ActionArtifactLocation.QueryResult[T]]
 
   def root: Source[T, Folder[T]]
 }

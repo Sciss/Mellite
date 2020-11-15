@@ -14,7 +14,9 @@
 package de.sciss.mellite.impl.objview
 
 import java.awt.datatransfer.Transferable
+import java.net.URI
 
+import de.sciss.asyncfile.Ops.URIOps
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
@@ -30,7 +32,7 @@ import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, DragAndDrop, G
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.io.AudioFile
+import de.sciss.audiofile.AudioFile
 import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}
 
 import scala.annotation.tailrec
@@ -70,12 +72,12 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
                 case Failure(ex) => Failure(ex)
                 case Success(spec) =>
                   val locExist: Option[LocationConfig[T]] = locSeq.find { case (_, dir) =>
-                    val locOk = Try(Artifact.relativize(parent = dir, sub = head)).isSuccess
+                    val locOk = Try(Artifact.Value.relativize(parent = dir, sub = head.toURI)).isSuccess
                     locOk
                   }
 
                   val locOpt = locExist.orElse(
-                    ActionArtifactLocation.query[T](file = head, window = window)(implicit tx => universe.workspace.root)
+                    ActionArtifactLocation.query[T](file = head.toURI, window = window)(implicit tx => universe.workspace.root)
                   )
 
                   locOpt match {
@@ -139,10 +141,10 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       }
     }
 
-    def resolveLoc(f: File, opt: Option[(String, File)]): Try[LocationConfig[T]] = opt match {
+    def resolveLoc(f: URI, opt: Option[(String, URI)]): Try[LocationConfig[T]] = opt match {
       case Some((nm, base)) => Success((Right(nm), base))
       case None =>
-        f.absolute.parentOption match {
+        f./*absolute.*/parentOption match {
           case Some(parent) =>
             val vec = ActionArtifactLocation.find[T](file = f)(implicit tx => universe.workspace.root)
             val exist = vec.collectFirst {
@@ -161,7 +163,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     for {
       c     <- p.parse(Config2(name = p.nameOption.orElse(p.location.toOption.map(_.name)), file = p.file(),
         offset = p.offset(), gain = p.gain().linear, const = p.const()))
-      loc   <- resolveLoc(c.file, c.location)
+      loc   <- resolveLoc(c.file.toURI, c.location.map(tup => (tup._1, tup._2.toURI)))
       spec  <- Try(AudioFile.readSpec(c.file))
     } yield {
       val c1 = SingleConfig(name = c.name.getOrElse(c.file.base), file = c.file, spec = spec, location = loc,
@@ -174,7 +176,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
   }
 
   def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
-    var locMade = Map.empty[(String, File), ArtifactLocation[T]]
+    var locMade = Map.empty[(String, URI), ArtifactLocation[T]]
     var res     = List.empty[Obj[T]]
 
     config.foreach { c =>
@@ -190,7 +192,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
               loc0
           }
       }
-      val audioObj = ObjectActions.mkAudioFile(loc, c.file, c.spec, offset = c.offset, gain = c.gain, const = c.const,
+      val audioObj = ObjectActions.mkAudioFile(loc, c.file.toURI, c.spec, offset = c.offset, gain = c.gain, const = c.const,
         name = Some(c.name))
       res ::= audioObj
     }
@@ -205,8 +207,10 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
     def isViewable = true
 
     override def createTransferable(): Option[Transferable] = {
-      val t = DragAndDrop.Transferable.files(value.artifact)
-      Some(t)
+      val fileOpt = Try(new File(value.artifact)).toOption
+      fileOpt.map { f =>
+        DragAndDrop.Transferable.files(f)
+      }
     }
 
     def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] = {

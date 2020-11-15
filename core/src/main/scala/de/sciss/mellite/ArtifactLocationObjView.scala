@@ -13,13 +13,12 @@
 
 package de.sciss.mellite
 
+import java.net.URI
+
 import de.sciss.desktop
-import de.sciss.file._
 import de.sciss.icons.raphael
-import de.sciss.lucre.ArtifactLocation
-import de.sciss.lucre.Obj
-import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{ArtifactLocation, Obj, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl
 import de.sciss.synth.proc.Universe
 import javax.swing.Icon
@@ -55,7 +54,7 @@ object ArtifactLocationObjView extends ObjListView.Factory {
   def mkListView[T <: Txn[T]](obj: ArtifactLocation[T])(implicit tx: T): ArtifactLocationObjView[T] with ObjListView[T] =
     companion.mkListView(obj)
 
-  final case class Config[T <: LTxn[T]](name: String = prefix, directory: File, const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, directory: URI, const: Boolean = false)
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
@@ -71,5 +70,5 @@ object ArtifactLocationObjView extends ObjListView.Factory {
 trait ArtifactLocationObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = ArtifactLocation[T]
 
-  def directory: File
+  def directory: URI
 }

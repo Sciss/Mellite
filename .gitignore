@@ -7,3 +7,4 @@ project/boot/
 *.app
 *.swp
 Mellite.jar
+/.bsp/

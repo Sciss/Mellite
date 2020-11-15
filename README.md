@@ -96,8 +96,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "3.0.0"
-    "de.sciss" %% "mellite-app"  % "3.0.0"
+    "de.sciss" %% "mellite-core" % "3.1.0"
+    "de.sciss" %% "mellite-app"  % "3.1.0"
 
 ## building from source
 
@@ -109,10 +109,7 @@ The last version to support Scala 2.10 is 2.10.2.
 The default target and the binary distribution of the application are currently based on Scala 2.13. Scala 2.12 was used up to Mellite v2.43.0.
 
 The dependencies will be downloaded automatically from Maven Central repository, except for snapshots during
-development. For convenience, the [sbt script by Paul Phillips](https://github.com/paulp/sbt-extras) has been
-included, which is covered by a BSD-3-clause license. Therefore, on Linux and Mac you can just use `./sbt mellite-app/run` or
-`./sbt mellite-app/universal:packageBin` to get going without having to separately install sbt. On Windows, install sbt
-regularly through its website.
+development. 
 
 Dependencies not found are all available from their respective
 [git repositories](https://git.iem.at/users/sciss/projects), so in case you want to build a snapshot version, you

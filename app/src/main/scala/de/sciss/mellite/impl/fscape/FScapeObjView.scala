@@ -18,15 +18,15 @@ import de.sciss.fscape.lucre.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Obj, Source, Txn => LTxn}
+import de.sciss.log.Level
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjView}
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
-import de.sciss.mellite.{AttrMapView, FScapeOutputsView, Shapes, SplitPaneView}
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
@@ -232,15 +232,15 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     val attrView    = AttrMapView       [T](obj)
     val rightView   = SplitPaneView(attrView, outputsView, Orientation.Vertical)
 
-    import de.sciss.fscape.{showControlLog, showStreamLog}
+    import de.sciss.fscape.Log.{control, stream}
 
     val actToggleControl = Action("Toggle Control Debug") {
-      showControlLog = !showControlLog
-      println(s"Control Debug is ${if (showControlLog) "ON" else "OFF"}")
+      control.level = if (control.level == Level.Debug) Level.Off else Level.Debug
+      println(s"Control log level is ${control.level}")
     }
     val actToggleStream = Action("Toggle Stream Debug") {
-      showStreamLog = !showStreamLog
-      println(s"Stream Debug is ${if (showStreamLog) "ON" else "OFF"}")
+      stream.level = if (stream.level == Level.Debug) Level.Off else Level.Debug
+      println(s"Stream log level is ${stream.level}")
     }
 
     make(obj, objH, codeObj,

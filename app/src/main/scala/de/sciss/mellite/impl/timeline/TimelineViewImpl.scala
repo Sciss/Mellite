@@ -37,7 +37,7 @@ import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, Dra
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
-import de.sciss.synth.io.AudioFile
+import de.sciss.audiofile.AudioFile
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.impl.AuxContextImpl
 import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
@@ -488,12 +488,12 @@ object TimelineViewImpl extends TimelineView.Companion {
           resOpt.orElse[UndoableEdit] {
             val tr = Try(AudioFile.readSpec(file)).toOption
             tr.flatMap { spec =>
-              ActionArtifactLocation.query[T](file)(implicit tx => universe.workspace.root).flatMap { either =>
+              ActionArtifactLocation.query[T](file.toURI)(implicit tx => universe.workspace.root).flatMap { either =>
                 cursor.step { implicit tx =>
                   ActionArtifactLocation.merge(either).flatMap { case (list0, locM) =>
                     val folder = universe.workspace.root
                     // val obj   = ObjectActions.addAudioFile(elems, elems.size, loc, file, spec)
-                    val obj = ObjectActions.mkAudioFile(locM, file, spec)
+                    val obj = ObjectActions.mkAudioFile(locM, file.toURI, spec)
                     val edits0 = list0.map(obj => EditFolderInsertObj("Location", folder, folder.size, obj)).toList
                     val edits1 = edits0 :+ EditFolderInsertObj("Audio File", folder, folder.size, obj)
                     val edits2 = insertAudioRegion(drop, ed, obj).fold(edits1)(edits1 :+ _)

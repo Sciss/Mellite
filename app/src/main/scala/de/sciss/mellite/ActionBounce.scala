@@ -16,11 +16,14 @@ package de.sciss.mellite
 import java.awt
 import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEvent}
 import java.io.{EOFException, File, IOException}
+import java.net.URI
 import java.text.ParseException
 
+import de.sciss.asyncfile.AsyncFile
+import de.sciss.asyncfile.Ops._
+import de.sciss.audiofile.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.audiowidgets.TimeField
 import de.sciss.desktop.{Desktop, DialogSource, FileDialog, OptionPane, PathField, Window}
-import de.sciss.file._
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Txn}
@@ -33,7 +36,6 @@ import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
-import de.sciss.synth.io.{AudioFile, AudioFileType, SampleFormat}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
 import de.sciss.synth.{Client, SynthGraph, addToTail, intNumberWrapper}
@@ -195,7 +197,7 @@ object ActionBounce {
         case _ =>
       }
 
-    q.file match {
+    q.uriOption match {
       case Some(f)  => storeString(attrFile, f.path)
       case None     => attr.remove(attrFile)
     }
@@ -229,8 +231,10 @@ object ActionBounce {
     }
   }
 
-  def recallSettings[T <: Txn[T]](obj: Obj[T], defaultRealtime: Boolean = false,
-                                  defaultFile: File = file(""), defaultChannels: Vec[Range.Inclusive] = Vector(0 to 1))
+  def recallSettings[T <: Txn[T]](obj             : Obj[T],
+                                  defaultRealtime : Boolean               = false,
+                                  defaultFile     : URI                   = Artifact.Value.empty,
+                                  defaultChannels : Vec[Range.Inclusive]  = Vector(0 to 1))
                                  (implicit tx: T): QuerySettings[T] = {
     val attr = obj.attr
     import equal.Implicits._
@@ -267,13 +271,13 @@ object ActionBounce {
     }
 
     val path = recallString(attrFile)
-    val file = if (path.isEmpty) {
+    val fileOpt: Option[URI] = if (path.isEmpty) {
       if (defaultFile.path.isEmpty) None else {
         val f = defaultFile.replaceExt(fileFormat.extension)
         Some(f)
       }
     } else {
-      Some(new File(path))
+      Some(new File(path).toURI)
     }
 
 
@@ -294,13 +298,13 @@ object ActionBounce {
 
     val location = attr.$[ArtifactLocation](attrLocation).map(tx.newHandle(_))
 
-    QuerySettings(file = file, fileFormat = fileFormat, sampleRate = sampleRate, gain = gain, span = span,
+    QuerySettings(uriOption = fileOpt, fileFormat = fileFormat, sampleRate = sampleRate, gain = gain, span = span,
       channels = channels, realtime = realtime, fineControl = fineControl, importFile = importFile,
       location = location)
   }
 
   final case class QuerySettings[T <: Txn[T]](
-                                               file        : Option[File]          = None,
+                                               uriOption   : Option[URI]           = None,
                                                fileFormat  : FileFormat            = FileFormat.PCM(),
                                                sampleRate  : Int                   = 44100,
                                                gain        : Gain                  = Gain.normalized(-0.2f),
@@ -311,13 +315,13 @@ object ActionBounce {
                                                importFile  : Boolean               = false,
                                                location    : Option[Source[T, ArtifactLocation[T]]] = None
   ) {
-    def prepare(group: IIterable[Source[T, Obj[T]]], f: File)(mkSpan: => Span): PerformSettings[T] = {
+    def prepare(group: IIterable[Source[T, Obj[T]]], uri: URI)(mkSpan: => Span): PerformSettings[T] = {
       val sConfig = Server.Config()
       val cConfig = Client.Config()
       Mellite.applyAudioPreferences(sConfig, cConfig, useDevice = realtime, pickPort = realtime)
       if (fineControl) sConfig.blockSize = 1
       val numChannels = mkNumChannels(channels)
-      specToServerConfig(f, fileFormat, numChannels = numChannels, sampleRate = sampleRate, config = sConfig)
+      specToServerConfig(uri, fileFormat, numChannels = numChannels, sampleRate = sampleRate, config = sConfig)
       val span1: Span = span match {
         case s: Span  => s
         case _        => mkSpan
@@ -341,9 +345,9 @@ object ActionBounce {
   )
 
   /** Note: header format and sample format are left unspecified if file format is not PCM. */
-  def specToServerConfig(file: File, fileFormat: FileFormat, numChannels: Int, sampleRate: Int,
+  def specToServerConfig(uri: URI, fileFormat: FileFormat, numChannels: Int, sampleRate: Int,
                          config: Server.ConfigBuilder): Unit = {
-    config.nrtOutputPath      = file.path
+    config.nrtOutputPath      = uri.path
     fileFormat match {
       case pcm: FileFormat.PCM =>
         config.nrtHeaderFormat    = pcm.tpe
@@ -487,17 +491,22 @@ object ActionBounce {
       case ValueChanged(_) => ggOk.enabled = ggPath.valueOption.isDefined
     }
 
-    def setPath(file: File): Unit =
-      ggPath.value = file.replaceExt(ggFileType.selection.item.extension)
+    def setPath(uri: File): Unit = {
+      import de.sciss.file._
+      ggPath.value = uri.replaceExt(ggFileType.selection.item.extension)
+    }
 
     ggFileType.listenTo(ggFileType.selection)
     ggFileType.reactions += {
       case SelectionChanged(_) =>
         val p = ggPath.value
-        if (!p.path.isEmpty) setPath(p)
+        if (!p.getPath.isEmpty) setPath(p)
     }
 
-    init.file.foreach(f => ggPath.value = f)
+    init.uriOption.foreach { uri =>
+      val fOpt = Try(new File(uri)).toOption
+      fOpt.foreach(ggPath.value_=)
+    }
 
     val gainModel   = new SpinnerNumberModel(init.gain.decibels, -160.0, 160.0, 0.1)
     val ggGainAmt   = new Spinner(gainModel)
@@ -706,7 +715,7 @@ object ActionBounce {
     def dialogComplete(ok: Boolean): Unit = if (!wasCompleted) {
       wasCompleted = true
       findWindow().foreach(_.dispose())
-      val file    = ggPath.valueOption
+      val fileOpt = ggPath.valueOption
 
       val channels: Vec[Range.Inclusive] = try {
         fmtRanges.stringToValue(ggChannelsJ.getText)
@@ -729,7 +738,7 @@ object ActionBounce {
       var settings = QuerySettings(
         realtime    = ggRealtime   .selected,
         fineControl = ggFineControl.selected,
-        file        = file,
+        uriOption   = fileOpt.map(_.toURI),
         fileFormat  = fileFormat,
         sampleRate  = sampleRate,
         gain        = Gain(gainModel.getNumber.floatValue(), if (ggGainType.selection.index == 0) true else false),
@@ -739,17 +748,18 @@ object ActionBounce {
         location    = init.location
       )
 
-      val ok2: Boolean = file match {
+      val ok2: Boolean = fileOpt match {
         case Some(f) if importFile =>
+          val uri = f.toURI
           init.location match {
             case Some(source) if cursor.step { implicit tx =>
                 val parent = source().directory
-                Try(Artifact.relativize(parent, f)).isSuccess
+                Try(Artifact.Value.relativize(parent, uri)).isSuccess
               } =>  // ok, keep previous location
               ok
 
             case _ => // either no location was set, or it's not parent of the file
-              ActionArtifactLocation.query[T](f)(implicit tx => universe.workspace.root) match {
+              ActionArtifactLocation.query[T](uri)(implicit tx => universe.workspace.root) match {
                 case Some((either, directory)) =>
                   either match {
                     case Left(source) =>
@@ -775,10 +785,10 @@ object ActionBounce {
         case _ => ok
       }
 
-      file match {
+      fileOpt match {
         case Some(f) if ok2 && f.exists() =>
           val ok3 = Dialog.showConfirmation(
-            message     = s"<HTML><BODY>File<BR><B>${f.path}</B><BR>already exists.<P>Are you sure you want to overwrite it?</BODY>",
+            message     = s"<HTML><BODY>File<BR><B>${f.getPath}</B><BR>already exists.<P>Are you sure you want to overwrite it?</BODY>",
             title       = title,
             optionType  = Dialog.Options.OkCancel,
             messageType = Dialog.Message.Warning
@@ -826,13 +836,12 @@ object ActionBounce {
 
   def performGUI[T <: Txn[T]](view: UniverseView[T],
                               settings: QuerySettings[T],
-                              group: IIterable[Source[T, Obj[T]]], file: File, span: Span): Unit = {
+                              group: IIterable[Source[T, Obj[T]]], uri: URI, span: Span): Unit = {
 
     import view.{cursor, universe}
     import universe.workspace
     val window      = Window.find(view.component)
-    val bounceFile  = file
-    val pSet        = settings.prepare(group, bounceFile)(span)
+    val pSet        = settings.prepare(group, uri)(span)
     val process: ProcessorLike[Any, Any] = perform(pSet)
 
     var processCompleted = false
@@ -841,7 +850,7 @@ object ActionBounce {
     val ggCancel = new Button("Abort")
     ggCancel.focusable = false
     lazy val op = OptionPane(message = ggProgress, messageType = OptionPane.Message.Plain, entries = Seq(ggCancel))
-    val title   = s"Exporting to ${file.name} ..."
+    val title   = s"Exporting to ${uri.name} ..."
     op.title    = title
 
     ggCancel.listenTo(ggCancel)
@@ -877,19 +886,23 @@ object ActionBounce {
       defer(fDispose())
       (settings.importFile, settings.location) match {
         case (true, Some(locSource)) =>
-          val spec      = AudioFile.readSpec(file)
-          cursor.step { implicit tx =>
-            val loc       = locSource()
-            val depArtif  = Artifact(loc, file)
-            val depOffset = LongObj  .newVar[T](0L)
-            val depGain   = DoubleObj.newVar[T](1.0)
-            val deployed  = AudioCue.Obj[T](depArtif, spec, depOffset, depGain)
-            deployed.name = file.base
-            workspace.root.addLast(deployed)
+          AudioFile.readSpecAsync(uri).foreach { spec =>
+            cursor.step { implicit tx =>
+              val loc       = locSource()
+              val depArtif  = Artifact(loc, uri)
+              val depOffset = LongObj  .newVar[T](0L)
+              val depGain   = DoubleObj.newVar[T](1.0)
+              val deployed  = AudioCue.Obj[T](depArtif, spec, depOffset, depGain)
+              deployed.name = uri.base
+              workspace.root.addLast(deployed)
+            }
           }
 
         case _ =>
-          Desktop.revealFile(file)
+          val fileOpt = Try(new File(uri)).toOption
+          fileOpt.foreach { f =>
+            Desktop.revealFile(f)
+          }
       }
     }
 
@@ -919,7 +932,7 @@ object ActionBounce {
     val numChannels   = settings.server.outputBusChannels
 
     val span          = settings.span
-    val fileOut       = file(settings.server.nrtOutputPath)
+    val fileOut       = new File(settings.server.nrtOutputPath)
     val sampleRate    = settings.server.sampleRate
     val fileFrames0   = (span.length * sampleRate / TimeRef.SampleRate + 0.5).toLong
     val fileFrames    = fileFrames0 // - (fileFrames0 % settings.server.blockSize)
@@ -928,7 +941,7 @@ object ActionBounce {
       val fTmp    = File.createTempFile("bounce", ".w64")
       fTmp.deleteOnExit()
       val sConfig = Server.ConfigBuilder(settings.server)
-      sConfig.nrtOutputPath   = fTmp.path
+      sConfig.nrtOutputPath   = fTmp.getPath
       sConfig.nrtHeaderFormat = AudioFileType.Wave64
       sConfig.nrtSampleFormat = SampleFormat.Float
       // if (realtime) sConfig.outputBusChannels = 0
@@ -1012,7 +1025,7 @@ object ActionBounce {
     override def toString = s"Normalize bounce $fileOut"
 
     def body(): File = blocking {
-      val fileIn  = await(bounce, weight = if (gain.normalized) 0.8 else 0.9)   // arbitrary weight
+      val fileIn  = await(bounce, target = if (gain.normalized) 0.8 else 0.9)   // arbitrary weight
 
       // tricky --- scsynth flush might not yet be seen
       // thus wait a few seconds until header becomes available
@@ -1035,7 +1048,7 @@ object ActionBounce {
           throw new EOFException("Exported file is empty")
 
         val mul = if (!gain.normalized) gain.linear else {
-          var max = 0f
+          var max = 0.0
           while (rem > 0) {
             val chunk = math.min(bufSz, rem).toInt
             afIn.read(buf, 0, chunk)
@@ -1053,7 +1066,7 @@ object ActionBounce {
             checkAborted()
           }
           afIn.seek(0L)
-          if (max == 0) 1f else gain.linear / max
+          if (max == 0) 1.0 else gain.linear / max
         }
 
         def writePCM(f: File, tpe: AudioFileType, sampleFormat: SampleFormat, maxChannels: Int,
@@ -1097,7 +1110,7 @@ object ActionBounce {
             fTmp.deleteOnExit()
             try {
               writePCM(fTmp, AudioFileType.AIFF, SampleFormat.Int16, maxChannels = 2, progStop = 0.95)
-              var lameArgs = List[String](fTmp.path, fileOut.path)
+              var lameArgs = List[String](fTmp.getPath, fileOut.getPath)
               if (!mp3.comment.isEmpty) lameArgs :::= List("--tc", mp3.comment)
               if (!mp3.artist .isEmpty) lameArgs :::= List("--ta", mp3.artist )
               if (!mp3.title  .isEmpty) lameArgs :::= List("--tt", mp3.title  )
@@ -1120,7 +1133,13 @@ object ActionBounce {
 
       } finally {
         if (afIn.isOpen) afIn.cleanUp()
-        afIn.file.foreach(_.delete())
+        afIn.uri.foreach { uri =>
+          AsyncFile.getFileSystemProvider(uri).foreach { fsp =>
+            fsp.obtain().foreach { af =>
+              af.delete(uri)
+            }
+          }
+        }
       }
 
       fileOut
@@ -1144,7 +1163,7 @@ class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
   protected def selectionType: Selection = SpanSelection
 
   protected def defaultRealtime(implicit tx: T): Boolean               = false
-  protected def defaultFile    (implicit tx: T): File                  = file("")
+  protected def defaultFile    (implicit tx: T): URI                   = Artifact.Value.empty
   protected def defaultChannels(implicit tx: T): Vec[Range.Inclusive]  = Vector(0 to 1)
 
   import view.cursor
@@ -1170,7 +1189,7 @@ class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
         }
 
         for {
-          f    <- _settings.file
+          f    <- _settings.uriOption
           span <- _settings.span.nonEmptyOption
         } {
           performGUI(view, _settings, objH :: Nil, f, span)

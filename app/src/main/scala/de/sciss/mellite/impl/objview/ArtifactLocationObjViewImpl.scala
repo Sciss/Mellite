@@ -14,13 +14,14 @@
 package de.sciss.mellite.impl.objview
 
 import java.awt.datatransfer.Transferable
+import java.io.File
+import java.net.URI
 
 import de.sciss.desktop
-import de.sciss.file.{File, file}
-import de.sciss.lucre.{ArtifactLocation, Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{ArtifactLocation, Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.ArtifactLocationObjView.{Config, MakeResult}
 import de.sciss.mellite.edit.EditArtifactLocation
 import de.sciss.mellite.impl.ObjViewCmdLineParser
@@ -28,6 +29,8 @@ import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationFrame, Artifact
 import de.sciss.synth.proc
 import de.sciss.synth.proc.Universe
 import javax.swing.undo.UndoableEdit
+
+import scala.util.Try
 
 object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
   def install(): Unit =
@@ -54,7 +57,7 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
       val location: Opt[File]     = trailArg(descr = "Directory")
       validateFileIsDirectory(location)
     }
-    p.parse(Config(name = p.name(), directory = p.location(), const = p.const()))
+    p.parse(Config(name = p.name(), directory = p.location().toURI, const = p.const()))
   }
 
   def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
@@ -67,7 +70,7 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
   }
 
   final class Impl[T <: Txn[T]](val objH: Source[T, ArtifactLocation[T]],
-                                var directory: File, val isListCellEditable: Boolean)
+                                var directory: URI, val isListCellEditable: Boolean)
     extends ArtifactLocationObjView[T]
       with ObjListView /* .ArtifactLocation */[T]
       with ObjViewImpl.Impl[T]
@@ -79,7 +82,7 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
 
     def factory: ObjView.Factory = ArtifactLocationObjView
 
-    def value: File = directory
+    def value: URI = directory
 
     def isViewable: Boolean = true
 
@@ -89,8 +92,10 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
     }
 
     override def createTransferable(): Option[Transferable] = {
-      val t = DragAndDrop.Transferable.files(value)
-      Some(t)
+      val fileOpt = Try(new File(value)).toOption
+      fileOpt.map { f =>
+        DragAndDrop.Transferable.files(f)
+      }
     }
 
     def init(obj: ArtifactLocation[T])(implicit tx: T): this.type = {
@@ -106,8 +111,8 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
 
     def tryEditListCell(value: Any)(implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
       val dirOpt = value match {
-        case s: String  => Some(file(s))
-        case f: File    => Some(f)
+        case s: String  => Try(new URI(s)).toOption
+        case f: URI     => Some(f)
         case _          => None
       }
       dirOpt.flatMap { newDir =>

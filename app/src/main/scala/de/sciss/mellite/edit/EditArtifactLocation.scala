@@ -13,12 +13,13 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.file.File
+import java.net.URI
+
 import de.sciss.lucre.{ArtifactLocation, Cursor, Source, Txn}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 object EditArtifactLocation {
-  def apply[T <: Txn[T]](obj: ArtifactLocation.Var[T], directory: File)
+  def apply[T <: Txn[T]](obj: ArtifactLocation.Var[T], directory: URI)
                         (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
     val before    = obj.directory
     val objH      = tx.newHandle(obj)
@@ -28,7 +29,7 @@ object EditArtifactLocation {
   }
 
   private[edit] final class Impl[T <: Txn[T]](objH  : Source[T, ArtifactLocation.Var[T]],
-                                              before: File, now: File)(implicit cursor: Cursor[T])
+                                              before: URI, now: URI)(implicit cursor: Cursor[T])
     extends AbstractUndoableEdit {
 
     override def undo(): Unit = {
@@ -41,7 +42,7 @@ object EditArtifactLocation {
       cursor.step { implicit tx => perform() }
     }
 
-    private def perform(directory: File)(implicit tx: T): Unit =
+    private def perform(directory: URI)(implicit tx: T): Unit =
       objH().update(ArtifactLocation.newConst(directory)) // .directory = directory
 
     def perform()(implicit tx: T): Unit = perform(now)

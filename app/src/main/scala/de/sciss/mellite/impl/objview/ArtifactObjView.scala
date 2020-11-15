@@ -13,6 +13,8 @@
 
 package de.sciss.mellite.impl.objview
 
+import java.net.URI
+
 import de.sciss.desktop
 import de.sciss.file._
 import de.sciss.icons.raphael
@@ -47,15 +49,15 @@ object ArtifactObjView extends ObjListView.Factory {
   }
 
   type LocationConfig[T <: LTxn[T]] = ActionArtifactLocation.QueryResult[T]
-  final case class Config[T <: LTxn[T]](name: String, file: File, location: LocationConfig[T])
+  final case class Config[T <: LTxn[T]](name: String, file: URI, location: LocationConfig[T])
 
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
                                  (implicit universe: Universe[T]): Unit = {
     val (ggFile, ggValue) = ArtifactViewImpl.mkPathField(reveal = false, mode = true)
-    val res = ObjViewImpl.primitiveConfig[T, File](window, tpe = prefix, ggValue = ggValue,
+    val res = ObjViewImpl.primitiveConfig[T, URI](window, tpe = prefix, ggValue = ggValue,
       prepare = ggFile.valueOption match {
-        case Some(value) => Success(value)
-        case None => Failure(MessageException("No file was specified"))
+        case Some(value)  => Success(value.toURI)
+        case None         => Failure(MessageException("No file was specified"))
       })
     val res1 = res.flatMap { c =>
       import c._
@@ -83,11 +85,11 @@ object ArtifactObjView extends ObjListView.Factory {
         case (None, None)     => Left("File not specified")
        }
     }
-    p.parse(Config(name = p.name(), file = p.file(), location = p.location.toOption match {
-      case Some(v) => Right(v.name) -> v
+    p.parse(Config(name = p.name(), file = p.file().toURI, location = p.location.toOption match {
+      case Some(v) => Right(v.name) -> v.toURI
       case None =>
         val parent = p.file().absolute.parent
-        Right(parent.name) -> parent
+        Right(parent.name) -> parent.toURI
     }))
   }
 
@@ -105,7 +107,7 @@ object ArtifactObjView extends ObjListView.Factory {
   }
 
   private final class Impl[T <: Txn[T]](val objH: Source[T, Artifact[T]],
-                                        var file: File, val isListCellEditable: Boolean)
+                                        var uri: URI, val isListCellEditable: Boolean)
     extends ArtifactObjView[T]
       with ObjListView[T]
       with ObjViewImpl.Impl[T]
@@ -115,7 +117,7 @@ object ArtifactObjView extends ObjListView.Factory {
 
     def factory: ObjView.Factory = ArtifactObjView
 
-    def value: File = file
+    def value: URI = uri
 
     override def obj(implicit tx: T): Artifact[T] = objH()
 
@@ -130,7 +132,7 @@ object ArtifactObjView extends ObjListView.Factory {
       initAttrs(obj)
       addDisposable(obj.changed.react { implicit tx =>upd =>
         deferAndRepaint {
-          file = upd.now
+          uri = upd.now
         }
       })
       this

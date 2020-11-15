@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.0.1-SNAPSHOT"
-lazy val mimaCommonVersion          = "3.0.0"
-lazy val appVersion                 = "3.0.1-SNAPSHOT"
+lazy val commonVersion              = "3.1.0-SNAPSHOT"
+lazy val mimaCommonVersion          = "3.1.0"
+lazy val appVersion                 = "3.1.0-SNAPSHOT"
 lazy val mimaAppVersion             = "3.0.0"
 
 lazy val loggingEnabled             = true
@@ -18,61 +18,60 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val common = new {
-    val audioFile           = "2.0.1"
-    val audioWidgets        = "2.0.0"
-    val desktop             = "0.10.7"
-    val equal               = "0.1.5"
+    val audioFile           = "2.3.1"
+    val audioWidgets        = "2.2.0"
+    val desktop             = "0.11.1"
+    val equal               = "0.1.6"
     val fileUtil            = "1.1.5"
-    val lucre               = "4.0.1"
-    val lucreSwing          = "2.0.0"
+    val lucre               = "4.2.0-SNAPSHOT"
+    val lucreSwing          = "2.3.0-SNAPSHOT"
     val model               = "0.3.5"
     val numbers             = "0.2.1"
-    val processor           = "0.4.3"
-    val raphaelIcons        = "1.0.6"
-    val scalaCollider       = "2.0.0"
-    val scalaColliderUGens  = "1.19.8"
-    val scalaOSC            = "1.2.2"
-    val scalaSTM            = "0.10.0"
-    val scalaSwing          = "2.1.1"
+    val processor           = "0.5.0"
+    val raphaelIcons        = "1.0.7"
+    val scalaCollider       = "2.4.0"
+    val scalaColliderUGens  = "1.20.0"
+    val scalaOSC            = "1.2.3"
+    val scalaSTM            = "0.11.0"
+    val scalaSwing          = "3.0.0"
     val scallop             = "3.5.1"
     val serial              = "2.0.0"
-    val sonogram            = "2.0.0"
-    val soundProcesses      = "4.0.1"
+    val sonogram            = "2.2.0"
+    val soundProcesses      = "4.3.0-SNAPSHOT"
     val span                = "2.0.0"
-    val swingPlus           = "0.4.2"
+    val swingPlus           = "0.5.0"
   }
   val app = new {
-    val akka                = "2.6.9"
+    val akka                = "2.6.10"
     val appDirs             = "1.2.0"
     val dejaVuFonts         = "2.37"    // directly included
-    val dotterweide         = "0.3.0"
-    val fileCache           = "1.0.0"
+    val dotterweide         = "0.4.0"
+    val fileCache           = "1.1.0"
     val fingerTree          = "1.5.5"
-    val freesound           = "2.0.0"
-    val fscape              = "3.0.0"
-    val interpreterPane     = "1.10.1"
+    val freesound           = "2.1.0-SNAPSHOT"
+    val fscape              = "3.2.0-SNAPSHOT"
+    val interpreterPane     = "1.11.0"
 //    val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.4"
     val linKernighan        = "0.1.3"
-    val lucrePi             = "1.0.0"
-    val negatum             = "1.0.0"
-    val patterns            = "1.0.0"
-    val pdflitz             = "1.4.1"
+    val lucrePi             = "1.1.0-SNAPSHOT"
+    val negatum             = "1.1.0-SNAPSHOT"
+    val patterns            = "1.1.0-SNAPSHOT"
+    val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
-    val raphael             = "1.0.6"
-    val scalaColliderSwing  = "2.0.0"
-    val scissDSP            = "2.0.0"
+    val scalaColliderSwing  = "2.3.0"
+    val scissDSP            = "2.2.0"
     val slf4j               = "1.7.30"
     val submin              = "0.3.4"
     val syntaxPane          = "1.2.0"
-    val treeTable           = "1.5.1"
+    val treeTable           = "1.6.1"
     val topology            = "1.1.3"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "3.0.0"
+    val wolkenpumpe         = "3.1.0-SNAPSHOT"
   }
 }
 
@@ -328,7 +327,6 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "patterns-lucre"                 % deps.app.patterns,              // pattern sequences
       "de.sciss"          %% "processor"                      % deps.common.processor,          // futures with progress and cancel
       "de.sciss"          %% "pdflitz"                        % deps.app.pdflitz,               // PDF export
-      "de.sciss"          %% "raphael-icons"                  % deps.app.raphael,               // icons
       "de.sciss"          %% "scalacollider"                  % deps.common.scalaCollider,      // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-api"         % deps.common.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-core"        % deps.common.scalaColliderUGens, // realtime sound synthesis

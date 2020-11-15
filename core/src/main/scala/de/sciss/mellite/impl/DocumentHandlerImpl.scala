@@ -13,7 +13,8 @@
 
 package de.sciss.mellite.impl
 
-import de.sciss.file._
+import java.net.URI
+
 import de.sciss.lucre.Txn.peer
 import de.sciss.lucre.{Disposable, Txn, TxnLike}
 import de.sciss.mellite.DocumentHandler
@@ -32,7 +33,7 @@ object DocumentHandlerImpl {
     override def toString = "DocumentHandler"
 
     private val all   = STMRef(Vec.empty[Universe[_] /*Document*/])
-    private val map   = TMap.empty[File, Universe[_]] // Document] // path to document
+    private val map   = TMap.empty[URI, Universe[_]] // Document] // path to document
 
     // def openRead(path: String): Document = ...
 
@@ -68,7 +69,7 @@ object DocumentHandlerImpl {
     }
 
     def allDocuments: Iterator[Document] = all.single().iterator
-    def getDocument(file: File): Option[Document] = map.single.get(file)
+    def getDocument(file: URI): Option[Document] = map.single.get(file)
 
     def isEmpty: Boolean = map.single.isEmpty
   }
