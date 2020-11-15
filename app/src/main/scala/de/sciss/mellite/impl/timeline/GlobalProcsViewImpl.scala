@@ -30,7 +30,7 @@ import de.sciss.mellite.impl.proc.{ProcGUIActions, ProcObjView}
 import de.sciss.mellite.{DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
-import de.sciss.synth.proc.{Proc, Timeline, Universe}
+import de.sciss.proc.{Proc, Timeline, Universe}
 import de.sciss.{desktop, equal}
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, TableColumnModel}
@@ -211,7 +211,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
           val name = ggName.text
           val edit = atomic { implicit tx =>
 //            ProcActions.insertGlobalRegion(groupH(), name, bus = None)
-            import de.sciss.synth.proc.Implicits._
+            import de.sciss.proc.Implicits._
             val obj   = presetCtl.make[T]()
             obj.name  = name
             val group = groupH()

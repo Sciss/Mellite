@@ -26,7 +26,7 @@ import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.tool.DraggingTool
 import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas}
-import de.sciss.synth.proc.{Proc, Timeline}
+import de.sciss.proc.{Proc, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

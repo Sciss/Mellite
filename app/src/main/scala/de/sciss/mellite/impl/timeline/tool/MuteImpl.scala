@@ -23,7 +23,7 @@ import de.sciss.mellite.TimelineTool.Mute
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.tool.RubberBandTool
 import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, Shapes, TimelineTrackCanvas}
-import de.sciss.synth.proc.{ObjKeys, Timeline}
+import de.sciss.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

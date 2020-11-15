@@ -20,8 +20,8 @@ import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.ObjGraphemeView.Factory
 import de.sciss.mellite.impl.objview.{GenericObjView, ObjViewImpl}
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, ObjGraphemeView}
-import de.sciss.synth.proc.Grapheme
-import de.sciss.synth.proc.Grapheme.Entry
+import de.sciss.proc.Grapheme
+import de.sciss.proc.Grapheme.Entry
 
 import scala.swing.Graphics2D
 

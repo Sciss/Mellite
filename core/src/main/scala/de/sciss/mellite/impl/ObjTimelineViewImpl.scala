@@ -21,7 +21,7 @@ import de.sciss.mellite.ObjTimelineView.{Context, Factory}
 import de.sciss.mellite.impl.objview.GenericObjView
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{ObjTimelineView, ObjView, TimelineTool}
-import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
+import de.sciss.proc.{FadeSpec, ObjKeys, Timeline}
 
 object ObjTimelineViewImpl {
   private val sync = new AnyRef

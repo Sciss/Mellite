@@ -25,7 +25,7 @@ import de.sciss.lucre.swing.LucreSwing.{defer, requireEDT}
 import de.sciss.lucre.{Cursor, Txn}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
-import de.sciss.synth.proc.SoundProcesses
+import de.sciss.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
 import javax.imageio.ImageIO
 import javax.swing.{Icon, ImageIcon, KeyStroke, SwingUtilities, UIManager}

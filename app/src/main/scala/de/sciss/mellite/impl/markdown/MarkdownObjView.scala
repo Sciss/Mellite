@@ -21,8 +21,8 @@ import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView}
 import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Markdown, Universe}
 import javax.swing.Icon
 
 object MarkdownObjView extends ObjListView.Factory {

@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.Txn
-import de.sciss.synth.proc.Timeline
+import de.sciss.proc.Timeline
 
 trait TimelineTrackCanvas[T <: Txn[T]] extends TimelineCanvas2D[T, Int, ObjTimelineView[T]] {
   def timeline(implicit tx: T): Timeline[T]

@@ -18,7 +18,7 @@ import java.io.File
 import de.sciss.filecache.Limit
 import de.sciss.freesound.lucre.{Retrieval, RetrievalObjView}
 import de.sciss.fscape.lucre.{Cache => FScCache}
-import de.sciss.synth.proc.FScape
+import de.sciss.proc.FScape
 import de.sciss.lucre
 import de.sciss.lucre.swing.LucreSwing
 import de.sciss.mellite.impl.code.{CodeFrameImpl, CodeViewImpl}
@@ -34,8 +34,8 @@ import de.sciss.mellite.impl.widget.WidgetObjView
 import de.sciss.negatum.Negatum
 import de.sciss.negatum.gui.NegatumObjView
 import de.sciss.nuages.Wolkenpumpe
-import de.sciss.synth.proc.Pattern
-import de.sciss.synth.proc.{GenView, SoundProcesses, Widget}
+import de.sciss.proc.Pattern
+import de.sciss.proc.{GenView, SoundProcesses, Widget}
 import net.harawata.appdirs.AppDirsFactory
 
 trait Init {

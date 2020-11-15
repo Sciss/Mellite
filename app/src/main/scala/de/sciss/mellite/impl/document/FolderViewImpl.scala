@@ -28,7 +28,7 @@ import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.TFormat
-import de.sciss.synth.proc.{ObjKeys, Universe}
+import de.sciss.proc.{ObjKeys, Universe}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.event.{CellEditorListener, ChangeEvent}

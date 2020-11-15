@@ -17,7 +17,7 @@ import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.mellite.{DocumentHandler, DocumentViewHandler}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.concurrent.stm.TMap
 

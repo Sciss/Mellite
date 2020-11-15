@@ -28,8 +28,8 @@ import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}
 import de.sciss.synth.UGenSource.Vec
-import de.sciss.synth.proc
-import de.sciss.synth.proc.Universe
+import de.sciss.proc
+import de.sciss.proc.Universe
 import de.sciss.{desktop, equal}
 import javax.swing.SpinnerNumberModel
 

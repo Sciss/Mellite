@@ -22,7 +22,7 @@ import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
 import de.sciss.synth.Curve
-import de.sciss.synth.proc.{FadeSpec, ObjKeys, Timeline}
+import de.sciss.proc.{FadeSpec, ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

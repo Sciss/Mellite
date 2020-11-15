@@ -17,7 +17,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{Txn, TxnLike, synth}
 import de.sciss.model.Model
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.Action

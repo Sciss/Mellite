@@ -19,8 +19,8 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.FolderFrame
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Implicits._
+import de.sciss.proc.Universe
 import javax.swing.{Icon, UIManager}
 
 object FolderObjView extends NoArgsListObjViewFactory {

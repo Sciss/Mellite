@@ -20,8 +20,8 @@ import de.sciss.lucre.{Txn, Workspace}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc
-import de.sciss.synth.proc.Universe
+import de.sciss.proc
+import de.sciss.proc.Universe
 
 import scala.concurrent.{Future, Promise}
 import scala.swing.Action

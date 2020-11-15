@@ -16,7 +16,7 @@ package de.sciss.mellite
 import de.sciss.desktop
 import de.sciss.lucre.Workspace
 import de.sciss.mellite.impl.code.{InterpreterFrameImpl => Impl}
-import de.sciss.synth.proc
+import de.sciss.proc
 
 import scala.swing.event.Key
 

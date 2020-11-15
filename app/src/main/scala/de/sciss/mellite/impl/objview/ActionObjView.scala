@@ -18,8 +18,8 @@ import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Action, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Action, Universe}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

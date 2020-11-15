@@ -18,7 +18,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.{Txn, synth}
 import de.sciss.mellite.impl.widget.WidgetEditorViewImpl
 import de.sciss.model.Model
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 

@@ -19,7 +19,7 @@ import de.sciss.lucre.swing.LucreSwing.requireEDT
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.edit.EditTimelineRemoveObj
-import de.sciss.synth.proc.Timeline
+import de.sciss.proc.Timeline
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{IndexedSeq => Vec}

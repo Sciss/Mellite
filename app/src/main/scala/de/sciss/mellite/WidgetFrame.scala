@@ -18,7 +18,7 @@ import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.widget.WidgetFrameImpl
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 

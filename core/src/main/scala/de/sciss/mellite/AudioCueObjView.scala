@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl
 import de.sciss.audiofile.AudioFileSpec
-import de.sciss.synth.proc.{AudioCue, Universe}
+import de.sciss.proc.{AudioCue, Universe}
 import javax.swing.Icon
 
 object AudioCueObjView extends ObjListView.Factory {

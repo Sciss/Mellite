@@ -36,9 +36,9 @@ import de.sciss.model.impl.ModelImpl
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
 import de.sciss.synth.Curve
-import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{CurveObj, EnvSegment, Universe}
+import de.sciss.proc.Grapheme.Entry
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{CurveObj, EnvSegment, Universe}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop

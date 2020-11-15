@@ -17,7 +17,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 trait ProcObjViewImpl[T <: Txn[T]]
   extends ObjListView[T]

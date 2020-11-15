@@ -14,8 +14,8 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.InMemory
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Markdown
+import de.sciss.proc.Implicits._
+import de.sciss.proc.Markdown
 
 object Help {
   private type                  S = InMemory

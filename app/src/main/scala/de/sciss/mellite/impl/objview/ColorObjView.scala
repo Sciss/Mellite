@@ -26,8 +26,8 @@ import de.sciss.mellite.impl.component.PaintIcon
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.{desktop, numbers}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Color, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Color, Universe}
 import javax.swing.Icon
 import org.rogach.scallop
 

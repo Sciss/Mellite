@@ -27,7 +27,7 @@ import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.code.CodeFrameImpl
 import de.sciss.mellite.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.proc.{Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}

@@ -21,7 +21,7 @@
 //import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.{ActionBounce, FolderEditorView, FolderView, RunnerToggleButton}
 //import de.sciss.swingplus.Separator
-//import de.sciss.synth.proc.{Ensemble, Universe}
+//import de.sciss.proc.{Ensemble, Universe}
 //
 //import scala.swing.Swing._
 //import scala.swing.{BoxPanel, Component, Label, Orientation}

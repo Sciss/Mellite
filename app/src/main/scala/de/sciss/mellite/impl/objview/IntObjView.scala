@@ -19,8 +19,8 @@ import de.sciss.lucre.{Expr, IntObj, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.{ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Confluent, Universe}
 import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.util.{Success, Try}

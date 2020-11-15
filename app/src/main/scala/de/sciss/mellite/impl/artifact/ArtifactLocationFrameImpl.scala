@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ArtifactLocationObjView.humanName
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationView}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object ArtifactLocationFrameImpl {
   def apply[T <: Txn[T]](obj: ArtifactLocation[T])

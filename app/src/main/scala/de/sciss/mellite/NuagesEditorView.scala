@@ -18,7 +18,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.{Txn, synth}
 import de.sciss.mellite.impl.document.{NuagesEditorViewImpl => Impl}
 import de.sciss.nuages.Nuages
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.swing.Action
 

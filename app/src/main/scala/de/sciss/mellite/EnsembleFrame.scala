@@ -16,7 +16,7 @@
 //import de.sciss.lucre
 //import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.impl.document.{EnsembleFrameImpl => Impl}
-//import de.sciss.synth.proc.{Ensemble, Universe}
+//import de.sciss.proc.{Ensemble, Universe}
 //
 //object EnsembleFrame {
 //  /** Creates a new frame for an ensemble view. */

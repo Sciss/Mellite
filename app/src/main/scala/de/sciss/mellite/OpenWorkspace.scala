@@ -23,8 +23,8 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.{AnyTxn, Executor, Txn}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{Confluent, Durable, Universe, Workspace}
+import de.sciss.proc
+import de.sciss.proc.{Confluent, Durable, Universe, Workspace}
 import javax.swing.SwingUtilities
 
 import scala.concurrent.duration.Duration

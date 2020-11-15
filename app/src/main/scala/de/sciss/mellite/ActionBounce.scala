@@ -36,8 +36,8 @@ import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
 import de.sciss.synth.{Client, SynthGraph, addToTail, intNumberWrapper}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}
 import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}

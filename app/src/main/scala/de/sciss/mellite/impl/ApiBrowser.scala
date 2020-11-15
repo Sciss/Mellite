@@ -18,7 +18,7 @@ import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.{GUI, Mellite, WebBrowser}
-import de.sciss.synth.proc.Code
+import de.sciss.proc.Code
 import dotterweide.build.{Module, Version}
 import dotterweide.editor.controller.LookUpTypeAction
 import dotterweide.editor.{Action, Editor}
@@ -150,7 +150,7 @@ object ApiBrowser {
   private[this] var lookUpRefBusy = false
 
   private def mkBasePath(code: Option[Code]): String = {
-    val baseSymbol  = code.fold("de.sciss.synth.proc")(_.tpe.docBaseSymbol)
+    val baseSymbol  = code.fold("de.sciss.proc")(_.tpe.docBaseSymbol)
     val s           = baseSymbol.replace('.', '/')
     val i           = s.lastIndexOf('/')
     val s1          = s.substring(i + 1)

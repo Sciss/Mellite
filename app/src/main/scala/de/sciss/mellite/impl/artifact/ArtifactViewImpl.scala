@@ -27,7 +27,7 @@ import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.objview.ArtifactObjView.humanName
 import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationObjView, ArtifactView}
 import de.sciss.swingplus.ComboBox
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException}
 
 import scala.swing.event.{SelectionChanged, ValueChanged}

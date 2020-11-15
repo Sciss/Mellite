@@ -25,7 +25,7 @@ import de.sciss.lucre.{Disposable, Obj}
 import de.sciss.mellite.{DragAndDrop, MapView, ObjListView, ObjView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.swingplus.DropMode
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, DefaultTableCellRenderer, TableCellEditor}
 import javax.swing.undo.UndoableEdit

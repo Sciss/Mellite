@@ -17,7 +17,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.Source
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
-import de.sciss.synth.proc.{Grapheme, Universe}
+import de.sciss.proc.{Grapheme, Universe}
 
 object GraphemeView {
   private[mellite] var peer: Companion = _

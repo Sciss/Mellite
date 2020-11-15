@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.Txn
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 
 trait GraphemeCanvas[T <: Txn[T]] extends TimelineCanvas2D[T, Double, ObjGraphemeView[T]] {
   def grapheme(implicit tx: T): Grapheme[T]

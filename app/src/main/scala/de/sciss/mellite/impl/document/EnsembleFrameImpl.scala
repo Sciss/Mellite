@@ -18,7 +18,7 @@
 //import de.sciss.lucre.swing.View
 //import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.impl.WindowImpl
-//import de.sciss.synth.proc.{Universe}
+//import de.sciss.proc.{Universe}
 //
 //object EnsembleFrameImpl {
 //  def apply[T <: Txn[T]](obj: Ensemble[T])

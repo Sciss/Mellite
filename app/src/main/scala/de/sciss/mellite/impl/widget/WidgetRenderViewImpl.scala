@@ -24,9 +24,9 @@ import de.sciss.lucre.{Disposable, Source, synth}
 import de.sciss.mellite.impl.component.ZoomSupport
 import de.sciss.mellite.{GUI, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
-import de.sciss.synth.proc.UGenGraphBuilder.MissingIn
-import de.sciss.synth.proc.Widget.{Graph, GraphChange}
-import de.sciss.synth.proc.{ExprContext, Universe, Widget}
+import de.sciss.proc.UGenGraphBuilder.MissingIn
+import de.sciss.proc.Widget.{Graph, GraphChange}
+import de.sciss.proc.{ExprContext, Universe, Widget}
 import javax.swing.JComponent
 
 import scala.collection.immutable.{Seq => ISeq}

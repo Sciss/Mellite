@@ -29,7 +29,7 @@ import de.sciss.scalainterpreter.impl.CodePaneImpl
 import de.sciss.swingplus.Implicits._
 import de.sciss.syntaxpane.SyntaxDocument
 import de.sciss.syntaxpane.syntaxkits.MarkdownSyntaxKit
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.{Markdown, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}

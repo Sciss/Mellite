@@ -19,7 +19,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{Application, GraphemeFrame, GraphemeView}
-import de.sciss.synth.proc.{Grapheme, Universe}
+import de.sciss.proc.{Grapheme, Universe}
 
 import scala.swing.event.Key
 

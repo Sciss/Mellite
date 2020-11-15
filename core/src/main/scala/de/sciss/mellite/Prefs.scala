@@ -20,7 +20,7 @@ import de.sciss.desktop.Preferences.{Entry, Type}
 import de.sciss.file._
 import de.sciss.mellite.Application.userPrefs
 import de.sciss.osc
-import de.sciss.synth.proc.SensorSystem
+import de.sciss.proc.SensorSystem
 import javax.swing.UIManager
 import javax.swing.plaf.metal.MetalLookAndFeel
 

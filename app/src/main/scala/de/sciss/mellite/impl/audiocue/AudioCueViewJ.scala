@@ -21,7 +21,7 @@ import de.sciss.desktop
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.sonogram.{Overview, PaintController}
-import de.sciss.synth.proc.TimeRef
+import de.sciss.proc.TimeRef
 import javax.swing.JComponent
 
 import scala.swing.Component

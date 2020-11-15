@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.edit
 
-import de.sciss.synth.proc.FScape
+import de.sciss.proc.FScape
 import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 

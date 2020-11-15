@@ -16,7 +16,7 @@ package de.sciss.mellite.impl.timeline
 import de.sciss.lucre.Txn
 import de.sciss.swingplus.Spinner
 import de.sciss.synth
-import de.sciss.synth.proc.{Code, Proc}
+import de.sciss.proc.{Code, Proc}
 import de.sciss.synth.{GE, SynthGraph}
 import javax.swing.SpinnerNumberModel
 

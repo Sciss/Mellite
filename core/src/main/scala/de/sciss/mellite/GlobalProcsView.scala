@@ -17,7 +17,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
-import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.proc.{Timeline, Universe}
 
 import scala.swing.Table
 

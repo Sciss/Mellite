@@ -18,7 +18,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.{NoMakeListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.synth.proc.Proc
+import de.sciss.proc.Proc
 import javax.swing.Icon
 
 object OutputObjView extends NoMakeListObjViewFactory {

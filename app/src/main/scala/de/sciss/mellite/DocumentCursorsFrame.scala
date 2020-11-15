@@ -16,8 +16,8 @@ package de.sciss.mellite
 import de.sciss.lucre
 import de.sciss.lucre.swing.View
 import de.sciss.mellite.impl.document.{CursorsFrameImpl => Impl}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{Universe, Workspace}
+import de.sciss.proc
+import de.sciss.proc.{Universe, Workspace}
 
 object DocumentCursorsFrame {
   type S = proc.Confluent

@@ -17,7 +17,7 @@ import de.sciss.lucre
 import de.sciss.lucre.{Cursor, Txn => LTxn}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 

@@ -20,7 +20,7 @@ import de.sciss.mellite.{GraphemeView, ObjGraphemeView}
 import de.sciss.mellite.edit.EditGraphemeRemoveObj
 import de.sciss.mellite.impl.TimelineViewBaseImpl
 import de.sciss.span.Span
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 
 import scala.swing.Action
 import scala.swing.event.Key

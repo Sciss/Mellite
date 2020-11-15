@@ -14,7 +14,7 @@
 package de.sciss.mellite.edit
 
 import de.sciss.lucre.{Cursor, Obj, Source, SpanLikeObj, Txn}
-import de.sciss.synth.proc.Timeline
+import de.sciss.proc.Timeline
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove

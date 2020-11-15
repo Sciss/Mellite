@@ -17,7 +17,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.document.{NuagesEditorFrameImpl => Impl}
 import de.sciss.nuages.Nuages
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object NuagesEditorFrame {
   def apply[T <: Txn[T]](obj: Nuages[T])(implicit tx: T, universe: Universe[T]): NuagesEditorFrame[T] =

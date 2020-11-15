@@ -25,8 +25,8 @@ import de.sciss.processor.Processor
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.serial.TFormat
 import de.sciss.swingplus.{ListView, SpinningProgressBar}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{Confluent, Durable, Universe}
+import de.sciss.proc
+import de.sciss.proc.{Confluent, Durable, Universe}
 
 import scala.concurrent.ExecutionContext
 import scala.swing.{BoxPanel, Component, Orientation, ScrollPane}

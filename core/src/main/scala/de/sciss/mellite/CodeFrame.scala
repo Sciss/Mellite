@@ -17,7 +17,7 @@ import de.sciss.lucre
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Txn => LTxn}
-import de.sciss.synth.proc.{Action, Code, Control, Proc, Universe}
+import de.sciss.proc.{Action, Code, Control, Proc, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 

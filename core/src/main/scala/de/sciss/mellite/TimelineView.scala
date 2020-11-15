@@ -17,8 +17,8 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
-import de.sciss.synth.proc.gui.TransportView
-import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.proc.gui.TransportView
+import de.sciss.proc.{Timeline, Universe}
 
 import scala.swing.Action
 

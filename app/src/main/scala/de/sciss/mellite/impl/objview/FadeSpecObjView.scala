@@ -19,7 +19,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{NonViewable, raphaelIcon}
 import de.sciss.mellite.Shapes
-import de.sciss.synth.proc.{FadeSpec, TimeRef}
+import de.sciss.proc.{FadeSpec, TimeRef}
 import javax.swing.Icon
 
 import scala.swing.{Component, Label}

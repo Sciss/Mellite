@@ -24,7 +24,7 @@ import de.sciss.mellite.{DragAndDrop, TimelineView => _TimelineView}
 import de.sciss.serial.DataInput
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.TimeRef
+import de.sciss.proc.TimeRef
 
 object TimelineView {
   private lazy val _init: Unit =

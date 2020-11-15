@@ -20,8 +20,8 @@ import de.sciss.lucre.{Expr, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Confluent, Universe}
 import javax.swing.Icon
 
 import scala.swing.TextField

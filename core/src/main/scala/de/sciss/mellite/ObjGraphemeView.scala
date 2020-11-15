@@ -19,7 +19,7 @@ import de.sciss.mellite
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl => Impl}
 import de.sciss.model.Change
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Graphics2D

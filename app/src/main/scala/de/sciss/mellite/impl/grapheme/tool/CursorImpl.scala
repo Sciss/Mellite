@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, LongObj, Obj}
 import de.sciss.mellite.{GUI, GraphemeCanvas, ObjGraphemeView, Shapes}
 import de.sciss.span.Span
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

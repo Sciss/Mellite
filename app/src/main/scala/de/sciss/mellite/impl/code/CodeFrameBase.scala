@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.mellite.{CodeView, Veto}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc.Code.Example
+import de.sciss.proc.Code.Example
 
 import scala.concurrent.{Future, Promise}
 

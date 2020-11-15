@@ -18,7 +18,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.DragRubber
 import de.sciss.model.{Change, Model}
 import de.sciss.span.Span
-import de.sciss.synth.proc.FadeSpec
+import de.sciss.proc.FadeSpec
 
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}

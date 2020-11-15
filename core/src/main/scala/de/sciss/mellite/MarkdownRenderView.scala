@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{Cursor, Observable, synth, Txn => LTxn}
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 

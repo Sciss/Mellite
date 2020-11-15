@@ -30,8 +30,8 @@ import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.proc.ProcGUIActions
 import de.sciss.mellite.ActionBounce
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{ObjKeys, Proc, TimeRef, Timeline}
+import de.sciss.proc
+import de.sciss.proc.{ObjKeys, Proc, TimeRef, Timeline}
 import de.sciss.topology
 import de.sciss.topology.Topology
 import javax.swing.undo.UndoableEdit

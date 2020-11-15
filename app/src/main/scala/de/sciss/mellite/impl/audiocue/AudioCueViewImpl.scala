@@ -31,11 +31,11 @@ import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
 import de.sciss.mellite.impl.timeline
 import de.sciss.mellite.{ArtifactFrame, AudioCueView, DragAndDrop, GUI, ObjView, ProcActions, SonogramManager}
+import de.sciss.proc.gui.TransportView
+import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.graph.ScanIn
-import de.sciss.synth.proc.gui.TransportView
-import de.sciss.synth.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
 import de.sciss.{sonogram, synth}
 
 import scala.annotation.tailrec

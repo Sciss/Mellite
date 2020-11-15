@@ -17,7 +17,7 @@ import java.awt.datatransfer.Transferable
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.equal.Implicits._
-import de.sciss.synth.proc.FScape
+import de.sciss.proc.FScape
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
@@ -27,7 +27,7 @@ import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView}
 import de.sciss.swingplus.{ComboBox, ListView}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.undo.UndoableEdit
 import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
 

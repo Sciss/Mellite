@@ -30,8 +30,8 @@ import de.sciss.mellite.{CodeView, GUI, Prefs}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
-import de.sciss.synth.proc.Code.Import
-import de.sciss.synth.proc.{Code, Universe}
+import de.sciss.proc.Code.Import
+import de.sciss.proc.{Code, Universe}
 import dotterweide.Span
 import dotterweide.build.Version
 import dotterweide.editor.controller.FlashAction

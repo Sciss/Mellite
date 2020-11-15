@@ -24,8 +24,8 @@ import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.{Cursor, Disposable, Obj, Source, synth, Txn => LTxn}
 import de.sciss.mellite.impl.component.{NavigationHistory, ZoomSupport}
 import de.sciss.mellite.{GUI, MarkdownFrame, MarkdownRenderView, ObjListView}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc
+import de.sciss.proc.{Markdown, Universe}
 import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
 import org.pegdown.{Extensions, PegDownProcessor}
 

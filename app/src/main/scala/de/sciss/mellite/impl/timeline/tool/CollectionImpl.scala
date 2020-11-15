@@ -18,7 +18,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.impl.tool.BasicCollectionTool
 import de.sciss.mellite.{ObjTimelineView, TimelineTool, TimelineTrackCanvas}
-import de.sciss.synth.proc.Timeline
+import de.sciss.proc.Timeline
 import javax.swing.undo.UndoableEdit
 
 /** A more complete implementation for timeline tools that process selected regions.

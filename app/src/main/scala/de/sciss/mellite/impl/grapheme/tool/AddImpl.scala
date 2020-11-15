@@ -24,7 +24,7 @@ import de.sciss.mellite.edit.EditGraphemeInsertObj
 import de.sciss.mellite.{BasicTool, GUI, GraphemeCanvas, GraphemeTool, ObjGraphemeView, Shapes}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.synth.Curve
-import de.sciss.synth.proc.{CurveObj, EnvSegment}
+import de.sciss.proc.{CurveObj, EnvSegment}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

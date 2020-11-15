@@ -19,7 +19,7 @@ import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.{GUI, ObjListView}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 /** A utility trait for `ListObjView.Factory` that assumes the object is
   * constructor without further arguments. It implements `initMakeDialog` by

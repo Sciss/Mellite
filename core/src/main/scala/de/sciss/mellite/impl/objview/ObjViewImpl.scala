@@ -30,7 +30,7 @@ import de.sciss.mellite.{GUI, ObjView, UniverseView}
 import de.sciss.numbers.Implicits._
 import de.sciss.processor.Processor.Aborted
 import de.sciss.serial.TFormat
-import de.sciss.synth.proc.{Color, Confluent, ObjKeys, TimeRef, Universe, Workspace}
+import de.sciss.proc.{Color, Confluent, ObjKeys, TimeRef, Universe, Workspace}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 import org.rogach.scallop

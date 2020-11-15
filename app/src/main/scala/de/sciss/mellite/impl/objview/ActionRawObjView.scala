@@ -21,8 +21,8 @@
 //import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.{CodeFrame, Mellite, ObjListView, ObjTimelineView, ObjView}
 //import de.sciss.mellite.impl.ObjTimelineViewImpl
-//import de.sciss.synth.proc.Implicits._
-//import de.sciss.synth.proc.{ActionRaw, Universe}
+//import de.sciss.proc.Implicits._
+//import de.sciss.proc.{ActionRaw, Universe}
 //import javax.swing.Icon
 //
 //@deprecated("Action should be used instead of ActionRaw", since = "2.46.1")

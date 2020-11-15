@@ -18,7 +18,7 @@ import de.sciss.lucre
 import de.sciss.lucre.Artifact
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.ArtifactFrameImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object ArtifactFrame {
   def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode = FileDialog.Save)

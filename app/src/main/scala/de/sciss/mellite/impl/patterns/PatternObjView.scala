@@ -26,9 +26,9 @@ import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.graph.Pat
-import de.sciss.synth.proc.Pattern
-import de.sciss.synth.proc.{Code, Universe}
-import de.sciss.synth.proc.Implicits._
+import de.sciss.proc.Pattern
+import de.sciss.proc.{Code, Universe}
+import de.sciss.proc.Implicits._
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

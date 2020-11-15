@@ -25,7 +25,7 @@ import de.sciss.lucre.{Copy, Folder, Obj, Source, Txn}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.{ActionArtifactLocation, DragAndDrop, FolderView, ObjListView, ObjView, ObjectActions}
 import de.sciss.audiofile.{AudioFile, AudioFileSpec}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.undo.UndoableEdit
 import javax.swing.{JComponent, TransferHandler}

@@ -23,9 +23,9 @@ import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, MessageExcepti
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser}
-import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Confluent, Universe}
+import de.sciss.proc.Grapheme.Entry
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Confluent, Universe}
 import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label, TextField}

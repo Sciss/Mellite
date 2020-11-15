@@ -18,7 +18,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite
 import de.sciss.mellite.impl.{ObjTimelineViewImpl => Impl}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AuxContext, FadeSpec, Timeline}
+import de.sciss.proc.{AuxContext, FadeSpec, Timeline}
 
 import scala.language.implicitConversions
 import scala.swing.Graphics2D

@@ -17,7 +17,7 @@ import de.sciss.lucre.IdentMap
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.span.Span
-import de.sciss.synth.proc.Proc
+import de.sciss.proc.Proc
 
 final class InputAttrOutput[T <: Txn[T]](val parent: ProcObjView.Timeline[T], val key: String,
                                          out: Proc.Output[T], tx0: T)

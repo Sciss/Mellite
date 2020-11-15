@@ -21,8 +21,8 @@ import de.sciss.file._
 import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.synth.{InMemory, Txn}
 import de.sciss.lucre.{DataStore, Workspace}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.Universe
+import de.sciss.proc
+import de.sciss.proc.Universe
 import javax.swing.JDialog
 
 import scala.concurrent.duration.Duration

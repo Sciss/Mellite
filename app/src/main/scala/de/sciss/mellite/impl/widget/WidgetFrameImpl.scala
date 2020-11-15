@@ -23,7 +23,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.code.CodeFrameBase
 import de.sciss.mellite.{CodeView, WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.Action

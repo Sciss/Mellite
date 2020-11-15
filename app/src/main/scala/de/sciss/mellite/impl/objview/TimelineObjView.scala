@@ -19,8 +19,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.{ObjListView, ObjView, TimelineFrame}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Timeline, Universe}
 import javax.swing.Icon
 
 object TimelineObjView extends NoArgsListObjViewFactory {

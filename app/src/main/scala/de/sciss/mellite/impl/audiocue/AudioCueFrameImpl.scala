@@ -21,7 +21,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{AudioCueFrame, AudioCueView}
-import de.sciss.synth.proc.{AudioCue, Universe}
+import de.sciss.proc.{AudioCue, Universe}
 
 import scala.util.Try
 

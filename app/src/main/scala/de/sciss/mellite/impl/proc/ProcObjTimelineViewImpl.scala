@@ -28,8 +28,8 @@ import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
 import de.sciss.mellite.{ObjTimelineView, ObjView, SonogramManager, TimelineRendering, TimelineView}
 import de.sciss.sonogram.{Overview => SonoOverview}
 import de.sciss.span.Span
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{AudioCue, Proc, TimeRef}
+import de.sciss.proc
+import de.sciss.proc.{AudioCue, Proc, TimeRef}
 
 import scala.concurrent.stm.{Ref, TSet}
 import scala.swing.Graphics2D

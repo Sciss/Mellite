@@ -14,7 +14,7 @@
 package de.sciss.mellite.edit
 
 import de.sciss.lucre.{Cursor, LongObj, Obj, Source, Txn => LTxn}
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 import javax.swing.undo.{AbstractUndoableEdit, UndoableEdit}
 
 // direction: true = insert, false = remove

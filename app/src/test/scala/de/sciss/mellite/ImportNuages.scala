@@ -5,7 +5,7 @@ import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.{Copy, Txn}
 import de.sciss.nuages.Nuages
 import de.sciss.nuages.Nuages.Surface
-import de.sciss.synth.proc.{Durable, Workspace}
+import de.sciss.proc.{Durable, Workspace}
 
 // quick hack to copy a nuages-only database into a regular mellite session
 object ImportNuages extends App {

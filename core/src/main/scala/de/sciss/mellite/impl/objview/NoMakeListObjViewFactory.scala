@@ -18,7 +18,7 @@ import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.Obj
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ObjListView
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.util.Failure
 

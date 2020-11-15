@@ -23,7 +23,7 @@ import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.component.{CollectionViewImpl, NoMenuBarActions}
 import de.sciss.mellite.{AttrMapFrame, AttrMapView, ObjView}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.{Action, Component}

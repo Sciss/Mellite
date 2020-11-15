@@ -33,7 +33,7 @@ import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
-import de.sciss.synth.proc.{Grapheme, TimeRef, Universe}
+import de.sciss.proc.{Grapheme, TimeRef, Universe}
 import javax.swing.{JComponent, UIManager}
 
 import scala.annotation.tailrec

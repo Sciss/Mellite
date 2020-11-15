@@ -26,8 +26,8 @@ import de.sciss.lucre.{BooleanObj, Obj, Source}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseView}
 import de.sciss.synth.SynthGraph
-import de.sciss.synth.proc.Code.Example
-import de.sciss.synth.proc.{Action, Code, Control, Proc, Universe, Widget}
+import de.sciss.proc.Code.Example
+import de.sciss.proc.{Action, Code, Control, Proc, Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}

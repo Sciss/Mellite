@@ -25,8 +25,8 @@ import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.artifact.ArtifactViewImpl
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactFrame, MessageException, ObjListView, ObjView}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Implicits._
+import de.sciss.proc.Universe
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

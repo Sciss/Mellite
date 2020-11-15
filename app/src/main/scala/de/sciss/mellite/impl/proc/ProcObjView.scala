@@ -19,8 +19,8 @@ import de.sciss.lucre.{Cursor, Disposable, Ident, IntObj, Obj, Source, SpanLikeO
 import de.sciss.mellite
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.{ObjListView, ObjTimelineView, ObjView}
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{ObjKeys, Proc}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{ObjKeys, Proc}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

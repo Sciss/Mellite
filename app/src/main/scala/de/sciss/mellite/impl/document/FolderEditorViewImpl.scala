@@ -22,7 +22,7 @@ import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.impl.component.CollectionViewImpl
 import de.sciss.mellite.{FolderEditorView, FolderView, ObjView}
 import de.sciss.swingplus.{GroupPanel, Spinner}
-import de.sciss.synth.proc.{ObjKeys, Universe}
+import de.sciss.proc.{ObjKeys, Universe}
 import javax.swing.SpinnerNumberModel
 import javax.swing.undo.UndoableEdit
 

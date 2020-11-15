@@ -29,9 +29,9 @@ import de.sciss.mellite.Log.{log, timeline => logTimeline}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.numbers.Implicits._
-import de.sciss.synth.proc.SoundProcesses.{logAural, logTransport}
-import de.sciss.synth.proc.gui.{AudioBusMeter, Oscilloscope}
-import de.sciss.synth.proc.{AuralSystem, SensorSystem}
+import de.sciss.proc.SoundProcesses.{logAural, logTransport}
+import de.sciss.proc.gui.{AudioBusMeter, Oscilloscope}
+import de.sciss.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail}
 import de.sciss.{desktop, osc}

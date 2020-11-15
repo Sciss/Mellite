@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.lucre.{Cursor, Txn}
 import de.sciss.lucre.swing.View
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 trait UniverseView[T <: Txn[T]] extends View.Cursor[T] {
   implicit val universe: Universe[T]

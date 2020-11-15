@@ -23,7 +23,7 @@ import de.sciss.lucre.{Cursor, Obj, SpanLikeObj, StringObj}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, ObjView, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.span.Span
-import de.sciss.synth.proc.Timeline
+import de.sciss.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

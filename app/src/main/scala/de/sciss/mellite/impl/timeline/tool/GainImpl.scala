@@ -20,7 +20,7 @@ import de.sciss.lucre.{Cursor, DoubleObj, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.synth
-import de.sciss.synth.proc.{ObjKeys, Timeline}
+import de.sciss.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

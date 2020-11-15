@@ -22,7 +22,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.tool.{CollectionToolLike, RubberBandTool}
 import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}
 import de.sciss.span.Span
-import de.sciss.synth.proc.{AuralContext, AuralObj, TimeRef}
+import de.sciss.proc.{AuralContext, AuralObj, TimeRef}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

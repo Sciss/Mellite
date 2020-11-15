@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{Application, FolderEditorView, FolderView, WindowPlacement}
 import de.sciss.mellite.{ActionCloseAllWorkspaces, FolderFrame}
 import de.sciss.mellite.impl.WindowImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.concurrent.Future
 import scala.swing.{Action, Component, SequentialContainer}

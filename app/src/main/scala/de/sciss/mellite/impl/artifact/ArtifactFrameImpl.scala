@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.objview.ArtifactObjView.humanName
 import de.sciss.mellite.{ArtifactFrame, ArtifactView}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object ArtifactFrameImpl {
   def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode)

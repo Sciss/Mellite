@@ -23,8 +23,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.swingplus.ComboBox
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Code, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Code, Universe}
 import javax.swing.Icon
 import org.rogach.scallop
 

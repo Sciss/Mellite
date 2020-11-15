@@ -15,7 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.audiocue.{AudioCueViewImpl => Impl}
-import de.sciss.synth.proc.{AudioCue, Universe}
+import de.sciss.proc.{AudioCue, Universe}
 
 object AudioCueView {
   def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] =

@@ -21,9 +21,9 @@ import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser}
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, Shapes}
 import de.sciss.swingplus.Spinner
-import de.sciss.synth.proc.Grapheme.Entry
-import de.sciss.synth.proc.{Confluent, Universe}
-import de.sciss.synth.proc.Implicits._
+import de.sciss.proc.Grapheme.Entry
+import de.sciss.proc.{Confluent, Universe}
+import de.sciss.proc.Implicits._
 import javax.swing.{Icon, SpinnerNumberModel}
 
 import scala.swing.{Component, Graphics2D, Label}

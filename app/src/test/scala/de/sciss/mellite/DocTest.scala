@@ -3,7 +3,7 @@ package de.sciss.mellite
 import java.io.File
 
 import de.sciss.lucre.store.BerkeleyDB
-import de.sciss.synth.proc.Workspace
+import de.sciss.proc.Workspace
 
 object DocTest extends App {
   val file  = File.createTempFile("mellite", "doc")

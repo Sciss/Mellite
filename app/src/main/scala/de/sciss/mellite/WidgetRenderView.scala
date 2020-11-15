@@ -17,7 +17,7 @@ import de.sciss.lucre.edit.UndoManager
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.{synth, Txn => LTxn}
 import de.sciss.mellite.impl.widget.WidgetRenderViewImpl
-import de.sciss.synth.proc.{Universe, Widget}
+import de.sciss.proc.{Universe, Widget}
 
 import scala.collection.immutable.{Seq => ISeq}
 

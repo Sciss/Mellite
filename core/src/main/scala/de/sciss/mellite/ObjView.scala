@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Obj, Observable, Source, Txn => LTxn}
 import de.sciss.mellite.DragAndDrop.Flavor
-import de.sciss.synth.proc.{Color, Universe}
+import de.sciss.proc.{Color, Universe}
 import javax.swing.Icon
 
 import scala.util.Try

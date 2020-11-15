@@ -20,7 +20,7 @@ import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.ObjGraphemeViewImpl
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjTimelineView, ObjView}
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 import javax.swing.Icon
 
 import scala.swing.{Component, Graphics2D, Label}

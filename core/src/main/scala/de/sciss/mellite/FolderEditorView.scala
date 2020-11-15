@@ -18,7 +18,7 @@ import de.sciss.lucre.Folder
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.swing.{Action, Component, SequentialContainer}
 

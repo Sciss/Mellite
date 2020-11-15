@@ -18,7 +18,7 @@ import java.io.File
 import de.sciss.desktop.{SwingApplication, SwingApplicationProxy}
 import de.sciss.lucre.synth.Server
 import de.sciss.synth.Client
-import de.sciss.synth.proc.{AuralSystem, Code, Universe}
+import de.sciss.proc.{AuralSystem, Code, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 

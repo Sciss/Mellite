@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.{TreeTableView, View}
 import de.sciss.lucre.{Folder, Obj, Source, Txn, synth}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.model.Model
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 

@@ -21,8 +21,8 @@ import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.document.NuagesEditorFrameImpl
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.nuages.Nuages
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Timeline, Universe}
 import javax.swing.Icon
 
 object NuagesObjView extends NoArgsListObjViewFactory {

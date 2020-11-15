@@ -38,9 +38,9 @@ import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, Dra
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
-import de.sciss.synth.proc.gui.TransportView
-import de.sciss.synth.proc.impl.AuxContextImpl
-import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
+import de.sciss.proc.gui.TransportView
+import de.sciss.proc.impl.AuxContextImpl
+import de.sciss.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
 import javax.swing.UIManager
 import javax.swing.undo.UndoableEdit
 

@@ -26,8 +26,8 @@
 //import de.sciss.mellite.impl.ObjViewCmdLineParser
 //import de.sciss.processor.Processor.Aborted
 //import de.sciss.swingplus.{GroupPanel, Spinner}
-//import de.sciss.synth.proc.Implicits._
-//import de.sciss.synth.proc.{Ensemble, TimeRef, Universe}
+//import de.sciss.proc.Implicits._
+//import de.sciss.proc.{Ensemble, TimeRef, Universe}
 //import javax.swing.{Icon, SpinnerNumberModel}
 //
 //import scala.swing.Swing.EmptyIcon

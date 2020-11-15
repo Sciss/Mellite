@@ -23,7 +23,7 @@ import de.sciss.lucre.{Cursor, LongObj, Obj}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.tool.RubberBandTool
 import de.sciss.mellite.{GUI, GraphemeCanvas, GraphemeTool, ObjGraphemeView}
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 

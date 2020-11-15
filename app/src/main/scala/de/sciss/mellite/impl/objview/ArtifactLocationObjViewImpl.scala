@@ -26,8 +26,8 @@ import de.sciss.mellite.ArtifactLocationObjView.{Config, MakeResult}
 import de.sciss.mellite.edit.EditArtifactLocation
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationFrame, ArtifactLocationObjView, DragAndDrop, GUI, ObjListView, ObjView}
-import de.sciss.synth.proc
-import de.sciss.synth.proc.Universe
+import de.sciss.proc
+import de.sciss.proc.Universe
 import javax.swing.undo.UndoableEdit
 
 import scala.util.Try

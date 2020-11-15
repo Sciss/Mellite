@@ -1,6 +1,6 @@
 package de.sciss.lucre
 
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 
 /** Cheesy work-around for Lucre #4 -- https://github.com/Sciss/Lucre/issues/4 */
 object GraphemeHasIterator {

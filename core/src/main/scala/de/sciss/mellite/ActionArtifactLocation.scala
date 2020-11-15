@@ -20,8 +20,8 @@ import de.sciss.asyncfile.Ops._
 import de.sciss.file.File
 import de.sciss.lucre.{Artifact, ArtifactLocation, Folder, Obj, Source, Txn}
 import de.sciss.swingplus.Labeled
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Implicits._
+import de.sciss.proc.Universe
 import de.sciss.{desktop, equal, swingplus}
 
 import scala.annotation.tailrec

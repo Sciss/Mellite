@@ -32,8 +32,8 @@ import de.sciss.model.impl.ModelImpl
 import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
-import de.sciss.synth.proc.Universe
-import de.sciss.synth.proc.Implicits._
+import de.sciss.proc.Universe
+import de.sciss.proc.Implicits._
 import de.sciss.{desktop, numbers}
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop

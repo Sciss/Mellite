@@ -18,7 +18,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, LongObj, Obj}
 import de.sciss.mellite.impl.tool.BasicCollectionTool
 import de.sciss.mellite.{GraphemeCanvas, GraphemeTool, ObjGraphemeView}
-import de.sciss.synth.proc.Grapheme
+import de.sciss.proc.Grapheme
 import javax.swing.undo.UndoableEdit
 
 /** A more complete implementation for grapheme tools that process selected views.

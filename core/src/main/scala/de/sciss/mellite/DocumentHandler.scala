@@ -18,7 +18,7 @@ import java.net.URI
 import de.sciss.lucre.Txn
 import de.sciss.mellite.impl.DocumentHandlerImpl
 import de.sciss.model.Model
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object DocumentHandler {
 

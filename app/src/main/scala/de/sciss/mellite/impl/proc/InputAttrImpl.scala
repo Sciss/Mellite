@@ -18,7 +18,7 @@ import de.sciss.lucre.{Ident, IdentMap, Identified, Obj, Txn => LTxn}
 import de.sciss.mellite.impl.proc.ProcObjView.{InputAttr, LinkTarget}
 import de.sciss.mellite.{TimelineRendering, TimelineView}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AuxContext, Proc}
+import de.sciss.proc.{AuxContext, Proc}
 
 import scala.annotation.switch
 import scala.concurrent.stm.TSet

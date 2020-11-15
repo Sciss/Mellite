@@ -20,8 +20,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.GraphemeFrame
-import de.sciss.synth.proc.Implicits._
-import de.sciss.synth.proc.{Grapheme, Universe}
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{Grapheme, Universe}
 import javax.swing.Icon
 
 object GraphemeObjView extends NoArgsListObjViewFactory {

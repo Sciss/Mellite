@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ActionCloseAllWorkspaces
 import de.sciss.mellite.{DocumentHandler, Mellite}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 /** We are bridging between the transactional and non-EDT `mellite.DocumentHandler` and
   * the GUI-based `de.sciss.desktop.DocumentHandler`. This is a bit ugly. In theory it

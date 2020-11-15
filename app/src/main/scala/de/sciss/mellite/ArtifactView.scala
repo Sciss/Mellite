@@ -18,7 +18,7 @@ import de.sciss.lucre.Artifact
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.{ArtifactViewImpl => Impl}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object ArtifactView {
   def apply[T <: Txn[T]](obj: Artifact[T], mode: Boolean, initMode: FileDialog.Mode)

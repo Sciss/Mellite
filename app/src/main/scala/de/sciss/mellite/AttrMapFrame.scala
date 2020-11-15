@@ -17,7 +17,7 @@ import de.sciss.lucre.Obj
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.document.{AttrMapFrameImpl => Impl}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object AttrMapFrame {
   def apply[T <: Txn[T]](obj: Obj[T])(implicit tx: T, universe: Universe[T]): AttrMapFrame[T] =

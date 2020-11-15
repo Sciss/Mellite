@@ -19,7 +19,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.{Disposable, TxnLike}
 import de.sciss.model.Model
-import de.sciss.synth.proc.{Code, Universe}
+import de.sciss.proc.{Code, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}

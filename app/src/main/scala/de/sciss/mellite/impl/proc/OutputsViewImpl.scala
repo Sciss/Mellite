@@ -25,7 +25,7 @@ import de.sciss.mellite.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.{DragAndDrop, GUI, MapView, ObjListView, ProcOutputsView}
-import de.sciss.synth.proc.{Proc, Universe}
+import de.sciss.proc.{Proc, Universe}
 import javax.swing.undo.UndoableEdit
 
 import scala.swing.Swing.HGlue

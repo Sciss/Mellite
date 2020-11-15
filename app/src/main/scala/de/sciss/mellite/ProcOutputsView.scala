@@ -19,7 +19,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.impl.proc.OutputsViewImpl
-import de.sciss.synth.proc.{Proc, Universe}
+import de.sciss.proc.{Proc, Universe}
 
 object ProcOutputsView {
   final case class Drag[T <: Txn[T]](universe: Universe[T], proc: Source[T, Proc[T]], key: String)

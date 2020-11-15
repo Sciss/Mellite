@@ -20,7 +20,7 @@ import de.sciss.desktop.{KeyStrokes, Window, WindowHandler}
 import de.sciss.mellite.InterpreterFrame
 import de.sciss.mellite.{Application, GUI}
 import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
-import de.sciss.synth.proc.Workspace
+import de.sciss.proc.Workspace
 
 import scala.swing.event.Key
 

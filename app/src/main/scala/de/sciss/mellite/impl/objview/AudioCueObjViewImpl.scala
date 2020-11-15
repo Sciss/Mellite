@@ -33,7 +33,7 @@ import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.audiofile.AudioFile
-import de.sciss.synth.proc.{AudioCue, TimeRef, Universe}
+import de.sciss.proc.{AudioCue, TimeRef, Universe}
 
 import scala.annotation.tailrec
 import scala.swing.{Component, Label}

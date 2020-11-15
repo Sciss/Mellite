@@ -17,7 +17,7 @@ import de.sciss.lucre.swing._
 import de.sciss.lucre.Txn
 import de.sciss.mellite.impl.DocumentViewHandlerImpl
 import de.sciss.model.Model
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 //object DocumentViewHandler {
 //  lazy val instance: DocumentViewHandler = new DocumentViewHandler {

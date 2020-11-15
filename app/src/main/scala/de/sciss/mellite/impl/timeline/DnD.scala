@@ -26,7 +26,7 @@ import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.{DragAndDrop, ObjView}
 import de.sciss.span.Span
 import de.sciss.audiofile.AudioFile
-import de.sciss.synth.proc.{AudioCue, Proc, TimeRef, Universe}
+import de.sciss.proc.{AudioCue, Proc, TimeRef, Universe}
 import javax.swing.TransferHandler._
 
 import scala.swing.Component

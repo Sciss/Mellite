@@ -22,7 +22,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{MarkdownEditorView, MarkdownFrame, MarkdownRenderView, Veto}
 import de.sciss.processor.Processor.Aborted
-import de.sciss.synth.proc.{Markdown, Universe}
+import de.sciss.proc.{Markdown, Universe}
 
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.{Future, Promise}

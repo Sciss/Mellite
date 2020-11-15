@@ -18,7 +18,7 @@ import de.sciss.lucre.ArtifactLocation
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.artifact.{ArtifactLocationViewImpl => Impl}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object ArtifactLocationView {
   def apply[T <: Txn[T]](obj: ArtifactLocation[T])

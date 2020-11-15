@@ -20,7 +20,7 @@ import de.sciss.icons.raphael
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{ArtifactLocation, Obj, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 import javax.swing.Icon
 
 object ArtifactLocationObjView extends ObjListView.Factory {

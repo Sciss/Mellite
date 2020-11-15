@@ -17,7 +17,7 @@ import de.sciss.desktop.UndoManager
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Txn => LTxn}
 import de.sciss.mellite.impl.document.{AttrMapViewImpl => Impl}
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object AttrMapView {
   def apply[T <: Txn[T]](obj: Obj[T])(implicit tx: T, universe: Universe[T],

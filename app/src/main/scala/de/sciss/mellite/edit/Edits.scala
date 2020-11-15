@@ -21,8 +21,9 @@ import de.sciss.mellite.Mellite.???!
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
-import de.sciss.synth.{SynthGraph, proc}
+import de.sciss.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
+import de.sciss.synth.SynthGraph
+import de.sciss.{proc, synth}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -58,9 +59,9 @@ object Edits {
         var scanOutKeys = Set.empty[String]
 
         sg.sources.foreach {
-          case proc.graph.ScanIn   (key)    => scanInKeys  += key
-          case proc.graph.ScanOut  (key, _) => scanOutKeys += key
-          case proc.graph.ScanInFix(key, _) => scanInKeys  += key
+          case synth.proc.graph.ScanIn   (key)    => scanInKeys  += key
+          case synth.proc.graph.ScanOut  (key, _) => scanOutKeys += key
+          case synth.proc.graph.ScanInFix(key, _) => scanInKeys  += key
           case _ =>
         }
 

@@ -17,7 +17,7 @@
 //import de.sciss.lucre.swing.View
 //import de.sciss.lucre.synth.Txn
 //import de.sciss.mellite.impl.document.{EnsembleViewImpl => Impl}
-//import de.sciss.synth.proc.{Ensemble, Universe}
+//import de.sciss.proc.{Ensemble, Universe}
 //
 //object EnsembleView {
 //  def apply[T <: Txn[T]](ensemble: Ensemble[T])(implicit tx: T, universe: Universe[T],

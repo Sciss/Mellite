@@ -20,7 +20,7 @@ import de.sciss.lucre.{Disposable, Txn, TxnLike}
 import de.sciss.mellite.DocumentHandler
 import de.sciss.mellite.DocumentHandler.Document
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{TMap, Ref => STMRef}

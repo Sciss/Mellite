@@ -17,7 +17,7 @@ import de.sciss.fingertree.RangedSeq
 import de.sciss.lucre.{Disposable, IdentMap}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.proc.ProcObjView.LinkTarget
-import de.sciss.synth.proc
+import de.sciss.proc
 
 final class InputAttrTimeline[T <: Txn[T]](val parent: ProcObjView.Timeline[T], val key: String,
                                            tl: proc.Timeline[T], tx0: T)

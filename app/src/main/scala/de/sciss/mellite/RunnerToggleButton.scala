@@ -19,8 +19,8 @@ import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Disposable, Obj, Txn, synth}
-import de.sciss.synth.proc.Runner.{Done, Failed, State}
-import de.sciss.synth.proc.{Runner, Universe}
+import de.sciss.proc.Runner.{Done, Failed, State}
+import de.sciss.proc.{Runner, Universe}
 
 import scala.swing.ToggleButton
 import scala.swing.event.{ButtonClicked, Key}

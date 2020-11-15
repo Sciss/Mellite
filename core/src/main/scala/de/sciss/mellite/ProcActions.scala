@@ -16,9 +16,10 @@ package de.sciss.mellite
 import de.sciss.equal
 import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.span.Span
-import de.sciss.synth.proc.impl.MkSynthGraphSource
-import de.sciss.synth.proc.{AudioCue, ObjKeys, Proc, Timeline}
-import de.sciss.synth.{SynthGraph, proc}
+import de.sciss.proc.impl.MkSynthGraphSource
+import de.sciss.proc.{AudioCue, ObjKeys, Proc, Timeline}
+import de.sciss.synth.SynthGraph
+import de.sciss.proc
 
 object ProcActions {
   private val MinDur    = 32

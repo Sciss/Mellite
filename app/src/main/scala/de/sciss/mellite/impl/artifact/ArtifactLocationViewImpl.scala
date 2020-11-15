@@ -27,7 +27,7 @@ import de.sciss.mellite.ArtifactLocationObjView.humanName
 import de.sciss.mellite.ArtifactLocationView
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.swingplus.ComboBox
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Button, Component, FlowPanel}

@@ -16,12 +16,14 @@ package de.sciss.mellite
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
+import de.sciss.log.Level
 import de.sciss.lucre.synth.{Executor, RT, Server, Txn}
 import de.sciss.lucre.{Cursor, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
-import de.sciss.synth.{Client, proc}
-import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe}
+import de.sciss.synth.Client
+import de.sciss.proc
+import de.sciss.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, SoundProcesses, Universe}
 import javax.swing.UIManager
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
@@ -251,6 +253,8 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       LogFrame.init()
     }
 
+    SoundProcesses.log.level = Level.Warn
+
     DocumentViewHandler.init()
     OpenWorkspace.install()
 
@@ -363,7 +367,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     u.cursor.step { implicit tx =>
       val f = u.workspace.root
       config.autoRun.foreach { name =>
-        import de.sciss.synth.proc.Implicits._
+        import de.sciss.proc.Implicits._
 
         (f / name).fold[Unit] {
           tx.afterCommit(Log.log.warn(s"o-run object '$name' does not exist."))

@@ -14,13 +14,13 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.synth.proc.FScape
+import de.sciss.proc.FScape
 import de.sciss.lucre.Source
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.mellite.impl.fscape.FScapeOutputsViewImpl
-import de.sciss.synth.proc.Universe
+import de.sciss.proc.Universe
 
 object FScapeOutputsView {
   final case class Drag[T <: Txn[T]](universe: Universe[T], fscape: Source[T, FScape[T]], key: String)

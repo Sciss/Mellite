@@ -17,7 +17,7 @@ import de.sciss.lucre
 import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.grapheme.{GraphemeFrameImpl => Impl}
-import de.sciss.synth.proc.{Grapheme, Universe}
+import de.sciss.proc.{Grapheme, Universe}
 
 object GraphemeFrame {
   def apply[T <: Txn[T]](group: Grapheme[T])

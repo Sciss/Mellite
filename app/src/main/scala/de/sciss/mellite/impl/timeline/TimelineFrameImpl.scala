@@ -21,7 +21,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.{Application, TimelineFrame, TimelineView}
-import de.sciss.synth.proc.{Timeline, Universe}
+import de.sciss.proc.{Timeline, Universe}
 
 import scala.swing.Action
 

@@ -28,8 +28,8 @@ import de.sciss.mellite.Log.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
 import de.sciss.model.Change
-import de.sciss.synth.proc
-import de.sciss.synth.proc.{Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
+import de.sciss.proc
+import de.sciss.proc.{Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
 import javax.swing.tree.TreeNode
 
