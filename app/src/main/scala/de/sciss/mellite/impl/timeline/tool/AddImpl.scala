@@ -19,7 +19,7 @@ import java.awt.event.MouseEvent
 import de.sciss.icons.raphael
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, IntObj, SpanLikeObj}
-import de.sciss.mellite.Mellite.log
+import de.sciss.mellite.Log.log
 import de.sciss.mellite.edit.EditTimelineInsertObj
 import de.sciss.mellite.impl.tool.{CollectionToolLike, DraggingTool}
 import de.sciss.mellite.{BasicTools, GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}

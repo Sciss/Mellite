@@ -17,6 +17,7 @@ import java.awt.datatransfer.Transferable
 import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
 
+import de.sciss.audiofile.AudioFile
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
@@ -37,7 +38,6 @@ import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, Dra
 import de.sciss.model.Change
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.ScrollBar
-import de.sciss.audiofile.AudioFile
 import de.sciss.synth.proc.gui.TransportView
 import de.sciss.synth.proc.impl.AuxContextImpl
 import de.sciss.synth.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
@@ -60,7 +60,7 @@ object TimelineViewImpl extends TimelineView.Companion {
 
   private val DEBUG = false // true
 
-  import de.sciss.mellite.Mellite.{logTimeline => logT}
+  import de.sciss.mellite.Log.{timeline => logT}
 
   def apply[T <: Txn[T]](obj: Timeline[T])
                         (implicit tx: T, universe: Universe[T],

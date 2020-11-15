@@ -16,12 +16,11 @@ package de.sciss.mellite
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
-import de.sciss.log.Logger
 import de.sciss.lucre.synth.{Executor, RT, Server, Txn}
 import de.sciss.lucre.{Cursor, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.osc
-import de.sciss.synth.Client
+import de.sciss.synth.{Client, proc}
 import de.sciss.synth.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe}
 import javax.swing.UIManager
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
@@ -41,9 +40,6 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
 //  ServerImpl.USE_COMPRESSION = false
 
-  final val log         : Logger = new Logger("mllt")
-  final val logTimeline : Logger = new Logger("mllt timeline")
-
   implicit val executionContext: ExecutionContext = Executor.executionContext
 
   /** Exception are sometimes swallowed without printing in a transaction. This ensures a print. */
@@ -52,22 +48,6 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     err.printStackTrace()
     throw err
   }
-
-  import de.sciss.synth.proc
-//  proc.showLog            = true
-//  proc.showAuralLog       = true
-//  proc.showTransportLog   = true
-//  showTimelineLog         = true
-  //  showLog                 = true
-  //  //  lucre.event    .showLog = true
-  //  //  lucre.confluent.showLog = true
-//  de.sciss.lucre.bitemp.impl.BiGroupImpl.showLog = true
-//  // gui.impl.timeline.TimelineViewImpl.DEBUG = true
-//  de.sciss.lucre.event.showLog = true
-//  de.sciss.fscape.showStreamLog   = true
-//  de.sciss.fscape.showControlLog  = true
-//  Prefs.useLogFrame = false
-//  de.sciss.synth.proc.graph.impl.ActionResponder.DEBUG = true
 
   override def main(args: Array[String]): Unit = {
     object p extends ScallopConf(args) {
@@ -267,9 +247,11 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     uid.remove("TabbedPane.ancestorInputMap") // interferes with code editor navigation
 
     // early, so error printing in `initTypes` is already captured
-    if (Prefs.useLogFrame && config.logFrame) LogFrame.instance   // init
-    DocumentViewHandler.instance                                  // init
+    if (Prefs.useLogFrame && config.logFrame) {
+      LogFrame.init()
+    }
 
+    DocumentViewHandler.init()
     OpenWorkspace.install()
 
     // at this point, awt.Toolkit will have loaded Atk
@@ -384,10 +366,10 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         import de.sciss.synth.proc.Implicits._
 
         (f / name).fold[Unit] {
-          tx.afterCommit(println(s"Warning: auto-run object '$name' does not exist."))
+          tx.afterCommit(Log.log.warn(s"o-run object '$name' does not exist."))
         } { obj =>
           u.mkRunner(obj).fold[Unit] {
-            tx.afterCommit(println(s"Warning: no runner for object '$name' of type ${obj.tpe}."))
+            tx.afterCommit(Log.log.warn(s"no runner for object '$name' of type ${obj.tpe}."))
           } { r =>
             r.run()
           }

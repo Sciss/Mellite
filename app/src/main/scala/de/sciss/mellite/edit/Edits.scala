@@ -16,7 +16,8 @@ package de.sciss.mellite.edit
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{Cursor, DoubleObj, DoubleVector, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
-import de.sciss.mellite.Mellite.{???!, log}
+import de.sciss.mellite.Log.log
+import de.sciss.mellite.Mellite.???!
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions}
 import de.sciss.span.{Span, SpanLike}

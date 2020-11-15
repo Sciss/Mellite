@@ -24,7 +24,8 @@ import de.sciss.log.Level
 import de.sciss.lucre.TxnLike
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, RT, Server, Synth}
-import de.sciss.mellite.Mellite.{executionContext, log, logTimeline}
+import de.sciss.mellite.Mellite.{executionContext}
+import de.sciss.mellite.Log.{log, timeline => logTimeline}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.numbers.Implicits._

@@ -48,7 +48,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
   private val DEBUG   = false
 
-  import de.sciss.mellite.Mellite.{logTimeline => logT}
+  import de.sciss.mellite.Log.{timeline => logT}
 
 //  private type EntryProc[T <: Txn[T]] = BiGroup.Entry[T, Proc[T]]
 

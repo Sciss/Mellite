@@ -57,6 +57,11 @@ object DocumentViewHandler {
 
   type View[T <: Txn[T]] = WorkspaceWindow[T]
 
+  def init(): Unit = {
+    instance
+    ()
+  }
+
   lazy val instance: DocumentViewHandler =
     DocumentViewHandlerImpl.instance
 

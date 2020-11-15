@@ -27,6 +27,11 @@ object LogFrame {
   val verticalPlacement     = 1.0f
   val placementPadding      = 20
 
+  def init(): Unit = {
+    instance
+    ()
+  }
+
   lazy val instance: LogFrame  = new LogWindowImpl with LogFrame with ZoomSupport with NoMenuBarActions { frame =>
     def handler: WindowHandler = Application.windowHandler
 

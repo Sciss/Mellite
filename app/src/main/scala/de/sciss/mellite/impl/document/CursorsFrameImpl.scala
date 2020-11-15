@@ -24,7 +24,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Cursor, Disposable, confluent}
-import de.sciss.mellite.Mellite.log
+import de.sciss.mellite.Log.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
 import de.sciss.model.Change
