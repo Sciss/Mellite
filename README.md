@@ -177,11 +177,13 @@ Copy the artifacts to a safe location now.
 To build for Mac and Windows, we need to publish all libraries now to Maven Central (use JDK 8 again!).
 Then Windows can be built on Linux using wine:
  
- 1. `rm -r full/target` (otherwise Jlink fails)
+ 1. `rm -rf full/target` (otherwise Jlink fails)
  2. `wine cmd.exe` and
  `Z:\home\hhrutz\Downloads\OpenJDK11U-jdk_x64_windows_hotspot_11.0.9_11\jdk-11.0.9+11\bin\java.exe -jar Z:\home\hhrutz\Downloads\sbt-1.4.2\sbt\bin\sbt-launch.jar` then in sbt console:
  `project mellite-full` and `universal:packageBin`
  
+N.B.: sbt 1.4.x seems no longer to work under wine due to coursier updates; for now we can still build by setting the version in `build.properties` to 1.3.13 temporarily!
+
 For Mac we need a bloody fruit company machine:
 
  1. `git fetch; git merge origin/work`
