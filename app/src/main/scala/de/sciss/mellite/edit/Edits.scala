@@ -20,7 +20,7 @@ import de.sciss.mellite.Mellite.{???!, log}
 import de.sciss.mellite.ProcActions.{Move, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
 import javax.swing.undo.UndoableEdit
 
@@ -44,7 +44,7 @@ object Edits {
                                  compiler: Code.Compiler): Option[UndoableEdit] = {
     val code = codeElem.value
     code match {
-      case csg: Code.SynthGraph =>
+      case csg: Code.Proc =>
         val sg = try {
           csg.execute {}  // XXX TODO: compilation blocks, not good!
         } catch {
@@ -64,16 +64,16 @@ object Edits {
         }
 
         // sg.sources.foreach(println)
-        if (scanInKeys .nonEmpty) log(s"SynthDef has the following scan in  keys: ${scanInKeys .mkString(", ")}")
-        if (scanOutKeys.nonEmpty) log(s"SynthDef has the following scan out keys: ${scanOutKeys.mkString(", ")}")
+        if (scanInKeys .nonEmpty) log.debug(s"SynthDef has the following scan in  keys: ${scanInKeys .mkString(", ")}")
+        if (scanOutKeys.nonEmpty) log.debug(s"SynthDef has the following scan out keys: ${scanOutKeys.mkString(", ")}")
 
         val editName    = "Set Synth Graph"
         val attrNameOpt = codeElem.attr.get(ObjKeys.attrName)
         val edits       = List.newBuilder[UndoableEdit]
 
         processes.foreach { p =>
-          val graphEx = SynthGraphObj.newConst[T](sg)  // XXX TODO: ideally would link to code updates
-          val edit1   = EditVar.Expr[T, SynthGraph, SynthGraphObj](editName, p.graph, graphEx)
+          val graphEx = Proc.GraphObj.newConst[T](sg)  // XXX TODO: ideally would link to code updates
+          val edit1   = EditVar.Expr[T, SynthGraph, Proc.GraphObj](editName, p.graph, graphEx)
           edits += edit1
           if (attrNameOpt.nonEmpty) {
             val edit2 = EditAttrMap("Set Object Name", p, ObjKeys.attrName, attrNameOpt)
@@ -115,7 +115,7 @@ object Edits {
 
   def addLink[T <: Txn[T]](source: Proc.Output[T], sink: Proc[T], key: String = Proc.mainIn)
                           (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
-    log(s"Link $source to $sink / $key")
+    log.debug(s"Link $source to $sink / $key")
     // source.addSink(Scan.Link.Scan(sink))
 //    EditAddScanLink(source = source /* , sourceKey */ , sink = sink /* , sinkKey */)
     sink.attr.get(key) match {
@@ -135,7 +135,7 @@ object Edits {
 
   def removeLink[T <: Txn[T]](link: Link[T])
                              (implicit tx: T, cursor: Cursor[T]): UndoableEdit = {
-    log(s"Unlink $link")
+    log.debug(s"Unlink $link")
     val edit = link.sinkType match {
       case SinkDirect() =>
         EditAttrMap("Remove Link", obj = link.sink, key = link.key, value = None)

@@ -73,7 +73,7 @@ final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], t
       val obj   = p // Obj(Proc.Elem(p))
       obj.attr.put(ObjTimelineView.attrTrackIndex , IntObj.newVar(IntObj.newConst(drag.modelYOffset)))
       obj.attr.put(ObjTimelineView.attrTrackHeight, IntObj.newVar(IntObj.newConst(drag.modelYExtent)))
-      log(s"Add function region $p, span = ${drag.span}, trackIndex = ${drag.modelYOffset}")
+      log.debug(s"Add function region $p, span = ${drag.span}, trackIndex = ${drag.modelYOffset}")
       // import SpanLikeObj.serializer
       EditTimelineInsertObj(s"Insert $name", g, span, obj)
       // g.add(span, obj)

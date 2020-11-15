@@ -17,7 +17,7 @@ import java.awt.datatransfer.Transferable
 
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.equal.Implicits._
-import de.sciss.fscape.lucre.FScape
+import de.sciss.synth.proc.FScape
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn

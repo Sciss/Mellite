@@ -50,7 +50,7 @@ object CursorsFrameImpl {
     val _view: ViewImpl = new ViewImpl(rootView)(workspace, tx.system, universe) {
       self =>
       val observer: Disposable[D] = root.changed.react { implicit tx =>upd =>
-        log(s"DocumentCursorsFrame update $upd")
+        log.debug(s"DocumentCursorsFrame update $upd")
         self.elemUpdated(rootView, upd.changes)
       }
     }
@@ -126,7 +126,7 @@ object CursorsFrameImpl {
     }
 
     override protected def performClose(): Future[Unit] = {
-      log(s"Closing workspace ${workspace.folder}")
+      log.debug(s"Closing workspace ${workspace.folder}")
 //      implicit val cursor: Cursor[T] = workspace.cursor
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }

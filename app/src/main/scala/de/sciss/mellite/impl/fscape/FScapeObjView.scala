@@ -14,7 +14,7 @@
 package de.sciss.mellite.impl.fscape
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
-import de.sciss.fscape.lucre.FScape
+import de.sciss.synth.proc.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
@@ -27,6 +27,7 @@ import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjListViewImpl.NonEditable
 import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl, ObjViewImpl}
 import de.sciss.mellite.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
+import de.sciss.synth.proc.FScape.GraphObj
 import de.sciss.synth.proc.Implicits._
 import de.sciss.synth.proc.{Code, Universe}
 import javax.swing.Icon
@@ -102,7 +103,6 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     }
 
     import de.sciss.fscape.Graph
-    import de.sciss.fscape.lucre.GraphObj
 
     val handler = new CodeView.Handler[T, Unit, Graph] {
       def in(): Unit = ()

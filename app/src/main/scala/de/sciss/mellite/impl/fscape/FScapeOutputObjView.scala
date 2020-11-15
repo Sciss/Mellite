@@ -13,7 +13,7 @@
 
 package de.sciss.mellite.impl.fscape
 
-import de.sciss.fscape.lucre.FScape
+import de.sciss.synth.proc.FScape
 import de.sciss.icons.raphael
 import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn

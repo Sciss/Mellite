@@ -16,7 +16,7 @@ package de.sciss.mellite.impl.timeline
 import de.sciss.lucre.Txn
 import de.sciss.swingplus.Spinner
 import de.sciss.synth
-import de.sciss.synth.proc.{Code, Proc, SynthGraphObj}
+import de.sciss.synth.proc.{Code, Proc}
 import de.sciss.synth.{GE, SynthGraph}
 import javax.swing.SpinnerNumberModel
 
@@ -38,7 +38,7 @@ object GlobalProcPreset {
     type Ctl <: Controls
 
     protected def source(controls: Ctl): Option[String]
-    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T]
+    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): Proc.GraphObj[T]
     protected def hasOutput: Boolean
 
     protected def configure[T <: Txn[T]](proc: Proc[T], controls: Ctl)(implicit tx: T): Unit
@@ -50,7 +50,7 @@ object GlobalProcPreset {
     final def make[T <: Txn[T]](controls: Ctl)(implicit tx: T): Proc[T] = {
       val p = Proc[T]()
       p.graph() = graph(controls)
-      source(controls).foreach(s => p.attr.put(Proc.attrSource, Code.Obj.newVar(Code.SynthGraph(s))))
+      source(controls).foreach(s => p.attr.put(Proc.attrSource, Code.Obj.newVar(Code.Proc(s))))
       if (hasOutput) p.outputs.add(Proc.mainOut)
       configure(p, controls)
       p
@@ -62,7 +62,7 @@ object GlobalProcPreset {
 
     protected def source(controls: Ctl): Option[String] = None
 
-    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T] = SynthGraphObj.empty[T]
+    protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): Proc.GraphObj[T] = Proc.GraphObj.empty[T]
 
     protected def hasOutput = false
 
@@ -102,7 +102,7 @@ object GlobalProcPreset {
       )
     }
 
-    final protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): SynthGraphObj[T] = {
+    final protected def graph[T <: Txn[T]](controls: Ctl)(implicit tx: T): Proc.GraphObj[T] = {
       val numInChannels  = numInputChannels (controls)
       val numOutChannels = numOutputChannels(controls)
       // Note: be careful when you change this to take care of the source code string above

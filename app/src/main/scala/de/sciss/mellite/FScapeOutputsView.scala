@@ -14,7 +14,7 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.fscape.lucre.FScape
+import de.sciss.synth.proc.FScape
 import de.sciss.lucre.Source
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn

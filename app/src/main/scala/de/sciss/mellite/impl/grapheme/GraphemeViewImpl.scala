@@ -238,7 +238,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     }
 
     def objAdded(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Unit = {
-      logT(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
+      logT.debug(s"objAdded(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
       val a = addObjImpl(gr, time = time, entry = entry, updateSucc = true)
       deferTx {
         viewMapG = a.newViewMap
@@ -248,7 +248,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     }
 
     def objAddedInit(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Child = {
-      logT(s"objAddedInit(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
+      logT.debug(s"objAddedInit(time = $time / ${TimeRef.framesToSecs(time)}, entry.value = ${entry.value})")
       assert (time == entry.key.value, s"time = $time, entry.key = ${entry.key.value}")
       val a = addObjImpl(gr, time = time, entry = entry, updateSucc = false)
       viewMapG = a.newViewMap
@@ -307,7 +307,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       Console.err.println(s"Warning: Grapheme - $action. View for object $entry (value ${entry.value}) not found.")
 
     def objRemoved(gr: BiPin[T, Obj[T]], time: Long, entry: Grapheme.Entry[T])(implicit tx: T): Unit = {
-      logT(s"objRemoved($time, entry.value = ${entry.value})")
+      logT.debug(s"objRemoved($time, entry.value = ${entry.value})")
       val opt = removeObjImpl(gr = gr, time = time, entry = entry, isMove = false)
       opt.fold[Unit] {
         warnViewNotFound("remove", entry)
@@ -367,7 +367,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
     def objMoved(gr: BiPin[T, Obj[T]], entry: Grapheme.Entry[T], timeCh: Change[Long])
                 (implicit tx: T): Unit = {
-      logT(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, entry.value = ${entry.value})")
+      logT.debug(s"objMoved(${timeCh.before} / ${TimeRef.framesToSecs(timeCh.before)} -> ${timeCh.now} / ${TimeRef.framesToSecs(timeCh.now)}, entry.value = ${entry.value})")
       val opt = removeObjImpl(gr = gr, time = timeCh.before, entry = entry, isMove = true)
       opt.fold[Unit] {
         warnViewNotFound("remove", entry)
@@ -465,7 +465,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       }
 
       protected def commitToolChanges(value: Any): Unit = {
-        logT(s"Commit tool changes $value")
+        logT.debug(s"Commit tool changes $value")
         val editOpt = cursor.step { implicit tx =>
           value match {
 //            case t: GraphemeTool.Cursor    => toolCursor .commit(t)

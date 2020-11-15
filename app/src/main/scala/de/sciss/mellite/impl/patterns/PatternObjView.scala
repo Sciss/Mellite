@@ -25,8 +25,8 @@ import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl,
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
-import de.sciss.patterns.Pat
-import de.sciss.patterns.lucre.Pattern
+import de.sciss.patterns.graph.Pat
+import de.sciss.synth.proc.Pattern
 import de.sciss.synth.proc.{Code, Universe}
 import de.sciss.synth.proc.Implicits._
 import javax.swing.Icon

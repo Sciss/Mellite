@@ -20,17 +20,19 @@ import de.sciss.audiowidgets.PeakMeter
 import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
 import de.sciss.icons.raphael
+import de.sciss.log.Level
 import de.sciss.lucre.TxnLike
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, RT, Server, Synth}
-import de.sciss.mellite.Mellite.{executionContext, log, showTimelineLog}
+import de.sciss.mellite.Mellite.{executionContext, log, logTimeline}
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.numbers.Implicits._
+import de.sciss.synth.proc.SoundProcesses.{logAural, logTransport}
 import de.sciss.synth.proc.gui.{AudioBusMeter, Oscilloscope}
 import de.sciss.synth.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
-import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail, proc}
+import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail}
 import de.sciss.{desktop, osc}
 import javax.imageio.ImageIO
 
@@ -178,10 +180,10 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   private def toggleDebugLog(): Unit = {
-    val state = !showTimelineLog
-    showTimelineLog         = state
-    proc.showAuralLog       = state
-    proc.showTransportLog   = state
+    val lvl = if (logTimeline.level == Level.Debug) Level.Off else Level.Debug
+    logTimeline .level  = lvl
+    logAural    .level  = lvl
+    logTransport.level  = lvl
   }
 
   private object ActionScope extends Action("Show Oscilloscope") {
@@ -267,7 +269,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   private def auralSystemStarted(s: Server)(implicit tx: RT): Unit = {
-    log("MainFrame: AuralSystem started")
+    log.debug("MainFrame: AuralSystem started")
 
     val numIns  = s.peer.config.inputBusChannels
     val numOuts = s.peer.config.outputBusChannels
@@ -483,7 +485,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   private def auralSystemStopped()(implicit tx: RT): Unit = {
-    log("MainFrame: AuralSystem stopped")
+    log.debug("MainFrame: AuralSystem stopped")
     metersRef .swap(Nil)(tx.peer).foreach(_.dispose())
     synOpt.swap(None)(tx.peer)
     deferTx {
@@ -505,7 +507,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     }
 
   private def sensorSystemStarted(s: SensorSystem.Server)(implicit tx: TxnLike): Unit = {
-    log("MainFrame: SensorSystem started")
+    log.debug("MainFrame: SensorSystem started")
     deferTx {
       actionStartStopSensors.title = "Stop"
       ggDumpSensors.enabled = true
@@ -519,12 +521,12 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   private def sensorSystemStopped()(implicit tx: TxnLike): Unit = {
-    log("MainFrame: SensorSystem stopped")
+    log.debug("MainFrame: SensorSystem stopped")
     deferTx {
-      ggMainVolumeOpt = None
-      actionStartStopSensors.title = "Start"
-      ggDumpSensors.enabled   = false
-      ggDumpSensors.selected  = false
+      ggMainVolumeOpt               = None
+      actionStartStopSensors.title  = "Start"
+      ggDumpSensors.enabled         = false
+      ggDumpSensors.selected        = false
       if (Prefs.useSensorMeters) {
         sensorServerPane.contents.remove(sensorServerPane.contents.size - 1)
       }

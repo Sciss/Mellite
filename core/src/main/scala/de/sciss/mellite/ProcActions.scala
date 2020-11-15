@@ -17,7 +17,7 @@ import de.sciss.equal
 import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.span.Span
 import de.sciss.synth.proc.impl.MkSynthGraphSource
-import de.sciss.synth.proc.{AudioCue, ObjKeys, Proc, SynthGraphObj, Timeline}
+import de.sciss.synth.proc.{AudioCue, ObjKeys, Proc, Timeline}
 import de.sciss.synth.{SynthGraph, proc}
 
 object ProcActions {
@@ -249,9 +249,9 @@ object ProcActions {
     // val bi: Grapheme.TimedElem[T] = (gStart, grapheme) // BiExpr(gStart, grapheme)
     // grIn.add(gStart, audioCue)
     // scanIn add grIn
-    p.graph() = SynthGraphObj.tape
+    p.graph() = Proc.GraphObj.tape
     a.put(Proc.graphAudio, audioCueOff /* grIn */)
-    a.put(Proc.attrSource, SynthGraphObj.tapeSource)
+    a.put(Proc.attrSource, Proc.GraphObj.tapeSource)
     (span, p)
   }
 

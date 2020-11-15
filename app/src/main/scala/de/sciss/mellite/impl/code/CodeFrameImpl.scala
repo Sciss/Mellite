@@ -27,7 +27,7 @@ import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseView}
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.Code.Example
-import de.sciss.synth.proc.{Action, Code, Control, Proc, SynthGraphObj, Universe, Widget}
+import de.sciss.synth.proc.{Action, Code, Control, Proc, Universe, Widget}
 import javax.swing.undo.UndoableEdit
 
 import scala.collection.immutable.{Seq => ISeq}
@@ -43,7 +43,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
   def proc[T <: Txn[T]](obj: Proc[T])
                        (implicit tx: T, universe: Universe[T],
                         compiler: Code.Compiler): CodeFrame[T] = {
-    val codeObj = mkSource(obj = obj, codeTpe = Code.SynthGraph, key = Proc.attrSource)({
+    val codeObj = mkSource(obj = obj, codeTpe = Code.Proc, key = Proc.attrSource)({
       val gv: SynthGraph = obj.graph.value
       val txt     = /*if (gv.isEmpty) "" else*/ try {
         ProcActions.extractSource(gv)
@@ -52,14 +52,14 @@ object CodeFrameImpl extends CodeFrame.Companion {
           s"// $ex"
       }
       if (txt.isEmpty)
-        Code.SynthGraph.defaultSource
+        Code.Proc.defaultSource
       else
         s"// source code automatically extracted\n\n$txt"
     })
 
     val objH    = tx.newHandle(obj)
     val code0   = codeObj.value match {
-      case cs: Code.SynthGraph => cs
+      case cs: Code.Proc => cs
       case other => sys.error(s"Proc source code does not produce SynthGraph: ${other.tpe.humanName}")
     }
 
@@ -69,7 +69,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
       def save(in: Unit, out: SynthGraph)(implicit tx: T): UndoableEdit = {
         val obj = objH()
         import universe.cursor
-        EditVar.Expr[T, SynthGraph, SynthGraphObj]("Change SynthGraph", obj.graph, SynthGraphObj.newConst[T](out))
+        EditVar.Expr[T, SynthGraph, Proc.GraphObj]("Change SynthGraph", obj.graph, Proc.GraphObj.newConst[T](out))
       }
 
       def dispose()(implicit tx: T): Unit = ()

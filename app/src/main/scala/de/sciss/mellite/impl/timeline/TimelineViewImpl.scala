@@ -299,7 +299,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     private def repaintAll(): Unit = canvas.canvasComponent.repaint()
 
     private def objAdded(span: SpanLike, timed: BiGroup.Entry[T, Obj[T]], repaint: Boolean)(implicit tx: T): Unit = {
-      logT(s"objAdded($span / ${TimeRef.spanToSecs(span)}, $timed)")
+      logT.debug(s"objAdded($span / ${TimeRef.spanToSecs(span)}, $timed)")
       // timed.span
       // val proc = timed.value
 
@@ -354,7 +354,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       Console.err.println(s"Warning: Timeline - $action. View for object $timed not found.")
 
     private def objRemoved(span: SpanLike, timed: BiGroup.Entry[T, Obj[T]])(implicit tx: T): Unit = {
-      logT(s"objRemoved($span, $timed)")
+      logT.debug(s"objRemoved($span, $timed)")
       val id = timed.id
       viewMap.get(id).fold {
         warnViewNotFound("remove", timed)
@@ -378,7 +378,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     // by using trackCh = Change(0,0), and vice versa
     private def objMoved(timed: BiGroup.Entry[T, Obj[T]], spanCh: Change[SpanLike], trackCh: Option[(Int, Int)])
                 (implicit tx: T): Unit = {
-      logT(s"objMoved(${spanCh.before} / ${TimeRef.spanToSecs(spanCh.before)} -> ${spanCh.now} / ${TimeRef.spanToSecs(spanCh.now)}, $timed)")
+      logT.debug(s"objMoved(${spanCh.before} / ${TimeRef.spanToSecs(spanCh.before)} -> ${spanCh.now} / ${TimeRef.spanToSecs(spanCh.now)}, $timed)")
       viewMap.get(timed.id).fold {
         warnViewNotFound("move", timed)
       } { view =>
@@ -434,7 +434,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     private def insertAudioRegion(drop: DnD.Drop[T], drag: DnD.AudioDragLike[T],
                                   audioCue: AudioCue.Obj[T])(implicit tx: T): Option[UndoableEdit] =
       plainGroup.modifiableOption.map { groupM =>
-        logT(s"insertAudioRegion($drop, ${drag.selection}, $audioCue)")
+        logT.debug(s"insertAudioRegion($drop, ${drag.selection}, $audioCue)")
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
         val (span, obj) = ProcActions.mkAudioRegion(time = tlSpan,
           audioCue = audioCue, gOffset = drag.selection.start /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
@@ -587,7 +587,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       }
 
       protected def commitToolChanges(value: Any): Unit = {
-        logT(s"Commit tool changes $value")
+        logT.debug(s"Commit tool changes $value")
         val editOpt = cursor.step { implicit tx =>
           value match {
             case t: TimelineTool.Cursor => toolCursor commit t

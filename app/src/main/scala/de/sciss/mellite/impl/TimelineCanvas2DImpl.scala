@@ -52,7 +52,7 @@ trait TimelineCanvas2DImpl[T <: Txn[T], Y, Child]
   protected final val toolListener: Model.Listener[Update[Any]] = {
     // case TrackTool.DragBegin =>
     case DragCancel =>
-      log(s"Drag cancel $toolState")
+      log.debug(s"Drag cancel $toolState")
       if (toolState.isDefined) {
         toolState   = None
         repaint()
@@ -62,7 +62,7 @@ trait TimelineCanvas2DImpl[T <: Txn[T], Y, Child]
       }
 
     case DragEnd =>
-      log(s"Drag end $toolState")
+      log.debug(s"Drag end $toolState")
       toolState.fold[Unit] {
         if (rubberState.isValid) {
           rubberState = emptyRubber
@@ -84,13 +84,13 @@ trait TimelineCanvas2DImpl[T <: Txn[T], Y, Child]
       }
 
     case BasicTool.Adjust(state) =>
-      log(s"Tool commit $state")
+      log.debug(s"Tool commit $state")
       toolState = None
       commitToolChanges(state)
       repaint()
 
     case state: DragRubber[_] =>
-      log(s"Tool rubber $state")
+      log.debug(s"Tool rubber $state")
       rubberState = state.asInstanceOf[DragRubber[Y]]    // XXX TODO not pretty
       repaint()
   }
