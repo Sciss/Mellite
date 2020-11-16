@@ -32,7 +32,11 @@ trait TimelineCanvas2D[T <: Txn[T], Y, Child] extends TimelineCanvas {
 
   def screenToModelPos(y: Int): Y
 
+  def screenToModelPosF(y: Int): Double = throw new NotImplementedError()
+
   def screenToModelExtent(dy: Int): Y
+
+  def screenToModelExtentF(dy: Int): Double = throw new NotImplementedError()
 
   def modelPosToScreen(modelY: Y): Double
 

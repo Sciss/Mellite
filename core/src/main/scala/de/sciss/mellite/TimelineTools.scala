@@ -118,17 +118,17 @@ object TimelineTool {
 
   // ----
 
-  type Move                             = ProcActions.Move
-  val  Move   : ProcActions.Move  .type = ProcActions.Move
-  type Resize                           = ProcActions.Resize
-  val  Resize : ProcActions.Resize.type = ProcActions.Resize
+  type Move                              = ProcActions.Move
+  val  Move   : ProcActions.Move   .type = ProcActions.Move
+  type Resize                            = ProcActions.Resize
+  val  Resize : ProcActions.Resize .type = ProcActions.Resize
 
   final case class Gain    (factor: Float)
   final case class Mute    (engaged: Boolean)
   final case class Fade    (deltaFadeIn: Long, deltaFadeOut: Long, deltaFadeInCurve: Float, deltaFadeOutCurve: Float)
 
   final val NoMove      = Move(deltaTime = 0L, deltaTrack = 0, copy = false)
-  final val NoResize    = Resize(deltaStart = 0L, deltaStop = 0L)
+  final val NoResize    = Resize(deltaStart = 0L, deltaStop = 0L, deltaTrackStart = 0, deltaTrackStop = 0)
   final val NoGain      = Gain(1f)
   final val NoFade      = Fade(0L, 0L, 0f, 0f)
   final val NoFunction  = Add(-1, -1, Span(0L, 0L))

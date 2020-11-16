@@ -27,3 +27,15 @@ trait TimelineRendering extends BasicRendering {
   def ttFadeState                 : TimelineTool.Fade
   def ttFunctionState             : TimelineTool.Add
 }
+
+trait TimelineRendering2 extends BasicRendering {
+  def pntInlet                    : Paint
+  def pntInletSpan                : Paint
+  def strokeInletSpan             : Stroke
+
+  def ttMoveState                 : TimelineTool.Move
+  def ttResizeState               : TimelineTool.Resize
+  def ttGainState                 : TimelineTool.Gain
+  def ttFadeState                 : TimelineTool.Fade
+  def ttFunctionState             : TimelineTool.Add
+}

@@ -15,13 +15,13 @@ package de.sciss.mellite.edit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.{Cursor, DoubleObj, DoubleVector, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
+import de.sciss.lucre.{BooleanObj, Cursor, DoubleObj, DoubleVector, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.mellite.Log.log
 import de.sciss.mellite.Mellite.???!
-import de.sciss.mellite.ProcActions.{Move, Resize}
-import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions}
-import de.sciss.span.{Span, SpanLike}
+import de.sciss.mellite.TimelineTool.{Move, Resize, Gain, Mute}
+import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions, TimelineView}
 import de.sciss.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
+import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.SynthGraph
 import de.sciss.{proc, synth}
 import javax.swing.undo.UndoableEdit
@@ -215,71 +215,167 @@ object Edits {
 
   private def any2stringadd: Any = ()
 
-  def resize[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], amount: Resize, minStart: Long)
-                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
-    SpanLikeObj.Var.unapply(span).flatMap { vr =>
-      import amount.{deltaStart, deltaStop}
-      val oldSpan   = span.value
-      // val minStart  = timelineModel.bounds.start
-      val dStartC   = if (deltaStart >= 0) deltaStart else oldSpan match {
-        case Span.HasStart(oldStart) => math.max(-(oldStart - minStart) , deltaStart)
-        case _ => 0L
-      }
-      val dStopC   = if (deltaStop >= 0) deltaStop else oldSpan match {
-        case Span.HasStop (oldStop)   => math.max(-(oldStop  - minStart + 32 /* MinDur */), deltaStop)
-        case _ => 0L
-      }
-
-      if (dStartC != 0L || dStopC != 0L) {
-        // val imp = ExprImplicits[T]
-
-        val (dStartCC, dStopCC) = (dStartC, dStopC)
-
-        // XXX TODO -- the variable contents should ideally be looked at
-        // during the edit performance
-
-        val oldSpan = vr()
-        val newSpan = oldSpan.value match {
-          case Span.From (start)  => Span.From (start + dStartCC)
-          case Span.Until(stop )  => Span.Until(stop  + dStopCC )
-          case Span(start, stop)  =>
-            val newStart = start + dStartCC
-            Span(newStart, math.max(newStart + 32 /* MinDur */, stop + dStopCC))
-          case other => other
-        }
-
+  private def editAdjustIntAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Int, name: String,
+                                                default: Int)(combine: (Int, Int) => Int)
+                                               (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
+    obj.attr.$[IntObj](key) match {
+      case Some(IntObj.Var(vr)) =>
+        // XXX TODO could be more elaborate; for now preserve just one level of variables
+        val edit = EditVar.Expr[T, Int, IntObj](name, vr, combine(vr().value, arg))
+        Some(edit)
+      case other =>
         import de.sciss.equal.Implicits._
-        val newSpanEx = SpanLikeObj.newConst[T](newSpan)
-        if (newSpanEx === oldSpan) None else {
-          val name  = "Resize"
-          val edit0 = EditVar.Expr[T, SpanLike, SpanLikeObj](name, vr, newSpanEx)
-          val edit1Opt: Option[UndoableEdit] = if (dStartCC == 0L) None else obj match {
-            case objT: Proc[T] =>
-              for {
-                audioCue <- ProcActions.getAudioRegion(objT)
-              } yield {
-                // Crazy heuristics
-                audioCue match {
-                  case AudioCue.Obj.Shift(peer, amt) =>
-
-                    amt match {
-                      case LongObj.Var(amtVr) =>
-                        EditVar.Expr[T, Long, LongObj](name, amtVr, amtVr() + dStartCC)
-                      case _ =>
-                        val newCue = AudioCue.Obj.Shift(peer, LongObj.newVar[T](amt + dStartCC))
-                        EditAttrMap(name, objT, Proc.graphAudio, Some(newCue))
-                    }
-                  case other =>
-                    val newCue = AudioCue.Obj.Shift(other, LongObj.newVar[T](dStartCC))
-                    EditAttrMap(name, objT, Proc.graphAudio, Some(newCue))
-                }
-              }
-            case _ => None
-          }
-          CompoundEdit(edit0 :: edit1Opt.toList, name)
+        val v = combine(other.fold(default)(_.value), arg)
+        val valueOpt = if (v === default) None else Some(IntObj.newVar[T](v))
+        if (other.isEmpty && valueOpt.isEmpty) None else {
+          val edit = EditAttrMap.expr[T, Int, IntObj](name, obj, key, valueOpt)
+          Some(edit)
         }
-      } else None
     }
+
+  private def editAdjustDoubleAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Double, name: String,
+                                                 default: Double)(combine: (Double, Double) => Double)
+                                                (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
+    obj.attr.$[DoubleObj](key) match {
+      case Some(DoubleObj.Var(vr)) =>
+        // XXX TODO could be more elaborate; for now preserve just one level of variables
+        val edit = EditVar.Expr[T, Double, DoubleObj](name, vr, combine(vr().value, arg))
+        Some(edit)
+      case other =>
+        import de.sciss.equal.Implicits._
+        val v = combine(other.fold(default)(_.value), arg)
+        val valueOpt = if (v === default) None else Some(DoubleObj.newVar[T](v))
+        if (other.isEmpty && valueOpt.isEmpty) None else {
+          val edit = EditAttrMap.expr[T, Double, DoubleObj](name, obj, key, valueOpt)
+          Some(edit)
+        }
+    }
+
+  private def editAdjustBooleanAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Boolean, name: String,
+                                                default: Boolean)(combine: (Boolean, Boolean) => Boolean)
+                                               (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
+    obj.attr.$[BooleanObj](key) match {
+      case Some(BooleanObj.Var(vr)) =>
+        // XXX TODO could be more elaborate; for now preserve just one level of variables
+        val edit = EditVar.Expr[T, Boolean, BooleanObj](name, vr, combine(vr().value, arg))
+        Some(edit)
+      case other =>
+        import de.sciss.equal.Implicits._
+        val v = combine(other.fold(default)(_.value), arg)
+        val valueOpt = if (v === default) None else Some(BooleanObj.newVar[T](v))
+        if (other.isEmpty && valueOpt.isEmpty) None else {
+          val edit = EditAttrMap.expr[T, Boolean, BooleanObj](name, obj, key, valueOpt)
+          Some(edit)
+        }
+    }
+
+  def gain[T <: Txn[T]](obj: Obj[T], amount: Gain)
+                       (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+    import amount.factor
+    if (factor == 1f) None else {
+      editAdjustDoubleAttr[T](obj, key = ObjKeys.attrGain, arg = factor.toDouble, name = "Adjust Gain",
+        default = 1.0)(_ * _)
+    }
+  }
+
+  def mute[T <: Txn[T]](obj: Obj[T], state: Mute)
+                       (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+    import state.engaged
+    editAdjustBooleanAttr[T](obj, key = ObjKeys.attrMute, arg = engaged, name = "Adjust Mute",
+      default = false)((_, now) => now)
+  }
+
+  def resize[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], amount: Resize, minStart: Long)
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+    import de.sciss.equal.Implicits._
+    var edits       = List.empty[UndoableEdit]
+    val nameResize  = "Resize"
+
+    // time
+    span match {
+      case SpanLikeObj.Var(vr) =>
+        import amount.{deltaStart, deltaStop}
+        val oldSpan   = span.value
+        // val minStart  = timelineModel.bounds.start
+        val dStartC   = if (deltaStart >= 0) deltaStart else oldSpan match {
+          case Span.HasStart(oldStart) => math.max(-(oldStart - minStart) , deltaStart)
+          case _ => 0L
+        }
+        val dStopC   = if (deltaStop >= 0) deltaStop else oldSpan match {
+          case Span.HasStop (oldStop)   => math.max(-(oldStop  - minStart + 32 /* MinDur */), deltaStop)
+          case _ => 0L
+        }
+
+        if (dStartC != 0L || dStopC != 0L) {
+          // val imp = ExprImplicits[T]
+
+          // XXX TODO -- the variable contents should ideally be looked at
+          // during the edit performance
+
+          val oldSpan = vr()
+          val newSpan = oldSpan.value match {
+            case Span.From (start)  => Span.From (start + dStartC)
+            case Span.Until(stop )  => Span.Until(stop  + dStopC )
+            case Span(start, stop)  =>
+              val newStart = start + dStartC
+              Span(newStart, math.max(newStart + 32 /* MinDur */, stop + dStopC))
+            case other => other
+          }
+
+          val newSpanEx = SpanLikeObj.newConst[T](newSpan)
+          if (newSpanEx !== oldSpan) {
+            val edit0 = EditVar.Expr[T, SpanLike, SpanLikeObj](nameResize, vr, newSpanEx)
+            if (dStartC != 0L) obj match {
+              case objT: Proc[T] =>
+                ProcActions.getAudioRegion(objT).foreach { audioCue =>
+                  // Crazy heuristics
+                  val edit = audioCue match {
+                    case AudioCue.Obj.Shift(peer, amt) =>
+
+                      amt match {
+                        case LongObj.Var(amtVr) =>
+                          // XXX TODO why we use EditVar.Expr here and EditAttrMap elsewhere?
+                          // I think we should always edit the variable and not copy the contents
+                          // of the variable to a new variable?
+                          EditVar.Expr[T, Long, LongObj](nameResize, amtVr, amtVr() + dStartC)
+                        case _ =>
+                          val newCue = AudioCue.Obj.Shift(peer, LongObj.newVar[T](amt + dStartC))
+                          EditAttrMap(nameResize, objT, Proc.graphAudio, Some(newCue))
+                      }
+                    case other =>
+                      val newCue = AudioCue.Obj.Shift(other, LongObj.newVar[T](dStartC))
+                      EditAttrMap(nameResize, objT, Proc.graphAudio, Some(newCue))
+                  }
+                  edits ::= edit
+                }
+              case _ =>
+            }
+            edits ::= edit0
+          }
+        }
+
+      case _ =>
+    }
+
+    val nameTrack     = "Adjust Track Placement"
+    val nameCompound  = if (edits.isEmpty) nameTrack else nameResize
+
+    // track
+    val deltaTrack = amount.deltaTrackStart
+    if (deltaTrack != 0) {
+      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
+        name = nameTrack, default = 0)(_ + _)
+      edits :::= edit.toList
+    }
+    val deltaTrackH = amount.deltaTrackStop - amount.deltaTrackStart
+    if (deltaTrackH != 0) {
+      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackHeight, arg = deltaTrackH,
+        name = "Adjust Track Height", default = TimelineView.DefaultTrackHeight)(_ + _)
+      edits :::= edit.toList
+    }
+
+    CompoundEdit(edits, nameCompound)
+  }
 
   def timelineMoveOrCopy[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T], amount: Move, minStart: Long)
                                      (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
@@ -340,24 +436,9 @@ object Edits {
 
     import amount._
     if (deltaTrack != 0) {
-      // in the case of const, just overwrite, in the case of
-      // var, check the value stored in the var, and update the var
-      // instead (recursion). otherwise, it will be some combinatorial
-      // expression, and we could decide to construct a binary op instead!
-      // val expr = ExprImplicits[T]
-
-      import de.sciss.equal.Implicits._
-//      import expr.Ops._
-      val newTrackOpt: Option[IntObj[T]] = obj.attr.$[IntObj](ObjTimelineView.attrTrackIndex) match {
-        case Some(IntObj.Var(vr)) => Some(vr() + deltaTrack)
-        case other =>
-          val v = other.fold(0)(_.value) + deltaTrack
-          if (v === 0) None else Some(IntObj.newConst(v)) // default is zero; in that case remove attribute
-      }
-      val edit = EditAttrMap.expr[T, Int, IntObj]("Adjust Track Placement", obj,
-        ObjTimelineView.attrTrackIndex, newTrackOpt)
-
-      edits ::= edit
+      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
+        name = "Adjust Track Placement", default = 0)(_ + _)
+      edits :::= edit.toList
     }
 
     val name    = "Move"

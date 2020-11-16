@@ -14,6 +14,7 @@
 package de.sciss.mellite.impl.tool
 
 import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
+import java.awt.Component
 
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.{DragAdjust, DragBegin, DragCancel, DragEnd}
@@ -92,12 +93,12 @@ trait DraggingTool[T <: Txn[T], A, Y] {
     def currentModelY : Y           = _currentModelY
     def currentPos    : Long        = _currentPos
 
-    // ---- constructor ----
-    {
+    /*if (install)*/ {
       val comp = firstEvent.getComponent
-      comp.addMouseListener(this)
-      comp.addMouseMotionListener(this)
+      comp.addMouseListener       (this)
+      comp.addMouseMotionListener (this)
       comp.requestFocus() // (why? needed to receive key events?)
+      this
     }
 
     override def mouseReleased(e: MouseEvent): Unit = {

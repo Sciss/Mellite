@@ -28,9 +28,18 @@ object ProcActions {
   // private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T] // BiGroup.Modifiable[T, Proc[T], Proc.Update[T]]
   private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T]
 
-  final case class Resize(deltaStart: Long, deltaStop: Long) {
-    override def toString = s"$productPrefix(deltaStart = $deltaStart, deltaStop = $deltaStop)"
+  object Resize extends scala.runtime.AbstractFunction2[Long, Long, Resize] {
+    def apply(deltaStart: Long, deltaStop: Long): Resize = new Resize(deltaStart, deltaStop)
   }
+  final case class Resize(deltaStart: Long, deltaStop: Long, deltaTrackStart: Int, deltaTrackStop: Int) {
+    def this(deltaStart: Long, deltaStop: Long) = this(deltaStart, deltaStop, 0, 0)
+
+    def copy(newStart: Long = deltaStart, newStop: Long = deltaStop): Resize =
+      new Resize(newStart, newStop, deltaTrackStart, deltaTrackStop)
+
+    override def toString = s"$productPrefix(deltaStart = $deltaStart, deltaStop = $deltaStop, deltaTrackStart = $deltaTrackStart, deltaTrackStop = $deltaTrackStop)"
+  }
+
   final case class Move  (deltaTime : Long, deltaTrack: Int, copy: Boolean) {
     override def toString = s"$productPrefix(deltaTime = $deltaTime, deltaTrack = $deltaTrack, copy = $copy)"
   }

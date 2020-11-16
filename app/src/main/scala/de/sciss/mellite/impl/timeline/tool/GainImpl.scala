@@ -16,11 +16,11 @@ package de.sciss.mellite.impl.timeline.tool
 import java.awt
 
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Cursor, DoubleObj, Obj, SpanLikeObj}
-import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
+import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.proc.Timeline
 import de.sciss.synth
-import de.sciss.proc.{ObjKeys, Timeline}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -48,20 +48,6 @@ final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   protected def commitObj(drag: Gain)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
-    import drag.factor
-    // ProcActions.adjustGain(obj, drag.factor)
-    // val imp = ExprImplicits[T]
-    if (factor == 1f) None else {
-//      import expr.Ops._
-      val newGain: DoubleObj[T] = obj.attr.$[DoubleObj](ObjKeys.attrGain) match {
-        case Some(DoubleObj.Var(vr)) => vr() * factor.toDouble
-        case other =>
-          other.fold(1.0)(_.value) * factor
-      }
-      import de.sciss.equal.Implicits._
-      val newGainOpt = if (newGain === DoubleObj.newConst[T](1.0)) None else Some(newGain)
-      val edit = EditAttrMap.expr[T, Double, DoubleObj](s"Adjust $name", obj, ObjKeys.attrGain, newGainOpt)
-      Some(edit)
-    }
+    Edits.gain(obj, drag)
   }
 }

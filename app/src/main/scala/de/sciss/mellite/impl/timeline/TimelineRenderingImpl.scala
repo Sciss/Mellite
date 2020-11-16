@@ -26,7 +26,7 @@ final class TimelineRenderingImpl(component: Component, isDark: Boolean)
 //  import timeline.{TimelineRenderingImpl => Impl}
 
   var ttMoveState     : TimelineTool.Move     = TimelineTool.NoMove
-  var ttResizeState   : TimelineTool.Resize   = TimelineTool.NoResize
+  var ttResizeState   : TimelineTool.Resize  = TimelineTool.NoResize
   var ttGainState     : TimelineTool.Gain     = TimelineTool.NoGain
   var ttFadeState     : TimelineTool.Fade     = TimelineTool.NoFade
   var ttFunctionState : TimelineTool.Add      = TimelineTool.NoFunction

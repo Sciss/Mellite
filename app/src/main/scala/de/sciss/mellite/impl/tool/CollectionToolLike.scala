@@ -28,6 +28,8 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
   // protected def trackList: TrackList
   protected def canvas: TimelineCanvas2D[T, Y, Child]
 
+  protected val hover: Boolean = false
+
   /** Applies standard mouse selection techniques regarding regions.
     *
     * - If no modifier is hold, clicking outside of a region deselects all
@@ -64,19 +66,31 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
       val childOpt  = canvas.findChildView(pos, modelY)
       handlePress(e, modelY, pos, childOpt)
     }
+
+    override def mouseEntered(e: MouseEvent): Unit = mouseHover(e)
+    override def mouseMoved  (e: MouseEvent): Unit = mouseHover(e)
+
+    private def mouseHover(e: MouseEvent): Unit = if (hover) {
+      // println(s"mouseHover($e)")
+      val pos       = canvas.screenToFrame(e.getX).toLong
+      val modelY    = canvas.screenToModelPos(e.getY)
+      val childOpt  = canvas.findChildView(pos, modelY)
+      handleHover(e, modelY, pos, childOpt)
+    }
   }
 
-  /** Implemented by adding mouse listeners to the component. */
+  /** Implemented by adding mouse input listeners to the component. */
   final def install(component: Component): Unit = {
-    component.peer.addMouseListener      (mia)
-    // component.peer.addMouseMotionListener(mia)
+    // println(s"install $this. hover? $hover")
+    component           .peer.addMouseListener      (mia)
+    if (hover) component.peer.addMouseMotionListener(mia)
     component.cursor = defaultCursor
   }
 
   /** Implemented by removing listeners from component. */
   final def uninstall(component: Component): Unit = {
-    component.peer.removeMouseListener      (mia)
-    // component.peer.removeMouseMotionListener(mia)
+    component           .peer.removeMouseListener      (mia)
+    if (hover) component.peer.removeMouseMotionListener(mia)
     component.cursor = null
   }
 
@@ -95,10 +109,6 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
   protected def handlePress(e: MouseEvent, modelY: Y, pos: Long,
                             childOpt: Option[Child]): Unit
 
-  //  /** Method that is called when the mouse is released. Implemented
-  //    * as a no-op, so only sub-classes that want to explicitly perform
-  //    * actions need to override it.
-  //    */
-  //  protected def handleRelease(e: MouseEvent, hitTrack: Int, pos: Long,
-  //                              regionOpt: Option[Child]): Unit = ()
+  protected def handleHover(e: MouseEvent, modelY: Y, pos: Long,
+                            childOpt: Option[Child]): Unit = ()
 }

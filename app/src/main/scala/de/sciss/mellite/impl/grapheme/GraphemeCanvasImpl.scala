@@ -59,6 +59,8 @@ trait GraphemeCanvasImpl[T <: Txn[T]] extends TimelineCanvas2DImpl[T, Double, Ob
     y.linLin(0, hm, max, min) // note 'max to min'
   }
 
+  override def screenToModelPosF(y: Int): Double = screenToModelPos(y)
+
   final def screenToModelExtent(y: Int): Double = {
     val a   = _yAxis
     val min = a.minimum
@@ -67,6 +69,8 @@ trait GraphemeCanvasImpl[T <: Txn[T]] extends TimelineCanvas2DImpl[T, Double, Ob
     import numbers.Implicits._
     y.linLin(0, hm, min, max) // note 'min to max'
   }
+
+  override def screenToModelExtentF(dy: Int): Double = screenToModelExtent(dy)
 
   final def modelPosToScreen(m: Double): Double = {
     val a   = _yAxis

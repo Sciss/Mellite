@@ -23,6 +23,7 @@ import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 
 import scala.swing.Graphics2D
+import math.{log10, min, max}
 
 trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with ObjViewImpl.Impl[T] {
   var trackIndex  : Int = _
@@ -115,7 +116,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
         val dt0 = moveState.deltaTime + resizeState.deltaStart
         if (dt0 >= 0) dt0 else {
           val minStart = TimelineNavigation.minStart(canvas.timelineModel)
-          math.max(minStart - start, dt0)
+          max(minStart - start, dt0)
         }
       } else 0L
 
@@ -125,7 +126,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
         dt0
 //        if (dt0 >= 0) dt0 else {
 //          val minStart = TimelineNavigation.minStart(canvas.timelineModel)
-//          dt0 // math.max(-(stop - total.start + TimelineView.MinDur), dt0)
+//          dt0 // max(-(stop - total.start + TimelineView.MinDur), dt0)
 //        }
       } else 0L
 
@@ -134,7 +135,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
 //        val dt0 = moveState.deltaTime
 //        if (dt0 >= 0) dt0 else {
 //          val total = tlv.timelineModel.bounds
-//          math.max(-(start - total.start), dt0)
+//          max(-(start - total.start), dt0)
 //        }
 //      } else 0L
 
@@ -144,7 +145,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
         val dStop     = adjustStop (stop )
         pStart        = start + dStart
         pStop         = stop  + dStop
-        val newStop   = math.max(pStart + TimelineView.MinDur, pStop)
+        val newStop   = max(pStart + TimelineView.MinDur, pStop)
         x1            = frameToScreen(pStart ).toInt
         x2            = frameToScreen(newStop).toInt
         // move          = adjustMove(start)
@@ -177,15 +178,27 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
         return
     }
 
-    val pTrk  = if (selected) math.max(0, trackIndex + moveState.deltaTrack) else trackIndex
-    py        = modelPosToScreen(pTrk).toInt
+    val pTrkStart  = 
+      if (selected) {
+        max(0, trackIndex + moveState.deltaTrack + resizeState.deltaTrackStart)
+      } else {
+        trackIndex
+      }
+    val pTrkStop =
+      if (selected) {
+        pTrkStart + max(1, trackHeight + resizeState.deltaTrackStop - resizeState.deltaTrackStart)
+      } else {
+        pTrkStart + trackHeight
+      }
+      
+    py        = modelPosToScreen(pTrkStart).toInt
     px        = x1
     pw        = x2 - x1
-    ph        = modelPosToScreen(pTrk + trackHeight).toInt - py
+    ph        = modelPosToScreen(pTrkStop).toInt - py
 
     // clipped coordinates
-    px1c      = math.max(px +  1, clipRect.x - 2)
-    px2c      = math.min(px + pw, clipRect.x + clipRect.width + 3)
+    px1c      = max(px +  1, clipRect.x - 2)
+    px2c      = min(px + pw, clipRect.x + clipRect.width + 3)
   }
 
   private[this] def paintBackImpl(g: Graphics2D, tlv: TimelineView[T], r: TimelineRendering, selected: Boolean): Unit = {
@@ -224,7 +237,6 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
 
       // --- fades ---
       def paintFade(curve: Curve, fw: Float, y1: Float, y2: Float, x: Float, x0: Float): Unit = {
-        import math.{log10, max}
         shape1.reset()
         shape2.reset()
         val vScale  = phi / -3f
@@ -252,8 +264,8 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
         case fv: ObjTimelineView.HasFade if timelineTools.fadeViewMode == FadeViewMode.Curve =>
 
           def adjustFade(in: Curve, deltaCurve: Float): Curve = in match {
-            case Curve.linear                 => Curve.parametric(math.max(-20, math.min(20, deltaCurve)))
-            case Curve.parametric(curvature)  => Curve.parametric(math.max(-20, math.min(20, curvature + deltaCurve)))
+            case Curve.linear                 => Curve.parametric(max(-20, min(20, deltaCurve)))
+            case Curve.parametric(curvature)  => Curve.parametric(max(-20, min(20, curvature + deltaCurve)))
             case other                        => other
           }
 

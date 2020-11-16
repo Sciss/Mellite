@@ -39,11 +39,14 @@ trait TimelineTrackCanvasImpl[T <: Txn[T]]
     repaint()
   }
 
-  final def screenToModelPos    (y    : Int): Int     = y / TimelineView.TrackScale + trackIndexOffset
-  final def screenToModelExtent (y    : Int): Int     = y / TimelineView.TrackScale
+  final def screenToModelPos              (y      : Int): Int     = y / TimelineView.TrackScale + trackIndexOffset
+  final def screenToModelExtent           (y      : Int): Int     = y / TimelineView.TrackScale
 
-  final def modelPosToScreen    (track  : Int): Double  = (track - trackIndexOffset) * TimelineView.TrackScale
-  final def modelExtentToScreen (tracks : Int): Double  = tracks * TimelineView.TrackScale
+  final override def screenToModelPosF    (y      : Int): Double  = y.toDouble / TimelineView.TrackScale + trackIndexOffset
+  final override def screenToModelExtentF (y      : Int): Double  = y.toDouble / TimelineView.TrackScale
+
+  final def modelPosToScreen              (track  : Int): Double  = (track - trackIndexOffset) * TimelineView.TrackScale
+  final def modelExtentToScreen           (tracks : Int): Double  = tracks * TimelineView.TrackScale
 
   final def modelYBox(a: Int, b: Int): (Int, Int) = if (a < b) (a, b - a + 1) else (b, a - b + 1)
 

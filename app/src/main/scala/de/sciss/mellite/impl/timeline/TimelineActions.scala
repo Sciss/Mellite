@@ -408,7 +408,7 @@ trait TimelineActions[T <: Txn[T]] {
         oldVal match {
           case Span.HasStop(rightStop) =>
             val minStart  = TimelineNavigation.minStart(timelineModel)
-            val resize    = ProcActions.Resize(0L, time - rightStop)
+            val resize    = ProcActions.Resize(0L, time - rightStop, 0, 0)
             val editOpt   = Edits.resize(spanVr, leftObj, resize, minStart = minStart)
             editOpt.foreach(edits ::= _)
 

@@ -18,12 +18,12 @@ import java.awt.event.MouseEvent
 import java.awt.{Point, Toolkit}
 
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{BooleanObj, Cursor, Obj, SpanLikeObj}
+import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.TimelineTool.Mute
-import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.tool.RubberBandTool
 import de.sciss.mellite.{BasicTool, GUI, ObjTimelineView, Shapes, TimelineTrackCanvas}
-import de.sciss.proc.{ObjKeys, Timeline}
+import de.sciss.proc.Timeline
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -45,16 +45,7 @@ final class MuteImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   protected def commitObj(mute: Mute)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
-    // val imp = ExprImplicits[T]
-    val newMute: BooleanObj[T] = obj.attr.$[BooleanObj](ObjKeys.attrMute) match {
-      // XXX TODO: BooleanObj should have `not` operator
-      case Some(BooleanObj.Var(vr)) => val vOld = vr().value; !vOld
-      case other => !other.exists(_.value)
-    }
-    import de.sciss.equal.Implicits._
-    val newMuteOpt = if (newMute === BooleanObj.newConst[T](false)) None else Some(newMute)
-    val edit = EditAttrMap.expr[T, Boolean, BooleanObj](s"Adjust $name", obj, ObjKeys.attrMute, newMuteOpt)
-    Some(edit)
+    Edits.mute(obj, mute)
   }
 
   protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit = region match {

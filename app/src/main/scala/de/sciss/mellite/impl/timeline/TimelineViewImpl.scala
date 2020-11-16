@@ -138,7 +138,7 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     private[this] lazy val toolCursor   = TimelineTool.cursor  [T](canvas)
     private[this] lazy val toolMove     = TimelineTool.move    [T](canvas)
-    private[this] lazy val toolResize   = TimelineTool.resize  [T](canvas)
+    private[this] lazy val toolResize   = TimelineTool.resize [T](canvas)
     private[this] lazy val toolGain     = TimelineTool.gain    [T](canvas)
     private[this] lazy val toolMute     = TimelineTool.mute    [T](canvas)
     private[this] lazy val toolFade     = TimelineTool.fade    [T](canvas)
