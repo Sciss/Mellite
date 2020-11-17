@@ -835,4 +835,31 @@ object Shapes {
     p.lineTo(10.5f, 8.0f)
     p.lineTo(10.5f, 3f)
   }
+
+  /////////////////////////////////////////////////////////////
+  // the following shapes are adapted from the Noun project
+  // https://thenounproject.com/term/timeline/370305/
+  //
+  // Creative Commons CC BY 3.0 US
+  //
+  // Copyright (c)   Alex Bickov
+
+  def Timeline(p: Path2D): Unit = {
+    p.moveTo(16.04096f, 28.65536f)
+    p.lineTo(16.04096f, 21.3952f)
+    p.lineTo(30.4f, 21.3952f)
+    p.lineTo(30.4f, 28.655682f)
+    p.lineTo(16.04096f, 28.655682f)
+    p.lineTo(16.04096f, 28.65536f)
+    p.moveTo(1.6f, 3.34464f)
+    p.lineTo(30.4f, 3.34464f)
+    p.lineTo(30.4f, 10.6048f)
+    p.lineTo(1.6f, 10.6048f)
+    p.lineTo(1.6f, 3.34464f)
+    p.moveTo(23.17952f, 19.6304f)
+    p.lineTo(8.82048f, 19.6304f)
+    p.lineTo(8.82048f, 12.3696f)
+    p.lineTo(23.17952f, 12.3696f)
+    p.lineTo(23.17952f, 19.6304f)
+  }
 }

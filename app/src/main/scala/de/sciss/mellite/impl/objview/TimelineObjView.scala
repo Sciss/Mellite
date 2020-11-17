@@ -13,19 +13,19 @@
 
 package de.sciss.mellite.impl.objview
 
-import de.sciss.icons.raphael
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.{ObjListView, ObjView, TimelineFrame}
+import de.sciss.mellite.{ObjListView, ObjView, Shapes, TimelineFrame}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Timeline, Universe}
+
 import javax.swing.Icon
 
 object TimelineObjView extends NoArgsListObjViewFactory {
   type E[T <: LTxn[T]] = Timeline[T]
-  val icon          : Icon      = raphaelIcon(raphael.Shapes.Ruler)
+  val icon          : Icon      = raphaelIcon(Shapes.Timeline)
   val prefix        : String    = "Timeline"
   def humanName     : String    = prefix
   def tpe           : Obj.Type  = Timeline
@@ -36,7 +36,7 @@ object TimelineObjView extends NoArgsListObjViewFactory {
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
     val obj = Timeline[T]() // .Modifiable[T]
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 
