@@ -34,6 +34,7 @@
 28  BiGroup.Entry
 29  Markdown
 30  EnvSegment.Obj
+31  proc.Tag
 
 100 fscape.GraphObj
 200 freesound.lucre.TextSearchObj

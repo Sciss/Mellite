@@ -1,5 +1,5 @@
 /*
- *  OutputObjView.scala
+ *  ProcOutputObjView.scala
  *  (Mellite)
  *
  *  Copyright (c) 2012-2020 Hanns Holger Rutz. All rights reserved.
@@ -21,7 +21,7 @@ import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.proc.Proc
 import javax.swing.Icon
 
-object OutputObjView extends NoMakeListObjViewFactory {
+object ProcOutputObjView extends NoMakeListObjViewFactory {
   type E[~ <: LTxn[~]] = Proc.Output[~]
   val icon          : Icon      = ObjViewImpl.raphaelIcon(raphael.Shapes.Export)
   val prefix        : String    = "Output"
@@ -29,22 +29,22 @@ object OutputObjView extends NoMakeListObjViewFactory {
   def tpe           : Obj.Type  = Proc.Output
   def category      : String    = ObjView.categMisc
 
-  def mkListView[T <: Txn[T]](obj: Proc.Output[T])(implicit tx: T): OutputObjView[T] with ObjListView[T] = {
+  def mkListView[T <: Txn[T]](obj: Proc.Output[T])(implicit tx: T): ProcOutputObjView[T] with ObjListView[T] = {
     val value = obj.key
     new Impl(tx.newHandle(obj), value).initAttrs(obj)
   }
 
   final class Impl[T <: Txn[T]](val objH: Source[T, Proc.Output[T]], val value: String)
-    extends OutputObjView[T]
+    extends ProcOutputObjView[T]
       with ObjListView[T]
       with ObjViewImpl    .Impl[T]
       with ObjListViewImpl.StringRenderer
       with ObjViewImpl    .NonViewable[T]
       with ObjListViewImpl.NonEditable[T] {
 
-    def factory: ObjView.Factory = OutputObjView
+    def factory: ObjView.Factory = ProcOutputObjView
   }
 }
-trait OutputObjView[T <: LTxn[T]] extends ObjView[T] {
+trait ProcOutputObjView[T <: LTxn[T]] extends ObjView[T] {
   type Repr = Proc.Output[T]
 }

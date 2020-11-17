@@ -94,9 +94,10 @@ private[mellite] object InterpreterFrameImpl {
     intpCfg.imports = List(
       "de.sciss.mellite._",
       "de.sciss.synth._",
-      "Ops._",
+      "de.sciss.proc",
+      "de.sciss.synth.Ops._",
       // "concurrent.duration._",
-      "proc.Implicits._",
+      "de.sciss.proc.Implicits._",
       "de.sciss.span.Span",
       // "MelliteDSL._",
       "InterpreterFrame.Bindings._"

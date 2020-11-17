@@ -18,6 +18,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val common = new {
+    val asyncFile           = "0.1.2"
     val audioFile           = "2.3.1"
     val audioWidgets        = "2.2.0"
     val desktop             = "0.11.1"
@@ -37,7 +38,7 @@ lazy val deps = new {
     val scallop             = "3.5.1"
     val serial              = "2.0.0"
     val sonogram            = "2.2.0"
-    val soundProcesses      = "4.3.0"
+    val soundProcesses      = "4.3.1-SNAPSHOT"
     val span                = "2.0.0"
     val swingPlus           = "0.5.0"
   }
@@ -88,7 +89,7 @@ def appNameL                        = baseNameL
 lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
-  licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
+  licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.13.3",
   crossScalaVersions := Seq("2.13.3", "2.12.12"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
   scalacOptions ++= {
@@ -234,6 +235,7 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
     version     := commonVersion,
     description := s"$baseName - core library",
     libraryDependencies ++= Seq(
+      "de.sciss"          %% "asyncfile"                      % deps.common.asyncFile,          // file I/O
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // audio file I/O
       "de.sciss"          %% "audiowidgets-app"               % deps.common.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.common.audioWidgets,       // audio application widgets

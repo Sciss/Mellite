@@ -13,12 +13,6 @@
 
 package de.sciss.mellite
 
-import java.awt
-import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEvent}
-import java.io.{EOFException, File, IOException}
-import java.net.URI
-import java.text.ParseException
-
 import de.sciss.asyncfile.AsyncFile
 import de.sciss.asyncfile.Ops._
 import de.sciss.audiofile.{AudioFile, AudioFileType, SampleFormat}
@@ -28,22 +22,29 @@ import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Txn}
 import de.sciss.lucre.{Artifact, ArtifactLocation, BooleanObj, DoubleObj, IntObj, LongObj, Obj, Source, SpanLikeObj, StringObj}
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.edit.EditFolderInsertObj
 import de.sciss.mellite.util.Gain
+import de.sciss.proc.Implicits._
+import de.sciss.proc.{AudioCue, Bounce, Tag, TimeRef, Timeline, Universe}
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner, SpinnerComboBox}
-import de.sciss.proc.Implicits._
-import de.sciss.proc.{AudioCue, Bounce, TimeRef, Timeline, Universe}
 import de.sciss.synth.{Client, SynthGraph, addToTail, intNumberWrapper}
 import de.sciss.{desktop, equal, numbers, swingplus, synth}
-import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 
+import java.awt
+import java.awt.event.{ComponentAdapter, ComponentEvent, WindowAdapter, WindowEvent}
+import java.io.{EOFException, File, IOException}
+import java.net.URI
+import java.text.ParseException
+import javax.swing.{JFormattedTextField, SpinnerNumberModel, SwingUtilities}
 import scala.collection.immutable.{IndexedSeq => Vec, Iterable => IIterable, Seq => ISeq}
 import scala.concurrent.blocking
+import scala.reflect.ClassTag
 import scala.swing.Swing._
 import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
 import scala.swing.{Button, ButtonGroup, CheckBox, Component, Dialog, Label, ProgressBar, TextField, ToggleButton}
@@ -95,23 +96,25 @@ object ActionBounce {
 
   def mkNumChannels(channels: Vec[Range.Inclusive]): Int = channels.map(_.size).sum
 
-  private[this] val attrFile          = "bounce-file"           // StringObj
-  private[this] val attrFileType      = "bounce-file-type"      // StringObj
-  private[this] val attrSampleFormat  = "bounce-sample-format"  // StringObj
-  private[this] val attrBitRate       = "bounce-bit-rate"       // IntObj
-  private[this] val attrMP3VBR        = "bounce-mp3-vbr"        // BooleanObj
-  private[this] val attrMP3Title      = "bounce-mp3-title"      // StringObj
-  private[this] val attrMP3Artist     = "bounce-mp3-artist"     // StringObj
-  private[this] val attrMP3Comment    = "bounce-mp3-comment"    // StringObj
-  private[this] val attrSampleRate    = "bounce-sample-rate"    // IntObj
-  private[this] val attrGain          = "bounce-gain"           // DoubleObj
-  private[this] val attrSpan          = "bounce-span"           // SpanLikeObj
-  private[this] val attrNormalize     = "bounce-normalize"      // BooleanObj
-  private[this] val attrChannels      = "bounce-channels"       // IntVector
-  private[this] val attrRealtime      = "bounce-realtime"       // BooleanObj
-  private[this] val attrFineControl   = "bounce-fine-control"   // BooleanObj
-  private[this] val attrImport        = "bounce-import"         // BooleanObj
-  private[this] val attrLocation      = "bounce-location"       // ArtifactLocation
+  private[this] val attrTag           = "tag-bounce"      // Tag
+
+  private[this] val attrFile          = "file"            // StringObj
+  private[this] val attrFileType      = "file-type"       // StringObj
+  private[this] val attrSampleFormat  = "sample-format"   // StringObj
+  private[this] val attrBitRate       = "bit-rate"        // IntObj
+  private[this] val attrMP3VBR        = "mp3-vbr"         // BooleanObj
+  private[this] val attrMP3Title      = "mp3-title"       // StringObj
+  private[this] val attrMP3Artist     = "mp3-artist"      // StringObj
+  private[this] val attrMP3Comment    = "mp3-comment"     // StringObj
+  private[this] val attrSampleRate    = "sample-rate"     // IntObj
+  private[this] val attrGain          = "gain"            // DoubleObj
+  private[this] val attrSpan          = "span"            // SpanLikeObj
+  private[this] val attrNormalize     = "normalize"       // BooleanObj
+  private[this] val attrChannels      = "channels"        // IntVector
+  private[this] val attrRealtime      = "realtime"        // BooleanObj
+  private[this] val attrFineControl   = "fine-control"    // BooleanObj
+  private[this] val attrImport        = "import"          // BooleanObj
+  private[this] val attrLocation      = "location"        // ArtifactLocation
 
 
   // cf. stackoverflow #4310439 - with added spaces after comma
@@ -149,7 +152,14 @@ object ActionBounce {
     * @param obj  the object into whose attribute map the settings are stored
     */
   def storeSettings[T <: Txn[T]](q: QuerySettings[T], obj: Obj[T])(implicit tx: T): Unit = {
-    val attr = obj.attr
+    val attr = {
+      val tag = obj.attr.$[Tag](attrTag).getOrElse {
+        val _tag = Tag[T]()
+        obj.attr.put(attrTag, _tag)
+        _tag
+      }
+      tag.attr
+    }
     import equal.Implicits._
 
     def storeString(key: String, value: String, default: String = ""): Unit =
@@ -226,7 +236,7 @@ object ActionBounce {
     storeBoolean  (attrImport     , q.importFile)
 
     q.location match {
-      case Some(locH) => attr.put(attrLocation, locH())
+      case Some(locH) => attr.put   (attrLocation, locH())
       case None       => attr.remove(attrLocation)
     }
   }
@@ -236,23 +246,30 @@ object ActionBounce {
                                   defaultFile     : URI                   = Artifact.Value.empty,
                                   defaultChannels : Vec[Range.Inclusive]  = Vector(0 to 1))
                                  (implicit tx: T): QuerySettings[T] = {
-    val attr = obj.attr
+    val attrOpt = {
+      tx.attrMapOption(obj).flatMap { a0 =>
+        a0.$[Tag](attrTag).flatMap(tag => tx.attrMapOption(tag))
+      }
+    }
     import equal.Implicits._
 
+    def attr[R[~ <: LTxn[~]] <: Obj[~]](key: String)(implicit tx: T, ct: ClassTag[R[T]]): Option[R[T]] =
+      attrOpt.flatMap(_.$[R](key))
+
     def recallString(key: String, default: String = ""): String =
-      attr.$[StringObj](key).fold(default)(_.value)
+      attr[StringObj](key).fold(default)(_.value)
 
     def recallInt(key: String, default: Int /* = 0 */): Int =
-      attr.$[IntObj](key).fold(default)(_.value)
+      attr[IntObj](key).fold(default)(_.value)
 
     def recallBoolean(key: String, default: Boolean = false): Boolean =
-      attr.$[BooleanObj](key).fold(default)(_.value)
+      attr[BooleanObj](key).fold(default)(_.value)
 
     def recallDouble(key: String, default: Double /* = 0.0 */): Double =
-      attr.$[DoubleObj](key).fold(default)(_.value)
+      attr[DoubleObj](key).fold(default)(_.value)
 
     def recallSpanLike(key: String, default: SpanLike = Span.Void): SpanLike =
-      attr.$[SpanLikeObj](key).fold(default)(_.value)
+      attr[SpanLikeObj](key).fold(default)(_.value)
 
     val tpeId = recallString(attrFileType, AudioFileType.AIFF.id)
     val fileFormat = if (tpeId === FileFormat.mp3id) {
@@ -296,7 +313,7 @@ object ActionBounce {
     val fineControl = recallBoolean  (attrFineControl)
     val importFile  = recallBoolean  (attrImport)
 
-    val location = attr.$[ArtifactLocation](attrLocation).map(tx.newHandle(_))
+    val location = attr[ArtifactLocation](attrLocation).map(tx.newHandle(_))
 
     QuerySettings(uriOption = fileOpt, fileFormat = fileFormat, sampleRate = sampleRate, gain = gain, span = span,
       channels = channels, realtime = realtime, fineControl = fineControl, importFile = importFile,
@@ -499,8 +516,9 @@ object ActionBounce {
     ggFileType.listenTo(ggFileType.selection)
     ggFileType.reactions += {
       case SelectionChanged(_) =>
-        val p = ggPath.value
-        if (!p.getPath.isEmpty) setPath(p)
+        ggPath.valueOption.foreach { p =>
+          setPath(p)
+        }
     }
 
     init.uriOption.foreach { uri =>
@@ -666,7 +684,8 @@ object ActionBounce {
       d
     }
 
-    val box = new GroupPanel {
+    val P = GroupPanel  // make IntelliJ happy
+    val box = new GroupPanel { panel =>
       horizontal = Par(
         Seq(lbPath, ggPath), // Seq(Size.fixed(lbPath, Size.Preferred), Size.fill(ggPath, pref = Size.Infinite)),
         Seq(
@@ -679,7 +698,7 @@ object ActionBounce {
             ggRealtime, ggFineControl, ggImport,
             ggMP3Title, ggMP3Artist, ggMP3Comment
           ),
-          Gap.Spring()
+          P.Gap.Spring()
         )
       )
       vertical = Seq(
@@ -690,11 +709,11 @@ object ActionBounce {
         Par(Baseline)(lbChannels, ggChannels),
         Par(Baseline)(lbSpanStart, ggSpanStartOpt),
         Par(Baseline)(lbSpanStopOrDur, ggSpanStopOrDur),
-        Gap.Preferred(Unrelated),
+        P.Gap.Preferred(Unrelated),
         Par(Baseline)(lbRealtime, ggRealtime),
         Par(Baseline)(lbFineControl, ggFineControl),
         Par(Baseline)(lbImport, ggImport),
-        Gap.Preferred(Unrelated),
+        P.Gap.Preferred(Unrelated),
         Par(Baseline)(lbMP3Title  , ggMP3Title  ),
         Par(Baseline)(lbMP3Artist , ggMP3Artist ),
         Par(Baseline)(lbMP3Comment, ggMP3Comment)
@@ -768,7 +787,7 @@ object ActionBounce {
 
                     case Right(name) =>
                       val (edit0, source) = cursor.step { implicit tx =>
-                        val locObj  = ActionArtifactLocation.create(name = name, directory = directory)
+                        val locObj  = ActionArtifactLocation.create[T](name = name, directory = directory)
                         val folder  = universe.workspace.root
                         val index   = folder.size
                         val _edit   = EditFolderInsertObj[T]("Location", folder, index, locObj)
@@ -1111,9 +1130,9 @@ object ActionBounce {
             try {
               writePCM(fTmp, AudioFileType.AIFF, SampleFormat.Int16, maxChannels = 2, progStop = 0.95)
               var lameArgs = List[String](fTmp.getPath, fileOut.getPath)
-              if (!mp3.comment.isEmpty) lameArgs :::= List("--tc", mp3.comment)
-              if (!mp3.artist .isEmpty) lameArgs :::= List("--ta", mp3.artist )
-              if (!mp3.title  .isEmpty) lameArgs :::= List("--tt", mp3.title  )
+              if (mp3.comment .nonEmpty) lameArgs :::= List("--tc", mp3.comment)
+              if (mp3.artist  .nonEmpty) lameArgs :::= List("--ta", mp3.artist )
+              if (mp3.title   .nonEmpty) lameArgs :::= List("--tt", mp3.title  )
               lameArgs :::= List[String](
                 "-h", "-S", "--noreplaygain",  // high quality, silent, no AGC
                 if (mp3.vbr) "--abr" else "-b", mp3.kbps.toString  // bit rate

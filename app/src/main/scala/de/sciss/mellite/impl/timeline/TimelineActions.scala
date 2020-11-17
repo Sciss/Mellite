@@ -31,11 +31,11 @@ import de.sciss.mellite.impl.proc.ProcGUIActions
 import de.sciss.mellite.ActionBounce
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.proc
-import de.sciss.proc.{ObjKeys, Proc, TimeRef, Timeline}
+import de.sciss.proc.{ObjKeys, Proc, Tag, TimeRef, Timeline}
 import de.sciss.topology
 import de.sciss.topology.Topology
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.swing.Action
 import scala.swing.event.Key
 import scala.util.Success
@@ -293,7 +293,7 @@ trait TimelineActions[T <: Txn[T]] {
         timelineMod.map { tlMod =>
           val (span, trkIdx) = location
           val spanObj = SpanLikeObj.newVar[T](span)
-          val elem: Obj[T] = IntObj.newConst[T](0)  // XXX TODO --- we should add a 'generic' Obj?
+          val elem: Obj[T] = Tag[T]()
           val attr    = elem.attr
           attr.put(ObjTimelineView.attrTrackIndex , IntObj   .newVar[T](trkIdx      ))
           attr.put(ObjTimelineView.attrTrackHeight, IntObj   .newVar[T](trackHeight ))

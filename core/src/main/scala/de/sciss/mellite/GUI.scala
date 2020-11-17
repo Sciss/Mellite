@@ -126,8 +126,7 @@ object GUI {
     res.peer.putClientProperty("styleId", "icon-space")
     res.icon          = iconNormal  (iconFun)
     res.disabledIcon  = iconDisabled(iconFun)
-    // res.peer.putClientProperty("JButton.buttonType", "textured")
-    if (!tooltip.isEmpty) res.tooltip = tooltip
+    if (tooltip.nonEmpty) res.tooltip = tooltip
     res
   }
 
@@ -184,7 +183,7 @@ object GUI {
     pf.head.peer.putClientProperty("mellite.reaction", reaction)
   }
 
-  def boostRotary(lo: Float = 1f, hi: Float = 512f, tooltip: String = "Sonogram Brightness")
+  def boostRotary(lo: Float = 1f, hi: Float = 512f, tooltip: String = "Sonogram Contrast")
                  (fun: Float => Unit): Component = {
     val knob = new RotaryKnob {
       min       = 0

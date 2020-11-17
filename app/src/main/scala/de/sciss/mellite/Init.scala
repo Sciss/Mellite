@@ -26,9 +26,9 @@ import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
 import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
 import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, GraphemeViewImpl}
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownObjView, MarkdownRenderViewImpl}
-import de.sciss.mellite.impl.objview.{ActionObjView, ArtifactLocationObjViewImpl, ArtifactObjView, AudioCueObjViewImpl, BooleanObjView, CodeObjView, ColorObjView, ControlObjView, DoubleObjView, DoubleVectorObjView, EnvSegmentObjView, FadeSpecObjView, FolderObjView, GraphemeObjView, IntObjView, IntVectorObjView, LongObjView, NuagesObjView, ParamSpecObjView, StringObjView, TimelineObjView}
+import de.sciss.mellite.impl.objview
 import de.sciss.mellite.impl.patterns.{PatternObjView, StreamObjView}
-import de.sciss.mellite.impl.proc.{OutputObjView, ProcObjView}
+import de.sciss.mellite.impl.proc.{ProcOutputObjView, ProcObjView}
 import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
 import de.sciss.mellite.impl.widget.WidgetObjView
 import de.sciss.negatum.Negatum
@@ -51,46 +51,45 @@ trait Init {
 
   private[this] lazy val _initObjViews: Unit = {
     val obj = List(
-      ActionObjView,
-//      ActionRawObjView,
+      objview.ActionObjView,
+      objview.ArtifactObjView,
+      objview.BooleanObjView,
+      objview.ColorObjView,
+      objview.CodeObjView,
+      objview.ControlObjView,
+      objview.DoubleObjView,
+      objview.DoubleVectorObjView,
+      objview.EnvSegmentObjView,
+      objview.FadeSpecObjView,
+      objview.FolderObjView,
+      objview.GraphemeObjView,
+      objview.IntObjView,
+      objview.IntVectorObjView,
+      objview.LongObjView,
+      objview.NuagesObjView,
+      objview.ParamSpecObjView,
+      objview.StringObjView,
+      objview.TagObjView,
+      objview.TimelineObjView,
       ArtifactLocationObjView,
-      ArtifactObjView,
       AudioCueObjView,
-      BooleanObjView,
-      ColorObjView,
-      CodeObjView,
-      ControlObjView,
-      DoubleObjView,
-      DoubleVectorObjView,
-//      EnsembleObjView,
-      EnvSegmentObjView,
-      FadeSpecObjView,
-      FolderObjView,
-      RetrievalObjView,
       FScapeObjView,
       FScapeOutputObjView,
-      GraphemeObjView,
-      IntObjView,
-      IntVectorObjView,
-      LongObjView,
       MarkdownObjView,
-      NuagesObjView,
       NegatumObjView,
-      OutputObjView,
-      ParamSpecObjView,
       PatternObjView,
       ProcObjView,
+      ProcOutputObjView,
+      RetrievalObjView,
       StreamObjView,
-      StringObjView,
-      TimelineObjView,
       WidgetObjView,
     )
     obj.foreach(ObjListView.addFactory)
 
     val gr = List(
-      DoubleObjView,
-      DoubleVectorObjView,
-      EnvSegmentObjView,
+      objview.DoubleObjView,
+      objview.DoubleVectorObjView,
+      objview.EnvSegmentObjView,
     )
     gr.foreach(ObjGraphemeView.addFactory)
 
@@ -104,8 +103,8 @@ trait Init {
   }
 
   private[this] lazy val _initCompanionFactories: Unit = {
-    ArtifactLocationObjViewImpl .install()
-    AudioCueObjViewImpl         .install()
+    objview.ArtifactLocationObjViewImpl .install()
+    objview.AudioCueObjViewImpl         .install()
     CodeFrameImpl               .install()
     CodeViewImpl                .install()
     FolderEditorViewImpl        .install()
