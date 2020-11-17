@@ -25,6 +25,7 @@ import de.sciss.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, So
 import de.sciss.synth.Client
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
 
+import java.util.Locale
 import javax.swing.UIManager
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.ExecutionContext
@@ -55,6 +56,12 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   }
 
   override def main(args: Array[String]): Unit = {
+    try {
+      // all UI and number formatters assume US locale
+      Locale.setDefault(Locale.US)
+    } catch {
+      case _: Exception => ()
+    }
     object p extends ScallopConf(args) {
       printedName = "mellite"
       version(fullName)

@@ -13,32 +13,42 @@
 
 package de.sciss.mellite.impl.audiocue
 
-import java.awt.Color
-import java.awt.datatransfer.Transferable
-
 import de.sciss.asyncfile.Ops._
+import de.sciss.audiofile.{AudioFileSpec, AudioFileType}
 import de.sciss.audiowidgets.TimelineModel
-import de.sciss.desktop.{Desktop, FileDialog, Util}
-import de.sciss.file.File
+import de.sciss.desktop.{Desktop, FileDialog, UndoManager, Util}
+import de.sciss.fscape.GE
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.lucre.swing.graph.AudioFileIn
+import de.sciss.lucre.swing.View
+import de.sciss.lucre.swing.graph.{AudioFileIn => LWAudioFileIn}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, Source, Workspace}
+import de.sciss.mellite.ActionBounce.FileFormat
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
 import de.sciss.mellite.impl.timeline
-import de.sciss.mellite.{ArtifactFrame, AudioCueView, DragAndDrop, GUI, ObjView, ProcActions, SonogramManager}
+import de.sciss.mellite.util.Gain
+import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager}
+import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.gui.TransportView
 import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
+import de.sciss.processor.impl.FutureProxy
+import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span
 import de.sciss.synth.SynthGraph
 import de.sciss.synth.proc.graph.ScanIn
-import de.sciss.{sonogram, synth}
+import de.sciss.{fscape, sonogram, synth}
 
+import java.awt.Color
+import java.awt.datatransfer.Transferable
+import java.io.File
+import java.net.URI
 import scala.annotation.tailrec
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.Future
 import scala.swing.Swing._
 import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, Label, Orientation, Swing}
 import scala.util.Try
@@ -101,7 +111,8 @@ object AudioCueViewImpl {
     transport.addObject(diff)
 
     val objH = tx.newHandle(obj)
-    val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, inMemoryBridge = tx.inMemoryBridge) {
+    implicit val undo: UndoManager = UndoManager()
+    val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, fullSpanTL, inMemoryBridge = tx.inMemoryBridge) {
       val timelineModel: TimelineModel =
         TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
           sampleRate = TimeRef.SampleRate)
@@ -113,9 +124,14 @@ object AudioCueViewImpl {
 
   private abstract class Impl[T <: Txn[T], I <: Txn[I]](var value: AudioCue, val objH: Source[T, AudioCue.Obj[T]],
                                                         artifactOptH: Option[Source[T, Artifact[T]]],
+                                                        fullSpanTL: Span,
                                                         inMemoryBridge: T => I)
-                                                       (implicit val universe: Universe[T])
-    extends AudioCueView[T] with AudioCueObjViewImpl.Basic[T] with ComponentHolder[Component] { impl =>
+                                                       (implicit val universe: Universe[T],
+                                                        val undoManager: UndoManager)
+    extends AudioCueView[T]
+      with AudioCueObjViewImpl.Basic[T] with View.Editable[T]
+      with ComponentHolder[Component]
+      with CanBounce { impl =>
 
     type C = Component
 
@@ -123,6 +139,151 @@ object AudioCueViewImpl {
     protected def timelineModel: TimelineModel
 
     private var _sonogram: sonogram.Overview = _
+
+    object actionBounce extends ActionBounce[T](impl, objH) {
+      override protected def prepare(set0: ActionBounce.QuerySettings[T],
+                                     recalled: Boolean): ActionBounce.QuerySettings[T] = {
+        val sel   = timelineModel.selection
+        val spec0 = value.spec
+        val set1  = if (sel.isEmpty) set0 else set0.copy(span = sel)
+        val set2  = if (recalled) set1 else set1.copy(
+          fileFormat  = FileFormat.PCM(spec0.fileType, spec0.sampleFormat),
+          sampleRate  = spec0.sampleRate.toInt,
+          gain        = Gain.immediate(0.0),
+        )
+        set2
+      }
+
+      override protected def spanPresets(): SpanPresets = {
+        val all = timelineModel.bounds match {
+          case sp: Span => ActionBounce.SpanPreset("All", sp) :: Nil
+          case _        => Nil
+        }
+        val sel = timelineModel.selection.nonEmptyOption.map(value => ActionBounce.SpanPreset("Selection", value)).toList
+        all ::: sel
+      }
+
+      override protected def defaultFile(implicit tx: T): URI = {
+        val a0 = value.artifact
+        val a1 = a0.replaceName(s"${a0.base}Cut.${a0.extL}")
+        a1
+      }
+
+      override protected def defaultChannels(implicit tx: T): Vec[Range.Inclusive] =
+        Vector(0 to (value.spec.numChannels - 1))
+
+      override protected def performGUI(settings: ActionBounce.QuerySettings[T], uri: URI, span: Span): Unit = {
+        // println(s"performGUI($settings, $uri, $span)")
+        val SR            = settings.sampleRate.toDouble
+        val needsResample = SR != value.sampleRate
+        val needsPost     = settings.fileFormat.isCompressed
+        val span          = settings.span.nonEmptyOption.getOrElse(fullSpanTL)
+        val srRatio       = value.spec.sampleRate / TimeRef.SampleRate
+        val dropLen       = (span.start * srRatio + 0.5).toLong
+        val takeLen       = (span.stop  * srRatio + 0.5).toLong - dropLen
+        val numFramesIn   = value.spec.numFrames
+        val numFramesOut  = takeLen
+        val needsCrop     = numFramesIn != numFramesOut
+        val fileOut       = new File(uri)
+        val channels      = settings.channels.flatten
+        val numChannels   = channels.size
+        val selectChan    = channels != (0 until value.numChannels)
+        val normalized    = settings.gain.normalized
+        val needsFSc      = needsResample || needsCrop || selectChan || normalized || !needsPost
+
+        // println(s"needsFSc $needsFSc: needsResample $needsResample || needsCrop $needsCrop || selectChan $selectChan || normalized $normalized || !needsPost !$needsPost")
+
+        val (bncOutF: File, bncOut: URI, bncSpec: AudioFileSpec) = if (needsFSc && needsPost) {
+          val fTmp = File.createTempFile("bounce", ".w64")
+          fTmp.deleteOnExit()
+          (fTmp, fTmp.toURI, AudioFileSpec(AudioFileType.Wave64, numChannels = numChannels, sampleRate = SR))
+        } else {
+          val FileFormat.PCM(tpe, smp) = settings.fileFormat
+          (fileOut, uri, AudioFileSpec(tpe, smp, numChannels = numChannels, sampleRate = SR))
+        }
+
+        def gBnc = fscape.Graph {
+          import fscape.Ops._
+          import fscape.graph._
+
+          def mkIn(): GE = {
+            val in    = AudioFileIn(value.artifact, numChannels = value.spec.numChannels)
+            val drop  = if (dropLen == 0L) in else in.drop(dropLen)
+            val crop  = if (takeLen == numFramesIn - dropLen) drop else drop.take(numFramesOut)
+            val rsmp  = if (!needsResample) crop else {
+              Resample(crop, factor = SR / value.sampleRate)
+            }
+            lazy val zero = DC(0.0).take(numFramesOut)
+            if (!selectChan) rsmp else channels.map { ch =>
+              if (ch >= 0 && ch < value.numChannels) rsmp.out(ch) else zero
+            }
+          }
+
+          val in0     = mkIn()
+          val scaled  = if (!normalized) {
+            val amp = settings.gain.linear
+            if (amp == 1.0) in0 else in0 * amp
+          } else {
+            val ana = Reduce.max(RunningMax(in0.abs))
+            ProgressFrames(ana, numFramesOut, "analyze")
+            val max = ana.last
+            // max.poll("MAX AMP")
+            val amp = settings.gain.linear / (max + (max sig_== 0.0))
+            val in1 = mkIn()
+            in1 * amp
+          }
+          val written = AudioFileOut(scaled, bncOut, bncSpec)
+          ProgressFrames(written, numFramesOut, "write")
+        }
+
+        import Mellite.executionContext
+
+        def post(pre: ProcessorLike[File, Any]) = {
+          val postGain = if (needsFSc) Gain.immediate(0.0) else settings.gain
+          ActionBounce.postProcess(
+            bounce      = pre,
+            fileOut     = fileOut,
+            fileFormat  = settings.fileFormat,
+            gain        = postGain,
+            numFrames   = numFramesOut,
+          )
+        }
+
+        val p = if (needsFSc) {
+          val pre = new Processor[File] with FutureProxy[File]
+            with ModelImpl[Processor.Update[File, Processor[File]]] { self =>
+
+            private[this] var _progress = 0.0
+            private[this] val ctrlCfg = {
+              val b = fscape.stream.Control.Config()
+              b.progressReporter = { pr =>
+                _progress = pr.total
+                dispatch(Processor.Progress(self, _progress))
+              }
+              b.build
+            }
+            private[this] val ctrl = fscape.stream.Control(ctrlCfg)
+
+            protected def peerFuture: Future[File] = ctrl.status.map(_ => bncOutF)
+
+            def abort(): Unit = ctrl.cancel()
+
+            def progress: Double = _progress
+
+            ctrl.run(gBnc)
+          }
+
+          if (!needsPost) pre else post(pre)
+
+        } else {
+          val fileIn  = new File(value.artifact)
+          val pre     = Processor.fromFuture("Bounce", Future.successful(fileIn))
+          post(pre)
+        }
+
+        ActionBounce.monitorProcess(p, settings, uri, view = impl)
+      }
+    }
 
     override def dispose()(implicit tx: T): Unit = {
       val itx: I = inMemoryBridge(tx)
@@ -223,7 +384,7 @@ object AudioCueViewImpl {
       ggArtifact.tooltip  = "File View"
       ggArtifact.enabled  = artifactOptH.isDefined
 
-      val lbSpec = new Label(AudioFileIn.specToString(snapshot.spec))
+      val lbSpec = new Label(LWAudioFileIn.specToString(snapshot.spec))
 
       val bottomPane = new BoxPanel(Orientation.Horizontal) {
         contents += ggReveal

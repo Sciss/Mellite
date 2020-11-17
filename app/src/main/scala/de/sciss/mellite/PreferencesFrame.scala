@@ -16,13 +16,12 @@ package de.sciss.mellite
 import de.sciss.desktop.{Desktop, FileDialog, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
 import de.sciss.icons.raphael
-import de.sciss.mellite.impl.component.NoMenuBarActions
+import de.sciss.mellite.impl.component.{BaselineFlowPanel, NoMenuBarActions}
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
-import javax.swing.JPanel
 
-import scala.swing.{Action, Alignment, Component, FlowPanel, Label, TabbedPane}
+import scala.swing.{Action, Alignment, Component, Label, TabbedPane}
 
 final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
 
@@ -60,18 +59,10 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       ggScreenMenuBar.visible = false
     }
 
-    def mkFlow(hGap0: Int, components: Component*): Component =
-      new FlowPanel(components: _*) {
-        override lazy val peer: JPanel =
-          new JPanel(new java.awt.FlowLayout(FlowPanel.Alignment.Leading.id)) with SuperMixin {
-            override def getBaseline(width: Int, height: Int): Int = {
-              components.head.peer.getBaseline(width, height)
-            }
-          }
-
-          alignOnBaseline = true
-          hGap = hGap0
-          vGap = 0
+    def mkFlow(hGap0: Int, components: Component*): Component = {
+      val fp = new BaselineFlowPanel(components: _*)
+      fp.hGap = hGap0
+      fp
     }
 
     val lbCodeFont          = label("Code Font")

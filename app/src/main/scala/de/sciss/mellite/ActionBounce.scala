@@ -21,10 +21,10 @@ import de.sciss.desktop.{Desktop, DialogSource, FileDialog, OptionPane, PathFiel
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.{Buffer, Server, Synth, Txn}
-import de.sciss.lucre.{Artifact, ArtifactLocation, BooleanObj, DoubleObj, IntObj, LongObj, Obj, Source, SpanLikeObj, StringObj}
-import de.sciss.lucre.{Txn => LTxn}
+import de.sciss.lucre.{Artifact, ArtifactLocation, BooleanObj, DoubleObj, IntObj, LongObj, Obj, Source, SpanLikeObj, StringObj, Txn => LTxn}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.edit.EditFolderInsertObj
+import de.sciss.mellite.impl.component.BaselineFlowPanel
 import de.sciss.mellite.util.Gain
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{AudioCue, Bounce, Tag, TimeRef, Timeline, Universe}
@@ -49,7 +49,7 @@ import scala.swing.Swing._
 import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
 import scala.swing.{Button, ButtonGroup, CheckBox, Component, Dialog, Label, ProgressBar, TextField, ToggleButton}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Try}
 
 object ActionBounce {
   private[this] val DEBUG = false
@@ -88,6 +88,8 @@ object ActionBounce {
   }
   sealed trait FileFormat {
     def isPCM: Boolean
+
+    def isCompressed: Boolean = !isPCM
 
     def id: String
 
@@ -151,7 +153,8 @@ object ActionBounce {
     * @param q    the settings to store
     * @param obj  the object into whose attribute map the settings are stored
     */
-  def storeSettings[T <: Txn[T]](q: QuerySettings[T], obj: Obj[T])(implicit tx: T): Unit = {
+  def storeSettings[T <: Txn[T]](q: QuerySettings[T], obj: Obj[T], hasRealtimeOption: Boolean)
+                                (implicit tx: T): Unit = {
     val attr = {
       val tag = obj.attr.$[Tag](attrTag).getOrElse {
         val _tag = Tag[T]()
@@ -231,8 +234,10 @@ object ActionBounce {
     storeBoolean  (attrNormalize  , q.gain.normalized, default = true)
     storeSpanLike (attrSpan       , q.span)
     storeString   (attrChannels   , channelsToString(q.channels))
-    storeBoolean  (attrRealtime   , q.realtime)
-    storeBoolean  (attrFineControl, q.fineControl)
+    if (hasRealtimeOption) {
+      storeBoolean  (attrRealtime   , q.realtime)
+      storeBoolean  (attrFineControl, q.fineControl)
+    }
     storeBoolean  (attrImport     , q.importFile)
 
     q.location match {
@@ -241,11 +246,15 @@ object ActionBounce {
     }
   }
 
+  /** Retrieves settings from a tag map found at `attrTag`. If settings are found,
+    * the returned `Boolean` is `true` ("marked"), if no attribute was recalled,
+    * the returned `Boolean` is `false`.
+    */
   def recallSettings[T <: Txn[T]](obj             : Obj[T],
                                   defaultRealtime : Boolean               = false,
                                   defaultFile     : URI                   = Artifact.Value.empty,
                                   defaultChannels : Vec[Range.Inclusive]  = Vector(0 to 1))
-                                 (implicit tx: T): QuerySettings[T] = {
+                                 (implicit tx: T): (QuerySettings[T], Boolean) = {
     val attrOpt = {
       tx.attrMapOption(obj).flatMap { a0 =>
         a0.$[Tag](attrTag).flatMap(tag => tx.attrMapOption(tag))
@@ -253,8 +262,13 @@ object ActionBounce {
     }
     import equal.Implicits._
 
-    def attr[R[~ <: LTxn[~]] <: Obj[~]](key: String)(implicit tx: T, ct: ClassTag[R[T]]): Option[R[T]] =
-      attrOpt.flatMap(_.$[R](key))
+    var mark = false
+
+    def attr[R[~ <: LTxn[~]] <: Obj[~]](key: String)(implicit tx: T, ct: ClassTag[R[T]]): Option[R[T]] = {
+      val res = attrOpt.flatMap(_.$[R](key))
+      if (res.isDefined) mark = true
+      res
+    }
 
     def recallString(key: String, default: String = ""): String =
       attr[StringObj](key).fold(default)(_.value)
@@ -315,11 +329,23 @@ object ActionBounce {
 
     val location = attr[ArtifactLocation](attrLocation).map(tx.newHandle(_))
 
-    QuerySettings(uriOption = fileOpt, fileFormat = fileFormat, sampleRate = sampleRate, gain = gain, span = span,
+    val qs = QuerySettings(uriOption = fileOpt, fileFormat = fileFormat, sampleRate = sampleRate, gain = gain, span = span,
       channels = channels, realtime = realtime, fineControl = fineControl, importFile = importFile,
       location = location)
+    (qs, mark)
   }
 
+  /** @param uriOption    the output file
+    * @param fileFormat   the output file format
+    * @param sampleRate   the output sample rate
+    * @param gain         the gain settings (normlized / immediate)
+    * @param span         the optional span within the object to bounce
+    * @param channels     the sequence of channel ranges. Unlike the UI presentation, this is _zero based_!
+    * @param realtime     whether to use real-time processing
+    * @param fineControl  whether to use fine-grained DSP blocks
+    * @param importFile   whether to import the resulting file back into theworkspace
+    * @param location     the location to use for re-imported artifact
+    */
   final case class QuerySettings[T <: Txn[T]](
                                                uriOption   : Option[URI]           = None,
                                                fileFormat  : FileFormat            = FileFormat.PCM(),
@@ -420,7 +446,8 @@ object ActionBounce {
 
   def query[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
                          init: QuerySettings[T], selectionType: Selection,
-                         spanPresets: ISeq[SpanPreset])(callback: (QuerySettings[T], Boolean) => Unit): Unit = {
+                         spanPresets: ISeq[SpanPreset], hasRealtimeOption: Boolean)
+                        (callback: (QuerySettings[T], Boolean) => Unit): Unit = {
 
     val viewU: UniverseView[T] = view
     import view.undoManager
@@ -599,6 +626,12 @@ object ActionBounce {
       }
     }
     val bgSpanPresets = new ButtonGroup(ggSpanPresets: _*)
+    val lbSpanPresets = new Label("Span:")
+    val pSpanPresets  = new BaselineFlowPanel(ggSpanPresets: _*)
+    if (ggSpanPresets.isEmpty) {
+      pSpanPresets  .visible = false
+      lbSpanPresets .visible = false
+    }
 
     def mkSpan(): SpanOrVoid = selectionType match {
       case SpanSelection =>
@@ -668,6 +701,13 @@ object ActionBounce {
     val lbFineControl = new Label("Fine Control Rate:"      /* , EmptyIcon, Trailing */)
     val lbImport      = new Label("Import into Workspace:"  /* , EmptyIcon, Trailing */)
 
+    if (!hasRealtimeOption) {
+      ggRealtime    .visible = false
+      lbRealtime    .visible = false
+      ggFineControl .visible = false
+      lbFineControl .visible = false
+    }
+
     ggImport.selected = init.importFile
 
     // do this _here_ because the path has already
@@ -690,11 +730,11 @@ object ActionBounce {
         Seq(lbPath, ggPath), // Seq(Size.fixed(lbPath, Size.Preferred), Size.fill(ggPath, pref = Size.Infinite)),
         Seq(
           Par(Trailing)(
-            lbFormat , lbSampleRate, lbGain, lbChannels, lbSpanStart, lbSpanStopOrDur,
+            lbFormat , lbSampleRate, lbGain, lbChannels, lbSpanPresets, lbSpanStart, lbSpanStopOrDur,
             lbRealtime, lbFineControl, lbImport, lbMP3Title, lbMP3Artist, lbMP3Comment),
           Par(
             Seq(ggFileType, ggPCMSampleFormat, ggMP3BitRate, ggMP3VBR), ggSampleRate,
-            Seq(ggGainAmt, ggGainType), ggChannels, ggSpanStartOpt, ggSpanStopOrDur,
+            Seq(ggGainAmt, ggGainType), ggChannels, pSpanPresets, ggSpanStartOpt, ggSpanStopOrDur,
             ggRealtime, ggFineControl, ggImport,
             ggMP3Title, ggMP3Artist, ggMP3Comment
           ),
@@ -707,6 +747,7 @@ object ActionBounce {
         Par(Baseline)(lbSampleRate, ggSampleRate),
         Par(Baseline)(lbGain, ggGainAmt, ggGainType),
         Par(Baseline)(lbChannels, ggChannels),
+        Par(Baseline)(lbSpanPresets, pSpanPresets),
         Par(Baseline)(lbSpanStart, ggSpanStartOpt),
         Par(Baseline)(lbSpanStopOrDur, ggSpanStopOrDur),
         P.Gap.Preferred(Unrelated),
@@ -815,7 +856,7 @@ object ActionBounce {
           callback(settings, ok3)
 
         case None if ok2 =>
-          query(view, settings, selectionType, spanPresets)(callback)
+          query(view, settings, selectionType, spanPresets, hasRealtimeOption = hasRealtimeOption)(callback)
 
         case _ =>
           callback(settings, ok2)
@@ -853,29 +894,38 @@ object ActionBounce {
 
   /////////////////////////////////////////////////////////////////////////////////////////////
 
-  def performGUI[T <: Txn[T]](view: UniverseView[T],
-                              settings: QuerySettings[T],
-                              group: IIterable[Source[T, Obj[T]]], uri: URI, span: Span): Unit = {
-
+  /** Monitors the bounce process, possibly opening a status window, displaying errors,
+    * and eventually importing the target file into the workspace if the import option was set.
+    */
+  def monitorProcess[T <: Txn[T]](p: ProcessorLike[Any, Any], settings: QuerySettings[T], uri: URI,
+                                  view: UniverseView[T]): Unit = {
     import view.{cursor, universe}
     import universe.workspace
-    val window      = Window.find(view.component)
-    val pSet        = settings.prepare(group, uri)(span)
-    val process: ProcessorLike[Any, Any] = perform(pSet)
+    val window            = Window.find(view.component)
+    var processCompleted  = false
 
-    var processCompleted = false
-
-    val ggProgress  = new ProgressBar()
-    val ggCancel = new Button("Abort")
-    ggCancel.focusable = false
-    lazy val op = OptionPane(message = ggProgress, messageType = OptionPane.Message.Plain, entries = Seq(ggCancel))
-    val title   = s"Exporting to ${uri.name} ..."
-    op.title    = title
+    val ggProgress        = new ProgressBar()
+    val ggCancel          = new Button("Abort")
+    ggCancel.focusable    = false
+    lazy val op           = OptionPane(message = ggProgress, messageType = OptionPane.Message.Plain,
+      entries = Seq(ggCancel))
+    val title             = s"Exporting to ${uri.name} ..."
+    op.title              = title
 
     ggCancel.listenTo(ggCancel)
     ggCancel.reactions += {
       case ButtonClicked(_) =>
-        process.abort()
+        p.abort()
+        // currently process doesn't seem to abort under certain errors
+        // (e.g. buffer allocator exhausted). XXX TODO
+        val run = new Runnable { def run(): Unit = { Thread.sleep(1000); defer(fDispose()) }}
+        new Thread(run).start()
+    }
+
+    ggCancel.listenTo(ggCancel)
+    ggCancel.reactions += {
+      case ButtonClicked(_) =>
+        p.abort()
         // currently process doesn't seem to abort under certain errors
         // (e.g. buffer allocator exhausted). XXX TODO
         val run = new Runnable { def run(): Unit = { Thread.sleep(1000); defer(fDispose()) }}
@@ -886,18 +936,8 @@ object ActionBounce {
       val w = SwingUtilities.getWindowAncestor(op.peer); if (w != null) w.dispose()
       processCompleted = true
     }
-    process.addListener {
-      case prog @ Processor.Progress(_, _) => defer(ggProgress.value = prog.toInt)
-    }
-
-    val onFailure: PartialFunction[Throwable, Unit] = {
-      case Processor.Aborted() =>
-        defer(fDispose())
-      case ex =>
-        defer {
-          fDispose()
-          DialogSource.Exception(ex -> title).show(window)
-        }
+    p.addListener {
+      case pr @ Processor.Progress(_, _) => defer(ggProgress.value = pr.toInt)
     }
 
     def bounceDone(): Unit = {
@@ -908,10 +948,10 @@ object ActionBounce {
           AudioFile.readSpecAsync(uri).foreach { spec =>
             cursor.step { implicit tx =>
               val loc       = locSource()
-              val depArtif  = Artifact(loc, uri)
+              val depArt    = Artifact(loc, uri)
               val depOffset = LongObj  .newVar[T](0L)
               val depGain   = DoubleObj.newVar[T](1.0)
-              val deployed  = AudioCue.Obj[T](depArtif, spec, depOffset, depGain)
+              val deployed  = AudioCue.Obj[T](depArt, spec, depOffset, depGain)
               deployed.name = uri.base
               workspace.root.addLast(deployed)
             }
@@ -925,16 +965,35 @@ object ActionBounce {
       }
     }
 
-    process.onComplete {
-      case Success(_)   => bounceDone()
-      case Failure(ex)  => onFailure(ex)
+    val onFailure: PartialFunction[Throwable, Unit] = {
+      case Processor.Aborted() =>
+        defer(fDispose())
+      case ex =>
+        defer {
+          fDispose()
+          DialogSource.Exception(ex -> title).show(window)
+        }
     }
-//    process.onSuccess { case _ => bounceDone() }
-//    process.onFailure(onFailure)
+
+    p.onComplete {
+      case Failure(ex)  => onFailure(ex)
+      case _            => bounceDone()
+    }
 
     desktop.Util.delay(500) {
       if (!processCompleted) op.show(window)
     }
+  }
+
+  def performGUI[T <: Txn[T]](view: UniverseView[T],
+                              settings: QuerySettings[T],
+                              group: IIterable[Source[T, Obj[T]]], uri: URI, span: Span): Unit = {
+
+    import view.universe
+    val pSet = settings.prepare(group, uri)(span)
+    val process: ProcessorLike[Any, Any] = perform(pSet)
+
+    monitorProcess(process, settings, uri, view)
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1019,32 +1078,51 @@ object ActionBounce {
       Synth.play(graph)(s.defaultGroup, addAction = addToTail)
     }
 
+    // XXX TODO --- could use filtered console output via Poll to
+    // measure max gain already during bounce
     val bProcess  = bounce.apply(bnc)
     // bProcess.addListener {
     //   case u => println(s"UPDATE: $u")
     // }
     bProcess.start()
-    val process   = if (!needsTemp) bProcess else {
-      val nProcess = new PostProcessor(bounce = bProcess,
+    val process = if (!needsTemp) bProcess else {
+      postProcess(bounce = bProcess,
         fileOut = fileOut, fileFormat = settings.fileFormat,
         gain = if (normalized) settings1.gain else Gain.immediate(0f), numFrames = fileFrames)
-      nProcess.start()
-      nProcess
     }
     process
   }
 
-  // XXX TODO --- could use filtered console output via Poll to
-  // measure max gain already during bounce
-  private final class PostProcessor[T <: Txn[T]](bounce: Processor[File],
-                                              fileOut: File, fileFormat: FileFormat,
-                                              gain: Gain, numFrames: Long)
+  /** Converts a bounced file to another file format, for example using compression,
+    * optionally normalizing the output.
+    *
+    * @param bounce     the ongoing or completed bounce process
+    * @param fileOut    the file created by the post processing
+    * @param fileFormat the target file format
+    * @param gain       relative gain or normalized headroom for the output
+    * @param numFrames  the nominal number of frames to process. Real-time bounce may be
+    *                   slightly off, thus this allowed to truncate the length of the post-processing output.
+    *                   Use -1 to use the length reported by the bounced file.
+    */
+  def postProcess(bounce: ProcessorLike[File, Any],
+                  fileOut: File, fileFormat: FileFormat,
+                  gain: Gain, numFrames: Long): Processor[File] = {
+    val nProcess = new PostProcessor(bounce = bounce, fileOut = fileOut, fileFormat = fileFormat, gain = gain,
+      numFrames = numFrames)
+    nProcess.start()
+    nProcess
+  }
+
+  private final class PostProcessor[T <: Txn[T]](bounce: ProcessorLike[File, Any],
+                                                 fileOut: File, fileFormat: FileFormat,
+                                                 gain: Gain, numFrames: Long)
     extends ProcessorImpl[File, Processor[File]] with Processor[File] {
 
     override def toString = s"Normalize bounce $fileOut"
 
     def body(): File = blocking {
-      val fileIn  = await(bounce, target = if (gain.normalized) 0.8 else 0.9)   // arbitrary weight
+      // XXX TODO use async API
+      val fileIn = await(bounce, target = if (gain.normalized) 0.8 else 0.9)   // arbitrary weight
 
       // tricky --- scsynth flush might not yet be seen
       // thus wait a few seconds until header becomes available
@@ -1059,7 +1137,7 @@ object ActionBounce {
       try {
         val bufSz       = 8192
         val buf         = afIn.buffer(bufSz)
-        val numFrames0  = math.min(afIn.numFrames, numFrames) // whatever...
+        val numFrames0  = if (numFrames < 0L) afIn.numFrames else math.min(afIn.numFrames, numFrames)
         var rem         = numFrames0
 //        if (rem >= afIn.numFrames)
 //          throw new EOFException(s"Bounced file is too short (${afIn.numFrames} -- expected at least $rem)")
@@ -1120,7 +1198,6 @@ object ActionBounce {
           }
         }
 
-
         fileFormat match {
           case FileFormat.PCM(fileType, sampleFormat) =>
             writePCM(fileOut, fileType, sampleFormat, maxChannels = 0, progStop = 1.0)
@@ -1165,15 +1242,19 @@ object ActionBounce {
     }
   }
 }
-class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
-                                objH: Source[T, Obj[T]], storeSettings: Boolean = true)
+class ActionBounce[T <: Txn[T]](protected val view: UniverseView[T] with View.Editable[T],
+                                protected val objH: Source[T, Obj[T]],
+                                storeSettings     : Boolean = true,
+                                hasRealtimeOption : Boolean = false,
+                               )
   extends scala.swing.Action(ActionBounce.title) {
 
   import ActionBounce.{storeSettings => _, _}
 
-  private[this] var settings = QuerySettings[T]()
+  private[this] var settings    = QuerySettings[T]()
+  private[this] var hadSettings = false
 
-  protected def prepare(settings: QuerySettings[T]): QuerySettings[T] = settings
+  protected def prepare(settings: QuerySettings[T], recalled: Boolean): QuerySettings[T] = settings
 
   protected type SpanPresets = ISeq[SpanPreset]
 
@@ -1187,23 +1268,35 @@ class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
 
   import view.cursor
 
+  /** subclasses may override this if they wish to perform a different kind
+    * of bounce (e.g. not SuperCollider-based)
+    *
+    * @param  uri   definitely specifies `settings.uriOption`, i.e. the target file
+    * @param  span  definitely specifies `settings.span`, i.e. the object's span to be bounced
+    */
+  protected def performGUI(settings: QuerySettings[T], uri: URI, span: Span): Unit =
+    ActionBounce.performGUI(view, settings, objH :: Nil, uri, span)
+
   def apply(): Unit = {
     if (storeSettings) {
-      settings = cursor.step { implicit tx =>
+      val tup = cursor.step { implicit tx =>
         ActionBounce.recallSettings(objH(),
           defaultRealtime = defaultRealtime, defaultFile = defaultFile, defaultChannels = defaultChannels)
       }
+      settings    = tup._1
+      hadSettings = tup._2
     }
 
-    val setUpd  = prepare(settings)
+    val setUpd  = prepare(settings, recalled = hadSettings)
     val presets = spanPresets()
+    hadSettings = true
 
-    query(view, setUpd, selectionType, presets) { (_settings, ok) =>
+    query(view, setUpd, selectionType, presets, hasRealtimeOption = hasRealtimeOption) { (_settings, ok) =>
       settings = _settings
       if (ok) {
         if (storeSettings) {
           cursor.step { implicit tx =>
-            ActionBounce.storeSettings(_settings, objH())
+            ActionBounce.storeSettings(_settings, objH(), hasRealtimeOption = hasRealtimeOption)
           }
         }
 
@@ -1211,7 +1304,7 @@ class ActionBounce[T <: Txn[T]](view: UniverseView[T] with View.Editable[T],
           f    <- _settings.uriOption
           span <- _settings.span.nonEmptyOption
         } {
-          performGUI(view, _settings, objH :: Nil, f, span)
+          performGUI(_settings, f, span)
         }
       }
     }
