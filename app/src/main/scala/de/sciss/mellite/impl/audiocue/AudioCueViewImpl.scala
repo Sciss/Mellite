@@ -154,7 +154,7 @@ object AudioCueViewImpl {
         val artF      = new File(snapshot.artifact)
         _sonogram     = SonogramManager.acquire(artF)
         sonogramView  = new AudioCueViewJ(_sonogram, timelineModel)
-        ggVisualBoost = GUI.boostRotary()(sonogramView.visualBoost = _)
+        ggVisualBoost = GUI.boostRotaryR(init = 22f)(sonogramView.visualBoost = _)
       } catch {
         case NonFatal(ex) =>
           ex.printStackTrace()

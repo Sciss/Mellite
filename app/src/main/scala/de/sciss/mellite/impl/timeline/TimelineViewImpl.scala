@@ -213,7 +213,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       super.guiInit()
 
       canvas = new View
-      val ggVisualBoost = GUI.boostRotary()(canvas.timelineTools.visualBoost = _)
+      val ggVisualBoost = GUI.boostRotaryR(init = 22f)(canvas.timelineTools.visualBoost = _)
 
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
@@ -437,7 +437,7 @@ object TimelineViewImpl extends TimelineView.Companion {
         logT.debug(s"insertAudioRegion($drop, ${drag.selection}, $audioCue)")
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
         val (span, obj) = ProcActions.mkAudioRegion(time = tlSpan,
-          audioCue = audioCue, gOffset = drag.selection.start /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
+          audioCue = audioCue, gOffset = drag.selection.start - audioCue.value.offset /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
         val track = canvas.screenToModelPos(drop.y)
         obj.attr.put(ObjTimelineView.attrTrackIndex, IntObj.newVar(IntObj.newConst(track)))
         val edit = EditTimelineInsertObj("Insert Audio Region", groupM, span, obj)

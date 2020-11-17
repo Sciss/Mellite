@@ -183,17 +183,29 @@ object GUI {
     pf.head.peer.putClientProperty("mellite.reaction", reaction)
   }
 
+  // XXX TODO remove in major version
   def boostRotary(lo: Float = 1f, hi: Float = 512f, tooltip: String = "Sonogram Contrast")
-                 (fun: Float => Unit): Component = {
+                 (fun: Float => Unit): Component =
+    boostRotaryR(lo = lo, hi = hi, tooltip = tooltip)(fun)
+
+  // if `init` it greater than or equal to `lo`, the rotary position is initialized and the function is called
+  def boostRotaryR(lo: Float = 1f, hi: Float = 512f, init: Float = -1f, tooltip: String = "Sonogram Contrast")
+                  (fun: Float => Unit): Component = {
+    import numbers.Implicits._
     val knob = new RotaryKnob {
       min       = 0
       max       = 64
-      value     = 0
       focusable = false
+      if (init >= lo && init <= hi) {
+        value = (init.expLin(lo, hi, 0, 64) + 0.5f).toInt
+        fun(init)
+      } else {
+        value = 0
+      }
+
       listenTo(this)
       reactions += {
         case ValueChanged(_) =>
-          import numbers.Implicits._
           val scaled = value.linExp(0, 64, lo, hi)
           fun(scaled)
       }
