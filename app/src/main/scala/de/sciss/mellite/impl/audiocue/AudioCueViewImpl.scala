@@ -46,17 +46,14 @@ import scala.util.control.NonFatal
 
 object AudioCueViewImpl {
   def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] = {
-    val value         = obj.value // .artifact // store.resolve(element.entity.value.artifact)
-    // val sampleRate    = f.spec.sampleRate
-//    val system: S     = tx.system
-    type I            = tx.I // _workspace.I
-    implicit val itx: I = tx.inMemory // inMemoryBridge(tx)
-    val timeline      = Timeline[I]() // proc.ProcGroup.Modifiable[I]
-    // val groupObj      = Obj(ProcGroupElem(group))
+    val value         = obj.value
+    type I            = tx.I
+    implicit val itx: I = tx.inMemory
+    val timeline      = Timeline[I]()
     val srRatio       = value.spec.sampleRate / TimeRef.SampleRate
-    // val fullSpanFile  = Span(0L, f.spec.numFrames)
     val numFramesTL   = (value.spec.numFrames / srRatio).toLong
-    val fullSpanTL    = Span(0L, numFramesTL)
+    val offsetTL      = value.offset
+    val fullSpanTL    = Span(offsetTL, numFramesTL)
 
     @tailrec def findArtifact(in: AudioCue.Obj[T]): Option[Source[T, Artifact[T]]] = in match {
       case AudioCue.Obj               (a, _, _, _)  => Some(tx.newHandle(a))
@@ -74,7 +71,7 @@ object AudioCueViewImpl {
      val iLoc         = ArtifactLocation.newVar[I](artifactDir)
      val iArtifact    = Artifact(iLoc, artifact) // iLoc.add(artifact.value)
 
-    val audioCueI     = AudioCue.Obj[I](iArtifact, value.spec, value.offset, value.gain)
+    val audioCueI     = AudioCue.Obj[I](iArtifact, value.spec, 0L /*value.offset*/, value.gain)
 
     val (_, proc)     = ProcActions.insertAudioRegion[I](timeline, time = Span(0L, numFramesTL),
       /* track = 0, */ audioCue = audioCueI, gOffset = 0L /* , bus = None */)
