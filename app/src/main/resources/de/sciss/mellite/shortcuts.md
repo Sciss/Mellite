@@ -62,3 +62,18 @@ We try to use the same keyboard mappings as IntelliJ IDEA, with some additional 
 |`shift RETURN`     |Execute selection in interpreter   |
 
 (*) Currently not implemented
+
+## Oscilloscope
+
+|**Key**                  |**Action**                                                   |
+|:------------------------|:------------------------------------------------------------|
+|`ctrl UP`, `ctrl DOWN`   |increase or decrease vertical zoom                           |
+|`ctrl RIGHT`, `ctrl LEFT`|increase or decrease horizontal zoom                         |
+|`SPACE`                  |toggle run/pause                                             |
+|`PERIOD`                 |pause                                                        |
+|`J`, `L`                 |decrease or increase channel offset                          |
+|`shift J`, `shift L`     |decrease or increase number of channels                      |
+|`K`                      |switch between audio and control rate buses                  |
+|`I`, `O`                 |switch to audio inputs and audio outputs                     |
+|`S`                      |switch between parallel and overlay mode                     |
+|`shift S`                |switch between Lissajous (X/Y) and normal (X over time) mode |
