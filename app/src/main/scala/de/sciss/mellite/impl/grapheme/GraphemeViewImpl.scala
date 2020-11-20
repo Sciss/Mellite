@@ -166,7 +166,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     private[this] lazy val toolAdd      = GraphemeTool.add     [T](canvas)
 
     def grapheme  (implicit tx: T): Grapheme[T] = graphemeH()
-    def plainGroup(implicit tx: T): Grapheme[T] = grapheme
+//    def plainGroup(implicit tx: T): Grapheme[T] = grapheme
 
     def dispose()(implicit tx: T): Unit = {
       val m: ViewMap = emptyMap
@@ -401,7 +401,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[T, ObjGraphemeView[T]] = impl.selectionModel
-      def grapheme(implicit tx: T): Grapheme[T]              = impl.plainGroup
+      def grapheme(implicit tx: T): Grapheme[T]                 = impl.grapheme
 
 //      def findChildView(frame: Long): Option[GraphemeObjView[T]] = {
 //        val it = viewMapG.valuesIteratorFrom(frame)

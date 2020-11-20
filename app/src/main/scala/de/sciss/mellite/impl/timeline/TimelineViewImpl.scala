@@ -13,10 +13,6 @@
 
 package de.sciss.mellite.impl.timeline
 
-import java.awt.datatransfer.Transferable
-import java.awt.{Font, Graphics2D, RenderingHints}
-import java.util.Locale
-
 import de.sciss.audiofile.AudioFile
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
@@ -36,14 +32,17 @@ import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
 import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView}
 import de.sciss.model.Change
-import de.sciss.span.{Span, SpanLike}
-import de.sciss.swingplus.ScrollBar
 import de.sciss.proc.gui.TransportView
 import de.sciss.proc.impl.AuxContextImpl
 import de.sciss.proc.{AudioCue, TimeRef, Timeline, Transport, Universe}
+import de.sciss.span.{Span, SpanLike}
+import de.sciss.swingplus.ScrollBar
+
+import java.awt.datatransfer.Transferable
+import java.awt.{Font, Graphics2D, RenderingHints}
+import java.util.Locale
 import javax.swing.UIManager
 import javax.swing.undo.UndoableEdit
-
 import scala.concurrent.stm.TSet
 import scala.math.{max, min}
 import scala.swing.Swing._
@@ -146,7 +145,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     private[this] lazy val toolPatch    = TimelineTool.patch   [T](canvas)
     private[this] lazy val toolAudition = TimelineTool.audition[T](canvas, this)
 
-    def plainGroup(implicit tx: T): Timeline[T] = obj
+    def timeline(implicit tx: T): Timeline[T] = obj
 
     override def dispose()(implicit tx: T): Unit = {
       super.dispose()
@@ -165,7 +164,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       s.retain(_ => false)(tx.peer) // no `clear` method
 
     private def debugCheckConsistency(info: => String)(implicit tx: T): Unit = if (DEBUG) {
-      val check = BiGroupImpl.verifyConsistency(plainGroup, reportOnly = true)
+      val check = BiGroupImpl.verifyConsistency(timeline, reportOnly = true)
       check.foreach { msg =>
         println(info)
         println(msg)
@@ -433,16 +432,28 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     private def insertAudioRegion(drop: DnD.Drop[T], drag: DnD.AudioDragLike[T],
                                   audioCue: AudioCue.Obj[T])(implicit tx: T): Option[UndoableEdit] =
-      plainGroup.modifiableOption.map { groupM =>
+      timeline.modifiableOption.flatMap { tlm =>
         logT.debug(s"insertAudioRegion($drop, ${drag.selection}, $audioCue)")
         val tlSpan = Span(drop.frame, drop.frame + drag.selection.length)
-        val (span, obj) = ProcActions.mkAudioRegion(time = tlSpan,
+        val (span, child) = ProcActions.mkAudioRegion(time = tlSpan,
           audioCue = audioCue, gOffset = drag.selection.start - audioCue.value.offset /*, bus = None */) // , bus = ad.bus.map(_.apply().entity))
-        val track = canvas.screenToModelPos(drop.y)
-        obj.attr.put(ObjTimelineView.attrTrackIndex, IntObj.newVar(IntObj.newConst(track)))
-        val edit = EditTimelineInsertObj("Insert Audio Region", groupM, span, obj)
-        edit
+        insertDropObj(tlm, drop, span, child, "Audio Region", childNew = true)
       }
+
+    private def insertDropObj(tl: Timeline.Modifiable[T], drop: DnD.Drop[T], span: SpanLikeObj[T],
+                              child: Obj[T], childHumanName: String, childNew: Boolean)
+                             (implicit tx: T): Option[UndoableEdit] = {
+      val track = canvas.screenToModelPos(drop.y)
+      val editTrackIdx = Edits.adjustAttr[T, Int, IntObj](child, ObjTimelineView.attrTrackIndex, arg = track,
+        name = "Set Track Index", default = 0)((_, now) => now)
+      val nameCompound = s"Insert $childHumanName"
+      val editInsert = EditTimelineInsertObj(nameCompound, tl, span, child)
+      if (childNew) {
+        Some(editInsert)
+      } else {
+        CompoundEdit(editTrackIdx.toList ::: editInsert :: Nil, nameCompound)
+      }
+    }
 
     private def performDrop(drop: DnD.Drop[T]): Boolean = {
       def withRegions[A](fun: T => List[ObjTimelineView[T]] => Option[A]): Option[A] =
@@ -528,11 +539,11 @@ object TimelineViewImpl extends TimelineView.Companion {
         case DnD.ObjectDrag(_, `impl`, _) => None
 
         case DnD.ObjectDrag(_, view /* : ObjView.Proc[T] */, _) => cursor.step { implicit tx =>
-          plainGroup.modifiableOption.map { group =>
+          timeline.modifiableOption.flatMap { tlm =>
             val length  = defaultDropLength(view, inProgress = false)
             val span    = Span(drop.frame, drop.frame + length)
-            val spanEx  = SpanLikeObj.newVar[T](SpanLikeObj.newConst(span))
-            EditTimelineInsertObj(s"Insert ${view.humanName}", group, spanEx, view.obj)
+            val spanObj = SpanLikeObj.newVar[T](SpanLikeObj.newConst(span))
+            insertDropObj(tlm, drop, spanObj, view.obj, view.humanName, childNew = false)
           }
           // CompoundEdit(edits, "Insert Objects")
         }
@@ -559,7 +570,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[T, ObjTimelineView[T]] = impl.selectionModel
 
-      def timeline(implicit tx: T): Timeline[T] = impl.plainGroup
+      def timeline(implicit tx: T): Timeline[T] = impl.timeline
 
       def iterator: Iterator[ObjTimelineView[T]] = viewRange.iterator
 

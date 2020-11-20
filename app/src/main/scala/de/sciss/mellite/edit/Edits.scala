@@ -15,18 +15,19 @@ package de.sciss.mellite.edit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.{BooleanObj, Cursor, DoubleObj, DoubleVector, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
+import de.sciss.lucre.{BooleanObj, Cursor, DoubleObj, DoubleVector, Expr, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.mellite.Log.log
 import de.sciss.mellite.Mellite.???!
-import de.sciss.mellite.TimelineTool.{Move, Resize, Gain, Mute}
+import de.sciss.mellite.TimelineTool.{Gain, Move, Mute, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions, TimelineView}
 import de.sciss.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.SynthGraph
 import de.sciss.{proc, synth}
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
+import scala.reflect.ClassTag
 import scala.util.control.NonFatal
 
 object Edits {
@@ -215,56 +216,21 @@ object Edits {
 
   private def any2stringadd: Any = ()
 
-  private def editAdjustIntAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Int, name: String,
-                                                default: Int)(combine: (Int, Int) => Int)
-                                               (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
-    obj.attr.$[IntObj](key) match {
-      case Some(IntObj.Var(vr)) =>
+  def adjustAttr[T <: Txn[T], A, Repr[~ <: Txn[~]] <: Expr[~, A]](obj: Obj[T], key: String, arg: A, name: String,
+                              default: A)(combine: (A, A) => A)
+                             (implicit tx: T, cursor: Cursor[T], tpe: Expr.Type[A, Repr],
+                              ct: ClassTag[Repr[T]]): Option[UndoableEdit] =
+    obj.attr.$[Repr](key) match {
+      case Some(tpe.Var(vr)) =>
         // XXX TODO could be more elaborate; for now preserve just one level of variables
-        val edit = EditVar.Expr[T, Int, IntObj](name, vr, combine(vr().value, arg))
+        val edit = EditVar.Expr[T, A, Repr](name, vr, tpe.newConst(combine(vr().value, arg)))
         Some(edit)
       case other =>
         import de.sciss.equal.Implicits._
         val v = combine(other.fold(default)(_.value), arg)
-        val valueOpt = if (v === default) None else Some(IntObj.newVar[T](v))
+        val valueOpt = if (v === default) None else Some(tpe.newVar[T](tpe.newConst(v)))
         if (other.isEmpty && valueOpt.isEmpty) None else {
-          val edit = EditAttrMap.expr[T, Int, IntObj](name, obj, key, valueOpt)
-          Some(edit)
-        }
-    }
-
-  private def editAdjustDoubleAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Double, name: String,
-                                                 default: Double)(combine: (Double, Double) => Double)
-                                                (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
-    obj.attr.$[DoubleObj](key) match {
-      case Some(DoubleObj.Var(vr)) =>
-        // XXX TODO could be more elaborate; for now preserve just one level of variables
-        val edit = EditVar.Expr[T, Double, DoubleObj](name, vr, combine(vr().value, arg))
-        Some(edit)
-      case other =>
-        import de.sciss.equal.Implicits._
-        val v = combine(other.fold(default)(_.value), arg)
-        val valueOpt = if (v === default) None else Some(DoubleObj.newVar[T](v))
-        if (other.isEmpty && valueOpt.isEmpty) None else {
-          val edit = EditAttrMap.expr[T, Double, DoubleObj](name, obj, key, valueOpt)
-          Some(edit)
-        }
-    }
-
-  private def editAdjustBooleanAttr[T <: Txn[T]](obj: Obj[T], key: String, arg: Boolean, name: String,
-                                                default: Boolean)(combine: (Boolean, Boolean) => Boolean)
-                                               (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
-    obj.attr.$[BooleanObj](key) match {
-      case Some(BooleanObj.Var(vr)) =>
-        // XXX TODO could be more elaborate; for now preserve just one level of variables
-        val edit = EditVar.Expr[T, Boolean, BooleanObj](name, vr, combine(vr().value, arg))
-        Some(edit)
-      case other =>
-        import de.sciss.equal.Implicits._
-        val v = combine(other.fold(default)(_.value), arg)
-        val valueOpt = if (v === default) None else Some(BooleanObj.newVar[T](v))
-        if (other.isEmpty && valueOpt.isEmpty) None else {
-          val edit = EditAttrMap.expr[T, Boolean, BooleanObj](name, obj, key, valueOpt)
+          val edit = EditAttrMap.expr[T, A, Repr](name, obj, key, valueOpt)
           Some(edit)
         }
     }
@@ -273,7 +239,7 @@ object Edits {
                        (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import amount.factor
     if (factor == 1f) None else {
-      editAdjustDoubleAttr[T](obj, key = ObjKeys.attrGain, arg = factor.toDouble, name = "Adjust Gain",
+      adjustAttr[T, Double, DoubleObj](obj, key = ObjKeys.attrGain, arg = factor.toDouble, name = "Adjust Gain",
         default = 1.0)(_ * _)
     }
   }
@@ -281,7 +247,7 @@ object Edits {
   def mute[T <: Txn[T]](obj: Obj[T], state: Mute)
                        (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import state.engaged
-    editAdjustBooleanAttr[T](obj, key = ObjKeys.attrMute, arg = engaged, name = "Adjust Mute",
+    adjustAttr[T, Boolean, BooleanObj](obj, key = ObjKeys.attrMute, arg = engaged, name = "Adjust Mute",
       default = false)((_, now) => now)
   }
 
@@ -363,13 +329,13 @@ object Edits {
     // track
     val deltaTrack = amount.deltaTrackStart
     if (deltaTrack != 0) {
-      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
+      val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
         name = nameTrack, default = 0)(_ + _)
       edits :::= edit.toList
     }
     val deltaTrackH = amount.deltaTrackStop - amount.deltaTrackStart
     if (deltaTrackH != 0) {
-      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackHeight, arg = deltaTrackH,
+      val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackHeight, arg = deltaTrackH,
         name = "Adjust Track Height", default = TimelineView.DefaultTrackHeight)(_ + _)
       edits :::= edit.toList
     }
@@ -436,7 +402,7 @@ object Edits {
 
     import amount._
     if (deltaTrack != 0) {
-      val edit = editAdjustIntAttr[T](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
+      val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
         name = "Adjust Track Placement", default = 0)(_ + _)
       edits :::= edit.toList
     }

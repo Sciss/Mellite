@@ -45,6 +45,8 @@ object ProcActions {
                          (implicit tx: T): Unit = {
     import amount._
 
+    require (amount.deltaTrackStart == 0 && amount.deltaTrackStop == 0, "Track position resize not supported")
+
     val oldSpan   = span.value
     // val minStart  = timelineModel.bounds.start
     val dStartC   = if (deltaStart >= 0) deltaStart else oldSpan match {
