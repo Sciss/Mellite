@@ -65,7 +65,7 @@ object ArtifactLocationObjViewImpl extends ArtifactLocationObjView.Companion {
     val obj0  = ArtifactLocation.newConst[T](directory)
     val obj   = if (const) obj0 else ArtifactLocation.newVar[T](obj0)
     import proc.Implicits._
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

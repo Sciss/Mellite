@@ -73,11 +73,12 @@ object AttrMapFrameImpl {
     }
 
     protected def editInsert(f: ObjView.Factory, xs: List[Obj[T]], key: String)(implicit tx: T): Option[UndoableEdit] = {
-      val edits = xs.map { value =>
+      val editOpt = xs.lastOption.map { value =>
         val editName = s"Create Attribute '$key'"
         EditAttrMap(name = editName, obj = peer.obj, key = key, value = Some(value))
       }
-      CompoundEdit(edits, "Create Attributes")
+      editOpt
+//      CompoundEdit(edits, "Create Attributes")
     }
 
     protected def initGUI2(): Unit = {

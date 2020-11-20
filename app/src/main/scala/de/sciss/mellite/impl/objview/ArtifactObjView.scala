@@ -71,6 +71,7 @@ object ArtifactObjView extends ObjListView.Factory {
   }
 
   override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    // XXX TODO should accept URI strings (`file:...`) and not just plain desktop file paths
     object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val location: Opt[File] = opt(
         descr = "Artifact's base location (directory). If absent, artifact's direct parent is used."
@@ -88,7 +89,9 @@ object ArtifactObjView extends ObjListView.Factory {
     p.parse(Config(name = p.name(), file = p.file().toURI, location = p.location.toOption match {
       case Some(v) => Right(v.name) -> v.toURI
       case None =>
-        val parent = p.file().absolute.parent
+        val f       = p.file()
+        val fa      = f.absolute
+        val parent  = fa.parent
         Right(parent.name) -> parent.toURI
     }))
   }
@@ -102,8 +105,8 @@ object ArtifactObjView extends ObjListView.Factory {
         (objLoc :: Nil, objLoc)
     }
     val art = Artifact(loc, file)
-    if (!name.isEmpty) art.name = name
-    art :: list0
+    if (name.nonEmpty) art.name = name
+    list0 ::: art :: Nil
   }
 
   private final class Impl[T <: Txn[T]](val objH: Source[T, Artifact[T]],
