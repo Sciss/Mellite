@@ -14,15 +14,16 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Ident, Obj, Source, SpanLikeObj, Txn => LTxn}
+import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Ident, Obj, Source, SpanLikeObj, Txn => LTxn}
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.ObjGraphemeViewImpl
 import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjTimelineView, ObjView}
-import de.sciss.proc.Grapheme
-import javax.swing.Icon
+import de.sciss.proc.{Grapheme, Universe}
 
+import javax.swing.Icon
 import scala.swing.{Component, Graphics2D, Label}
 
 object GenericObjView extends NoMakeListObjViewFactory with ObjGraphemeView.Factory {
@@ -34,8 +35,10 @@ object GenericObjView extends NoMakeListObjViewFactory with ObjGraphemeView.Fact
 
   type E[T <: LTxn[T]]  = Obj[T]
 
-  def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: Obj[T])(implicit tx: T): ObjTimelineView[T] = {
-    val res = new TimelineImpl[T](tx.newHandle(obj)).initAttrs(id, span, obj)
+  def mkTimelineView[T <: Txn[T]](id: Ident[T], span: SpanLikeObj[T], obj: Obj[T])
+                                 (implicit tx: T): ObjTimelineView[T] = {
+    val peer  = ObjListView(obj)
+    val res   = new TimelineImpl[T](peer).initAttrs(id, span, obj)
     res
   }
 
@@ -53,17 +56,26 @@ object GenericObjView extends NoMakeListObjViewFactory with ObjGraphemeView.Fact
     type Repr = Obj[T]
 
     def factory: ObjView.Factory = GenericObjView
-
-    final def value: Any = ()
-
-    final def configureListCellRenderer(label: Label): Component = label
   }
 
   private final class ListImpl[T <: Txn[T]](val objH: Source[T, Obj[T]])
-    extends Impl[T] with ObjListView[T] with ObjListViewImpl.NonEditable[T] with ObjViewImpl.NonViewable[T]
+    extends Impl[T] with ObjListView[T] with ObjListViewImpl.NonEditable[T] with ObjViewImpl.NonViewable[T] {
 
-  private final class TimelineImpl[T <: Txn[T]](val objH : Source[T, Obj[T]])
-    extends Impl[T] with ObjTimelineViewBasicImpl[T] with ObjViewImpl.NonViewable[T]
+    def value: Any = ()
+
+    def configureListCellRenderer(label: Label): Component = label
+  }
+
+  private final class TimelineImpl[T <: Txn[T]](peer: ObjView[T])
+    extends Impl[T] with ObjTimelineViewBasicImpl[T] {
+
+    def objH: Source[T, Obj[T]] = peer.objH
+
+    def isViewable: Boolean = peer.isViewable
+
+    def openView(parent: Option[Window[T]])(implicit tx: T, universe: Universe[T]): Option[Window[T]] =
+      peer.openView(parent)
+  }
 
   private final class GraphemeImpl[T <: Txn[T]](val entryH: Source[T, Grapheme.Entry[T]],
                                                 val objH: Source[T, Obj[T]])
