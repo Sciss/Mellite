@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.fscape
 
 import java.awt.datatransfer.Transferable
-
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.equal.Implicits._
 import de.sciss.proc.FScape
@@ -25,12 +24,12 @@ import de.sciss.lucre.{Disposable, Obj, Source}
 import de.sciss.mellite.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
-import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView}
+import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView, ObjView}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.proc.Universe
+
 import javax.swing.undo.UndoableEdit
 import javax.swing.{DefaultListCellRenderer, Icon, JList, ListCellRenderer}
-
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, TextField}
 
@@ -59,8 +58,11 @@ object FScapeOutputsViewImpl {
                                            undoManager: UndoManager)
     extends MapViewImpl[T, FScapeOutputsView[T]] with FScapeOutputsView[T] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit] = None
-    protected final def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[T])
+                                     (implicit tx: T): Option[UndoableEdit] = None
+
+    protected final def editImport(key: String, value: Obj[T], context: Set[ObjView.Context[T]], isInsert: Boolean)
+                                  (implicit tx: T): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true

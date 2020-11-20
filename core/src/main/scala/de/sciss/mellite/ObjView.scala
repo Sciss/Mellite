@@ -13,16 +13,15 @@
 
 package de.sciss.mellite
 
-import java.awt.datatransfer.Transferable
-
 import de.sciss.desktop
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Obj, Observable, Source, Txn => LTxn}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.proc.{Color, Universe}
-import javax.swing.Icon
 
+import java.awt.datatransfer.Transferable
+import javax.swing.Icon
 import scala.util.Try
 
 object ObjView {
@@ -38,7 +37,13 @@ object ObjView {
 
   final val Unnamed = "<unnamed>"
 
-  final case class Drag[T <: LTxn[T]](universe: Universe[T], view: ObjView[T])
+  final case class Drag[T <: LTxn[T]](universe: Universe[T], view: ObjView[T],
+                                      context: Set[Context[T]] /*= Set.empty*/)
+
+  object Context {
+    final case class AttrKey[T <: LTxn[T]](s: String) extends Context[T]
+  }
+  sealed trait Context[T <: LTxn[T]]
 
   // Document not serializable -- local JVM only DnD -- cf. stackoverflow #10484344
   val Flavor: Flavor[Drag[_]] = DragAndDrop.internalFlavor

@@ -16,16 +16,16 @@ package de.sciss.mellite.impl.document
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
+import de.sciss.lucre.Obj
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Obj, Source}
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.impl.component.{CollectionViewImpl, NoMenuBarActions}
 import de.sciss.mellite.{AttrMapFrame, AttrMapView, ObjView}
 import de.sciss.proc.Universe
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.swing.{Action, Component}
 
 object AttrMapFrameImpl {
@@ -35,7 +35,7 @@ object AttrMapFrameImpl {
     val view      = new ViewImpl[T](contents)
     view.init()
     val name      = CellView.name(obj)
-    val res       = new FrameImpl[T](tx.newHandle(obj), view, name = name)
+    val res       = new FrameImpl[T](/*tx.newHandle(obj),*/ view, name = name)
     res.init()
     res
   }
@@ -90,9 +90,9 @@ object AttrMapFrameImpl {
     protected def selectedObjects: List[ObjView[T]] = peer.selection.map(_._2)
   }
 
-  private final class FrameImpl[T <: Txn[T]](objH: Source[T, Obj[T]], val view: ViewImpl[T],
+  private final class FrameImpl[T <: Txn[T]](/*objH: Source[T, Obj[T]],*/ val view: ViewImpl[T],
                                              name: CellView[T, String])
-                                       (implicit undoManager: UndoManager)
+//                                       (implicit undoManager: UndoManager)
     extends WindowImpl[T](name.map(n => s"$n : Attributes"))
     with AttrMapFrame[T] with NoMenuBarActions {
 
@@ -102,25 +102,25 @@ object AttrMapFrameImpl {
 
     def component: Component = contents.component
 
-    protected def selectedObjects: List[ObjView[T]] = contents.selection.map(_._2)
+//    protected def selectedObjects: List[ObjView[T]] = contents.selection.map(_._2)
 
     override protected def initGUI(): Unit = {
       super.initGUI()
       initNoMenuBarActions(component)
     }
 
-    protected lazy val actionDelete: Action = Action(null) {
-      val sel = contents.selection
-      if (sel.nonEmpty) {
-        import view.universe.cursor
-        val editOpt = cursor.step { implicit tx =>
-          val ed1 = sel.map { case (key, _) =>
-            EditAttrMap(name = s"Remove Attribute '$key'", objH(), key = key, value = None)
-          }
-          CompoundEdit(ed1, "Remove Attributes")
-        }
-        editOpt.foreach(undoManager.add)
-      }
-    }
+//    protected lazy val actionDelete: Action = Action(null) {
+//      val sel = contents.selection
+//      if (sel.nonEmpty) {
+//        import view.universe.cursor
+//        val editOpt = cursor.step { implicit tx =>
+//          val ed1 = sel.map { case (key, _) =>
+//            EditAttrMap(name = s"Remove Attribute '$key'", objH(), key = key, value = None)
+//          }
+//          CompoundEdit(ed1, "Remove Attributes")
+//        }
+//        editOpt.foreach(undoManager.add)
+//      }
+//    }
   }
 }

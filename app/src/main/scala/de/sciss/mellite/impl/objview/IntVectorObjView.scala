@@ -93,11 +93,14 @@ object IntVectorObjView extends ObjListView.Factory {
     def expr(implicit tx: T): IntVector[T] = objH()
 
     def convertEditValue(v: Any): Option[Vec[Int]] = v match {
-      case num: Vec[_] => num.foldLeft(Option(Vec.empty[Int])) {
-        case (Some(prev), d: Int) => Some(prev :+ d)
-        case _ => None
-      }
+      case num: Vec[_] =>
+        num.foldLeft(Option(Vec.empty[Int])) {
+          case (Some(prev), d: Int) => Some(prev :+ d)
+          case _                    => None
+        }
+
       case s: String  => parseString(s).toOption
+      case _          => None
     }
 
     def configureListCellRenderer(label: Label): Component = {

@@ -98,6 +98,7 @@ object IntObjView extends ObjListView.Factory {
     def convertEditValue(v: Any): Option[Int] = v match {
       case num: Int     => Some(num)
       case s  : String  => Try(s.toInt).toOption
+      case _            => None
     }
   }
 }

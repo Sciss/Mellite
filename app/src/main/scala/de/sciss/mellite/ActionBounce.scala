@@ -138,6 +138,8 @@ object ActionBounce {
           a to b
         }
       }
+
+      case _ => throw new IllegalArgumentException
     }
 
   private def channelToString(r: Range): String =
@@ -584,9 +586,12 @@ object ActionBounce {
 
       def valueToString(value: Any): String = try {
         value match {
-          case sq: Vec[_] => sq.map {
-            case r: Range => channelToString(r)
-          } .mkString(", ")
+          case sq: Vec[_] =>
+            sq.map {
+              case r: Range => channelToString(r)
+            } .mkString(", ")
+
+          case _ => throw new IllegalArgumentException
         }
       } catch {
         case NonFatal(_) => throw new ParseException(Option(value).fold("null")(_.toString), 0)

@@ -4,8 +4,8 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.1.1-SNAPSHOT"
-lazy val mimaCommonVersion          = "3.1.0"
+lazy val commonVersion              = "3.2.0-SNAPSHOT"
+lazy val mimaCommonVersion          = "3.2.0"
 lazy val appVersion                 = "3.2.0-SNAPSHOT"
 lazy val mimaAppVersion             = "3.2.0"
 
@@ -90,8 +90,8 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.13.3",
-  crossScalaVersions := Seq("2.13.3", "2.12.12"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
+  scalaVersion       := "2.13.4",
+  crossScalaVersions := Seq("2.13.4", "2.12.12"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"

@@ -336,6 +336,7 @@ object ColorObjView extends ObjListView.Factory {
                 parent.foreach { p =>
                   p.view match {
                     case e: View.Editable[T] => e.undoManager.add(edit)
+                    case _ => ()
                   }
                 }
               }

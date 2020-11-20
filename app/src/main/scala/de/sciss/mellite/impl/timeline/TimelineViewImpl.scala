@@ -218,7 +218,7 @@ object TimelineViewImpl extends TimelineView.Companion {
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {
           val t1  = mkDefaultTransferable()
-          val t2  = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
+          val t2  = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag[T](universe, impl, Set.empty))
           val t   = DragAndDrop.Transferable.seq(t1, t2)
           Some(t)
         }
@@ -504,18 +504,18 @@ object TimelineViewImpl extends TimelineView.Companion {
             }
           }
 
-        case DnD.ObjectDrag(_, view: IntObjView[T]) => withRegions { implicit tx => regions =>
+        case DnD.ObjectDrag(_, view: IntObjView[T], _) => withRegions { implicit tx => regions =>
           val intExpr = view.obj
           Edits.setBus[T](regions.map(_.obj), intExpr)
         }
 
-        case DnD.ObjectDrag(_, view: CodeObjView[T]) => withProcRegions { implicit tx => regions =>
+        case DnD.ObjectDrag(_, view: CodeObjView[T], _) => withProcRegions { implicit tx => regions =>
           val codeElem = view.obj
           import Mellite.compiler
           Edits.setSynthGraph[T](regions.map(_.obj), codeElem)
         }
 
-        case DnD.ObjectDrag(ws, view: AudioCueObjView[T]) =>
+        case DnD.ObjectDrag(ws, view: AudioCueObjView[T], _) =>
           val length  = defaultDropLength(view, inProgress = false)
           val span    = Span(0L, length)
           val ad      = DnD.AudioDrag(ws, view.objH, span)
@@ -525,9 +525,9 @@ object TimelineViewImpl extends TimelineView.Companion {
 
         // quick fix to forbid that we "drop ourselves onto ourselves"
         // ; must be stated before the next match case!
-        case DnD.ObjectDrag(_, `impl`) => None
+        case DnD.ObjectDrag(_, `impl`, _) => None
 
-        case DnD.ObjectDrag(_, view /* : ObjView.Proc[T] */) => cursor.step { implicit tx =>
+        case DnD.ObjectDrag(_, view /* : ObjView.Proc[T] */, _) => cursor.step { implicit tx =>
           plainGroup.modifiableOption.map { group =>
             val length  = defaultDropLength(view, inProgress = false)
             val span    = Span(drop.frame, drop.frame + length)
@@ -705,7 +705,7 @@ object TimelineViewImpl extends TimelineView.Companion {
                 drawDropFrame(g, modelYStart = track, modelYStop = track + TimelineView.DefaultTrackHeight,
                   span = span, rubber = false)
 
-              case DnD.ObjectDrag(_, view) /* : ObjView.Proc[T] */ =>
+              case DnD.ObjectDrag(_, view, _) /* : ObjView.Proc[T] */ =>
                 val track   = screenToModelPos(drop.y)
                 val length  = defaultDropLength(view, inProgress = true)
                 val span    = Span(drop.frame, drop.frame + length)

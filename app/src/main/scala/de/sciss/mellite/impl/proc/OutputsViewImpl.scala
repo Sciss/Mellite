@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.proc
 
 import java.awt.datatransfer.Transferable
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{OptionPane, UndoManager, Window}
 import de.sciss.icons.raphael
@@ -24,10 +23,10 @@ import de.sciss.lucre.{Disposable, Obj, Source}
 import de.sciss.mellite.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
-import de.sciss.mellite.{DragAndDrop, GUI, MapView, ObjListView, ProcOutputsView}
+import de.sciss.mellite.{DragAndDrop, GUI, MapView, ObjListView, ObjView, ProcOutputsView}
 import de.sciss.proc.{Proc, Universe}
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.swing.Swing.HGlue
 import scala.swing.{Action, BoxPanel, Button, Component, FlowPanel, Orientation, ScrollPane}
 
@@ -56,8 +55,11 @@ object OutputsViewImpl {
                                         undoManager: UndoManager)
     extends MapViewImpl[T, ProcOutputsView[T]] with ProcOutputsView[T] with ComponentHolder[Component] { impl =>
 
-    protected final def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit] = None
-    protected final def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = None
+    protected final def editRenameKey(before: String, now: String, value: Obj[T])
+                                     (implicit tx: T): Option[UndoableEdit] = None
+
+    protected final def editImport(key: String, value: Obj[T], context: Set[ObjView.Context[T]], isInsert: Boolean)
+                                  (implicit tx: T): Option[UndoableEdit] = None
 
     override protected def keyEditable: Boolean = false
     override protected def showKeyOnly: Boolean = true

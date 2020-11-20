@@ -48,7 +48,8 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
 
   protected def observer: Disposable[T]
 
-  protected def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit]
+  protected def editImport(key: String, value: Obj[T], context: Set[ObjView.Context[T]], isInsert: Boolean)
+                          (implicit tx: T): Option[UndoableEdit]
 
   protected def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit]
 
@@ -105,6 +106,8 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         withRow(key) { row =>
           tableModel.fireTableRowsUpdated(row, row)
         }
+
+      case _ => ()
     }}
 
   final protected def attrAdded(key: String, value: Obj[T])(implicit tx: T): Unit = {
@@ -225,12 +228,6 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         // opaque labels which unfortunately come out of DefaultTableCellRenderer
         if (isWebLaF) setOpaque(false)
 
-        // XXX TODO: somehow has no effect?
-//        outer.putClientProperty("styleId", "renderer")
-
-        // XXX TODO: we should also set a styleId to handle the different
-        // padding between default web-laf renderer and this one (2px)
-
         private val wrap: Label = new Label { override lazy val peer: JLabel = outer }
 
         override def setValue(value: Any): Unit = value match {
@@ -241,32 +238,6 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
           case _ =>
         }
       })
-
-//      val defaultRenderer: TableCellRenderer = if (UIManager.getLookAndFeel.getID == "submin") {
-//        classOf[WebTableCellRenderer[_, _, _]].newInstance()
-//      } else {
-//        new DefaultTableCellRenderer
-//      }
-//
-//      colValue.setCellRenderer(new TableCellRenderer {
-//        override def getTableCellRendererComponent(table: JTable, value: Any, isSelected: Boolean,
-//                                                   hasFocus: Boolean, row: Int, column: Int): java.awt.Component = {
-//          val res = defaultRenderer.getTableCellRendererComponent(table, null, isSelected, hasFocus, row, column)
-//          res match {
-//            case jl: javax.swing.JLabel =>
-//              if (jl.getIcon != null) jl.setIcon(null)
-//              value match {
-//                case view: ObjListView[_] =>
-//                  val w = scala.swing.LabelWrap(jl) // UIElement.cachedWrapper[Label](jl)
-//                  val wrapL = if (w != null) w
-//                  else new Label { override lazy val peer: JLabel = jl }
-//                  view.configureListCellRenderer(wrapL).peer
-//                case _ =>
-//                  jl
-//              }
-//          }
-//        }
-//      })
 
       colValue.setCellRenderer(new DefaultTableCellRenderer {
         outer =>
@@ -320,8 +291,9 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
       override def createTransferable(c: JComponent): Transferable = {
         val sel     = selection
         val trans1 = if (sel.size == 1) {
+          val (key, value) = sel.head
           val _res = DragAndDrop.Transferable(ObjView.Flavor) {
-            ObjView.Drag(universe, sel.head._2)
+            ObjView.Drag[T](universe, value, Set(ObjView.Context.AttrKey[T](key)))
           }
           _res
         } else null
@@ -349,22 +321,24 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         val res = support.isDrop && {
           val dl        = support.getDropLocation.asInstanceOf[JTable.DropLocation]
           val isInsert  = dl.isInsertRow
-          val data      = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
-          require(data.universe == universe, "Cross-session list copy not yet implemented")
-          val view      = data.view.asInstanceOf[ObjView[T]]
+          val data0     = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
+          require(data0.universe == universe, "Cross-session list copy not yet implemented")
+          val data: ObjView.Drag[T] = data0.asInstanceOf[ObjView.Drag[T]]
 
           val keyOpt = if (isInsert) { // ---- create new entry with key via dialog ----
-            queryKey()
+            val initial = data.context.collectFirst {
+              case ObjView.Context.AttrKey(k) => k
+            }
+            initial.fold(queryKey())(queryKey)
           } else {          // ---- update value of existing entry with key via dialog ----
             val rowV  = dl.getRow
             val row   = jt.convertRowIndexToModel(rowV)
             Some(modelEDT(row)._1)
           }
-          // println(s"TODO: ${if (isInsert) "insert" else "replace"} $view")
 
           keyOpt.exists { key =>
             val editOpt = cursor.step { implicit tx =>
-              editImport(isInsert = isInsert, key = key, value = view.obj)
+              editImport(isInsert = isInsert, key = key, value = data.view.obj, context = data.context)
             }
             editOpt.foreach(undoManager.add)
             editOpt.isDefined

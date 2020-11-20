@@ -19,10 +19,10 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Obj, Source}
 import de.sciss.mellite.edit.EditAttrMap
 import de.sciss.mellite.impl.MapViewImpl
-import de.sciss.mellite.{AttrMapView, ObjListView}
+import de.sciss.mellite.{AttrMapView, ObjListView, ObjView}
 import de.sciss.proc.Universe
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.swing.ScrollPane
 
 object AttrMapViewImpl {
@@ -50,7 +50,8 @@ object AttrMapViewImpl {
         }
       }
 
-      protected def editImport(key: String, value: Obj[T], isInsert: Boolean)(implicit tx: T): Option[UndoableEdit] = {
+      protected def editImport(key: String, value: Obj[T], context: Set[ObjView.Context[T]], isInsert: Boolean)
+                              (implicit tx: T): Option[UndoableEdit] = {
         val editName = if (isInsert) s"Create Attribute '$key'" else s"Change Attribute '$key'"
         val edit     = EditAttrMap(name = editName, obj = obj, key = key, value = Some(value))
         Some(edit)
@@ -63,7 +64,8 @@ object AttrMapViewImpl {
         CompoundEdit(ed1 :: ed2 :: Nil, s"Rename Attribute Key")
       }
 
-      protected def guiInit1(scroll: ScrollPane): Unit = component = scroll
+      protected def guiInit1(scroll: ScrollPane): Unit =
+        component = scroll
 
       init(list0)
     }

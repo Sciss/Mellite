@@ -327,7 +327,7 @@ object AudioCueViewImpl {
           val artFOpt = Try(new File(snapshot.artifact)).toOption
           artFOpt.map { artF =>
             val t2 = DragAndDrop.Transferable.files(artF)
-            val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag(universe, impl))
+            val t3 = DragAndDrop.Transferable(ObjView.Flavor)(ObjView.Drag[T](universe, impl, Set.empty))
             val spOpt = timelineModel.selection match {
               case sp0: Span if sp0.nonEmpty => Some(sp0)
               case _ => timelineModel.bounds match {

@@ -92,8 +92,9 @@ object LongObjView extends ObjListView.Factory {
     def expr(implicit tx: T): LongObj[T] = objH()
 
     def convertEditValue(v: Any): Option[Long] = v match {
-      case num: Long => Some(num)
-      case s: String => Try(s.toLong).toOption
+      case num: Long  => Some(num)
+      case s: String  => Try(s.toLong).toOption
+      case _          => None
     }
   }
 }

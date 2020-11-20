@@ -113,11 +113,14 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
       with ObjListViewImpl.SimpleExpr[T, V, E] {
 
     def convertEditValue(v: Any): Option[V] = v match {
-      case num: Vec[_] => num.foldLeft(Option(Vector.empty[Double])) {
-        case (Some(prev), d: Double) => Some(prev :+ d)
-        case _ => None
-      }
+      case num: Vec[_] =>
+        num.foldLeft(Option(Vector.empty[Double])) {
+          case (Some(prev), d: Double)  => Some(prev :+ d)
+          case _                        => None
+        }
+
       case s: String  => parseString(s).toOption
+      case _          => None
     }
 
     def configureListCellRenderer(label: Label): Component = {

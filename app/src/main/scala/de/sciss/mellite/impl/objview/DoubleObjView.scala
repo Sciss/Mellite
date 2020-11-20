@@ -122,6 +122,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
     def convertEditValue(v: Any): Option[Double] = v match {
       case num: V       => Some(num)
       case s  : String  => Try(s.toDouble).toOption
+      case _            => None
     }
   }
 

@@ -48,7 +48,8 @@ object DnD {
   final case class GlobalProcDrag[T <: Txn[T]](universe: Universe[T], source: Source[T, Proc[T]])
     extends Drag[T]
 
-  final case class ObjectDrag[T <: synth.Txn[T]](universe: Universe[T], view: ObjView[T]) extends Drag[T]
+  final case class ObjectDrag[T <: synth.Txn[T]](universe: Universe[T], view: ObjView[T],
+                                                 context: Set[ObjView.Context[T]]) extends Drag[T]
 
   /** Drag and Drop from Eisenkraut */
   final case class ExtAudioRegionDrag[T <: Txn[T]](universe: Universe[T], file: File, selection: Span)
@@ -138,8 +139,9 @@ trait DnD[T <: synth.Txn[T]] {
         }
       } else if (t.isDataFlavorSupported(ObjView.Flavor)) {
         t.getTransferData(ObjView.Flavor) match {
-          case ObjView.Drag(u, view) if u == universe =>
-            Some(DnD.ObjectDrag(universe, view.asInstanceOf[ObjView[T]]))
+          case dr0: ObjView.Drag[_] if dr0.universe == universe =>
+            val dr = dr0.asInstanceOf[ObjView.Drag[T]]
+            Some(DnD.ObjectDrag(universe, dr.view, dr.context))
           case _ => None
         }
 
