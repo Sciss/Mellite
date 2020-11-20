@@ -13,11 +13,6 @@
 
 package de.sciss.mellite.impl.document
 
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-
-import de.sciss.desktop
 import de.sciss.desktop.Window
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
@@ -28,11 +23,14 @@ import de.sciss.mellite.Log.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
 import de.sciss.model.Change
-import de.sciss.proc
+import de.sciss.{desktop, proc}
 import de.sciss.proc.{Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
-import javax.swing.tree.TreeNode
 
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import javax.swing.tree.TreeNode
 import scala.collection.JavaConverters.asJavaEnumerationConverter
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.Future
@@ -190,7 +188,13 @@ object CursorsFrameImpl {
         parent.childViews  = parent.childViews.patch(idx, Vector.empty, 1)
       }
 
-      def elemUpdated(view: Node): Unit = fireNodesChanged(view)
+      def elemUpdated(view: Node): Unit =
+        if (view == root) {
+          fireRootChanged()
+        } else {
+          // println(s"fireNodesChanged($view)")
+          fireNodesChanged(view)
+        }
     }
 
     private var _model: ElementTreeModel  = _
