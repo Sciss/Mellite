@@ -80,7 +80,7 @@ object DoubleObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
     import config._
     val obj0  = DoubleObj.newConst[T](value)
     val obj   = if (const) obj0 else DoubleObj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

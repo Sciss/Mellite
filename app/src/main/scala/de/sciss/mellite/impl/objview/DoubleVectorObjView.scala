@@ -79,7 +79,7 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
     import config._
     val obj0  = DoubleVector.newConst[T](value)
     val obj   = if (const) obj0 else DoubleVector.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 
@@ -113,7 +113,7 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
       with ObjListViewImpl.SimpleExpr[T, V, E] {
 
     def convertEditValue(v: Any): Option[V] = v match {
-      case num: Vec[_] =>
+      case num: Vec[Any] =>
         num.foldLeft(Option(Vector.empty[Double])) {
           case (Some(prev), d: Double)  => Some(prev :+ d)
           case _                        => None

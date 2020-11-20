@@ -301,8 +301,8 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         trans1
       }
 
-      override def canImport(support: TransferSupport): Boolean = {
-        val res = support.isDrop && {
+      override def canImport(support: TransferSupport): Boolean =
+        support.isDrop && {
           val dl = support.getDropLocation.asInstanceOf[JTable.DropLocation]
           val locOk = dl.isInsertRow || {
             val viewCol   = dl.getColumn
@@ -314,42 +314,34 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
           if (allOk) support.setDropAction(TransferHandler.LINK)
           allOk
         }
-        res
-      }
 
-      override def importData(support: TransferSupport): Boolean = {
-        val res = support.isDrop && {
+      override def importData(support: TransferSupport): Boolean =
+        support.isDrop && {
           val dl        = support.getDropLocation.asInstanceOf[JTable.DropLocation]
           val isInsert  = dl.isInsertRow
-          val data0     = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
-          require(data0.universe == universe, "Cross-session list copy not yet implemented")
-          val data: ObjView.Drag[T] = data0.asInstanceOf[ObjView.Drag[T]]
-
-          val keyOpt = if (isInsert) { // ---- create new entry with key via dialog ----
-            val initial = data.context.collectFirst {
-              case ObjView.Context.AttrKey(k) => k
-            }
-            initial.fold(queryKey())(queryKey)
-          } else {          // ---- update value of existing entry with key via dialog ----
-            val rowV  = dl.getRow
-            val row   = jt.convertRowIndexToModel(rowV)
-            Some(modelEDT(row)._1)
-          }
-
-          keyOpt.exists { key =>
-            val editOpt = cursor.step { implicit tx =>
-              editImport(isInsert = isInsert, key = key, value = data.view.obj, context = data.context)
-            }
-            editOpt.foreach(undoManager.add)
-            editOpt.isDefined
-          }
+          prepareImport(support, isInsert = isInsert, dropModelRow =
+            if (isInsert) jt.convertRowIndexToModel(dl.getRow) else -1)
         }
-        res
-      }
     })
 
     _scroll = new ScrollPane(_table)
-    _scroll.peer.putClientProperty("styleId", "undecorated")
+    val scrollPeer = _scroll.peer
+    scrollPeer.putClientProperty("styleId", "undecorated")
+    // make sure we can also drop onto the "blank" background of the scroll pane
+    scrollPeer.setTransferHandler(
+      new TransferHandler {
+        override def canImport(support: TransferSupport): Boolean =
+          support.isDrop && support.isDataFlavorSupported(ObjView.Flavor) && {
+            support.setDropAction(TransferHandler.LINK)
+            true
+          }
+
+        override def importData(support: TransferSupport): Boolean =
+          support.isDrop && {
+            prepareImport(support, isInsert = true, dropModelRow = -1)
+          }
+      }
+    )
     _scroll.border = null
     // component     = scroll
     _table.listenTo(_table.selection)
@@ -359,6 +351,29 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         dispatch(MapView.SelectionChanged(impl, sel))
     }
     guiInit1(_scroll)
+  }
+
+  private def prepareImport(support: TransferSupport, isInsert: Boolean, dropModelRow: Int) = {
+    val data0     = support.getTransferable.getTransferData(ObjView.Flavor).asInstanceOf[ObjView.Drag[_]]
+    require(data0.universe == universe, "Cross-session list copy not yet implemented")
+    val data: ObjView.Drag[T] = data0.asInstanceOf[ObjView.Drag[T]]
+
+    val keyOpt = if (isInsert) { // ---- create new entry with key via dialog ----
+      val initial = data.context.collectFirst {
+        case ObjView.Context.AttrKey(k) => k
+      }
+      initial.fold(queryKey())(queryKey)
+    } else {          // ---- update value of existing entry with key via dialog ----
+      Some(modelEDT(dropModelRow)._1)
+    }
+
+    keyOpt.exists { key =>
+      val editOpt = cursor.step { implicit tx =>
+        editImport(isInsert = isInsert, key = key, value = data.view.obj, context = data.context)
+      }
+      editOpt.foreach(undoManager.add)
+      editOpt.isDefined
+    }
   }
 
   final def queryKey(initial: String): Option[String] = {

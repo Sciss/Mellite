@@ -71,7 +71,7 @@ object LongObjView extends ObjListView.Factory {
     import config._
     val obj0  = LongObj.newConst[T](value)
     val obj   = if (const) obj0 else LongObj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

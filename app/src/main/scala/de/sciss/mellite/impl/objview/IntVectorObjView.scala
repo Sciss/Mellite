@@ -74,7 +74,7 @@ object IntVectorObjView extends ObjListView.Factory {
     import config._
     val obj0  = IntVector.newConst[T](value)
     val obj   = if (const) obj0 else IntVector.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 
@@ -93,7 +93,7 @@ object IntVectorObjView extends ObjListView.Factory {
     def expr(implicit tx: T): IntVector[T] = objH()
 
     def convertEditValue(v: Any): Option[Vec[Int]] = v match {
-      case num: Vec[_] =>
+      case num: Vec[Any] =>
         num.foldLeft(Option(Vec.empty[Int])) {
           case (Some(prev), d: Int) => Some(prev :+ d)
           case _                    => None
