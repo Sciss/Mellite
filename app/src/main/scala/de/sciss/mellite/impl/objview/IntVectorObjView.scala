@@ -31,7 +31,7 @@ object IntVectorObjView extends ObjListView.Factory {
   type E[T <: LTxn[T]] = IntVector[T]
   val icon          : Icon      = raphaelIcon(Shapes.IntegerNumberVector)
   val prefix        : String   = "IntVector"
-  def humanName     : String   = prefix
+  def humanName     : String   = "Int Vector"
   def tpe           : Obj.Type  = IntVector
   def category      : String   = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true

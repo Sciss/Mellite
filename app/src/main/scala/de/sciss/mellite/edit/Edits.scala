@@ -18,15 +18,16 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{BooleanObj, Cursor, DoubleObj, DoubleVector, Expr, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.mellite.Log.log
 import de.sciss.mellite.Mellite.???!
-import de.sciss.mellite.TimelineTool.{Gain, Move, Mute, Resize}
+import de.sciss.mellite.TimelineTool.{EmptyFade, Fade, Gain, Move, Mute, Resize}
 import de.sciss.mellite.{GraphemeTool, ObjTimelineView, ProcActions, TimelineView}
-import de.sciss.proc.{AudioCue, Code, CurveObj, EnvSegment, Grapheme, ObjKeys, Proc, Timeline}
+import de.sciss.proc.{AudioCue, Code, CurveObj, EnvSegment, FadeSpec, Grapheme, ObjKeys, Proc, Timeline}
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.synth.SynthGraph
+import de.sciss.synth.{Curve, SynthGraph}
 import de.sciss.{proc, synth}
 
 import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
+import scala.math.{max, min}
 import scala.reflect.ClassTag
 import scala.util.control.NonFatal
 
@@ -216,21 +217,21 @@ object Edits {
 
   private def any2stringadd: Any = ()
 
-  def adjustAttr[T <: Txn[T], A, Repr[~ <: Txn[~]] <: Expr[~, A]](obj: Obj[T], key: String, arg: A, name: String,
-                              default: A)(combine: (A, A) => A)
+  def adjustAttr[T <: Txn[T], A, Repr[~ <: Txn[~]] <: Expr[~, A]](obj: Obj[T], key: String, arg: A, editName: String,
+                                                                  default: A)(combine: (A, A) => A)
                              (implicit tx: T, cursor: Cursor[T], tpe: Expr.Type[A, Repr],
                               ct: ClassTag[Repr[T]]): Option[UndoableEdit] =
     obj.attr.$[Repr](key) match {
       case Some(tpe.Var(vr)) =>
         // XXX TODO could be more elaborate; for now preserve just one level of variables
-        val edit = EditVar.Expr[T, A, Repr](name, vr, tpe.newConst(combine(vr().value, arg)))
+        val edit = EditVar.Expr[T, A, Repr](editName, vr, tpe.newConst(combine(vr().value, arg)))
         Some(edit)
       case other =>
         import de.sciss.equal.Implicits._
         val v = combine(other.fold(default)(_.value), arg)
         val valueOpt = if (v === default) None else Some(tpe.newVar[T](tpe.newConst(v)))
         if (other.isEmpty && valueOpt.isEmpty) None else {
-          val edit = EditAttrMap.expr[T, A, Repr](name, obj, key, valueOpt)
+          val edit = EditAttrMap.expr[T, A, Repr](editName, obj, key, valueOpt)
           Some(edit)
         }
     }
@@ -239,7 +240,7 @@ object Edits {
                        (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import amount.factor
     if (factor == 1f) None else {
-      adjustAttr[T, Double, DoubleObj](obj, key = ObjKeys.attrGain, arg = factor.toDouble, name = "Adjust Gain",
+      adjustAttr[T, Double, DoubleObj](obj, key = ObjKeys.attrGain, arg = factor.toDouble, editName = "Adjust Gain",
         default = 1.0)(_ * _)
     }
   }
@@ -247,7 +248,7 @@ object Edits {
   def mute[T <: Txn[T]](obj: Obj[T], state: Mute)
                        (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     import state.engaged
-    adjustAttr[T, Boolean, BooleanObj](obj, key = ObjKeys.attrMute, arg = engaged, name = "Adjust Mute",
+    adjustAttr[T, Boolean, BooleanObj](obj, key = ObjKeys.attrMute, arg = engaged, editName = "Adjust Mute",
       default = false)((_, now) => now)
   }
 
@@ -330,18 +331,80 @@ object Edits {
     val deltaTrack = amount.deltaTrackStart
     if (deltaTrack != 0) {
       val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
-        name = nameTrack, default = 0)(_ + _)
+        editName = nameTrack, default = 0)(_ + _)
       edits :::= edit.toList
     }
     val deltaTrackH = amount.deltaTrackStop - amount.deltaTrackStart
     if (deltaTrackH != 0) {
       val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackHeight, arg = deltaTrackH,
-        name = "Adjust Track Height", default = TimelineView.DefaultTrackHeight)(_ + _)
+        editName = "Adjust Track Height", default = TimelineView.DefaultTrackHeight)(_ + _)
       edits :::= edit.toList
     }
 
     CompoundEdit(edits, nameCompound)
   }
+
+  def fade[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], amount: Fade)
+                       (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+    import amount._
+
+    val attr    = obj.attr
+    val exprIn  = attr.$[FadeSpec.Obj](ObjKeys.attrFadeIn )
+    val exprOut = attr.$[FadeSpec.Obj](ObjKeys.attrFadeOut)
+    val valIn   = exprIn .fold(EmptyFade)(_.value)
+    val valOut  = exprOut.fold(EmptyFade)(_.value)
+    val total   = span.value match {
+      case Span(start, stop)  => stop - start
+      case _                  => Long.MaxValue
+    }
+
+    val dIn     = max(-valIn.numFrames, min(total - (valIn.numFrames + valOut.numFrames), deltaFadeIn))
+    val valInC  = valIn.curve match {
+      case Curve.linear                 => 0f
+      case Curve.parametric(curvature)  => curvature
+      case _                            => Float.NaN
+    }
+    val dInC    = if (valInC.isNaN) 0f else max(-20, min(20, deltaFadeInCurve + valInC)) - valInC
+
+    var edits = List.empty[UndoableEdit]
+
+    val newValIn = if (dIn != 0L || dInC != 0f) {
+      val curve   = if (valInC.isNaN) valIn.curve else {
+        val newInC  = valInC + dInC
+        if (newInC == 0f) Curve.linear else Curve.parametric(newInC)
+      }
+      val numFr   = valIn.numFrames + dIn
+      val arg     = FadeSpec(numFr, curve, valIn.floor)
+      val edit    = adjustAttr[T, FadeSpec, FadeSpec.Obj](obj, key = ObjKeys.attrFadeIn, arg = arg,
+        editName = "Adjust Fade-In", default = FadeSpec(0L))((_, now) => now)
+      edits :::= edit.toList
+      arg
+
+    } else valIn
+
+    // XXX TODO: DRY
+    val dOut    = max(-valOut.numFrames, min(total - newValIn.numFrames, deltaFadeOut))
+    val valOutC = valOut.curve match {
+      case Curve.linear                 => 0f
+      case Curve.parametric(curvature)  => curvature
+      case _                            => Float.NaN
+    }
+    val dOutC    = if (valOutC.isNaN) 0f else max(-20, min(20, deltaFadeOutCurve + valOutC)) - valOutC
+
+    if (dOut != 0L || dOutC != 0f) {
+      val curve   = if (valOutC.isNaN) valOut.curve else {
+        val newOutC = valOutC + dOutC
+        if (newOutC == 0f) Curve.linear else Curve.parametric(newOutC)
+      }
+      val numFr   = valOut.numFrames + dOut
+      val arg     = FadeSpec(numFr, curve, valOut.floor)
+      val edit    = adjustAttr[T, FadeSpec, FadeSpec.Obj](obj, key = ObjKeys.attrFadeOut, arg = arg,
+        editName = "Adjust Fade-Out", default = FadeSpec(0L))((_, now) => now)
+      edits :::= edit.toList
+    }
+
+    CompoundEdit(edits, "Adjust Fade")
+}
 
   def timelineMoveOrCopy[T <: Txn[T]](span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T], amount: Move, minStart: Long)
                                      (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
@@ -403,7 +466,7 @@ object Edits {
     import amount._
     if (deltaTrack != 0) {
       val edit = adjustAttr[T, Int, IntObj](obj, key = ObjTimelineView.attrTrackIndex, arg = deltaTrack,
-        name = "Adjust Track Placement", default = 0)(_ + _)
+        editName = "Adjust Track Placement", default = 0)(_ + _)
       edits :::= edit.toList
     }
 

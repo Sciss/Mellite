@@ -55,7 +55,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   val prefix        : String    = "EnvSegment"
   def humanName     : String    = "Envelope Segment"
   def tpe           : Obj.Type  = EnvSegment.Obj
-  def category      : String    = ObjView.categPrimitives
+  def category      : String    = ObjView.categMisc
   def canMakeObj    : Boolean   = true
 
   def mkListView[T <: Txn[T]](obj: E[T])(implicit tx: T): ObjListView[T] = {
@@ -336,28 +336,6 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       .init(obj, entry)
   }
 
-  private val curveNameMap: Map[String, Curve] = Map(
-    "step"        -> Curve.step,
-    "lin"         -> Curve.linear,
-    "linear"      -> Curve.linear,
-    "exp"         -> Curve.exponential,
-    "exponential" -> Curve.exponential,
-    "sin"         -> Curve.sine,
-    "sine"        -> Curve.sine,
-    "welch"       -> Curve.welch,
-    "sqr"         -> Curve.squared,
-    "squared"     -> Curve.squared,
-    "cub"         -> Curve.cubed,
-    "cubed"       -> Curve.cubed
-  )
-
-  private implicit val ReadCurve: scallop.ValueConverter[Curve] = scallop.singleArgConverter { s =>
-    curveNameMap.getOrElse(s.toLowerCase, {
-      val p = s.toFloat
-      Curve.parametric(p)
-    })
-  }
-
   // XXX TODO DRY with ParamSpecObjView
   override def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])(done: MakeResult[T] => Unit)
                                           (implicit universe: Universe[T]): Unit = {
@@ -377,6 +355,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   }
 
   override def initMakeCmdLine[T <: Txn[T]](args: List[String])(implicit universe: Universe[T]): MakeResult[T] = {
+    import CmdLineSupport._
     object p extends ObjViewCmdLineParser[Config[T]](this, args) {
       val startLevel: Opt[Vec[Double]] = vecArg[Double](
         descr = "Starting level (single double or comma separated doubles)"

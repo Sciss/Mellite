@@ -16,14 +16,15 @@ package de.sciss.mellite.impl.timeline
 import de.sciss.mellite.{TimelineRendering, TimelineTool}
 import de.sciss.mellite.impl.RenderingImpl
 
+import java.awt.image.ImageObserver
 import scala.swing.Component
 
 //object TimelineRenderingImpl {
 //}
 final class TimelineRenderingImpl(component: Component, isDark: Boolean)
-  extends RenderingImpl(component, isDark) with TimelineRendering {
+  extends RenderingImpl(isDark) with TimelineRendering {
 
-//  import timeline.{TimelineRenderingImpl => Impl}
+  def imageObserver: ImageObserver = component.peer
 
   var ttMoveState     : TimelineTool.Move     = TimelineTool.NoMove
   var ttResizeState   : TimelineTool.Resize  = TimelineTool.NoResize

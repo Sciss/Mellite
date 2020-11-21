@@ -13,23 +13,22 @@
 
 package de.sciss.mellite
 
-import java.awt.event.ActionEvent
-import java.awt.geom.{AffineTransform, Area, Path2D}
-import java.awt.image.BufferedImage
-import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints, Shape}
-
 import de.sciss.audiowidgets.{ParamField, RotaryKnob, Transport}
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.LucreSwing.{defer, requireEDT}
 import de.sciss.lucre.{Cursor, Txn}
+import de.sciss.proc.SoundProcesses
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.GroupPanel
-import de.sciss.proc.SoundProcesses
 import de.sciss.{desktop, equal, numbers}
+
+import java.awt.event.ActionEvent
+import java.awt.geom.{AffineTransform, Area, Path2D}
+import java.awt.image.BufferedImage
+import java.awt.{BasicStroke, Color, Font, Graphics, Graphics2D, RenderingHints, Shape}
 import javax.imageio.ImageIO
 import javax.swing.{Icon, ImageIcon, KeyStroke, SwingUtilities, UIManager}
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Reactions.Reaction
 import scala.swing.Swing._

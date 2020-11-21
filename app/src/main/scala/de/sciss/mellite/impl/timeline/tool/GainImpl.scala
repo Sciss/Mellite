@@ -47,7 +47,6 @@ final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
   }
 
   protected def commitObj(drag: Gain)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
-                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
     Edits.gain(obj, drag)
-  }
 }

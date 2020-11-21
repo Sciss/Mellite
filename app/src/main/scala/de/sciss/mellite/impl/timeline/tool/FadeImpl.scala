@@ -13,23 +13,21 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-
-import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
-import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.proc.Timeline
 import de.sciss.span.Span
-import de.sciss.synth.Curve
-import de.sciss.proc.{FadeSpec, ObjKeys, Timeline}
+
+import java.awt
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
 final class FadeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
   extends BasicTimelineTool[T, TimelineTool.Fade] {
 
-  import TimelineTool.{EmptyFade, Fade}
+  import TimelineTool.Fade
 
   def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.NW_RESIZE_CURSOR)
   val name                  = "Fade"
@@ -65,90 +63,8 @@ final class FadeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
   }
 
   protected def commitObj(drag: Fade)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
-                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
-    import drag._
-
-    val attr    = obj.attr
-    val exprIn  = attr.$[FadeSpec.Obj](ObjKeys.attrFadeIn )
-    val exprOut = attr.$[FadeSpec.Obj](ObjKeys.attrFadeOut)
-    val valIn   = exprIn .fold(EmptyFade)(_.value)
-    val valOut  = exprOut.fold(EmptyFade)(_.value)
-    val total   = span.value match {
-      case Span(start, stop)  => stop - start
-      case _                  => Long.MaxValue
-    }
-
-    val dIn     = math.max(-valIn.numFrames, math.min(total - (valIn.numFrames + valOut.numFrames), deltaFadeIn))
-    val valInC  = valIn.curve match {
-      case Curve.linear                 => 0f
-      case Curve.parametric(curvature)  => curvature
-      case _                            => Float.NaN
-    }
-    val dInC    = if (valInC.isNaN) 0f else math.max(-20, math.min(20, deltaFadeInCurve + valInC)) - valInC
-
-    var edits = List.empty[UndoableEdit]
-
-    val newValIn = if (dIn != 0L || dInC != 0f) {
-      val newInC  = valInC + dInC
-      val curve   = if (newInC == 0f) Curve.linear else Curve.parametric(newInC)
-      val fr      = valIn.numFrames + dIn
-      val res     = FadeSpec(fr, curve, valIn.floor)
-      val elem    = FadeSpec.Obj.newConst[T](res)
-
-      val edit    = EditAttrMap.expr[T, FadeSpec, FadeSpec.Obj]("Adjust Fade-In", obj, ObjKeys.attrFadeIn, Some(elem))
-
-      edits ::= edit
-
-      //      exprIn match {
-      //        case Some(Expr.Var(vr)) =>
-      //          vr() = elem
-      //          res
-      //
-      //        case None =>
-      //          val vr = FadeSpec.Expr.newVar(elem)
-      //          attr.put(ObjKeys.attrFadeIn, Obj(FadeSpec.Obj(vr)))
-      //          res
-      //
-      //        case _ =>
-      //          valIn
-      //      }
-      res
-
-    } else valIn
-
-    // XXX TODO: DRY
-    val dOut    = math.max(-valOut.numFrames, math.min(total - newValIn.numFrames, deltaFadeOut))
-    val valOutC = valOut.curve match {
-      case Curve.linear                 => 0f
-      case Curve.parametric(curvature)  => curvature
-      case _                            => Float.NaN
-    }
-    val dOutC    = if (valOutC.isNaN) 0f else math.max(-20, math.min(20, deltaFadeOutCurve + valOutC)) - valOutC
-
-    if (dOut != 0L || dOutC != 0f) {
-      val newOutC = valOutC + dOutC
-      val curve   = if (newOutC == 0f) Curve.linear else Curve.parametric(newOutC)
-      val fr      = valOut.numFrames + dOut
-      val res     = FadeSpec(fr, curve, valOut.floor)
-      val elem    = FadeSpec.Obj.newConst[T](res)
-      val edit    = EditAttrMap.expr[T, FadeSpec, FadeSpec.Obj]("Adjust Fade-Out", obj, ObjKeys.attrFadeOut, Some(elem))
-
-      edits ::= edit
-
-      //      exprOut match {
-      //        case Some(Expr.Var(vr)) =>
-      //          vr() = elem
-      //
-      //        case None =>
-      //          val vr  = FadeSpec.Expr.newVar(elem)
-      //          attr.put(ObjKeys.attrFadeOut, Obj(FadeSpec.Obj(vr)))
-      //
-      //        case _ =>
-      //      }
-    }
-
-    CompoundEdit(edits,s"Adjust $name")
-  }
+                         (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
+    Edits.fade(span, obj, drag)
 
   protected def dialog(): Option[TimelineTool.Fade] = None // XXX TODO
 }

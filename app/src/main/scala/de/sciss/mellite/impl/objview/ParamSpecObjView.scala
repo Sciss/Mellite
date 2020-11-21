@@ -60,7 +60,8 @@ object ParamSpecObjView extends ObjListView.Factory {
     new Impl(tx.newHandle(obj), value, isListCellEditable = editable).init(obj)
   }
 
-  final case class Config[T <: LTxn[T]](name: String = prefix, value: ParamSpec = ParamSpec(), const: Boolean = false)
+  final case class Config[T <: LTxn[T]](name: String = prefix, value: ParamSpec = ParamSpec(),
+                                        const: Boolean = false)
 
   private final class PanelImpl(nameIn: Option[String], editable: Boolean) extends ModelImpl[Unit] {
 
@@ -254,7 +255,8 @@ object ParamSpecObjView extends ObjListView.Factory {
   def initMakeDialog[T <: Txn[T]](window: Option[desktop.Window])
                                  (done: MakeResult[T] => Unit)
                                  (implicit universe: Universe[T]): Unit = {
-    val panel = new PanelImpl(nameIn = Some(prefix), editable = true)
+    val panel   = new PanelImpl(nameIn = Some(prefix), editable = true)
+    panel.spec  = ParamSpec()
 
     val pane = desktop.OptionPane.confirmation(panel.component, optionType = Dialog.Options.OkCancel,
       messageType = Dialog.Message.Question, focus = Some(panel.ggHi))
@@ -311,7 +313,7 @@ object ParamSpecObjView extends ObjListView.Factory {
     import config._
     val obj0  = ParamSpec.Obj.newConst[T](value)
     val obj   = if (const) obj0 else ParamSpec.Obj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 
@@ -402,8 +404,6 @@ object ParamSpecObjView extends ObjListView.Factory {
   private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
                                              name: CellView[T, String])
     extends WindowImpl[T](name) with Veto[T] {
-
-//    resizable = false
 
     override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.editable || !view.dirty) None else Some(this)

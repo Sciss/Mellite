@@ -22,8 +22,8 @@ import de.sciss.mellite.{FadeViewMode, ObjTimelineView, ObjView, RegionViewMode,
 import de.sciss.span.{Span, SpanLike}
 import de.sciss.synth.Curve
 
+import scala.math.{max, min}
 import scala.swing.Graphics2D
-import math.{log10, min, max}
 
 trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with ObjViewImpl.Impl[T] {
   var trackIndex  : Int = _
@@ -210,7 +210,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
     import r.{ttFadeState => fadeState}
 
     if (px1c < px2c) {  // skip this if we are not overlapping with clip
-      import r.{pntBackground, pntFadeFill, pntFadeOutline, pntNameDark, pntNameLight, pntNameShadowDark, pntNameShadowLight, pntRegionBackground, pntRegionBackgroundMuted, pntRegionBackgroundSelected, pntRegionOutline, pntRegionOutlineSelected, regionTitleBaseline, regionTitleHeight, shape1, shape2}
+      import r.{pntBackground, pntNameDark, pntNameLight, pntNameShadowDark, pntNameShadowLight, pntRegionBackground, pntRegionBackgroundMuted, pntRegionBackgroundSelected, pntRegionOutline, pntRegionOutlineSelected, regionTitleBaseline, regionTitleHeight}
       if (regionViewMode != RegionViewMode.None) {
         g.translate(px, py)
         g.setPaint(if (selected) pntRegionOutlineSelected    else pntRegionOutline   )
@@ -235,31 +235,6 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
 
       paintInner(g, tlv = tlv, r = r, selected = selected)
 
-      // --- fades ---
-      def paintFade(curve: Curve, fw: Float, y1: Float, y2: Float, x: Float, x0: Float): Unit = {
-        shape1.reset()
-        shape2.reset()
-        val vScale  = phi / -3f
-        val y1s     = max(-3, log10(y1)) * vScale + pyi
-        shape1.moveTo(x, y1s)
-        shape2.moveTo(x, y1s)
-        var xs = 4
-        while (xs < fw) {
-          val ys = max(-3, log10(curve.levelAt(xs / fw, y1, y2))) * vScale + pyi
-          shape1.lineTo(x + xs, ys)
-          shape2.lineTo(x + xs, ys)
-          xs += 3
-        }
-        val y2s     = max(-3, log10(y2)) * vScale + pyi
-        shape1.lineTo(x + fw, y2s)
-        shape2.lineTo(x + fw, y2s)
-        shape1.lineTo(x0, pyi)
-        g.setPaint(pntFadeFill)
-        g.fill    (shape1)
-        g.setPaint(pntFadeOutline)
-        g.draw    (shape2)
-      }
-
       this match {
         case fv: ObjTimelineView.HasFade if timelineTools.fadeViewMode == FadeViewMode.Curve =>
 
@@ -276,7 +251,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
             val fw    = framesToScreen(fdInFr).toFloat
             val fdC   = st.deltaFadeInCurve
             val shape = if (fdC != 0f) adjustFade(fdIn.curve, fdC) else fdIn.curve
-            paintFade(shape, fw = fw, y1 = fdIn.floor, y2 = 1f, x = px, x0 = px)
+            r.paintFade(g, shape, fw = fw, y1 = fdIn.floor, y2 = 1f, x = px, x0 = px, pyi = pyi, phi = phi)
           }
           val fdOut   = fv.fadeOut
           val fdOutFr = fdOut.numFrames + st.deltaFadeOut
@@ -285,7 +260,7 @@ trait ObjTimelineViewBasicImpl[T <: LTxn[T]] extends ObjTimelineView[T] with Obj
             val fdC   = st.deltaFadeOutCurve
             val shape = if (fdC != 0f) adjustFade(fdOut.curve, fdC) else fdOut.curve
             val x0    = px + pw - 1
-            paintFade(shape, fw = fw, y1 = 1f, y2 = fdOut.floor, x = x0 - fw, x0 = x0)
+            r.paintFade(g, shape, fw = fw, y1 = 1f, y2 = fdOut.floor, x = x0 - fw, x0 = x0, pyi = pyi, phi = phi)
           }
 
         case _ =>

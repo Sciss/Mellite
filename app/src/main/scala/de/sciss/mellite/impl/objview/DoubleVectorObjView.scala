@@ -26,7 +26,7 @@ import de.sciss.proc.{Confluent, Universe}
 
 import java.awt.geom.Area
 import javax.swing.Icon
-import scala.swing.{Component, Graphics2D, Label, TextField}
+import scala.swing.{Graphics2D, TextField}
 import scala.util.{Failure, Try}
 
 object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Factory {
@@ -34,7 +34,7 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
   type V                        = Vec[Double]
   val icon          : Icon      = raphaelIcon(Shapes.RealNumberVector)
   val prefix        : String    = "DoubleVector"
-  def humanName     : String    = prefix
+  def humanName     : String    = "Double Vector"
   def tpe           : Obj.Type  = DoubleVector
   def category      : String    = ObjView.categPrimitives
   def canMakeObj    : Boolean   = true

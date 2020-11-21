@@ -445,7 +445,7 @@ object TimelineViewImpl extends TimelineView.Companion {
                              (implicit tx: T): Option[UndoableEdit] = {
       val track = canvas.screenToModelPos(drop.y)
       val editTrackIdx = Edits.adjustAttr[T, Int, IntObj](child, ObjTimelineView.attrTrackIndex, arg = track,
-        name = "Set Track Index", default = 0)((_, now) => now)
+        editName = "Set Track Index", default = 0)((_, now) => now)
       val nameCompound = s"Insert $childHumanName"
       val editInsert = EditTimelineInsertObj(nameCompound, tl, span, child)
       if (childNew) {

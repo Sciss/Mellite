@@ -13,14 +13,14 @@
 
 package de.sciss.mellite.impl
 
-import java.awt.geom.Path2D
-import java.awt.image.{BufferedImage, ImageObserver}
-import java.awt.{BasicStroke, LinearGradientPaint, Paint, Rectangle, Stroke, TexturePaint, Color => JColor}
-
 import de.sciss.mellite
 import de.sciss.mellite.BasicRendering
+import de.sciss.synth.Curve
 
-import scala.swing.Component
+import java.awt.geom.Path2D
+import java.awt.image.BufferedImage
+import java.awt.{BasicStroke, Graphics2D, LinearGradientPaint, Paint, Rectangle, Stroke, TexturePaint, Color => JColor}
+import scala.math.{log10, max}
 
 object RenderingImpl {
   private final val pntFadeFill: Paint = {
@@ -75,9 +75,10 @@ object RenderingImpl {
   private val strkInletSpan     : Stroke  = new BasicStroke(1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f,
     Array[Float](0.5f, 1.5f), 0f)
   private val strkNormal        : Stroke  = new BasicStroke()
+
 }
 
-abstract class RenderingImpl(component: Component, isDark: Boolean)
+abstract class RenderingImpl(isDark: Boolean)
   extends BasicRendering {
 
   import mellite.impl.{RenderingImpl => Impl}
@@ -119,7 +120,48 @@ abstract class RenderingImpl(component: Component, isDark: Boolean)
 
   final var sonogramBoost: Float = 1.0f
 
-  final def imageObserver: ImageObserver = component.peer
+//  final def imageObserver: ImageObserver = component.peer
 
   final def adjustGain(amp: Float, pos: Double): Float = amp * sonogramBoost
+
+  /** Paints a standardized rendering of a fade.
+    *
+    * The lowest painted level corresponds to 0.001 or -60 dB.
+    *
+    * @param g      the target graphics context
+    * @param curve  the fade curve
+    * @param fw     the fade width in pixels
+    * @param pyi    the vertical paint position in pixels
+    * @param phi    the paint height in pixels
+    * @param y1     the logical start level of the fade
+    * @param y2     the logical end level of the fade
+    * @param x      the horizontal paint position in pixels
+    * @param x0     the horizontal closing position (last line segment) in pixels.
+    *               for fade-in, this would be the same as `x`, for fade-out, this
+    *               would be x + fw
+    */
+  def paintFade(g: Graphics2D, curve: Curve, fw: Float, pyi: Int, phi: Int,
+                y1: Float, y2: Float, x: Float, x0: Float): Unit = {
+    shape1.reset()
+    shape2.reset()
+    val vScale  = phi / -3f
+    val y1s     = max(-3, log10(y1)) * vScale + pyi
+    shape1.moveTo(x, y1s)
+    shape2.moveTo(x, y1s)
+    var xs = 4
+    while (xs < fw) {
+      val ys = max(-3, log10(curve.levelAt(xs / fw, y1, y2))) * vScale + pyi
+      shape1.lineTo(x + xs, ys)
+      shape2.lineTo(x + xs, ys)
+      xs += 3
+    }
+    val y2s     = max(-3, log10(y2)) * vScale + pyi
+    shape1.lineTo(x + fw, y2s)
+    shape2.lineTo(x + fw, y2s)
+    shape1.lineTo(x0, pyi)
+    g.setPaint(pntFadeFill)
+    g.fill    (shape1)
+    g.setPaint(pntFadeOutline)
+    g.draw    (shape2)
+  }
 }
