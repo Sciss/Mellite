@@ -143,7 +143,7 @@ object TimelineTool {
     case class Linked[T <: Txn[T]](proc: ObjTimelineView[T] /*ProcObjView.Timeline[T]*/) extends Sink[T]
     case class Unlinked(frame: Long, y: Int) extends Sink[Nothing]
   }
-  final case class Patch[T <: Txn[T]](source: ObjTimelineView[T] /*ProcObjView.Timeline[T]*/, sink: Patch.Sink[T])
+  final case class Patch[T <: Txn[T]](source: ObjTimelineView[T] /*ProcObjView.Timeline[T]*/ , sink: Patch.Sink[T])
 
   final val EmptyFade = FadeSpec(numFrames = 0L)
 

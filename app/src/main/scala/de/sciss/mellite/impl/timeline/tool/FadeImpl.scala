@@ -67,7 +67,7 @@ final class FadeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
     else Fade(0L, deltaTime, 0f, deltaCurve)
   }
 
-  override protected def dragStarted(d: this.Drag): Boolean = {
+  override protected def dragStarted(d: Drag): Boolean = {
     val result = super.dragStarted(d)
     if (result) {
       dragCurve = math.abs(d.currentEvent.getX - d.firstEvent.getX) <

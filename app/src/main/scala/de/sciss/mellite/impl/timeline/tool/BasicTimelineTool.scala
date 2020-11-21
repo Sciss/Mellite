@@ -30,7 +30,7 @@ trait BasicTimelineTool[T <: Txn[T], A] extends CollectionImpl[T, A] with Draggi
 
   protected type Initial = ObjTimelineView[T]
 
-  final protected def handleSelect(e: MouseEvent, modelY: Int, pos: Long, child: ObjTimelineView[T]): Unit =
+  final protected def handleSelect(e: MouseEvent, pos: Long, modelY: Int, child: C): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {

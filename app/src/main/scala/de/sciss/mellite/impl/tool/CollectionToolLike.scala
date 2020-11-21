@@ -66,21 +66,23 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
   private[this] val mia = new MouseAdapter {
     override def mousePressed(e: MouseEvent): Unit = {
       e.getComponent.requestFocus()
-      val pos       = canvas.screenToFrame(e.getX).toLong
-      val modelY    = canvas.screenToModelPos(e.getY)
-      val childOpt  = canvas.findChildView(pos, modelY)
-      handlePress(e, modelY, pos, childOpt)
+      processMouse(e)(handlePress)
     }
 
     override def mouseEntered(e: MouseEvent): Unit = mouseHover(e)
     override def mouseMoved  (e: MouseEvent): Unit = mouseHover(e)
 
-    private def mouseHover(e: MouseEvent): Unit = if (hover) {
-      // println(s"mouseHover($e)")
+    private  def mouseHover  (e: MouseEvent): Unit = if (hover) processMouse(e)(handleHover)
+
+    override def mouseDragged(e: MouseEvent): Unit = if (hover) processMouse(e)(handleDrag )
+
+    override def mouseReleased(e: MouseEvent): Unit = processMouse(e)(handleRelease)
+
+    private def processMouse[A](e: MouseEvent)(fun: (MouseEvent, Long, Y, Option[C]) => A): A = {
       val pos       = canvas.screenToFrame(e.getX).toLong
       val modelY    = canvas.screenToModelPos(e.getY)
       val childOpt  = canvas.findChildView(pos, modelY)
-      handleHover(e, modelY, pos, childOpt)
+      fun(e, pos, modelY, childOpt)
     }
   }
 
@@ -128,11 +130,13 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
     *                   position or `None` if the mouse is pressed over
     *                   an empty part of the timeline.
     */
-  protected def handlePress(e: MouseEvent, modelY: Y, pos: Long,
-                            childOpt: Option[Child]): Unit
+  protected def handlePress(e: MouseEvent, pos: Long, modelY: Y, childOpt: Option[Child]): Unit
 
-  protected def handleHover(e: MouseEvent, modelY: Y, pos: Long,
-                            childOpt: Option[Child]): Unit = {
+  protected def handleRelease(e: MouseEvent, pos: Long, modelY: Y, childOpt: Option[Child]): Unit = ()
+
+  protected def handleDrag(e: MouseEvent, pos: Long, modelY: Y, childOpt: Option[Child]): Unit = ()
+
+  protected def handleHover(e: MouseEvent, pos: Long, modelY: Y, childOpt: Option[Child]): Unit = {
     val csr = getCursor(e, modelY, pos, childOpt)
     if (lastCursor != csr) {
       lastCursor = csr

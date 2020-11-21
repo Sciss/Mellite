@@ -13,20 +13,20 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-import java.awt.event.MouseEvent
-import java.awt.geom.{Area, Ellipse2D}
-import java.awt.image.BufferedImage
-import java.awt.{Color, Point, RenderingHints, Toolkit}
-
 import de.sciss.desktop.Desktop
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.tool.DraggingTool
-import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.proc.{Proc, Timeline}
+
+import java.awt
+import java.awt.event.MouseEvent
+import java.awt.geom.{Area, Ellipse2D}
+import java.awt.image.BufferedImage
+import java.awt.{Color, Point, RenderingHints, Toolkit}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -80,9 +80,9 @@ final class PatchImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
     Patch(d.initial, sink)
   }
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit =
-    region match {
-      case pv: ProcObjView.Timeline[T] => new Drag(e, hitTrack, pos, pv) // region.outputs only carries linked ones!
+  protected def handleSelect(e: MouseEvent, pos: Long, modelY: Int, child: C): Unit =
+    child match {
+      case pv: ProcObjView.Timeline[T] => new Drag(e, modelY, pos, pv) // region.outputs only carries linked ones!
       case _ =>
     }
 

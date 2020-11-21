@@ -26,7 +26,7 @@ import javax.swing.undo.UndoableEdit
   * commits performed in the abstract method `commitObj`.
   */
 trait CollectionImpl[T <: Txn[T], A] extends BasicCollectionTool[T, A, Int, ObjTimelineView[T]]
-  with TimelineTool[T, A]{
+  with TimelineTool[T, A] {
 
   override protected def canvas: TimelineTrackCanvas[T]
 

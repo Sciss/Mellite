@@ -59,8 +59,8 @@ final class MoveImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
     Move(deltaTime = dTim, deltaTrack = dTrk, copy = d.currentEvent.isAltDown)
   }
 
-  override protected def handleOutside(e: MouseEvent, hitTrack: Int, pos: Long): Unit =
-    mkRubber(e, modelY = hitTrack, pos = pos)
+  override protected def handleOutside(e: MouseEvent, pos: Long, modelY: Int): Unit =
+    mkRubber(e, modelY = modelY, pos = pos)
 
   protected def commitObj(drag: Move)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {

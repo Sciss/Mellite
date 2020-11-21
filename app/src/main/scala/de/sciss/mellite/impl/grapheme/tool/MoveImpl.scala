@@ -61,7 +61,7 @@ final class MoveImpl[T <: Txn[T]](protected val canvas: GraphemeCanvas[T])
     Move(deltaTime = dTim, deltaModelY = dModelY, copy = d.currentEvent.isAltDown)
   }
 
-  override protected def handleOutside(e: MouseEvent, modelY: Double, pos: Long): Unit =
+  override protected def handleOutside(e: MouseEvent, pos: Long, modelY: Double): Unit =
     mkRubber(e, modelY = modelY, pos = pos)
 
   protected def commitObj(drag: Move)(time: LongObj[T], child: Obj[T], parent: Grapheme[T])

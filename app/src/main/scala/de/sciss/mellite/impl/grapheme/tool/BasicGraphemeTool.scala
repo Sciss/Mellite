@@ -29,7 +29,7 @@ import de.sciss.mellite.impl.tool.DraggingTool
 trait BasicGraphemeTool[T <: Txn[T], A] extends CollectionImpl[T, A] with DraggingTool[T, A, Double] {
   protected type Initial = ObjGraphemeView[T]
 
-  final protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, region: ObjGraphemeView[T]): Unit =
+  final protected def handleSelect(e: MouseEvent, pos: Long, modelY: Double, region: ObjGraphemeView[T]): Unit =
     if (e.getClickCount == 2) {
       handleDoubleClick()
     } else {

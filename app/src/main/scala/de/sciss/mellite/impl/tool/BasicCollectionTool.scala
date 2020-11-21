@@ -23,17 +23,17 @@ import de.sciss.lucre.synth.Txn
   */
 trait BasicCollectionTool[T <: Txn[T], A, Y, Child] extends CollectionToolLike[T, A, Y, Child] {
 
-  protected def handlePress(e: MouseEvent, modelY: Y, pos: Long, childOpt: Option[Child]): Unit = {
+  protected def handlePress(e: MouseEvent, pos: Long, modelY: Y, childOpt: Option[Child]): Unit = {
     handleMouseSelection(e, childOpt)
     // now go on if region is selected
     childOpt.fold[Unit] {
-      handleOutside(e, modelY, pos)
+      handleOutside(e, pos, modelY)
     } { region =>
-      if (canvas.selectionModel.contains(region)) handleSelect(e, modelY, pos, region)
+      if (canvas.selectionModel.contains(region)) handleSelect(e, pos, modelY, region)
     }
   }
 
-  protected def handleSelect (e: MouseEvent, modelY: Y, pos: Long, child: Child): Unit
+  protected def handleSelect (e: MouseEvent, pos: Long, modelY: Y, child: Child): Unit
 
-  protected def handleOutside(e: MouseEvent, modelY: Y, pos: Long): Unit = ()
+  protected def handleOutside(e: MouseEvent, pos: Long, modelY: Y): Unit = ()
 }

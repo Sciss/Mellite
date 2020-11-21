@@ -33,7 +33,7 @@ final class CursorImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
   override protected def defaultCursor: awt.Cursor =
     awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
 
-  protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: ObjGraphemeView[T]): Unit =
+  protected def handleSelect(e: MouseEvent, pos: Long, modelY: Double, child: C): Unit =
 //    if (e.getClickCount == 2) {
 //      val ggText  = new TextField(region.name, 24)
 //      val panel   = new FlowPanel(new Label("Name:"), ggText)

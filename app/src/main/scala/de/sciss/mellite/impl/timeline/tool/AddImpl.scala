@@ -44,9 +44,9 @@ final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], t
   override protected def defaultCursor: awt.Cursor =
     awt.Cursor.getPredefinedCursor(awt.Cursor.CROSSHAIR_CURSOR)
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
-    handleMouseSelection(e, regionOpt)
-    regionOpt match {
+  protected def handlePress(e: MouseEvent, pos: Long, modelY: Int, childOpt: Option[C]): Unit = {
+    handleMouseSelection(e, childOpt)
+    childOpt match {
       case Some(region) =>
         if (e.getClickCount == 2 && region.isViewable) {
           import tlv.{cursor, universe}
@@ -55,7 +55,7 @@ final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], t
           }
         }
 
-      case _  => new Drag(e, hitTrack, pos, ())
+      case _  => new Drag(e, modelY, pos, ())
     }
   }
 

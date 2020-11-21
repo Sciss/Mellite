@@ -63,6 +63,13 @@ We try to use the same keyboard mappings as IntelliJ IDEA, with some additional 
 
 (*) Currently not implemented
 
+## Timeline
+
+|**Key**            |**Action**                         |
+|:------------------|:----------------------------------|
+|`1` to `9`         |Select timeline tools              |
+|`ESCAPE`           |Cancel ongoing tool edit           |
+
 ## Oscilloscope
 
 |**Key**                  |**Action**                                                   |

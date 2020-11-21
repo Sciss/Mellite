@@ -65,8 +65,8 @@ class AuditionImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tl
   override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
     if (childOpt.isEmpty) defaultCursor else AuditionImpl.cursor
 
-  protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
-    handleMouseSelection(e, childOpt = regionOpt)
+  protected def handlePress(e: MouseEvent, pos: Long, modelY: Int, childOpt: Option[C]): Unit = {
+    handleMouseSelection(e, childOpt = childOpt)
 
     val selMod = canvas.selectionModel
     if (selMod.isEmpty) return
@@ -74,7 +74,7 @@ class AuditionImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tl
     val playPos = if (!e.isAltDown) {
       // tlv.timelineModel.modifiableOption.foreach(_.position = pos) // XXX TODO -- eventually non-significant undoable edit
       pos
-    } else regionOpt.fold(pos)(_.spanValue match {
+    } else childOpt.fold(pos)(_.spanValue match {
       case hs: Span.HasStart => hs.start
       case _ => pos
     })

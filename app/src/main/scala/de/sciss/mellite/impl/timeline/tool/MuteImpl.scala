@@ -51,7 +51,7 @@ final class MuteImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =
     Edits.mute(obj, mute)
 
-  protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit = region match {
+  protected def handleSelect(e: MouseEvent, pos: Long, modelY: Int, child: C): Unit = child match {
     case hm: ObjTimelineView.HasMute => dispatch(BasicTool.Adjust(Mute(!hm.muted)))
     case _ =>
   }
