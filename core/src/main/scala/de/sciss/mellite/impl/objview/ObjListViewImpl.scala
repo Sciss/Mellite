@@ -13,12 +13,14 @@
 
 package de.sciss.mellite.impl.objview
 
+import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BooleanObj, Cursor, Expr, Obj, Txn => LTxn}
-import de.sciss.mellite.ObjListView
-import javax.swing.undo.UndoableEdit
+import de.sciss.mellite.{ObjListView, ObjView}
 
+import javax.swing.undo.UndoableEdit
+import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.{CheckBox, Component, Label}
 import scala.util.Try
 
@@ -94,6 +96,28 @@ object ObjListViewImpl {
 
   trait SimpleExpr[T <: Txn[T], A, Ex[~ <: LTxn[~]] <: Expr[~, A]] extends ExprLike[T, A, Ex]
     with ObjListView[T] with ObjViewImpl.SimpleExpr[T, A, Ex]
+
+  trait VectorExpr[T <: Txn[T], A, Ex[~ <: LTxn[~]] <: Expr[~, Vec[A]]] extends ExprLike[T, Vec[A], Ex]
+    with ObjListView[T] with ObjViewImpl.ExprLike[T, Vec[A], Ex] with ObjViewImpl.Impl[T] {
+
+    def value: String
+
+    def init(ex: Ex[T])(implicit tx: T): this.type = {
+      initAttrs(ex)
+      addDisposable(ex.changed.react { implicit tx =>upd =>
+        deferTx {
+          exprValue = upd.now
+        }
+        fire(ObjView.Repaint(this))
+      })
+      this
+    }
+
+    def configureListCellRenderer(label: Label): Component = {
+      label.text = value // value.iterator.map(_.toFloat).mkString(",")  // avoid excessive number of digits!
+      label
+    }
+  }
 
   private final val ggCheckBox = new CheckBox()
 

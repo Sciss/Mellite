@@ -13,21 +13,19 @@
 
 package de.sciss.mellite.impl.objview
 
-import java.awt.geom.Area
-
 import de.sciss.desktop
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.{DoubleVector, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, MessageException, ObjGraphemeView, ObjListView, ObjView}
+import de.sciss.lucre.{DoubleVector, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.Shapes
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, MessageException, ObjGraphemeView, ObjListView, ObjView, Shapes}
 import de.sciss.proc.Grapheme.Entry
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Confluent, Universe}
-import javax.swing.Icon
 
+import java.awt.geom.Area
+import javax.swing.Icon
 import scala.swing.{Component, Graphics2D, Label, TextField}
 import scala.util.{Failure, Try}
 
@@ -43,13 +41,13 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
 
   def mkListView[T <: Txn[T]](obj: E[T])(implicit tx: T): ObjListView[T] = {
     val ex          = obj
-    val value       = ex.value
+    val value0      = ex.value
     val isEditable  = ex match {
       case DoubleVector.Var(_)  => true
       case _            => false
     }
     val isViewable  = tx.isInstanceOf[Confluent.Txn]
-    new ListImpl[T](tx.newHandle(obj), value, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
+    new ListImpl[T](tx.newHandle(obj), value0, isListCellEditable = isEditable, isViewable = isViewable).init(obj)
   }
 
   final case class Config[T <: LTxn[T]](name: String = prefix, value: V, const: Boolean = false)
@@ -62,8 +60,8 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
                                  (done: MakeResult[T] => Unit)
                                  (implicit universe: Universe[T]): Unit = {
     val ggValue = new TextField("0.0,0.0")
-    val res0 = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
-    val res = res0.map(c => Config[T](name = c.name, value = c.value))
+    val res0    = primitiveConfig(window, tpe = prefix, ggValue = ggValue, prepare = parseString(ggValue.text))
+    val res     = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)
   }
 
@@ -107,10 +105,15 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
 
   // ---- ListObjView ----
 
-  private final class ListImpl[T <: Txn[T]](objH: Source[T, E[T]], var value: V,
+  private final class ListImpl[T <: Txn[T]](objH: Source[T, E[T]], value0: V,
                                             override val isListCellEditable: Boolean, isViewable: Boolean)
     extends Impl(objH, isViewable = isViewable) with ObjListView[T]
-      with ObjListViewImpl.SimpleExpr[T, V, E] {
+      with ObjListViewImpl.VectorExpr[T, Double, E] {
+
+    protected var exprValue: V = value0
+
+    def value: String =
+      exprValue.iterator.map(_.toFloat).mkString(",")
 
     def convertEditValue(v: Any): Option[V] = v match {
       case num: Vec[Any] =>
@@ -121,11 +124,6 @@ object DoubleVectorObjView extends ObjListView.Factory with ObjGraphemeView.Fact
 
       case s: String  => parseString(s).toOption
       case _          => None
-    }
-
-    def configureListCellRenderer(label: Label): Component = {
-      label.text = value.iterator.map(_.toFloat).mkString(",")  // avoid excessive number of digits!
-      label
     }
   }
 

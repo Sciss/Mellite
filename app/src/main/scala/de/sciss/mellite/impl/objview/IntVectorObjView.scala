@@ -22,9 +22,9 @@ import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.{MessageException, ObjListView, ObjView, Shapes}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Confluent, Universe}
-import javax.swing.Icon
 
-import scala.swing.{Component, Label, TextField}
+import javax.swing.Icon
+import scala.swing.TextField
 import scala.util.{Failure, Try}
 
 object IntVectorObjView extends ObjListView.Factory {
@@ -78,11 +78,11 @@ object IntVectorObjView extends ObjListView.Factory {
     obj :: Nil
   }
 
-  final class Impl[T <: Txn[T]](val objH: Source[T, IntVector[T]], var value: Vec[Int],
+  final class Impl[T <: Txn[T]](val objH: Source[T, IntVector[T]], value0: Vec[Int],
                                 override val isListCellEditable: Boolean, val isViewable: Boolean)
     extends ObjListView[T]
       with ObjViewImpl.Impl[T]
-      with ObjListViewImpl.SimpleExpr[T, Vec[Int], IntVector] {
+      with ObjListViewImpl.VectorExpr[T, Int, IntVector] {
 
     type Repr = IntVector[T]
 
@@ -91,6 +91,11 @@ object IntVectorObjView extends ObjListView.Factory {
     def exprType: Expr.Type[Vec[Int], IntVector] = IntVector
 
     def expr(implicit tx: T): IntVector[T] = objH()
+
+    protected var exprValue: Vec[Int] = value0
+
+    def value: String =
+      exprValue.mkString(",")
 
     def convertEditValue(v: Any): Option[Vec[Int]] = v match {
       case num: Vec[Any] =>
@@ -101,11 +106,6 @@ object IntVectorObjView extends ObjListView.Factory {
 
       case s: String  => parseString(s).toOption
       case _          => None
-    }
-
-    def configureListCellRenderer(label: Label): Component = {
-      label.text = value.mkString(",")
-      label
     }
   }
 }
