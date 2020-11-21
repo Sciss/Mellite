@@ -39,9 +39,13 @@ final class MuteImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
   extends CollectionImpl[T, Mute]
     with RubberBandTool[T, Mute, Int, ObjTimelineView[T]] {
 
-  def defaultCursor: awt.Cursor = MuteImpl.cursor
   val name                  = "Mute"
   val icon: Icon            = GUI.iconNormal(Shapes.Mute) // ToolsImpl.getIcon("mute")
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    if (childOpt.isEmpty) defaultCursor else MuteImpl.cursor
 
   protected def commitObj(mute: Mute)(span: SpanLikeObj[T], obj: Obj[T], timeline: Timeline[T])
                          (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] =

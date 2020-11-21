@@ -44,9 +44,9 @@ final class GraphemeToolsImpl[T <: Txn[T]](canvas: GraphemeCanvas[T])
       val oldTool   = _currentTool
       _currentTool  = value
       oldTool.uninstall(canvas.canvasComponent)
-      value    .install(canvas.canvasComponent)
+      value    .install(canvas.canvasComponent, None)
       dispatch(ToolChanged(Change(oldTool, value)))
     }
 
-  _currentTool.install(canvas.canvasComponent)
+  _currentTool.install(canvas.canvasComponent, None)
 }

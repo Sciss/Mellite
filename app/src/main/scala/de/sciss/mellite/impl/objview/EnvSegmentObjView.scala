@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.objview
 
-import java.awt.geom.Area
-
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
 import de.sciss.desktop.edit.CompoundEdit
@@ -22,27 +20,27 @@ import de.sciss.equal.Implicits._
 import de.sciss.icons.raphael
 import de.sciss.kollflitz.Vec
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{Disposable, DoubleObj, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseView}
+import de.sciss.lucre.{Disposable, DoubleObj, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
 import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser, WindowImpl}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseView}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.processor.Processor.Aborted
-import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
-import de.sciss.synth.Curve
 import de.sciss.proc.Grapheme.Entry
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{CurveObj, EnvSegment, Universe}
+import de.sciss.processor.Processor.Aborted
+import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
+import de.sciss.synth.Curve
+
+import java.awt.geom.Area
 import javax.swing.undo.UndoableEdit
 import javax.swing.{Icon, SpinnerModel, SpinnerNumberModel}
-import org.rogach.scallop
-
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Alignment, Component, Dialog, Graphics2D, Label, Swing, TextField}

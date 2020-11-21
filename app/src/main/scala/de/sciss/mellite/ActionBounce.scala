@@ -589,6 +589,7 @@ object ActionBounce {
           case sq: Vec[_] =>
             sq.map {
               case r: Range => channelToString(r)
+              case _        => throw new IllegalArgumentException
             } .mkString(", ")
 
           case _ => throw new IllegalArgumentException

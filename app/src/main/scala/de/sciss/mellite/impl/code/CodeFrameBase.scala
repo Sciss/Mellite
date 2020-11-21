@@ -59,7 +59,7 @@ trait CodeFrameBase[T <: Txn[T]] extends Veto[T] {
           messageType = OptionPane.Message.Warning)
         opt.title = s"Close - $title"
         val res = opt.show(Some(window))
-        res match {
+        (res: @unchecked) match {
           case OptionPane.Result.No =>
             p.success(())
           case OptionPane.Result.Yes =>

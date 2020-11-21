@@ -13,9 +13,6 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-import java.awt.event.MouseEvent
-
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.icons.raphael
 import de.sciss.lucre.synth.Txn
@@ -24,6 +21,9 @@ import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.impl.tool.RubberBandTool
 import de.sciss.mellite.{GUI, ObjTimelineView, TimelineTool, TimelineTrackCanvas}
 import de.sciss.proc.Timeline
+
+import java.awt
+import java.awt.event.MouseEvent
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -33,9 +33,13 @@ final class MoveImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Move
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.HAND_CURSOR)
   val name                  = "Move"
   val icon: Icon            = GUI.iconNormal(raphael.Shapes.Hand) // ToolsImpl.getIcon("openhand")
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    if (childOpt.isEmpty) defaultCursor else awt.Cursor.getPredefinedCursor(awt.Cursor.HAND_CURSOR)
 
   protected def dragToParam(d: Drag): Move = {
     val eNow  = d.currentEvent

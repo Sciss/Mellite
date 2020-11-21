@@ -14,19 +14,24 @@
 package de.sciss.mellite.impl.tool
 
 import java.awt.event.{MouseAdapter, MouseEvent}
-
+import java.awt
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.{BasicTool, TimelineCanvas2D}
 import de.sciss.model.impl.ModelImpl
 
+import java.awt.Cursor
 import scala.swing.Component
 
 /** A basic implementation block for timeline tools that process selected child views. */
 trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with ModelImpl[BasicTool.Update[A]] {
   tool =>
 
+  type C = Child
+
   // protected def trackList: TrackList
   protected def canvas: TimelineCanvas2D[T, Y, Child]
+
+  private[this] var lastCursor: awt.Cursor = _
 
   protected val hover: Boolean = false
 
@@ -80,18 +85,35 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
   }
 
   /** Implemented by adding mouse input listeners to the component. */
-  final def install(component: Component): Unit = {
+  final def install(component: Component, e: Option[MouseEvent]): Unit = {
     // println(s"install $this. hover? $hover")
     component           .peer.addMouseListener      (mia)
     if (hover) component.peer.addMouseMotionListener(mia)
-    component.cursor = defaultCursor
+    val csr           = getCursor(e)
+    lastCursor        = csr
+    component.cursor  = csr
   }
+
+  def getCursor(eOpt: Option[MouseEvent]): Cursor = eOpt match {
+    case None => defaultCursor
+    case Some(e) =>
+      val pos       = canvas.screenToFrame(e.getX).toLong
+      val modelY    = canvas.screenToModelPos(e.getY)
+      val childOpt  = canvas.findChildView(pos, modelY)
+      getCursor(e, modelY, pos, childOpt)
+  }
+
+  protected def defaultCursor: awt.Cursor = null
+
+  protected def getCursor(e: MouseEvent, modelY: Y, pos: Long, childOpt: Option[Child]): awt.Cursor =
+    defaultCursor
 
   /** Implemented by removing listeners from component. */
   final def uninstall(component: Component): Unit = {
     component           .peer.removeMouseListener      (mia)
     if (hover) component.peer.removeMouseMotionListener(mia)
-    component.cursor = null
+    component.cursor  = null
+    lastCursor        = null
   }
 
   /** Abstract method to be implemented by sub-classes. Called when the
@@ -110,5 +132,11 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
                             childOpt: Option[Child]): Unit
 
   protected def handleHover(e: MouseEvent, modelY: Y, pos: Long,
-                            childOpt: Option[Child]): Unit = ()
+                            childOpt: Option[Child]): Unit = {
+    val csr = getCursor(e, modelY, pos, childOpt)
+    if (lastCursor != csr) {
+      lastCursor = csr
+      e.getComponent.setCursor(csr)
+    }
+  }
 }

@@ -13,20 +13,19 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-import java.awt.event.MouseEvent
-
 import de.sciss.audiowidgets.impl.TimelineNavigation
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.TimelineTool.Resize
 import de.sciss.mellite.edit.Edits
-import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas}
+import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.proc.Timeline
 import de.sciss.span.Span
+
+import java.awt
+import java.awt.event.MouseEvent
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.math.{abs, min}
 
 final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
@@ -36,16 +35,11 @@ final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T]
 
   override protected val hover: Boolean = true
 
-  def defaultCursor: awt.Cursor = null // awt.Cursor.getPredefinedCursor(awt.Cursor.W_RESIZE_CURSOR)
   val name                  = "Resize"
   val icon: Icon            = GUI.iconNormal(Shapes.Crop)
 
-  private var lastCursor: awt.Cursor = _
-
-  override protected def handleHover(e: MouseEvent, modelY: Int, pos: Long,
-                                     childOpt: Option[ObjTimelineView[T]]): Unit = {
-    // println(s"handleHover($e, $modelY, $pos, $childOpt")
-    val csr = childOpt.fold(null: awt.Cursor) { child =>
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    childOpt.fold[awt.Cursor](null) { child =>
       val modelYF = canvas.screenToModelPosF(e.getY)
       val edge    = calcEdge(child, modelYF, pos)
       val csrId = {
@@ -56,14 +50,7 @@ final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T]
         else                      awt.Cursor .DEFAULT_CURSOR
       }
       awt.Cursor.getPredefinedCursor(csrId)
-      // println(s"CURSOR $csr")
     }
-
-    if (lastCursor != csr) {
-      lastCursor = csr
-      e.getComponent.setCursor(csr)
-    }
-  }
 
   protected def dialog(): Option[Resize] = None // not yet supported
 
@@ -73,8 +60,8 @@ final class ResizeImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T]
   private def calcEdge(region: Initial, modelY: Double /*Int*/, pos: Long): Edge = {
     import region.{trackHeight, trackIndex => trackStart}
     val trackStop   = trackStart + trackHeight
-    val insetY1     = abs(modelY - trackStart).toDouble / trackHeight
-    val insetY2     = abs(modelY - trackStop ).toDouble / trackHeight
+    val insetY1     = abs(modelY - trackStart) / trackHeight
+    val insetY2     = abs(modelY - trackStop ) / trackHeight
     val insetYMin   = min(insetY1, insetY2)
     region.spanValue match {
       case Span.From (start) =>

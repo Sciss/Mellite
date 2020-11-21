@@ -468,7 +468,7 @@ object FadeSpecObjView extends ObjListView.Factory {
         val opt = OptionPane.confirmation(message = message, optionType = OptionPane.Options.YesNoCancel,
           messageType = OptionPane.Message.Warning)
         opt.title = s"Close - $title"
-        opt.show(Some(window)) match {
+        (opt.show(Some(window)): @unchecked) match {
           case OptionPane.Result.No =>
             p.success(())
 

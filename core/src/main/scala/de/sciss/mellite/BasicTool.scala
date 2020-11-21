@@ -14,13 +14,13 @@
 package de.sciss.mellite
 
 import java.awt
-
 import de.sciss.model.Model
 import de.sciss.lucre.{Cursor, Txn => LTxn}
 import de.sciss.span.Span
+
+import java.awt.event.MouseEvent
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.swing.Component
 
 object BasicTool {
@@ -47,14 +47,14 @@ object BasicTool {
 }
 trait BasicTool[T <: LTxn[T], A] extends Model[BasicTool.Update[A]] {
   /** The mouse cursor used when the tool is active. */
-  def defaultCursor: awt.Cursor
+  def getCursor(e: Option[MouseEvent]): awt.Cursor
   /** The icon to use in a tool bar. */
   def icon: Icon
   /** The human readable name of the tool. */
   def name: String
 
   /** Called to activate the tool to operate on the given component. */
-  def install  (component: Component): Unit
+  def install  (component: Component, e: Option[MouseEvent]): Unit
   /** Called to deactivate the tool before switching to a different tool. */
   def uninstall(component: Component): Unit
 

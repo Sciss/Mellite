@@ -18,6 +18,9 @@ import de.sciss.mellite.{FadeViewMode, RegionViewMode, TimelineTool, TimelineToo
 import de.sciss.model.Change
 import de.sciss.model.impl.ModelImpl
 
+import java.awt.event.MouseEvent
+import javax.swing.event.MouseInputAdapter
+
 final class ToolsImpl[T <: Txn[T]](canvas: TimelineTrackCanvas[T])
   extends TimelineTools[T] with ModelImpl[TimelineTools.Update[T]] {
 
@@ -31,7 +34,7 @@ final class ToolsImpl[T <: Txn[T]](canvas: TimelineTrackCanvas[T])
       val oldTool   = _currentTool
       _currentTool  = value
       oldTool.uninstall(canvas.canvasComponent)
-      value    .install(canvas.canvasComponent)
+      value    .install(canvas.canvasComponent, Option(lastMouse))
       dispatch(ToolChanged(Change(oldTool, value)))
     }
 
@@ -65,5 +68,20 @@ final class ToolsImpl[T <: Txn[T]](canvas: TimelineTrackCanvas[T])
       dispatch(RegionViewModeChanged(Change(oldMode, value)))
     }
 
-  _currentTool.install(canvas.canvasComponent)
+  private[this] var lastMouse: MouseEvent = _
+
+  private[this] val mia: MouseInputAdapter = new MouseInputAdapter {
+    override def mouseEntered (e: MouseEvent): Unit = lastMouse = e
+    override def mouseMoved   (e: MouseEvent): Unit = lastMouse = e
+    override def mouseDragged (e: MouseEvent): Unit = lastMouse = e
+    override def mouseExited  (e: MouseEvent): Unit = lastMouse = null
+  }
+
+  // constructor
+  {
+    val cc = canvas.canvasComponent
+    cc.peer.addMouseListener      (mia)
+    cc.peer.addMouseMotionListener(mia)
+    _currentTool.install(cc, Option(lastMouse))
+  }
 }

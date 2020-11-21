@@ -13,9 +13,6 @@
 
 package de.sciss.mellite.impl.grapheme.tool
 
-import java.awt.event.{MouseAdapter, MouseEvent}
-import java.awt.{Cursor => AWTCursor}
-
 import de.sciss.icons.raphael
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, DoubleObj}
@@ -23,11 +20,13 @@ import de.sciss.mellite.BasicTool.Adjust
 import de.sciss.mellite.edit.EditGraphemeInsertObj
 import de.sciss.mellite.{BasicTool, GUI, GraphemeCanvas, GraphemeTool, ObjGraphemeView, Shapes}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.synth.Curve
 import de.sciss.proc.{CurveObj, EnvSegment}
+import de.sciss.synth.Curve
+
+import java.awt.event.{MouseAdapter, MouseEvent}
+import java.awt.{Cursor => AWTCursor}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.swing.Component
 
 final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
@@ -36,7 +35,9 @@ final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
   type Y      = Double
   type Child  = ObjGraphemeView[T]
 
-  def defaultCursor: AWTCursor  = AWTCursor.getPredefinedCursor(AWTCursor.CROSSHAIR_CURSOR)
+  def getCursor(e: Option[MouseEvent]): AWTCursor =
+    AWTCursor.getPredefinedCursor(AWTCursor.CROSSHAIR_CURSOR)
+
   def name                      = "Add Envelope Segment"
 //  val icon: Icon                = GUI.iconNormal(raphael.Shapes.Plus)
   val icon: Icon                = GUI.iconNormal(Shapes.plus(raphael.Shapes.Connect))
@@ -57,9 +58,9 @@ final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
     dispatch(Adjust(GraphemeTool.Add(time = pos, modelY = modelY, tpe = EnvSegment.Obj)))
   }
 
-  def install(component: Component): Unit = {
+  def install(component: Component, e: Option[MouseEvent]): Unit = {
     component.peer.addMouseListener(mia)
-    component.cursor = defaultCursor
+    component.cursor = getCursor(e)
   }
 
   def uninstall(component: Component): Unit = {

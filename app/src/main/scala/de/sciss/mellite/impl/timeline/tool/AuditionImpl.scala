@@ -13,16 +13,16 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-import java.awt.event.{MouseAdapter, MouseEvent}
-import java.awt.{Point, Toolkit}
-
 import de.sciss.lucre.Cursor
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.tool.{CollectionToolLike, RubberBandTool}
 import de.sciss.mellite.{GUI, ObjTimelineView, Shapes, TimelineTool, TimelineTrackCanvas, TimelineView}
-import de.sciss.span.Span
 import de.sciss.proc.{AuralContext, AuralObj, TimeRef}
+import de.sciss.span.Span
+
+import java.awt
+import java.awt.event.{MouseAdapter, MouseEvent}
+import java.awt.{Point, Toolkit}
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -57,9 +57,13 @@ class AuditionImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], tl
 
   // import TrackTool.{Cursor => _}
 
-  def defaultCursor: awt.Cursor = AuditionImpl.cursor
   val name                  = "Audition"
   val icon: Icon            = GUI.iconNormal(Shapes.Audition)
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    if (childOpt.isEmpty) defaultCursor else AuditionImpl.cursor
 
   protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
     handleMouseSelection(e, childOpt = regionOpt)

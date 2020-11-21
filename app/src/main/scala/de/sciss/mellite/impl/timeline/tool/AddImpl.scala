@@ -35,12 +35,14 @@ final class AddImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T], t
 
   import TimelineTool.Add
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.CROSSHAIR_CURSOR)
   val name                  = "Add Process" // "Function"
 //  val icon: Icon            = GUI.iconNormal(raphael.Shapes.Cogs)
   val icon: Icon            = GUI.iconNormal(Shapes.plus(raphael.Shapes.Cogs))
 
   protected type Initial = Unit
+
+  override protected def defaultCursor: awt.Cursor =
+    awt.Cursor.getPredefinedCursor(awt.Cursor.CROSSHAIR_CURSOR)
 
   protected def handlePress(e: MouseEvent, hitTrack: Int, pos: Long, regionOpt: Option[ObjTimelineView[T]]): Unit = {
     handleMouseSelection(e, regionOpt)

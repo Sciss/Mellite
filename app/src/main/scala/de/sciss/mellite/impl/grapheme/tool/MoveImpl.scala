@@ -33,9 +33,15 @@ final class MoveImpl[T <: Txn[T]](protected val canvas: GraphemeCanvas[T])
 
   import GraphemeTool.Move
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.HAND_CURSOR)
+  def getCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.HAND_CURSOR)
   val name                  = "Move"
   val icon: Icon            = GUI.iconNormal(raphael.Shapes.Hand) // ToolsImpl.getIcon("openhand")
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Double, pos: Long,
+                                   childOpt: Option[C]): awt.Cursor =
+    awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
 
   protected def dragToParam(d: Drag): Move = {
     val eNow      = d.currentEvent

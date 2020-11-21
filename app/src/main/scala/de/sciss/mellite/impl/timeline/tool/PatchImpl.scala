@@ -59,11 +59,15 @@ final class PatchImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Patch
 
-  def defaultCursor: awt.Cursor = PatchImpl.cursor
   val name                  = "Patch"
   val icon: Icon            = GUI.iconNormal(Shapes.Patch)
 
   protected type Initial = ProcObjView.Timeline[T] // TimelineObjView[T]
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    if (childOpt.isEmpty) defaultCursor else PatchImpl.cursor
 
   protected def dragToParam(d: Drag): Patch[T] = {
     val pos   = d.currentPos

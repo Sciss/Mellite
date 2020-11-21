@@ -27,9 +27,11 @@ import javax.swing.undo.UndoableEdit
 final class CursorImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
   extends CollectionImpl[T, Unit] {
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
+
+  override protected def defaultCursor: awt.Cursor =
+    awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
 
   protected def handleSelect(e: MouseEvent, modelY: Double, pos: Long, child: ObjGraphemeView[T]): Unit =
 //    if (e.getClickCount == 2) {

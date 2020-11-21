@@ -32,11 +32,15 @@ import scala.swing.{FlowPanel, Label, TextField}
 final class CursorImpl[T <: Txn[T]](val canvas: TimelineTrackCanvas[T])
   extends CollectionImpl[T, TimelineTool.Cursor] {
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
   def name                  = "Cursor"
   val icon: Icon            = GUI.iconNormal(Shapes.Pointer) // ToolsImpl.getIcon("text")
 
   private def renameName = "Rename Region"
+
+  override protected val hover: Boolean = true
+
+  override protected def defaultCursor: awt.Cursor =
+    awt.Cursor.getPredefinedCursor(awt.Cursor.TEXT_CURSOR)
 
   protected def handleSelect(e: MouseEvent, hitTrack: Int, pos: Long, region: ObjTimelineView[T]): Unit =
     if (e.getClickCount === 2) {

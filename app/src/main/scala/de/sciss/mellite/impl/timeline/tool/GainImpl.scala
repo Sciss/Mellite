@@ -13,14 +13,15 @@
 
 package de.sciss.mellite.impl.timeline.tool
 
-import java.awt
-
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, Obj, SpanLikeObj}
 import de.sciss.mellite.edit.Edits
 import de.sciss.mellite.{GUI, Shapes, TimelineTool, TimelineTrackCanvas}
 import de.sciss.proc.Timeline
 import de.sciss.synth
+
+import java.awt
+import java.awt.event.MouseEvent
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -29,11 +30,15 @@ final class GainImpl[T <: Txn[T]](protected val canvas: TimelineTrackCanvas[T])
 
   import TimelineTool.Gain
 
-  def defaultCursor: awt.Cursor = awt.Cursor.getPredefinedCursor(awt.Cursor.N_RESIZE_CURSOR)
   val name                  = "Gain"
   val icon: Icon            = GUI.iconNormal(Shapes.Gain) // ToolsImpl.getIcon("vresize")
 
   protected def dialog(): Option[Gain] = None // not yet supported
+
+  override protected val hover: Boolean = true
+
+  override protected def getCursor(e: MouseEvent, modelY: Int, pos: Long, childOpt: Option[C]): awt.Cursor =
+    if (childOpt.isEmpty) defaultCursor else awt.Cursor.getPredefinedCursor(awt.Cursor.N_RESIZE_CURSOR)
 
   override protected def dragStarted(d: Drag): Boolean =
     d.currentEvent.getY != d.firstEvent.getY
