@@ -116,7 +116,8 @@ object AudioCueViewImpl {
       val timelineModel: TimelineModel =
         TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
           sampleRate = TimeRef.SampleRate)
-      val transportView: TransportView[I]   = TransportView[I](transport, timelineModel, hasMillis = true, hasLoop = true)
+      val transportView: TransportView[I] =
+        TransportView[I](transport, timelineModel, hasMillis = true, hasLoop = true, hasCatch = true)
     }
 
     res.init(obj)
@@ -308,13 +309,13 @@ object AudioCueViewImpl {
     private def guiInit(): Unit = {
       val snapshot = value
 
-      var sonogramView  : AudioCueViewJ = null
-      var ggVisualBoost : Component     = null
+      var sonogramView  : AudioCueViewJ[I]  = null
+      var ggVisualBoost : Component         = null
 
       try {
         val artF      = new File(snapshot.artifact)
         _sonogram     = SonogramManager.acquire(artF)
-        sonogramView  = new AudioCueViewJ(_sonogram, timelineModel)
+        sonogramView  = new AudioCueViewJ[I](_sonogram, transportView)
         ggVisualBoost = GUI.boostRotaryR(init = 22f)(sonogramView.visualBoost = _)
       } catch {
         case NonFatal(ex) =>

@@ -14,22 +14,23 @@
 package de.sciss.mellite.impl.audiocue
 
 import java.awt.{Color, Graphics2D, RenderingHints}
-
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.audiowidgets.impl.TimelineCanvasImpl
 import de.sciss.desktop
+import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.sonogram.{Overview, PaintController}
 import de.sciss.proc.TimeRef
-import javax.swing.JComponent
+import de.sciss.proc.gui.TransportView
 
+import javax.swing.JComponent
 import scala.swing.Component
 import scala.swing.Swing._
 import scala.swing.event.MousePressed
 import scala.util.{Failure, Success}
 
-final class AudioCueViewJ(sonogram: Overview, val timelineModel: TimelineModel)
+final class AudioCueViewJ[T <: Txn[T]](sonogram: Overview, transportView: TransportView[T])
   extends TimelineCanvasImpl {
 
   import TimelineCanvasImpl._
@@ -43,6 +44,12 @@ final class AudioCueViewJ(sonogram: Overview, val timelineModel: TimelineModel)
   //    res.ticks = 50
   //    res
   //  }
+
+  transportView.catchOption = Some(transportCatch)
+
+  protected def transportRunning: Boolean = transportView.isPlayingEDT
+
+  def timelineModel: TimelineModel = transportView.timelineModel
 
   def visualBoost: Float = canvasComponent.sonogramBoost
   def visualBoost_=(value: Float): Unit = {

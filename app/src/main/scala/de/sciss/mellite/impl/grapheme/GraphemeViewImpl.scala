@@ -408,6 +408,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 //        if (it.hasNext) it.next().headOption else None
 //      }
 
+      protected def transportRunning: Boolean = false
+
       def findChildViews(r: BasicTool.Rectangular[Double]): Iterator[ObjGraphemeView[T]] = {
         val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong

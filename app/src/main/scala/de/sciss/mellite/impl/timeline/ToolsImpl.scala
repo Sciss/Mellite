@@ -75,6 +75,12 @@ final class ToolsImpl[T <: Txn[T]](canvas: TimelineTrackCanvas[T])
     override def mouseMoved   (e: MouseEvent): Unit = lastMouse = e
     override def mouseDragged (e: MouseEvent): Unit = lastMouse = e
     override def mouseExited  (e: MouseEvent): Unit = lastMouse = null
+
+    override def mousePressed(e: MouseEvent): Unit =
+      canvas.transportCatch.addCatchBypass(mia)
+
+    override def mouseReleased(e: MouseEvent): Unit =
+      canvas.transportCatch.removeCatchBypass(mia)
   }
 
   // constructor

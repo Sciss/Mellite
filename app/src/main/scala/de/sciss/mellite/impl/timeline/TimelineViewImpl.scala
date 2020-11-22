@@ -78,8 +78,6 @@ object TimelineViewImpl extends TimelineView.Companion {
     val timeline    = obj
     val timelineH   = tx.newHandle(obj)
 
-    // XXX TODO --- should use TransportView now!
-
     // ugly: the view dispose method cannot iterate over the proc objects
     // (other than through a GUI driven data structure). thus, it
     // only call pv.disposeGUI() and the procMap and scanMap must be
@@ -94,7 +92,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     val global = GlobalProcsView(timeline, selectionModel)
 
     import universe.cursor
-    val transportView = TransportView(transport, tlm, hasMillis = true, hasLoop = true)
+    val transportView = TransportView(transport, tlm, hasMillis = true, hasLoop = true, hasCatch = true)
     val tlView = new Impl[T](timelineH, viewMap, /* scanMap, */ tlm, selectionModel, global, transportView, tx)
 
     tlView.init(obj)
@@ -115,7 +113,6 @@ object TimelineViewImpl extends TimelineView.Companion {
       with AuxContextImpl[T] {
 
     impl =>
-
 
     type C = Component
 
@@ -566,6 +563,10 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     private final class View extends TimelineTrackCanvasImpl[T] {
       canvasImpl =>
+
+      transportView.catchOption = Some(transportCatch)
+
+      protected def transportRunning: Boolean = transportView.isPlayingEDT
 
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[T, ObjTimelineView[T]] = impl.selectionModel
