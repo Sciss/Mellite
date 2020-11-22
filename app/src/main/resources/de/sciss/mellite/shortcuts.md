@@ -63,12 +63,35 @@ We try to use the same keyboard mappings as IntelliJ IDEA, with some additional 
 
 (*) Currently not implemented
 
-## Timeline
+## Transport and temporal navigation
+
+|**Key**                  |**Action**                                        |
+|:------------------------|:-------------------------------------------------|
+|`SPACE`                  |Play and stop                                     |
+|`ENTER`                  |Go to beginning                                   |
+|`G`                      |Set-Cursor-Position dialog                        |
+|`OPEN_BRACKET`           |Cue rewind                                        |
+|`CLOSE_BRACKET`          |Cue fast forward                                  |
+|`SLASH`                  |Toggle loop                                       |
+|`V`                      |Toggle catch (scroll with transport)              |
+|`shift OPEN_BRACKET`     |Extend selection to the left                      |
+|`shift CLOSE_BRACKET`    |Extend selection to the right                     |
+|`LEFT`                   |Move position to selection start, clear selection |
+|`RIGHT`                  |Move position to selection end, clear selection   |
+|`alt LEFT`               |Move position to selection start                  |
+|`alt RIGHT`              |Move position to selection end                    |
+|`ctrl LEFT`              |Zoom out                                          |
+|`ctrl RIGHT`             |Zoom in                                           |
+|`ctrl alt LEFT`, `alt A` |Zoom all the way out                              |
+|`alt F`                  |Zoom to selection                                 |
+
+## Timeline editor
 
 |**Key**            |**Action**                         |
 |:------------------|:----------------------------------|
 |`1` to `9`         |Select timeline tools              |
 |`ESCAPE`           |Cancel ongoing tool edit           |
+|`M`                |Drop marker at current position    |
 
 ## Oscilloscope
 

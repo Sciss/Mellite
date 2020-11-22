@@ -568,6 +568,20 @@ object TimelineViewImpl extends TimelineView.Companion {
 
       protected def transportRunning: Boolean = transportView.isPlayingEDT
 
+      protected def transportPause (): Unit = {
+        val t = transport
+        t.scheduler.cursor.step { implicit tx => t.stop() }
+      }
+
+      protected def transportResume(): Unit = {
+        val t = transport
+        val p = timelineModel.position
+        t.scheduler.stepTag { implicit tx =>
+          t.seek(p)
+          t.play()
+        }
+      }
+
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[T, ObjTimelineView[T]] = impl.selectionModel
 

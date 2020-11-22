@@ -21,7 +21,7 @@ import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.sonogram.{Overview, PaintController}
-import de.sciss.proc.TimeRef
+import de.sciss.proc.{TimeRef, Transport}
 import de.sciss.proc.gui.TransportView
 
 import javax.swing.JComponent
@@ -48,6 +48,22 @@ final class AudioCueViewJ[T <: Txn[T]](sonogram: Overview, transportView: Transp
   transportView.catchOption = Some(transportCatch)
 
   protected def transportRunning: Boolean = transportView.isPlayingEDT
+
+  protected def transport: Transport[T] = transportView.transport
+
+  protected def transportPause (): Unit = {
+    val t = transport
+    t.scheduler.cursor.step { implicit tx => t.stop() }
+  }
+
+  protected def transportResume(): Unit = {
+    val t = transport
+    val p = timelineModel.position
+    t.scheduler.stepTag { implicit tx =>
+      t.seek(p)
+      t.play()
+    }
+  }
 
   def timelineModel: TimelineModel = transportView.timelineModel
 
