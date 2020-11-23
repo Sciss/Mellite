@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.2.1"
+lazy val commonVersion              = "3.2.2"
 lazy val mimaCommonVersion          = "3.2.1"
-lazy val appVersion                 = "3.2.1"
+lazy val appVersion                 = "3.2.2"
 lazy val mimaAppVersion             = "3.2.1"
 
 lazy val loggingEnabled             = true
@@ -31,7 +31,7 @@ lazy val deps = new {
     val processor           = "0.5.0"
     val raphaelIcons        = "1.0.7"
     val scalaCollider       = "2.4.0"
-    val scalaColliderUGens  = "1.20.0"
+    val scalaColliderUGens  = "1.20.1"
     val scalaOSC            = "1.2.3"
     val scalaSTM            = "0.11.0"
     val scalaSwing          = "3.0.0"
