@@ -43,7 +43,7 @@ trait Init {
 
   private[this] lazy val _cacheDir = {
     val appDirs = AppDirsFactory.getInstance
-    val path    = appDirs.getUserCacheDir("mellite", /* version */ null, /* author */ null)
+    val path    = appDirs.getUserCacheDir("mellite", /* version */ null, /* author */ "de.sciss")
     val res     = new File(path) // new File(new File(sys.props("user.home"), "mellite"), "cache")
     res.mkdirs()
     res
