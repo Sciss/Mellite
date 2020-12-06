@@ -17,7 +17,7 @@ import de.sciss.lucre.Txn
 import de.sciss.mellite.{MessageException, ObjView}
 import de.sciss.processor.Processor.Aborted
 import org.rogach.scallop.exceptions.{Help, ScallopException, ScallopResult, Version}
-import org.rogach.scallop.{ScallopConf, ScallopOption, ValueConverter, throwError}
+import org.rogach.scallop.ScallopConf
 
 import scala.collection.immutable.{IndexedSeq => Vec, Seq => ISeq}
 import scala.util.{Failure, Success, Try}
@@ -28,6 +28,8 @@ object ObjViewCmdLineParser {
 }
 class ObjViewCmdLineParser[C](private val f: ObjView.Factory, args: ISeq[String])
   extends ScallopConf(args) {
+
+  import org.rogach.scallop._
 
   printedName = f.prefix
 //  version(printedName)

@@ -4,10 +4,10 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.2.3-SNAPSHOT"
-lazy val mimaCommonVersion          = "3.2.1"
-lazy val appVersion                 = "3.2.3-SNAPSHOT"
-lazy val mimaAppVersion             = "3.2.1"
+lazy val commonVersion              = "3.3.0-SNAPSHOT"
+lazy val mimaCommonVersion          = "3.3.0"
+lazy val appVersion                 = "3.3.0-SNAPSHOT"
+lazy val mimaAppVersion             = "3.3.0"
 
 lazy val loggingEnabled             = true
 
@@ -19,26 +19,26 @@ lazy val authorEMail                = "contact@sciss.de"
 lazy val deps = new {
   val common = new {
     val asyncFile           = "0.1.2"
-    val audioFile           = "2.3.1"
-    val audioWidgets        = "2.3.0"
+    val audioFile           = "2.3.2"
+    val audioWidgets        = "2.3.1"
     val desktop             = "0.11.3"
     val equal               = "0.1.6"
     val fileUtil            = "1.1.5"
-    val lucre               = "4.2.0"
-    val lucreSwing          = "2.4.1"
+    val lucre               = "4.3.0-SNAPSHOT"
+    val lucreSwing          = "2.5.0-SNAPSHOT"
     val model               = "0.3.5"
     val numbers             = "0.2.1"
     val processor           = "0.5.0"
     val raphaelIcons        = "1.0.7"
-    val scalaCollider       = "2.4.0"
+    val scalaCollider       = "2.4.1"
     val scalaColliderUGens  = "1.20.1"
     val scalaOSC            = "1.2.3"
     val scalaSTM            = "0.11.0"
     val scalaSwing          = "3.0.0"
     val scallop             = "3.5.1"
     val serial              = "2.0.0"
-    val sonogram            = "2.2.0"
-    val soundProcesses      = "4.4.1"
+    val sonogram            = "2.2.1"
+    val soundProcesses      = "4.5.0-SNAPSHOT"
     val span                = "2.0.0"
     val swingPlus           = "0.5.0"
   }
@@ -91,7 +91,7 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.13.4",
-  crossScalaVersions := Seq("2.13.4", "2.12.12"),  // N.B. nsc API has breakage in minor versions (2.13.0 Dotterweide fails on 2.13.1)
+  crossScalaVersions := Seq("3.0.0-M2", "2.13.4", "2.12.12"),
   scalacOptions ++= {
     val xs = Seq(
       "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"

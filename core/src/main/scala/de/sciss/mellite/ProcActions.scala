@@ -15,6 +15,7 @@ package de.sciss.mellite
 
 import de.sciss.equal
 import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
+import de.sciss.lucre.expr
 import de.sciss.span.Span
 import de.sciss.proc.impl.MkSynthGraphSource
 import de.sciss.proc.{AudioCue, ObjKeys, Proc, Timeline}
@@ -88,7 +89,7 @@ object ProcActions {
             def any2stringadd: Any = ()
             audioCue match {
               case AudioCue.Obj.Shift(peer, amt) =>
-//                import expr.Ops._
+                import expr.Ops._
                 amt match {
                   case LongObj.Var(amtVr) =>
                     amtVr() = amtVr() + dStartCC
@@ -181,7 +182,7 @@ object ProcActions {
 
     attr.$[DoubleObj](ObjKeys.attrGain) match {
       case Some(DoubleObj.Var(vr)) =>
-//        import expr.Ops._
+        import expr.Ops._
         vr() = vr() * factor
       case other =>
         val newGain = other.fold(1.0)(_.value) * factor

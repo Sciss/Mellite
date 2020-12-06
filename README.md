@@ -3,7 +3,7 @@
 # Mellite
 
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sciss/Mellite?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/Sciss/Mellite.svg?branch=main)](https://travis-ci.org/Sciss/Mellite)
+[![Build Status](https://github.com/Sciss/Mellite/workflows/Scala%20CI/badge.svg?branch=main)](https://github.com/Sciss/Mellite/actions?query=workflow%3A%22Scala+CI%22)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/mellite-core_2.13)
 <a href="https://liberapay.com/sciss"><img alt="Donate using Liberapay" src="https://liberapay.com/assets/widgets/donate.svg" height="24"></a>
 

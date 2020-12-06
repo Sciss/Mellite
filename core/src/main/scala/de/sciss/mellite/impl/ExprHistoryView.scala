@@ -15,8 +15,7 @@ package de.sciss.mellite.impl
 
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-
-import de.sciss.lucre.confluent.Cursor
+import de.sciss.lucre.confluent.{Access, Cursor}
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Expr, Identified, Source, Txn, Workspace}
@@ -63,7 +62,7 @@ object ExprHistoryView {
 
   private final class Impl[A](val workspace: Workspace[T],
                               override val cursor: Cursor[T, D], exprH: Source[T, Expr[T, A]],
-                              pos0: S#Acc, time0: Long, value0: A, stop: Int)(implicit val universe: Universe[T])
+                              pos0: Access[T], time0: Long, value0: A, stop: Int)(implicit val universe: Universe[T])
     extends UniverseView[T] with ComponentHolder[Component] {
 
     type C = Component

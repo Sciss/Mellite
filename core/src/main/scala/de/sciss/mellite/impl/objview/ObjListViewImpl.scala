@@ -122,7 +122,7 @@ object ObjListViewImpl {
   private final val ggCheckBox = new CheckBox()
 
   trait BooleanExprLike[T <: Txn[T]] extends ExprLike[T, Boolean, BooleanObj] {
-    _: ObjListView[T] =>
+    self: ObjListView[T] =>
 
     def exprType: Expr.Type[Boolean, BooleanObj] = BooleanObj
 

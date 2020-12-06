@@ -220,7 +220,7 @@ object GUI {
   def step[T <: Txn[T]](title: String, message: String, window: Option[desktop.Window] = None,
                         timeout: Int = 1000)(fun: T => Unit)
                        (implicit cursor: Cursor[T]): Unit = {
-    val f = atomic(title = title, message = message, window = window, timeout = timeout)(fun)
+    val f = atomic[T, Unit](title = title, message = message, window = window, timeout = timeout)(fun)
     import ExecutionContext.Implicits.global
     f.onComplete {
       case Failure(ex)  => SoundProcesses.errorHandler(title, ex)
