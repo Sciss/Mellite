@@ -47,7 +47,7 @@ lazy val deps = new {
     val appDirs             = "1.2.0"
     val dejaVuFonts         = "2.37"    // directly included
     val dotterweide         = "0.4.0"
-    val fileCache           = "1.1.0"
+    val fileCache           = "1.1.1"
     val fingerTree          = "1.5.5"
     val freesound           = "2.2.0"
     val fscape              = "3.3.1"
@@ -56,23 +56,23 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.4"
     val linKernighan        = "0.1.3"
-    val lucrePi             = "1.2.0"
+    val lucrePi             = "1.3.0-SNAPSHOT"
     val negatum             = "1.2.0"
-    val patterns            = "1.2.0"
+    val patterns            = "1.3.0-SNAPSHOT"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
     val scalaColliderSwing  = "2.4.0"
-    val scissDSP            = "2.2.0"
+    val scissDSP            = "2.2.1"
     val slf4j               = "1.7.30"
     val submin              = "0.3.4"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.6.1"
-    val topology            = "1.1.3"
+    val topology            = "1.1.4"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "3.2.0"
+    val wolkenpumpe         = "3.3.0-SNAPSHOT"
   }
 }
 
@@ -102,6 +102,9 @@ lazy val commonSettings = Seq(
     val sq0 = if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil // JDK >8 breaks API; skip scala-doc
     val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) Seq("-Wconf:cat=deprecation&msg=Widening conversion:s") else Nil // nanny state defaults :-E
     sq1
+  },
+  sources in (Compile, doc) := {
+    if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is pretty much broken
   },
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   // resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577

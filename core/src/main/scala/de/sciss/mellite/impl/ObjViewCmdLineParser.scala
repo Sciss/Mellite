@@ -111,7 +111,7 @@ class ObjViewCmdLineParser[C](private val f: ObjView.Factory, args: ISeq[String]
                 descr   : String  = "",
                 required: Boolean = true)(implicit peer: ValueConverter[A]): ScallopOption[Vec[A]] =
     trailArg[String](name = name, descr = descr, required = required,
-      validate = collectVec(_).isDefined
+      validate = collectVec[A](_).isDefined
     ).map(collectVec[A](_).get) // XXX TODO d'oh this is ugly
 
   def parse(ok: => C): Try[C] = {
