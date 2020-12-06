@@ -78,7 +78,7 @@ trait CollectionToolLike[T <: Txn[T], A, Y, Child] extends BasicTool[T, A] with 
 
     override def mouseReleased(e: MouseEvent): Unit = processMouse(e)(handleRelease)
 
-    private def processMouse[A](e: MouseEvent)(fun: (MouseEvent, Long, Y, Option[C]) => A): A = {
+    private def processMouse[B](e: MouseEvent)(fun: (MouseEvent, Long, Y, Option[C]) => B): B = {
       val pos       = canvas.screenToFrame(e.getX).toLong
       val modelY    = canvas.screenToModelPos(e.getY)
       val childOpt  = canvas.findChildView(pos, modelY)

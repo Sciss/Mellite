@@ -18,7 +18,7 @@ import java.awt.event.MouseEvent
 
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Cursor, LongObj, Obj}
-import de.sciss.mellite.{GUI, GraphemeCanvas, ObjGraphemeView, Shapes}
+import de.sciss.mellite.{GUI, GraphemeCanvas, Shapes}
 import de.sciss.span.Span
 import de.sciss.proc.Grapheme
 import javax.swing.Icon

@@ -17,6 +17,7 @@ import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.expr
 import de.sciss.lucre.{Folder, Obj, StringObj}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.impl.component.CollectionViewImpl
@@ -171,7 +172,7 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
                   val suffix = incLast(appendText, n)
                   orig.attr.$[StringObj](ObjKeys.attrName).foreach { oldName =>
                     // val imp = ExprImplicits[T]
-//                    import expr.Ops._
+                    import expr.Ops._
                     val newName = oldName ++ suffix
                     cpy.attr.put(ObjKeys.attrName, StringObj.newVar(newName))
                   }

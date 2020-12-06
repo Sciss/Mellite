@@ -15,6 +15,7 @@ package de.sciss.mellite.edit
 
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.expr
 import de.sciss.lucre.{BooleanObj, Cursor, DoubleObj, DoubleVector, Expr, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
 import de.sciss.mellite.Log.log
 import de.sciss.mellite.Mellite.???!
@@ -298,7 +299,7 @@ object Edits {
                   // Crazy heuristics
                   val edit = audioCue match {
                     case AudioCue.Obj.Shift(peer, amt) =>
-
+                      import expr.Ops._
                       amt match {
                         case LongObj.Var(amtVr) =>
                           // XXX TODO why we use EditVar.Expr here and EditAttrMap elsewhere?
@@ -477,7 +478,7 @@ object Edits {
       span match {
         case SpanLikeObj.Var(vr) =>
           // s.transform(_ shift deltaC)
-//          import expr.Ops._
+          import expr.Ops._
           val newSpan = vr() shift deltaC
           val edit    = EditVar.Expr[T, SpanLike, SpanLikeObj](name, vr, newSpan)
           edits ::= edit
@@ -510,7 +511,8 @@ object Edits {
       // expression, and we could decide to construct a binary op instead!
       // XXX TODO -- do not hard code supported cases; should be handled by GraphemeObjView ?
 
-      def checkDouble(objT: DoubleObj[T]): Option[DoubleObj[T]] =
+      def checkDouble(objT: DoubleObj[T]): Option[DoubleObj[T]] = {
+        import expr.Ops._
         objT match {
           case DoubleObj.Var(vr) =>
             val newValue = vr() + deltaModelY
@@ -523,6 +525,7 @@ object Edits {
               DoubleObj.newVar[T](v)  // "upgrade" to var
             }
         }
+      }
 
       def checkDoubleVector(objT: DoubleVector[T]): Option[DoubleVector[T]] =
         objT match {
@@ -595,7 +598,7 @@ object Edits {
     if (hasDeltaTime || newValueOpt.isDefined) {
       val newTimeOpt: Option[LongObj[T]] = time match {
         case LongObj.Var(vr) =>
-//          import expr.Ops._
+          import expr.Ops._
           val newTime = vr() + deltaC
           edits ::= EditVar.Expr[T, Long, LongObj](name, vr, newTime)
           None
