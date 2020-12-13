@@ -9,5 +9,5 @@ test:
     # Execute your project's tests
     - sbt +clean +test; fi
   rules:
-    - if: $CI_COMMIT_MESSAGE =~ /-wip$/
+    - if: $CI_COMMIT_MESSAGE =~ /\<\>$/
       when: never
