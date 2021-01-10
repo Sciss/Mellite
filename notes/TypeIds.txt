@@ -21,7 +21,7 @@
 16  SynthGraph
 17  IncompleteProduct (SoundDesigner)
 18  UGenSource (SoundDesigner)
-19  ActionRaw (Function0[Unit])
+19  ActionRaw (Function0[Unit]) -- support removed
 20  Warp
 21  ParamSpec
 22 	Color

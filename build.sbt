@@ -50,14 +50,14 @@ lazy val deps = new {
     val fileCache           = "1.1.1"
     val fingerTree          = "1.5.5"
     val freesound           = "2.3.0"
-    val fscape              = "3.5.0"
+    val fscape              = "3.6.0-SNAPSHOT"
     val interpreterPane     = "1.11.0"
 //    val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.4"
     val linKernighan        = "0.1.3"
     val lucrePi             = "1.3.0"
-    val negatum             = "1.3.0"
+    val negatum             = "1.4.0-SNAPSHOT"
     val patterns            = "1.3.0"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
@@ -72,7 +72,7 @@ lazy val deps = new {
     val topology            = "1.1.4"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "3.3.0"
+    val wolkenpumpe         = "3.4.0-SNAPSHOT"
   }
 }
 
@@ -164,7 +164,7 @@ lazy val pkgUniversalSettings = Seq(
   scriptClasspath /* in Universal */ := Seq("*"),
   name                      in Linux     := appName,
   packageName               in Linux     := appNameL, // XXX TODO -- what was this for?
-  mainClass                 in Universal := appMainClass,
+  // mainClass                 in Universal := appMainClass,
   maintainer                in Universal := s"$authorName <$authorEMail>",
   target      in Universal := (target in Compile).value,
 )
@@ -173,7 +173,7 @@ lazy val pkgUniversalSettings = Seq(
 lazy val pkgDebianSettings = Seq(
   packageName               in Debian := appNameL,  // this is the installed package (e.g. in `apt remove <name>`).
   packageSummary            in Debian := appDescription,
-  mainClass                 in Debian := appMainClass,
+  // mainClass                 in Debian := appMainClass,
   maintainer                in Debian := s"$authorName <$authorEMail>",
   packageDescription        in Debian :=
     """Mellite is a computer music environment,
@@ -356,7 +356,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %  "treetable-java"                 % deps.app.treeTable,             // widget
       "de.sciss"          %% "treetable-scala"                % deps.app.treeTable,             // widget
 //      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
-//      "de.sciss"          %  "weblaf-ui"                      % deps.app.webLaF,                // look-and-feel
+//      "de.sciss"          % mainClassmainClassaf-ui"                      % deps.app.webLaF,                // look-and-feel
       "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
       "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
       "de.sciss"          %% "wolkenpumpe-basic"              % deps.app.wolkenpumpe,           // live improvisation

@@ -45,11 +45,16 @@ object OpenWorkspace extends  {
 
     accelerator = Some(menu1 + Key.O)
 
+    private var lastDir = Option.empty[File]
+
     def apply(): Unit = {
-      val dlg = FileDialog.folder(title = fullTitle)
+      val dlg = FileDialog.folder(init = lastDir, title = fullTitle)
       // import TypeCheckedTripleEquals._
       // dlg.setFilter { f => f.isDirectory && f.ext.toLowerCase === Workspace.ext}
-      dlg.show(None).foreach(perform)
+      dlg.show(None).foreach { f =>
+        lastDir = f.parentOption
+        perform(f)
+      }
     }
   }
 
