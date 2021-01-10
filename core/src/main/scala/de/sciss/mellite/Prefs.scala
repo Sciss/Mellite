@@ -28,11 +28,11 @@ import scala.util.{Success, Try}
 
 object Prefs {
 
-  implicit object OSCProtocolType extends Type[osc.Transport.Net] {
-    def toString(value: osc.Transport.Net): String = value.name
-    def valueOf(string: String): Option[osc.Transport.Net] =
+  implicit object OSCProtocolType extends Type[osc.Transport] {
+    def toString(value: osc.Transport): String = value.name
+    def valueOf(string: String): Option[osc.Transport] =
       Try(osc.Transport(string)) match {
-        case Success(net: osc.Transport.Net) => Some(net)
+        case Success(net: osc.Transport) => Some(net)
         case _ => None
       }
   }
@@ -190,16 +190,16 @@ object Prefs {
 
   // ---- sensor ----
 
-  final val defaultSensorProtocol: osc.Transport.Net = osc.UDP
+  final val defaultSensorProtocol: osc.Transport = osc.UDP
   def defaultSensorPort   : Int     = SensorSystem.defaultPort // 0x4D6C  // "Ml"
   def defaultSensorCommand: String  = SensorSystem.defaultCommand
   final val defaultSensorChannels   = 0
 
-  def sensorProtocol : Entry[osc.Transport.Net] = userPrefs("sensor-protocol")
-  def sensorPort     : Entry[Int              ] = userPrefs("sensor-port"    )
-  def sensorCommand  : Entry[String           ] = userPrefs("sensor-command" )
-  def sensorChannels : Entry[Int              ] = userPrefs("sensor-channels")
-  def sensorAutoStart: Entry[Boolean          ] = userPrefs("sensor-auto-start")
+  def sensorProtocol : Entry[osc.Transport] = userPrefs("sensor-protocol")
+  def sensorPort     : Entry[Int          ] = userPrefs("sensor-port"    )
+  def sensorCommand  : Entry[String       ] = userPrefs("sensor-command" )
+  def sensorChannels : Entry[Int          ] = userPrefs("sensor-channels")
+  def sensorAutoStart: Entry[Boolean      ] = userPrefs("sensor-auto-start")
 
   // ---- audio mixer ----
 
