@@ -24,8 +24,8 @@ lazy val deps = new {
     val desktop             = "0.11.3"
     val equal               = "0.1.6"
     val fileUtil            = "1.1.5"
-    val lucre               = "4.3.0"
-    val lucreSwing          = "2.5.0"
+    val lucre               = "4.4.0-SNAPSHOT"
+    val lucreSwing          = "2.6.0-SNAPSHOT"
     val model               = "0.3.5"
     val numbers             = "0.2.1"
     val processor           = "0.5.0"
@@ -58,7 +58,7 @@ lazy val deps = new {
     val linKernighan        = "0.1.3"
     val lucrePi             = "1.3.0"
     val negatum             = "1.4.0-SNAPSHOT"
-    val patterns            = "1.3.0"
+    val patterns            = "1.4.0-SNAPSHOT"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
@@ -92,11 +92,12 @@ lazy val commonSettings = Seq(
   licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.13.4",
   crossScalaVersions := Seq(/* "3.0.0-M2", */ "2.13.4", "2.12.12"),
+  scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
   scalacOptions ++= {
-    val xs = Seq(
-      "-deprecation", "-unchecked", "-feature", "-encoding", "utf8", "-Xlint:-stars-align,_", "-Xsource:2.13"
-    )
-    if (loggingEnabled || isSnapshot.value) xs else xs ++ Seq("-Xelide-below", "INFO")
+    if (isDotty.value) Nil else Seq("-Xlint:-stars-align,_", "-Xsource:2.13")
+  },
+  scalacOptions ++= {
+    if (loggingEnabled || isSnapshot.value) Nil else Seq("-Xelide-below", "INFO")
   },
   scalacOptions /* in (Compile, compile) */ ++= {
     val sq0 = if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil // JDK >8 breaks API; skip scala-doc
