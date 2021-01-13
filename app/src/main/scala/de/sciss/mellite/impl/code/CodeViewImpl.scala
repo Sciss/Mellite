@@ -2,7 +2,7 @@
  *  CodeViewImpl2.scala
  *  (Mellite)
  *
- *  Copyright (c) 2012-2020 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2012-2021 Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Affero General Public License v3+
  *
@@ -461,7 +461,7 @@ object CodeViewImpl extends CodeView.Companion {
         while ({
           ln < nl && doc.text(doc.intervalOf(ln)).startsWith(language.lineCommentPrefix)
         }) ln += 1
-        if (ln > 0) {
+        if (ln > 0 && ln < nl) {
           val off = doc.startOffsetOf(ln)
           if (off > 0) editorPanel.currentEditor.terminal.offset = off
         }

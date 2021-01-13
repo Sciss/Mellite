@@ -10,7 +10,7 @@
 ## statement
 
 Mellite is a computer music environment, implemented as a graphical front end
-for [SoundProcesses](http://git.iem.at/sciss/SoundProcesses). It is (C)opyright 2012&ndash;2020 by Hanns Holger Rutz.
+for [SoundProcesses](http://git.iem.at/sciss/SoundProcesses). It is (C)opyright 2012&ndash;2021 by Hanns Holger Rutz.
 All rights reserved. Mellite is released under the
 [GNU Affero General Public License](https://git.iem.at/sciss/Mellite/raw/main/LICENSE) v3+ and comes with
 absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
