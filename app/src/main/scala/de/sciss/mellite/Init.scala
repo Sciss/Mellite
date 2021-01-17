@@ -14,7 +14,6 @@
 package de.sciss.mellite
 
 import java.io.File
-
 import de.sciss.filecache.Limit
 import de.sciss.freesound.lucre.{Retrieval, RetrievalObjView}
 import de.sciss.fscape.lucre.{Cache => FScCache}
@@ -28,7 +27,7 @@ import de.sciss.mellite.impl.grapheme.{GraphemeToolImpl, GraphemeToolsImpl, Grap
 import de.sciss.mellite.impl.markdown.{MarkdownEditorViewImpl, MarkdownFrameImpl, MarkdownObjView, MarkdownRenderViewImpl}
 import de.sciss.mellite.impl.objview
 import de.sciss.mellite.impl.patterns.{PatternObjView, StreamObjView}
-import de.sciss.mellite.impl.proc.{ProcOutputObjView, ProcObjView}
+import de.sciss.mellite.impl.proc.{ProcObjView, ProcOutputObjView}
 import de.sciss.mellite.impl.timeline.{GlobalProcsViewImpl, TimelineToolImpl, TimelineToolsImpl, TimelineViewImpl}
 import de.sciss.mellite.impl.widget.WidgetObjView
 import de.sciss.negatum.Negatum
@@ -36,6 +35,7 @@ import de.sciss.negatum.gui.NegatumObjView
 import de.sciss.nuages.Wolkenpumpe
 import de.sciss.proc.Pattern
 import de.sciss.proc.{GenView, SoundProcesses, Widget}
+import de.sciss.synth.ThirdPartyUGens
 import net.harawata.appdirs.AppDirsFactory
 
 trait Init {
@@ -135,6 +135,8 @@ trait Init {
 
     _initObjViews
     _initCompanionFactories
+
+    ThirdPartyUGens.init()
 
     // ---- FScape ----
 

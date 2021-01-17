@@ -39,7 +39,7 @@ lazy val deps = new {
     val serial              = "2.0.0"
     val sonogram            = "2.2.1"
     val soundProcesses      = "4.7.0-SNAPSHOT"
-    val span                = "2.0.0"
+    val span                = "2.0.1"
     val swingPlus           = "0.5.0"
   }
   val app = new {
