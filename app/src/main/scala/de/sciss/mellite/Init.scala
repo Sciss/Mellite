@@ -19,7 +19,7 @@ import de.sciss.freesound.lucre.{Retrieval, RetrievalObjView}
 import de.sciss.fscape.lucre.{Cache => FScCache}
 import de.sciss.proc.FScape
 import de.sciss.lucre
-import de.sciss.lucre.swing.LucreSwing
+import de.sciss.lucre.swing.{FScapeViews, LucreSwing}
 import de.sciss.mellite.impl.code.{CodeFrameImpl, CodeViewImpl}
 import de.sciss.mellite.impl.document.{FolderEditorViewImpl, FolderViewImpl}
 import de.sciss.mellite.impl.fscape.{FScapeObjView, FScapeOutputObjView}
@@ -123,6 +123,7 @@ trait Init {
 
   def initTypes(): Unit = {
     FScape        .init()
+    FScapeViews   .init()
     LucreSwing    .init()
     Negatum       .init()
     Pattern       .init()

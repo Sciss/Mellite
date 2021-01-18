@@ -13,22 +13,27 @@
 
 package de.sciss.lucre.swing.graph
 
-import java.awt.datatransfer.Transferable
-
-import de.sciss.lucre.expr.Context
+import de.sciss.lucre.expr.ExElem.{ProductReader, RefMapIn}
 import de.sciss.lucre.expr.graph.impl.MappedIExpr
 import de.sciss.lucre.expr.graph.{Ex, Obj, Timed, Timeline => _Timeline}
+import de.sciss.lucre.expr.{Context, ExElem}
 import de.sciss.lucre.{Adjunct, IExpr, ITargets, Txn}
 import de.sciss.mellite
 import de.sciss.mellite.{DragAndDrop, TimelineView => _TimelineView}
+import de.sciss.proc.TimeRef
 import de.sciss.serial.DataInput
 import de.sciss.span.Span.SpanOrVoid
 import de.sciss.span.{Span, SpanLike}
-import de.sciss.proc.TimeRef
+
+import java.awt.datatransfer.Transferable
 
 object TimelineView {
-  private lazy val _init: Unit =
+  private lazy val _init: Unit = {
     Adjunct.addFactory(Drop)
+    ExElem.addProductReaderSq(Seq(
+      SampleRate, Position, Selection, Bounds, Visible, SelectedObjects, Timeline
+    ))
+  }
 
   def init(): Unit = _init
 
@@ -96,6 +101,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): Double = t.sampleRate
   }
 
+  object SampleRate extends ProductReader[SampleRate] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): SampleRate = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new SampleRate(_in)
+    }
+  }
   final case class SampleRate(in: Ex[TimelineView]) extends Ex[Double] {
     type Repr[T <: Txn[T]] = IExpr[T, Double]
 
@@ -113,6 +125,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): Long = t.position
   }
 
+  object Position extends ProductReader[Position] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Position = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new Position(_in)
+    }
+  }
   final case class Position(in: Ex[TimelineView]) extends Ex[Long] {
     type Repr[T <: Txn[T]] = IExpr[T, Long]
 
@@ -130,6 +149,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): SpanOrVoid = t.selection
   }
 
+  object Selection extends ProductReader[Selection] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Selection = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new Selection(_in)
+    }
+  }
   final case class Selection(in: Ex[TimelineView]) extends Ex[SpanOrVoid] {
     type Repr[T <: Txn[T]] = IExpr[T, SpanOrVoid]
 
@@ -147,6 +173,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): SpanLike = t.bounds
   }
 
+  object Bounds extends ProductReader[Bounds] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Bounds = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new Bounds(_in)
+    }
+  }
   final case class Bounds(in: Ex[TimelineView]) extends Ex[SpanLike] {
     type Repr[T <: Txn[T]] = IExpr[T, SpanLike]
 
@@ -164,6 +197,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): SpanOrVoid = t.visible
   }
 
+  object Visible extends ProductReader[Visible] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Visible = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new Visible(_in)
+    }
+  }
   final case class Visible(in: Ex[TimelineView]) extends Ex[SpanOrVoid] {
     type Repr[T <: Txn[T]] = IExpr[T, SpanOrVoid]
 
@@ -181,6 +221,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): Seq[Timed[Obj]] = t.selectedObjects
   }
 
+  object SelectedObjects extends ProductReader[SelectedObjects] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): SelectedObjects = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new SelectedObjects(_in)
+    }
+  }
   final case class SelectedObjects(in: Ex[TimelineView]) extends Ex[Seq[Timed[Obj]]] {
     type Repr[T <: Txn[T]] = IExpr[T, Seq[Timed[Obj]]]
 
@@ -198,6 +245,13 @@ object TimelineView {
     protected def mapValue(t: TimelineView)(implicit tx: T): _Timeline = t.timeline
   }
 
+  object Timeline extends ProductReader[Timeline] {
+    override def read(in: RefMapIn, key: String, arity: Int, adj: Int): Timeline = {
+      require (arity == 1 && adj == 0)
+      val _in = in.readEx[TimelineView]()
+      new Timeline(_in)
+    }
+  }
   final case class Timeline(in: Ex[TimelineView]) extends Ex[_Timeline] {
     type Repr[T <: Txn[T]] = IExpr[T, _Timeline]
 
