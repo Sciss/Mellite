@@ -23,7 +23,7 @@ import de.sciss.lucre.{Copy, Folder, Txn}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, Application, FolderEditorView, FolderFrame, FolderView, Mellite, WindowPlacement}
 import de.sciss.proc
-import de.sciss.proc.{Durable, Universe}
+import de.sciss.proc.{Durable, Universe, Workspace}
 
 import java.io.{DataOutputStream, FileOutputStream}
 import scala.concurrent.Future
@@ -100,12 +100,18 @@ object FolderFrameImpl {
           import de.sciss.file._
           type Tmp  = Durable.Txn
           val tmpDb = InMemoryDB(f.base)
-          val tmp   = Durable(tmpDb)
-          val blob  = Txn.copy[T, Tmp, Array[Byte]] { (txIn0: T, txOut0: Tmp) => {
+          implicit val tmp: Durable = Durable(tmpDb)
+          val ws = Workspace.Ephemeral[Tmp, Durable](tmp)  // initialized access
+
+          val blob  = Txn.copy[T, Tmp, Array[Byte]] { (txIn0: T, txOut: Tmp) => {
             implicit val txIn: T = txIn0
-            val context = Copy[T, Tmp]()(txIn0, txOut0)
-            val in      = view.peer.root()
-            context(in)
+            val context = Copy[T, Tmp]()(txIn, txOut)
+            val fIn     = view.peer.root()
+            val fOut    = ws.root(txOut)
+            fIn.iterator.foreach { in =>
+              val out = context(in)
+              fOut.addLast(out)(txOut)
+            }
             context.finish()
             tmpDb.toByteArray
           }} (view.cursor, tmp)
