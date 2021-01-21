@@ -11,6 +11,6 @@ object DocTest extends App {
   val cfg   = BerkeleyDB.Config()
   cfg.allowCreate = true
   val ds    = BerkeleyDB.factory(file)
-  val doc   = Workspace.Confluent.empty(file, ds)
+  val doc   = Workspace.Confluent.empty(file.toURI, ds)
   println("Ok.")
 }

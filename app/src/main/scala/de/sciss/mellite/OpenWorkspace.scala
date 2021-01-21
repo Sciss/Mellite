@@ -14,7 +14,6 @@
 package de.sciss.mellite
 
 import java.util.concurrent.TimeUnit
-
 import de.sciss.desktop
 import de.sciss.desktop.{Desktop, FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
@@ -25,8 +24,9 @@ import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.{AnyTxn, Executor, Txn}
 import de.sciss.proc
 import de.sciss.proc.{Confluent, Durable, Universe, Workspace}
-import javax.swing.SwingUtilities
 
+import java.net.URI
+import javax.swing.SwingUtilities
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}
 import scala.swing.event.Key
@@ -37,7 +37,7 @@ object OpenWorkspace extends  {
   // N.B.: we want `OpenWorkspace` to be usable in headless mode,
   // therefore all UI things have to be lazily initialized
   private lazy val _recent = RecentFiles(Application.userPrefs("recent-docs")) { folder =>
-    perform(folder)
+    perform(folder.toURI)
   }
 
   object action extends Action("Open...") {
@@ -53,7 +53,7 @@ object OpenWorkspace extends  {
       // dlg.setFilter { f => f.isDirectory && f.ext.toLowerCase === Workspace.ext}
       dlg.show(None).foreach { f =>
         lastDir = f.parentOption
-        perform(f)
+        perform(f.toURI)
       }
     }
   }
@@ -66,7 +66,7 @@ object OpenWorkspace extends  {
       case Desktop.OpenFiles(_, files) =>
         // println(s"TODO: $open; EDT? ${java.awt.EventQueue.isDispatchThread}")
         files.foreach { f =>
-          OpenWorkspace.perform(f)
+          OpenWorkspace.perform(f.toURI)
         }
     }
 
@@ -107,7 +107,7 @@ object OpenWorkspace extends  {
 ////      case dcv: DocumentCursorsView => dcv.window
 ////    } .foreach(_.front())
 
-  def perform(folder: File): Future[Universe[_]] = {
+  def perform(folder: URI): Future[Universe[_]] = {
 //    val fOpt = Some(folder)
     dh.documents.find(_.workspace.folder.contains(folder)).fold(open(folder, headless = false)) { u =>
 //      val u1 = u.asInstanceOf[Universe[T] forSome { type T <: Txn[T] }]
@@ -116,16 +116,16 @@ object OpenWorkspace extends  {
     }
   }
 
-  def open(folder: File, headless: Boolean): Future[Universe[_]] = {
+  def open(folder: URI, headless: Boolean): Future[Universe[_]] = {
     import Executor.executionContext
     val config          = BerkeleyDB.Config()
     config.allowCreate  = false
 //    config.readOnly     = true
     config.lockTimeout  = Duration(Prefs.dbLockTimeout.getOrElse(Prefs.defaultDbLockTimeout), TimeUnit.MILLISECONDS)
-    val ds              = BerkeleyDB.factory(folder, config)
+    val ds              = BerkeleyDB.factory(new File(folder), config)
     val fut: Future[Universe[_]] = Future {  // IntelliJ highlight bug
       val w = blocking {
-        Workspace.read(folder, ds).cast[AnyTxn]
+        Workspace.read(folder, ds, meta = Mellite.meta).cast[AnyTxn]
       }
       Mellite.mkUniverse[w.Tx](w)
     }
@@ -151,7 +151,7 @@ object OpenWorkspace extends  {
 //          case Success(eph: Workspace.Durable)   => openGUI(eph)
 //          case Success(eph: Workspace.InMemory)  => openGUI(eph)
           case Failure(e) =>
-            val message = s"Unable to create new workspace ${folder.path}\n\n${Util.formatException(e)}"
+            val message = s"Unable to create new workspace ${folder.getPath}\n\n${Util.formatException(e)}"
 
             if (headless) {
               Console.err.println(message)

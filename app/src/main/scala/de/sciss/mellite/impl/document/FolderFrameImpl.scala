@@ -17,7 +17,6 @@ import de.sciss.desktop.{FileDialog, Menu, OptionPane, UndoManager}
 import de.sciss.equal.Implicits._
 import de.sciss.file.File
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.store.InMemoryDB
 import de.sciss.lucre.synth.{Txn => STxn}
 import de.sciss.lucre.{Copy, Folder, Txn}
 import de.sciss.mellite.impl.WindowImpl
@@ -97,15 +96,11 @@ object FolderFrameImpl {
 
       override def apply(): Unit =
         selectFile().foreach { f =>
-          import de.sciss.file._
-          type Tmp  = Durable.Txn
-          val tmpDb = InMemoryDB(f.base)
-          implicit val tmp: Durable = Durable(tmpDb)
-          val ws = Workspace.Ephemeral[Tmp, Durable](tmp)  // initialized access
-
-          val blob  = Txn.copy[T, Tmp, Array[Byte]] { (txIn0: T, txOut: Tmp) => {
+          type Out  = Durable.Txn
+          val ws    = Workspace.Blob.empty(meta = Mellite.meta)
+          val blob  = Txn.copy[T, Out, Array[Byte]] { (txIn0: T, txOut: Out) => {
             implicit val txIn: T = txIn0
-            val context = Copy[T, Tmp]()(txIn, txOut)
+            val context = Copy[T, Out]()(txIn, txOut)
             val fIn     = view.peer.root()
             val fOut    = ws.root(txOut)
             fIn.iterator.foreach { in =>
@@ -113,17 +108,13 @@ object FolderFrameImpl {
               fOut.addLast(out)(txOut)
             }
             context.finish()
-            tmpDb.toByteArray
-          }} (view.cursor, tmp)
+            ws.toByteArray(txOut)
+          }} (view.cursor, ws.cursor)
 
           // println(s"blob size = ${blob.length}")
           val fOut = new FileOutputStream(f)
           try {
             val dOut = new DataOutputStream(fOut)
-            val BIN_COOKIE = 0x6d6c6c742d777300L  // "mllt-ws\u0000"
-            dOut.writeLong(BIN_COOKIE)
-            val mVer = Mellite.version
-            dOut.writeUTF(mVer)
             dOut.write(blob)
             dOut.flush()
           } finally {
@@ -140,7 +131,7 @@ object FolderFrameImpl {
         mf.get("file.bounce") match {
           case Some(it: Menu.ItemLike[_]) =>
             it.bind(window, actionExportBinaryWorkspace)
-          case None =>
+          case _ =>
         }
       }
     }

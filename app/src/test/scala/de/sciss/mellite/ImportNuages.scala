@@ -28,7 +28,7 @@ object ImportNuages extends App {
     val dsc     = BerkeleyDB.Config()
     dsc.allowCreate = true
     val ds      = BerkeleyDB.factory(fOut, dsc)
-    val wOut    = Workspace.Durable.empty(fOut, ds)
+    val wOut    = Workspace.Durable.empty(fOut.toURI, ds)
     try {
       Txn.copy[In, Out, Unit] { (txIn: In, tx: Out) =>
         val cpy   = Copy[In, Out]()(txIn, tx)

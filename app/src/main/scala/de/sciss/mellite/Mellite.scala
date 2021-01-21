@@ -20,6 +20,7 @@ import de.sciss.log.Level
 import de.sciss.lucre.synth.{RT, Server, Txn}
 import de.sciss.lucre.{Cursor, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
+import de.sciss.proc.Workspace.MetaData
 import de.sciss.{osc, proc}
 import de.sciss.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, SoundProcesses, Universe}
 import de.sciss.synth.Client
@@ -39,6 +40,13 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   private[this] var _config: Config = Config()
 
   def config: Config = _config
+
+  private lazy val _meta: MetaData = Map(
+    (proc.Workspace.KeyMelliteVersion       , version),   // IntelliJ doesn't like BuildInfo, so need reflection here
+    (proc.Workspace.KeySoundProcessesVersion, de.sciss.proc.BuildInfo.version),
+  )
+
+  def meta: MetaData = _meta
 
 //  ServerImpl.USE_COMPRESSION = false
 
@@ -215,8 +223,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   def startSensorSystem(): Unit = {
     val config = SensorSystem.Config()
     config.osc = Prefs.defaultSensorProtocol match {
-      case osc.UDP => osc.UDP.Config()
-      case osc.TCP => osc.TCP.Config()
+      case osc.UDP  => osc.UDP.Config()
+      case osc.TCP  => osc.TCP.Config()
+      case other    => throw new UnsupportedOperationException(other.toString)
     }
     config.osc.localPort  = Prefs.sensorPort   .getOrElse(Prefs.defaultSensorPort   )
     config.command        = Prefs.sensorCommand.getOrElse(Prefs.defaultSensorCommand)
@@ -340,11 +349,12 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     // ---- workspaces and auto-run ----
 
     config.open.foreach { fIn0 =>
-      val fIn = fIn0.absolute
+      val fIn   = fIn0.absolute
+      val uriIn = fIn.toURI
       val fut = if (headless) {
-        OpenWorkspace.open(fIn, headless = true)
+        OpenWorkspace.open(uriIn, headless = true)
       } else {
-        OpenWorkspace.perform(fIn)
+        OpenWorkspace.perform(uriIn)
       }
       if (config.autoRun.nonEmpty) fut.foreach { ws =>
         Mellite.withUniverse(ws)(autoRun(_))
