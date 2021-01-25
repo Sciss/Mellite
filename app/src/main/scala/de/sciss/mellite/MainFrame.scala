@@ -13,9 +13,6 @@
 
 package de.sciss.mellite
 
-import java.awt.{Color, Font}
-import java.net.URI
-
 import de.sciss.audiowidgets.PeakMeter
 import de.sciss.desktop.impl.WindowImpl
 import de.sciss.desktop.{Desktop, Menu, Preferences, Window, WindowHandler}
@@ -24,19 +21,22 @@ import de.sciss.log.Level
 import de.sciss.lucre.TxnLike
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.synth.{Bus, Group, RT, Server, Synth}
-import de.sciss.mellite.Mellite.{executionContext}
 import de.sciss.mellite.Log.{log, timeline => logTimeline}
+import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.ApiBrowser
 import de.sciss.mellite.impl.component.NoMenuBarActions
 import de.sciss.numbers.Implicits._
+import de.sciss.proc.AuralSystem.{Running, Stopped}
+import de.sciss.proc.SensorSystem
 import de.sciss.proc.SoundProcesses.{logAural, logTransport}
 import de.sciss.proc.gui.{AudioBusMeter, Oscilloscope}
-import de.sciss.proc.{AuralSystem, SensorSystem}
 import de.sciss.synth.swing.ServerStatusPanel
 import de.sciss.synth.{SynthGraph, addAfter, addBefore, addToHead, addToTail}
 import de.sciss.{desktop, osc}
-import javax.imageio.ImageIO
 
+import java.awt.{Color, Font}
+import java.net.URI
+import javax.imageio.ImageIO
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.{Ref, atomic}
 import scala.swing.Swing._
@@ -507,7 +507,7 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       sensorSystem.stop()
     }
 
-  private def sensorSystemStarted(s: SensorSystem.Server)(implicit tx: TxnLike): Unit = {
+  private def sensorSystemStarted(/*s: SensorSystem.Server*/)(implicit tx: TxnLike): Unit = {
     log.debug("MainFrame: SensorSystem started")
     deferTx {
       actionStartStopSensors.title = "Stop"
@@ -547,12 +547,13 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
   }
 
   step { implicit tx =>
-    auralSystem.addClient(new AuralSystem.Client {
-      def auralStarted(s: Server)(implicit tx: RT): Unit = me.auralSystemStarted(s)
-      def auralStopped()         (implicit tx: RT): Unit = me.auralSystemStopped()
-    })
+    auralSystem.react { implicit tx => {
+      case Running(s) => me.auralSystemStarted(s)
+      case Stopped    => me.auralSystemStopped()
+      case _          =>
+    }}
     sensorSystem.addClient(new SensorSystem.Client {
-      def sensorsStarted(s: SensorSystem.Server)(implicit tx: TxnLike): Unit = me.sensorSystemStarted(s)
+      def sensorsStarted(s: SensorSystem.Server)(implicit tx: TxnLike): Unit = me.sensorSystemStarted()
       def sensorsStopped()                      (implicit tx: TxnLike): Unit = me.sensorSystemStopped()
 
       def sensorsUpdate(values: Vec[Float])     (implicit tx: TxnLike): Unit =
