@@ -15,7 +15,6 @@ package de.sciss.mellite.impl.objview
 
 import java.text.NumberFormat
 import java.util.Locale
-
 import de.sciss.audiowidgets.RotaryKnob
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
@@ -29,12 +28,12 @@ import de.sciss.lucre.{Disposable, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
 import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.nuages.{CosineWarp, DbFaderWarp, ExponentialWarp, FaderWarp, IntWarp, LinearWarp, ParamSpec, ParametricWarp, SineWarp, Warp}
+import de.sciss.proc.{ParamSpec, Universe, Warp}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
-import de.sciss.proc.Universe
 import de.sciss.proc.Implicits._
 import de.sciss.{desktop, numbers}
+
 import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop
 
@@ -72,8 +71,8 @@ object ParamSpecObjView extends ObjListView.Factory {
     private[this] val mHi       = new SpinnerNumberModel(1.0, -1.0e6, 1.0e6, 0.1)
     private[this] val mCurve    = new SpinnerNumberModel(0.0, -1.0e6, 1.0e6, 0.1)
     private[this] val sqWarp    = Seq[Warp](
-      LinearWarp, ExponentialWarp, ParametricWarp(0),
-      CosineWarp, SineWarp, FaderWarp, DbFaderWarp, IntWarp
+      Warp.Linear, Warp.Exponential, Warp.Parametric(0d),
+      Warp.Cosine, Warp.Sine, Warp.Fader, Warp.DbFader, Warp.Int
     )
     private[this] val nWarp     = sqWarp.map { w =>
       val n = w.getClass.getSimpleName //.toLowerCase
@@ -95,9 +94,9 @@ object ParamSpecObjView extends ObjListView.Factory {
 
     def spec: ParamSpec = {
       val warpI = mWarp.selectedItem.fold(-1)(nWarp.indexOf)
-      val warp0 = if (warpI < 0) LinearWarp else sqWarp(warpI)
+      val warp0 = if (warpI < 0) Warp.Linear else sqWarp(warpI)
       val warp  = warp0 match {
-        case p @ ParametricWarp(_) => p.copy(curvature = mCurve.getNumber.doubleValue())
+        case p @ Warp.Parametric(_) => p.copy(curvature = mCurve.getNumber.doubleValue())
         case other => other
       }
       ParamSpec(
@@ -110,7 +109,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       mLo.setValue(value.lo)
       mHi.setValue(value.hi)
       val warpNorm = value.warp match {
-        case p @ ParametricWarp(c) =>
+        case p @ Warp.Parametric(c) =>
           mCurve.setValue(c)
           p.copy(curvature = 0.0)
         case other => other
@@ -152,7 +151,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       val out     = spc.map(in)
       ggRotOut.value = out.linLin(spc.lo, spc.hi, 0, 1000).toInt
       val inS     = fmtDec.format(in)
-      val fmt     = if (spc.warp == IntWarp) fmtInt else fmtDec
+      val fmt     = if (spc.warp == Warp.Int) fmtInt else fmtDec
       val outS    = fmt.format(out)
       ggIn  .text = inS
       ggOut .text = outS
@@ -167,7 +166,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       val in      = spc.inverseMap(out)
       ggRotIn.value = (in * 1000).toInt
       val inS     = fmtDec.format(in)
-      val fmt     = if (spc.warp == IntWarp) fmtInt else fmtDec
+      val fmt     = if (spc.warp == Warp.Int) fmtInt else fmtDec
       val outS    = fmt.format(out)
       ggIn  .text = inS
       ggOut .text = outS
@@ -218,7 +217,7 @@ object ParamSpecObjView extends ObjListView.Factory {
 
     private def updateExampleAndCurve(fire: Boolean = true): Unit = {
       val spc = updateExample(fire = false)
-      ggCurve.enabled = editable && spc.warp.isInstanceOf[ParametricWarp]
+      ggCurve.enabled = editable && spc.warp.isInstanceOf[Warp.Parametric]
       if (fire) dispatch(())
     }
 
@@ -272,23 +271,23 @@ object ParamSpecObjView extends ObjListView.Factory {
   }
 
   private val warpNameMap: Map[String, Warp] = Map(
-    "lin"         -> LinearWarp,
-    "linear"      -> LinearWarp,
-    "exp"         -> ExponentialWarp,
-    "exponential" -> ExponentialWarp,
-    "cos"         -> CosineWarp,
-    "cosine"      -> CosineWarp,
-    "sin"         -> SineWarp,
-    "sine"        -> SineWarp,
-    "fader"       -> FaderWarp,
-    "dbfader"     -> DbFaderWarp,
-    "int"         -> IntWarp
+    "lin"         -> Warp.Linear,
+    "linear"      -> Warp.Linear,
+    "exp"         -> Warp.Exponential,
+    "exponential" -> Warp.Exponential,
+    "cos"         -> Warp.Cosine,
+    "cosine"      -> Warp.Cosine,
+    "sin"         -> Warp.Sine,
+    "sine"        -> Warp.Sine,
+    "fader"       -> Warp.Fader,
+    "dbfader"     -> Warp.DbFader,
+    "int"         -> Warp.Int
   )
 
   private implicit val ReadWarp: scallop.ValueConverter[Warp] = scallop.singleArgConverter { s =>
     warpNameMap.getOrElse(s.toLowerCase(Locale.US), {
       val p = s.toDouble
-      ParametricWarp(p)
+      Warp.Parametric(p)
     })
   }
 
@@ -300,7 +299,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       val high    : Opt[Double] = trailArg(descr = "Highest parameter value", default = Some(default.value.hi))
       val warp    : Opt[Warp  ] = trailArg(required = false,
         descr = s"Parameter warp or curve (default: ${"lin" /* default.value.warp */})",
-        default = Some(LinearWarp))
+        default = Some(Warp.Linear))
       val const   : Opt[Boolean] = opt    (descr = "Make constant instead of variable")
     }
 

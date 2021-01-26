@@ -53,6 +53,8 @@ current 16-bit max
  2002 Timeline.Bridge            (SoundProcesses)
  2003 ArtifactLocation.Bridge    (SoundProcesses)
  2004 AudioCue.Type              (SoundProcesses)
+ 2005 Grapheme.Bridge            (SoundProcesses)
+ 2006 Proc.Bridge                (SoundProcesses)
 
  3000 DropTarget.Selector.String (LucreSwing)
  3001 DropTarget.Selector.File   (LucreSwing)
