@@ -1,0 +1,105 @@
+# Ex/Control
+
+## Lucre
+
+- [X] Act, Act.Nop, Act.OrElse, Act.Link,
+- [X] Artifact
+- [X] ArtifactLocation
+- [X] Attr, Attr.Set, Attr.Update, Attr.WithDefault
+- [X] BinaryOp: Plus, Minus, Times, Div, ModJ, Mod, Eq, Neq, Lt, Gt, Leq, Geq, Min, Max, And, Or, Xor, IDiv, Lcm, Gcd, RoundTo, RoundUpTo, Trunc, Atan2, Hypot, Hypotx, Pow, LeftShift, RightShift, UnsignedRightShift, Difsqr, Sumsqr, Sqrsum, Sqrdif, Absdif, Clip2, Excess, Fold2, Wrap2, OptionContains, OptionGetOrElse, OptionOrElse, SeqAppended, SeqApply, SeqApplyOption, SeqConcat, SeqContains, SeqDiff, SeqDrop, SeqDropRight, SeqEndsWith, SeqGrouped, SeqIndexOf, SeqIndexOfSlice, SeqIntersect, SeqIsDefinedAt, SeqLastIndexOf, SeqLastIndexOfSlice, SeqPrepended, SeqSameElements, SeqSplitAt, SeqTake, SeqTakeRight, SeqZip, StringConcat, StringContains, StringStartsWith, StringEndsWith, StringIndexOf, StringLastIndexOf, StringTake, StringDrop, SpanLikeClip, SpanLikeShift, SpanLikeContains, SpanLikeOverlaps, SpanLikeTouches, SpanLikeUnion, SpanLikeIntersect, FileReplaceExt, FileReplaceName, FileChild, 
+- [X] (CaseDef:) Var, Var.Update, Var.Set, Quote
+- [X] Changed
+- [X] Debug.PrintNow,
+- [X] Edit, Edit.Apply, Edit.Named, 
+- [X] Ex.MapExOption, Ex.MapExSeq, Ex.MapActOption, Ex.MapSeqAct, Ex.FlatMapExOption, Ex.FlatMapExSeq, Ex.FlatMapExSeqOption
+- [X] Folder: Ex[Folder], Folder.Size, Folder.IsEmpty, Folder.NonEmpty, Folder.Children, Folder.Append, Folder.Prepend, Folder.Drop, Folder.DropRight, Folder.Clear
+- [X] If: IfThen, IfThenAct, Else, ElseAct, ElseIfThen, ElseIfThenAct, 
+- [X] It
+- [X] Latch
+- [X] LoadBang
+- [X] Obj.Empty, Obj.Attr, Obj.Attr.Update, Obj.Attr.Set, Obj.As, Obj.Make, Obj.Copy,
+- [X] OptionGet
+- [X] PrintLn
+- [X] QuaternaryOp, QuaternaryOp.SeqMkString, QuaternaryOp.SeqPatch
+- [X] QuinaryOp, QuinaryOp.LinLin, QuinaryOp.LinExp, QuinaryOp.ExpLin, QuinaryOp.ExpExp,
+- [X] Span, Span.From, Span.Until, Span.All, Span.Void
+- [X] StringFormat
+- [X] TBinaryOp, TBinaryOp.And
+- [X] TernOp, TernOp.Clip, TernOp.Fold, TernOp.Wrap, TernOp.StringSlice, TernOp.StringSplit, TernOp.SeqIndexOf, TernOp.SeqIndexOfSlice, TernOp.SeqLastIndexOf, TernOp.SeqLastIndexOfSlice, TernOp.SeqPadTo, TernOp.SeqSlice, TernOp.SeqSliding, TernOp.SeqStartsWith, TernOp.SeqUpdated,
+- [X] TimeStamp, TimeStamp.Update, TimeStamp.Format
+- [X] ToTrig
+- [X] Trig
+- [X] TTBinaryOp, TTBinaryOp.And, TTBinaryOp.Or, TTBinaryOp.Xor
+- [X] UnOp, UnOp.Neg, UnOp.Not, UnOp.BitNot, UnOp.Abs, UnOp.ToDouble, UnOp.ToInt, UnOp.ToLong, UnOp.Ceil, UnOp.Floor, UnOp.Frac, UnOp.Signum, UnOp.Squared, UnOp.Cubed, UnOp.Sqrt, UnOp.Exp, UnOp.Reciprocal, UnOp.Midicps, UnOp.Cpsmidi, UnOp.Midiratio, UnOp.Ratiomidi, UnOp.Dbamp, UnOp.Ampdb, UnOp.Octcps, UnOp.Cpsoct, UnOp.Log, UnOp.Log2, UnOp.Log10, UnOp.Sin, UnOp.Cos, UnOp.Tan, UnOp.Asin, UnOp.Acos, UnOp.Atan, UnOp.Sinh, UnOp.Cosh, UnOp.Tanh, UnOp.ToStr, UnOp.OptionSome, UnOp.OptionIsEmpty, UnOp.OptionIsDefined, UnOp.OptionToList, UnOp.OptionGet, UnOp.Tuple2_1, UnOp.Tuple2_2, UnOp.Tuple2Swap, UnOp.SeqDistinct, UnOp.SeqHeadOption, UnOp.SeqIndices, UnOp.SeqIsEmpty, UnOp.SeqLastOption, UnOp.SeqMaxOption, UnOp.SeqMinOption, UnOp.SeqNonEmpty, UnOp.SeqPermutations, UnOp.SeqProduct, UnOp.SeqReverse, UnOp.SeqSize, UnOp.SeqSorted, UnOp.SeqSum, UnOp.SeqZipWithIndex, UnOp.SeqIntegrate, UnOp.SeqDifferentiate, UnOp.StringIsEmpty, UnOp.StringNonEmpty, UnOp.StringLength, UnOp.StringToIntOption, UnOp.StringToDoubleOption, UnOp.StringToBooleanOption, UnOp.SpanLikeIsEmpty, UnOp.SpanLikeNonEmpty, UnOp.SpanLikeClosedOption, UnOp.SpanLikeStartOption, UnOp.SpanLikeStopOption, UnOp.SpanLikeLengthOption, UnOp.SpanStart, UnOp.SpanStop, UnOp.SpanLength, UnOp.FileParentOption, UnOp.FilePath, UnOp.FileName, UnOp.FileBase, UnOp.FileExtL
+- [X] ExTuple2
+- [X] scala.Tuple2 (intern)
+- [X] ExSeq, ExSeq.Count, ExSeq.DropWhile, ExSeq.Exists, ExSeq.Filter, ExSeq.FilterNot, ExSeq.Forall, ExSeq.Find, ExSeq.FindLast, ExSeq.IndexWhere, ExSeq.Select, ExSeq.SelectFirst, ExSeq.TakeWhile
+
+
+## SP
+
+- [X] AudioCue, AudioCue.Empty, AudioCue.Artifact, AudioCue.Spec, AudioCue.Offset, AudioCue.Gain, AudioCue.FileOffset,
+- [X] AudioFileSpec, AudioFileSpec.NumChannels, AudioFileSpec.NumFrames, AudioFileSpec.SampleRate, AudioFileSpec.Read, AudioFileSpec.Empty,
+- [X] AuralSystem
+- [X] Bounce,
+- [X] Calendar, Calendar.Trunc, Calendar.Set, Calendar.Add, Calendar.Get, Calendar.Schedule
+- [X] Color.Predef
+- [X] Delay, Delay.Cancel
+- [X] FadeSpec, FadeSpec.NumFrames, FadeSpec.Curve, FadeSpec.Floor, 
+- [X] File.TmpDir, File.MkDir, File.Delete, File.List,
+- [X] Grapheme, Grapheme.Add, Grapheme.AddAll, Grapheme.Remove, Grapheme.RemoveAt, Grapheme.Clear, Grapheme.FirstEvent, Grapheme.LastEvent, Grapheme.EventBefore, Grapheme.EventAfter, Grapheme.ValueAt,
+- [X] OscNode.Dump, OscNode.Codec, OscUdpNode, OscUdpNode.Received, OscUdpNode.Sender, OscUdpNode.Message, OscUdpNode.Send
+- [X] OscMessage, OscMessage.Name, OscMessage.Args, OscMessage.Select
+- [X] Proc, Proc.Tape, Proc.Output,
+- [X] Runner, Runner.Messages, Runner.Progress, Runner.State, Runner.Stop, Runner.RunWith, Runner.Run,
+- [X] SocketAddress, SocketAddress.LocalHost, SocketAddress.Host, SocketAddress.Port
+- [X] Sys.Process, Sys.Process.Directory, Sys.Process.Output, Sys.Exit, Sys.Property, Sys.Env
+- [X] ThisRunner, ThisRunner.Stop, ThisRunner.Done, ThisRunner.Fail, ThisRunner.Progress, ThisRunner.Attr, ThisRunner.Attr.Update, ThisRunner.Attr.Set
+- [X] Timed.Span, Timed.Value
+- [X] Timeline, Timeline.Add, Timeline.AddAll, Timeline.Remove, Timeline.Split, Timeline.Split.Left, Timeline.Split.Right
+- [X] de.sciss.proc.Color.Predefined, de.sciss.proc.Color.User,
+
+## Patterns
+
+- [X] Pattern, Pattern.Reset, Pattern.NextOption, Pattern.Next, Pattern.Take, Pattern.ToStream, 
+- [X] Stream, Stream.Reset, Stream.NextOption, Stream.Next, Stream.Take, 
+
+---------------
+# Widget
+
+## LucreSwing
+
+- [X] Bang,
+- [X] Border.Empty,
+- [X] BorderPanel, BorderPanel.HGap, BorderPanel.VGap,
+- [X] Button, Button.Clicked,
+- [X] CheckBox, CheckBox.Selected,
+- [X] ComboBox, ComboBox.Index, ComboBox.ValueOption,
+- [X] Component.Enabled, Component.Focusable, Component.Tooltip,
+- [X] DoubleField, DoubleField.Value, DoubleField.Min, DoubleField.Max, DoubleField.Step, DoubleField.Decimals, DoubleField.Unit, DoubleField.Prototype, DoubleField.Editable,
+- [X] Empty,
+- [X] FlowPanel, FlowPanel.HGap, FlowPanel.VGap, FlowPanel.Align,
+- [X] GridPanel, GridPanel.Rows, GridPanel.Columns, GridPanel.Compact, GridPanel.CompactRows, GridPanel.CompactColumns, GridPanel.HGap, GridPanel.VGap,
+- [X] IntField, IntField.Value, IntField.Min, IntField.Max, IntField.Step, IntField.Unit, IntField.Prototype, IntField.Editable,
+- [X] Label, Label.HAlign, Label.VAlign,
+- [X] Panel.Border,
+- [X] ProgressBar, ProgressBar.Value, ProgressBar.Min, ProgressBar.Max, ProgressBar.Label, ProgressBar.LabelPainted,
+- [X] Separator,
+- [X] Slider, Slider.Value, Slider.Min, Slider.Max,
+- [X] TextField, TextField.Text, TextField.Columns, TextField.Editable,
+
+// JVM only
+- [X] DropTarget, DropTarget.Value, DropTarget.Received, DropTarget.Select,
+- [X] PathField, PathField.Value, PathField.Title, PathField.Mode,
+
+## FScape
+
+- [X] AudioFileIn, AudioFileIn.Value, AudioFileIn.Title, AudioFileIn.PathFieldVisible, AudioFileIn.FormatVisible,
+- [X] AudioFileOut, AudioFileOut.Value, AudioFileOut.FileType, AudioFileOut.SampleFormat, AudioFileOut.SampleRate, AudioFileOut.Title, AudioFileOut.PathFieldVisible, AudioFileOut.FileTypeVisible, AudioFileOut.SampleFormatVisible, AudioFileOut.SampleRateVisible,
+- [X] ImageFileIn, ImageFileIn.Value, ImageFileIn.Title, ImageFileIn.PathFieldVisible, ImageFileIn.FormatVisible,
+- [X] ImageFileOut, ImageFileOut.Value, ImageFileOut.FileType, ImageFileOut.SampleFormat, ImageFileOut.Quality, ImageFileOut.Title, ImageFileOut.PathFieldVisible, ImageFileOut.FileTypeVisible, ImageFileOut.SampleFormatVisible, ImageFileOut.QualityVisible,
+
+## Mellite
+
+- [X] TimelineView.SampleRate, TimelineView.Position, TimelineView.Selection, TimelineView.Bounds, TimelineView.Visible, TimelineView.SelectedObjects, TimelineView.Timeline,
+

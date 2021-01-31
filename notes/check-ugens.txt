@@ -1,0 +1,82 @@
+- [X] Control !!
+- [X] ControlProxy !
+- [X] TrigControl !!
+- [X] TrigControlProxy !
+- [X] AudioControl !!
+- [X] AudioControlProxy !
+- [X] Env		!
+- [X] / Env.Segment	!
+- [X] / Env.Curve.Apply	!
+- [X] / Env.Curve.Const	!
+- [X] / de.sciss.synth.Curve (-> objects step, linear etc.) !
+- [X] IEnv		!
+- [X] KlangSpec	!
+- [X] KlangSpec.Seq	!
+- [X] GESeq !
+- [X] UGenInSeq !
+
+- [X] LocalBuf
+- [X] MaxLocalBufs
+- [X] ChannelProxy
+- [X] MulAdd
+- [X] Sum3
+- [X] Sum4
+- [X] Nyquist
+- [X] Flatten
+- [X] Mix
+- [X] SplayAz
+- [X] LinLin
+- [X] Silent
+- [X] PhysicalOut
+- [X] RepeatChannels
+- [X] ChannelRangeProxy
+- [X] ChannelIndices
+- [X] NumChannels
+- [X] Pad
+
+- [X] BinaryOpUGen !! --- because Op
+- [X] UnaryOpUGen !! --- because Op
+- [X] Mix.Mono !
+- [X] Zip ! --- because GE*
+- [X] Reduce ! --- because BinaryOp.UGen
+- [X] WrapOut ! --- becauses Double
+- [X] PhysicalIn ! --- because Seq[Int]
+- [X] BufferGen.Command
+
+- [ ] JPverb
+
+SP:
+
+- [X] Action
+- [X] Reaction
+- [X] Attribute
+- [X] Buffer
+- [X] BufferGen
+- [X] BufferOut
+- [X] FadeIn, FadeOut, FadeInOut
+- [X] MkValue,
+- [X] Param
+- [X] ScanIn, ScanOut, ScanInFix
+- [X] StopSelf
+- [X] DiskIn, DiskIn.Done, VDiskIn, VDiskIn.Done, DiskOut, BufChannels, BufRateScale, BufSampleRate
+- [X] Time, Offset, Duration
+
+Wolkenpumpe:
+
+- [X] Param ! -- NOW IN SP!
+
+Negatum:
+
+- [X] EnvGen_ADSR !
+- [X] EnvGen_ASR !
+- [X] EnvGen_CutOff !
+- [X] EnvGen_DADSR !
+- [X] EnvGen_Linen !
+- [X] EnvGen_Perc !
+- [X] EnvGen_Sine !
+- [X] EnvGen_Triangle !
+- [X] NegatumIn !
+- [X] NegatumOut !
+- [X] Protect !
+
+
