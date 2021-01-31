@@ -171,7 +171,7 @@ object AudioCueViewImpl {
       }
 
       override protected def defaultChannels(implicit tx: T): Vec[Range.Inclusive] =
-        Vector(0 to (value.spec.numChannels - 1))
+        Vector(Range.inclusive(0, value.spec.numChannels - 1))
 
       override protected def performGUI(settings: ActionBounce.QuerySettings[T], uri: URI, span: Span): Unit = {
         // println(s"performGUI($settings, $uri, $span)")
@@ -194,16 +194,17 @@ object AudioCueViewImpl {
 
         // println(s"needsFSc $needsFSc: needsResample $needsResample || needsCrop $needsCrop || selectChan $selectChan || normalized $normalized || !needsPost !$needsPost")
 
-        val (bncOutF: File, bncOut: URI, bncSpec: AudioFileSpec) = if (needsFSc && needsPost) {
+        val (bncOutF: File, bncOut: URI, bncSpecOpt: Option[AudioFileSpec]) = if (needsFSc && needsPost) {
           val fTmp = File.createTempFile("bounce", ".w64")
           fTmp.deleteOnExit()
-          (fTmp, fTmp.toURI, AudioFileSpec(AudioFileType.Wave64, numChannels = numChannels, sampleRate = SR))
+          val spec = AudioFileSpec(AudioFileType.Wave64, numChannels = numChannels, sampleRate = SR)
+          (fTmp, fTmp.toURI, Some(spec))
         } else {
-          val FileFormat.PCM(tpe, smp) = settings.fileFormat
-          (fileOut, uri, AudioFileSpec(tpe, smp, numChannels = numChannels, sampleRate = SR))
+          // val FileFormat.PCM(tpe, smp) = settings.fileFormat
+          (fileOut, uri, None) //  AudioFileSpec(tpe, smp, numChannels = numChannels, sampleRate = SR))
         }
 
-        def gBnc = fscape.Graph {
+        def gBnc(bncSpec: AudioFileSpec) = fscape.Graph {
           import fscape.Ops._
           import fscape.graph._
 
@@ -251,7 +252,7 @@ object AudioCueViewImpl {
         }
 
         val p = if (needsFSc) {
-          val pre = new Processor[File] with FutureProxy[File]
+          val pre: Processor[File] = new Processor[File] with FutureProxy[File]
             with ModelImpl[Processor.Update[File, Processor[File]]] { self =>
 
             private[this] var _progress = 0.0
@@ -271,7 +272,7 @@ object AudioCueViewImpl {
 
             def progress: Double = _progress
 
-            ctrl.run(gBnc)
+            ctrl.run(gBnc(bncSpecOpt.get))
           }
 
           if (!needsPost) pre else post(pre)
