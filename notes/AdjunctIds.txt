@@ -8,6 +8,7 @@ current 16-bit max
     4 BooleanTop
     5 BooleanSeqTop
     6 LongTop
+    7 LongSeqTop
    10 StringTop
   255 Widen.idIdentity
   256 Widen .intSeqSeq

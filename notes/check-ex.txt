@@ -7,12 +7,12 @@
 - [X] ArtifactLocation
 - [X] Attr, Attr.Set, Attr.Update, Attr.WithDefault
 - [X] BinaryOp: Plus, Minus, Times, Div, ModJ, Mod, Eq, Neq, Lt, Gt, Leq, Geq, Min, Max, And, Or, Xor, IDiv, Lcm, Gcd, RoundTo, RoundUpTo, Trunc, Atan2, Hypot, Hypotx, Pow, LeftShift, RightShift, UnsignedRightShift, Difsqr, Sumsqr, Sqrsum, Sqrdif, Absdif, Clip2, Excess, Fold2, Wrap2, OptionContains, OptionGetOrElse, OptionOrElse, SeqAppended, SeqApply, SeqApplyOption, SeqConcat, SeqContains, SeqDiff, SeqDrop, SeqDropRight, SeqEndsWith, SeqGrouped, SeqIndexOf, SeqIndexOfSlice, SeqIntersect, SeqIsDefinedAt, SeqLastIndexOf, SeqLastIndexOfSlice, SeqPrepended, SeqSameElements, SeqSplitAt, SeqTake, SeqTakeRight, SeqZip, StringConcat, StringContains, StringStartsWith, StringEndsWith, StringIndexOf, StringLastIndexOf, StringTake, StringDrop, SpanLikeClip, SpanLikeShift, SpanLikeContains, SpanLikeOverlaps, SpanLikeTouches, SpanLikeUnion, SpanLikeIntersect, FileReplaceExt, FileReplaceName, FileChild, 
-- [X] (CaseDef:) Var, Var.Update, Var.Set, Quote
+- [X] (CaseDef:) Var, Var.Update, Var.Set, Var.Inc, Var.Dec, Quote
 - [X] Changed
 - [X] Debug.PrintNow,
 - [X] Edit, Edit.Apply, Edit.Named, 
 - [X] Ex.MapExOption, Ex.MapExSeq, Ex.MapActOption, Ex.MapSeqAct, Ex.FlatMapExOption, Ex.FlatMapExSeq, Ex.FlatMapExSeqOption
-- [X] Folder: Ex[Folder], Folder.Size, Folder.IsEmpty, Folder.NonEmpty, Folder.Children, Folder.Append, Folder.Prepend, Folder.Drop, Folder.DropRight, Folder.Clear
+- [X] Folder: Ex[Folder], Folder.Size, Folder.IsEmpty, Folder.NonEmpty, Folder.Children, Folder.Append, Folder.Prepend, Folder.Drop, Folder.DropRight, Folder.Clear, Folder.Remove,
 - [X] If: IfThen, IfThenAct, Else, ElseAct, ElseIfThen, ElseIfThenAct, 
 - [X] It
 - [X] Latch
@@ -22,6 +22,7 @@
 - [X] PrintLn
 - [X] QuaternaryOp, QuaternaryOp.SeqMkString, QuaternaryOp.SeqPatch
 - [X] QuinaryOp, QuinaryOp.LinLin, QuinaryOp.LinExp, QuinaryOp.ExpLin, QuinaryOp.ExpExp,
+- [X] Random, Random.Coin, Random.Until, Random.Range,
 - [X] Span, Span.From, Span.Until, Span.All, Span.Void
 - [X] StringFormat
 - [X] TBinaryOp, TBinaryOp.And
