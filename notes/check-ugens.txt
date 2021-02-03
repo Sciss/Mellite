@@ -1,3 +1,5 @@
+## ScalaCollider (manual)
+
 - [X] Control !!
 - [X] ControlProxy !
 - [X] TrigControl !!
@@ -45,7 +47,11 @@
 
 - [ ] JPverb
 
-SP:
+## ScalaCollider-If
+
+- [X] IfThen, IfLagThen, ElseIfThen, ElseUnit, ElseGE, ThisBranch,
+
+## SP
 
 - [X] Action
 - [X] Reaction
@@ -61,11 +67,11 @@ SP:
 - [X] DiskIn, DiskIn.Done, VDiskIn, VDiskIn.Done, DiskOut, BufChannels, BufRateScale, BufSampleRate
 - [X] Time, Offset, Duration
 
-Wolkenpumpe:
+## Wolkenpumpe
 
 - [X] Param ! -- NOW IN SP!
 
-Negatum:
+## Negatum
 
 - [X] EnvGen_ADSR !
 - [X] EnvGen_ASR !
