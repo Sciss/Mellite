@@ -41,11 +41,11 @@
 - [X] Mix.Mono !
 - [X] Zip ! --- because GE*
 - [X] Reduce ! --- because BinaryOp.UGen
-- [X] WrapOut ! --- becauses Double
+- [X] WrapOut ! --- because Double
 - [X] PhysicalIn ! --- because Seq[Int]
 - [X] BufferGen.Command
 
-- [ ] JPverb
+- [X] JPverb
 
 ## ScalaCollider-If
 

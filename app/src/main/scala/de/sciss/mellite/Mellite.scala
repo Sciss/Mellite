@@ -273,7 +273,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
 
     // SoundProcesses.log      .level = Level.Warn
-    // SoundProcesses.logAural     .level = Level.All
+    SoundProcesses.logAural     .level = Level.All
     // SoundProcesses.logTransport .level = Level.All
 
     DocumentViewHandler.init()

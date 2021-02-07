@@ -160,6 +160,7 @@
 - [X] MkIntVector,
 - [X] MkLong,
 - [X] OnComplete,
+- [X] PhysicalIn, PhysicalOut,
 
 ## JVM only
 

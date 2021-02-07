@@ -24,8 +24,8 @@ lazy val deps = new {
     val desktop             = "0.11.3"
     val equal               = "0.1.6"
     val fileUtil            = "1.1.5"
-    val lucre               = "4.4.1-SNAPSHOT"
-    val lucreSwing          = "2.6.0"
+    val lucre               = "4.4.1"
+    val lucreSwing          = "2.6.1"
     val model               = "0.3.5"
     val numbers             = "0.2.1"
     val processor           = "0.5.0"
@@ -39,7 +39,7 @@ lazy val deps = new {
     val scallop             = "4.0.2"
     val serial              = "2.0.1"
     val sonogram            = "2.2.1"
-    val soundProcesses      = "4.7.0-SNAPSHOT"
+    val soundProcesses      = "4.7.0"
     val span                = "2.0.2"
     val swingPlus           = "0.5.0"
   }
@@ -57,9 +57,9 @@ lazy val deps = new {
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.4"
     val linKernighan        = "0.1.3"
-    val lucrePi             = "1.4.0-SNAPSHOT"
+    val lucrePi             = "1.4.0"
     val negatum             = "1.4.0-SNAPSHOT"
-    val patterns            = "1.4.0-SNAPSHOT"
+    val patterns            = "1.4.0"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
@@ -73,7 +73,7 @@ lazy val deps = new {
     val topology            = "1.1.4"
     // val webLaF              = "2.2.1"
     val webLaF              = "1.2.11"
-    val wolkenpumpe         = "3.4.0-SNAPSHOT"
+    val wolkenpumpe         = "3.4.0"
   }
 }
 
@@ -92,7 +92,7 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.13.4",
-  crossScalaVersions := Seq(/* "3.0.0-M2", */ "2.13.4", "2.12.12"),
+  crossScalaVersions := Seq(/* "3.0.0-M3", */ "2.13.4", "2.12.13"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
   scalacOptions ++= {
     if (isDotty.value) Nil else Seq("-Xlint:-stars-align,_", "-Xsource:2.13")
