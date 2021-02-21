@@ -14,12 +14,13 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Cursor, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Control, Universe}
+
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -39,7 +40,7 @@ object ControlObjView extends NoArgsListObjViewFactory {
   def makeObj[T <: Txn[T]](config: Config[T])(implicit tx: T): List[Obj[T]] = {
     val name  = config
     val obj   = Control[T]()
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

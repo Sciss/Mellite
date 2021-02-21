@@ -13,17 +13,17 @@
 
 package de.sciss.mellite.impl.tool
 
-import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
-
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.BasicTool.{DragCancel, DragEnd, DragRubber}
 import de.sciss.mellite.BasicTools
 import de.sciss.span.Span
+
+import java.awt.event.{KeyEvent, KeyListener, MouseEvent}
 import javax.swing.event.MouseInputAdapter
 
 // XXX TODO --- DRY with DraggingTool
 trait RubberBandTool[T <: Txn[T], A, Y, Child] {
-  _: CollectionToolLike[T, A, Y, Child] =>
+  this: CollectionToolLike[T, A, Y, Child] =>
 
   final protected def mkRubber(e: MouseEvent, modelY: Y, pos: Long): Unit =
     new Rubber(e, firstModelY = modelY, firstPos = pos)

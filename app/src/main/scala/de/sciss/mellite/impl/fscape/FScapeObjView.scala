@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.fscape
 
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
-import de.sciss.proc.FScape
 import de.sciss.fscape.lucre.UGenGraphBuilder.MissingIn
 import de.sciss.fscape.stream.Cancelled
 import de.sciss.icons.raphael
@@ -29,10 +28,10 @@ import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjListViewImpl,
 import de.sciss.mellite.{AttrMapView, CodeFrame, CodeView, FScapeOutputsView, GUI, ObjListView, ObjView, Shapes, SplitPaneView}
 import de.sciss.proc.FScape.GraphObj
 import de.sciss.proc.Implicits._
-import de.sciss.proc.{Code, Universe}
+import de.sciss.proc.{Code, FScape, Universe}
+
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.concurrent.Promise
 import scala.concurrent.stm.Ref
 import scala.swing.event.Key
@@ -58,8 +57,8 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     new Impl(tx.newHandle(obj)).initAttrs(obj)
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
-    val obj  = FScape[T]()
-    if (!name.isEmpty) obj.name = name
+    val obj = FScape[T]()
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

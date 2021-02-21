@@ -14,13 +14,13 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{Folder, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.mellite.FolderFrame
+import de.sciss.lucre.{Folder, Obj, Source, Txn => LTxn}
+import de.sciss.mellite.{FolderFrame, ObjListView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.Universe
+
 import javax.swing.{Icon, UIManager}
 
 object FolderObjView extends NoArgsListObjViewFactory {
@@ -36,7 +36,7 @@ object FolderObjView extends NoArgsListObjViewFactory {
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
     val obj  = Folder[T]()
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

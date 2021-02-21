@@ -22,8 +22,8 @@ import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.{ObjListView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Confluent, Universe}
-import javax.swing.Icon
 
+import javax.swing.Icon
 import scala.swing.TextField
 import scala.util.Success
 
@@ -71,7 +71,7 @@ object StringObjView extends ObjListView.Factory {
     import config._
     val obj0  = StringObj.newConst[T](value)
     val obj   = if (const) obj0 else StringObj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

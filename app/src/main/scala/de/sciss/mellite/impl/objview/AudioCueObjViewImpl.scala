@@ -13,28 +13,26 @@
 
 package de.sciss.mellite.impl.objview
 
-import java.awt.datatransfer.Transferable
-import java.net.URI
-
 import de.sciss.asyncfile.Ops.URIOps
+import de.sciss.audiofile.AudioFile
 import de.sciss.desktop
 import de.sciss.desktop.FileDialog
 import de.sciss.equal.Implicits._
 import de.sciss.file._
-import de.sciss.lucre.{Artifact, ArtifactLocation, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.swing.graph.AudioFileIn
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Artifact, ArtifactLocation, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.AudioCueObjView.{Config, LocationConfig, MakeResult, SingleConfig}
-import de.sciss.mellite.AudioCueFrame
-import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.ObjViewImpl.{GainArg, TimeArg}
-import de.sciss.processor.Processor.Aborted
-import de.sciss.audiofile.AudioFile
+import de.sciss.mellite.{ActionArtifactLocation, AudioCueFrame, AudioCueObjView, DragAndDrop, GUI, MessageException, ObjListView, ObjView, ObjectActions, WorkspaceCache}
 import de.sciss.proc.{AudioCue, TimeRef, Universe}
+import de.sciss.processor.Processor.Aborted
 
+import java.awt.datatransfer.Transferable
+import java.net.URI
 import scala.annotation.tailrec
 import scala.swing.{Component, Label}
 import scala.util.{Failure, Success, Try}
@@ -47,7 +45,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
                                  (implicit universe: Universe[T]): Unit = {
     import universe.{cursor, workspace}
     val dirIn = cursor.step { implicit tx =>
-      dirCache.get()
+      dirCache.get[T]()
     }
     val dlg = FileDialog.open(init = dirIn, title = "Add Audio Files")
     dlg.setFilter(f => Try(AudioFile.identify(f).isDefined).getOrElse(false))
@@ -58,7 +56,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       val dirOutOpt = f0.parentOption
       dirOutOpt.foreach { dirOut =>
         cursor.step { implicit tx =>
-          dirCache.set(dirOut)
+          dirCache.set[T](dirOut)
         }
       }
       val fs = dlg.files

@@ -13,30 +13,27 @@
 
 package de.sciss.mellite.impl.timeline
 
-import java.awt.datatransfer.Transferable
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{Menu, OptionPane, UndoManager}
 import de.sciss.icons.raphael
-import de.sciss.lucre.{IntObj, Obj, Source, SpanLikeObj, TxnLike, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.Txn.{peer => txPeer}
-import de.sciss.mellite.AttrMapFrame
+import de.sciss.lucre.{IntObj, Obj, Source, SpanLikeObj, TxnLike, Txn => LTxn}
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.objview.IntObjView
 import de.sciss.mellite.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.{DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel}
+import de.sciss.mellite.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel}
+import de.sciss.proc.{Proc, Timeline, Universe}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
-import de.sciss.proc.{Proc, Timeline, Universe}
 import de.sciss.{desktop, equal}
+
+import java.awt.datatransfer.Transferable
 import javax.swing.TransferHandler.TransferSupport
 import javax.swing.table.{AbstractTableModel, TableColumnModel}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{DropMode, JComponent, SwingUtilities, TransferHandler}
-
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TxnExecutor
@@ -145,7 +142,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
           case (3, busS: String) =>   // XXX TODO: should use spinner for editing
             Try(busS.toInt).foreach { bus =>
               atomic { implicit tx =>
-                ProcActions.setBus(pv.obj :: Nil, IntObj.newConst(bus))
+                ProcActions.setBus(pv.obj :: Nil, IntObj.newConst[T](bus))
               }
             }
 
@@ -224,7 +221,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
     private def removeProcs(pvs: Iterable[ProcObjView.Timeline[T]]): Unit =
       if (pvs.nonEmpty) groupHOpt.foreach { groupH =>
         val editOpt = atomic { implicit tx =>
-          ProcGUIActions.removeProcs(groupH(), pvs)
+          ProcGUIActions.removeProcs(groupH(), pvs.iterator)
         }
         editOpt.foreach(undoManager.add)
       }

@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.impl.markdown
 
-import de.sciss.desktop
 import de.sciss.desktop.{Desktop, KeyStrokes, OptionPane, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.Txn.peer
@@ -24,11 +23,11 @@ import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.{Cursor, Disposable, Obj, Source, synth, Txn => LTxn}
 import de.sciss.mellite.impl.component.{NavigationHistory, ZoomSupport}
 import de.sciss.mellite.{GUI, MarkdownFrame, MarkdownRenderView, ObjListView}
-import de.sciss.proc
 import de.sciss.proc.{Markdown, Universe}
-import javax.swing.event.{HyperlinkEvent, HyperlinkListener}
+import de.sciss.{desktop, proc}
 import org.pegdown.{Extensions, PegDownProcessor}
 
+import javax.swing.event.HyperlinkEvent
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
@@ -85,7 +84,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
   private final case class Percent(value: Int) {
     override def toString: String = s"$value%"
 
-    def fraction: Double = value * 0.01
+//    def fraction: Double = value * 0.01
   }
 
   private abstract class Base[T <: LTxn[T]](bottom: ISeq[View[T]], embedded: Boolean)
@@ -180,47 +179,45 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
         border        = Swing.EmptyBorder(8)
         preferredSize = (500, 500)
 
-        peer.addHyperlinkListener(new HyperlinkListener {
-          def hyperlinkUpdate(e: HyperlinkEvent): Unit = {
-            if (e.getEventType == HyperlinkEvent.EventType.ACTIVATED) {
-              // println(s"description: ${e.getDescription}")
-              // println(s"source elem: ${e.getSourceElement}")
-              // println(s"url        : ${e.getURL}")
-              // val link = e.getDescription
-              // val ident = if (link.startsWith("ugen.")) link.substring(5) else link
-              // lookUpHelp(ident)
+        peer.addHyperlinkListener((e: HyperlinkEvent) => {
+          if (e.getEventType == HyperlinkEvent.EventType.ACTIVATED) {
+            // println(s"description: ${e.getDescription}")
+            // println(s"source elem: ${e.getSourceElement}")
+            // println(s"url        : ${e.getURL}")
+            // val link = e.getDescription
+            // val ident = if (link.startsWith("ugen.")) link.substring(5) else link
+            // lookUpHelp(ident)
 
-              val url = e.getURL
-              if (url != null) {
-                Desktop.browseURI(url.toURI)
-              } else {
-                val key = e.getDescription
-                val either: Either[String, Unit] = impl.cursor.step { implicit tx =>
-                  val obj = markdown
-                  obj.attr.get(key).fold[Either[String, Unit]] {
-                    import proc.Implicits._
-                    Left(s"Attribute '$key' not found in Markdown object '${obj.name}'")
-                  } {
-                    case md: Markdown[T] =>
-                      nav.push(tx.newHandle(md))
-                      setMarkdownFromNav()
-                      fire(MarkdownRenderView.FollowedLink(impl, md))
-                      Right(())
+            val url = e.getURL
+            if (url != null) {
+              Desktop.browseURI(url.toURI)
+            } else {
+              val key = e.getDescription
+              val either: Either[String, Unit] = impl.cursor.step { implicit tx =>
+                val obj = markdown
+                obj.attr.get(key).fold[Either[String, Unit]] {
+                  import proc.Implicits._
+                  Left(s"Attribute '$key' not found in Markdown object '${obj.name}'")
+                } {
+                  case md: Markdown[T] =>
+                    nav.push(tx.newHandle(md))
+                    setMarkdownFromNav()
+                    fire(MarkdownRenderView.FollowedLink(impl, md))
+                    Right(())
 
-                    case other =>
-                      val opt = viewAttr(other)
-                      opt match {
-                        case Some(_) => Right(())
-                        case None =>
-                          import proc.Implicits._
-                          Left(s"Object '${other.name}' in attribute '$key' is not viewable")
-                      }
-                  }
+                  case other =>
+                    val opt = viewAttr(other)
+                    opt match {
+                      case Some(_) => Right(())
+                      case None =>
+                        import proc.Implicits._
+                        Left(s"Object '${other.name}' in attribute '$key' is not viewable")
+                    }
                 }
-                either.left.foreach { message =>
-                  val opt = OptionPane.message(message, OptionPane.Message.Error)
-                  opt.show(desktop.Window.find(impl.component), "Markdown Link")
-                }
+              }
+              either.left.foreach { message =>
+                val opt = OptionPane.message(message, OptionPane.Message.Error)
+                opt.show(desktop.Window.find(impl.component), "Markdown Link")
               }
             }
           }

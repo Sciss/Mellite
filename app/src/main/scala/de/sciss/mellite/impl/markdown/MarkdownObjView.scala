@@ -14,15 +14,15 @@
 package de.sciss.mellite.impl.markdown
 
 import de.sciss.desktop
-import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView}
-import de.sciss.mellite.Shapes
+import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.impl.objview.{ObjListViewImpl, ObjViewImpl}
+import de.sciss.mellite.{GUI, MarkdownFrame, ObjListView, ObjView, Shapes}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Markdown, Universe}
+
 import javax.swing.Icon
 
 object MarkdownObjView extends ObjListView.Factory {
@@ -70,7 +70,7 @@ object MarkdownObjView extends ObjListView.Factory {
     )
     val obj0  = Markdown.newConst[T](value)
     val obj   = if (const) obj0 else Markdown.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

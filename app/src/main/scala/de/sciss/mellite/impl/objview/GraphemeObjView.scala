@@ -14,14 +14,14 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{ObjListView, ObjView}
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.GraphemeFrame
+import de.sciss.mellite.{GraphemeFrame, ObjListView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Grapheme, Universe}
+
 import javax.swing.Icon
 
 object GraphemeObjView extends NoArgsListObjViewFactory {
@@ -37,7 +37,7 @@ object GraphemeObjView extends NoArgsListObjViewFactory {
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
     val obj = Grapheme[T]() // .Modifiable[T]
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

@@ -374,7 +374,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
     import config._
     val obj0  = EnvSegment.Obj.newConst[T](value)
     val obj   = if (const) obj0 else EnvSegment.Obj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

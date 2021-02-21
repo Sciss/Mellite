@@ -21,6 +21,7 @@ import de.sciss.mellite.impl.objview.{NoArgsListObjViewFactory, ObjViewImpl}
 import de.sciss.mellite.{ObjListView, ObjTimelineView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{ObjKeys, Proc}
+
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
 
@@ -38,7 +39,7 @@ object ProcObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
     val obj  = Proc[T]()
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

@@ -14,16 +14,15 @@
 package de.sciss.mellite.impl.objview
 
 import de.sciss.desktop
-import de.sciss.lucre.{BooleanObj, Obj, Source, Txn => LTxn}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{ObjListView, ObjView}
-import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.Shapes
+import de.sciss.lucre.{BooleanObj, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
+import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
+import de.sciss.mellite.{ObjListView, ObjView, Shapes}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Confluent, Universe}
-import javax.swing.Icon
 
+import javax.swing.Icon
 import scala.swing.CheckBox
 import scala.util.Success
 
@@ -70,7 +69,7 @@ object BooleanObjView extends ObjListView.Factory {
     import config._
     val obj0  = BooleanObj.newConst[T](value)
     val obj   = if (const) obj0 else BooleanObj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

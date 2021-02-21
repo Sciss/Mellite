@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.markdown
 
-import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
@@ -24,14 +22,15 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Source, TxnLike, synth}
 import de.sciss.mellite.{GUI, MarkdownEditorView, MarkdownRenderView}
 import de.sciss.model.impl.ModelImpl
+import de.sciss.proc.{Markdown, Universe}
 import de.sciss.scalainterpreter.Fonts
 import de.sciss.scalainterpreter.impl.CodePaneImpl
 import de.sciss.swingplus.Implicits._
 import de.sciss.syntaxpane.SyntaxDocument
 import de.sciss.syntaxpane.syntaxkits.MarkdownSyntaxKit
-import de.sciss.proc.{Markdown, Universe}
-import javax.swing.undo.UndoableEdit
 
+import java.beans.PropertyChangeEvent
+import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.stm.Ref
 import scala.swing.Swing._
@@ -156,10 +155,7 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
 
       lazy val doc = paneImpl.editor.peer.getDocument.asInstanceOf[SyntaxDocument]
 
-      doc.addPropertyChangeListener(SyntaxDocument.CAN_UNDO, new PropertyChangeListener {
-        def propertyChange(e: PropertyChangeEvent): Unit =
-          dirty = doc.canUndo
-      })
+      doc.addPropertyChangeListener(SyntaxDocument.CAN_UNDO, (_: PropertyChangeEvent) => dirty = doc.canUndo)
 
       val ksRender  = KeyStrokes.menu1 + Key.Enter
       val ttRender  = s"Render (${Util.keyStrokeText(ksRender)})"

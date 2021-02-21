@@ -27,7 +27,7 @@ object WorkspaceCache {
 
     workspace.addDependent(this)
 
-    def dispose()(implicit tx: T): Unit = impl.remove()
+    def dispose()(implicit tx: T): Unit = impl.remove[T]()
   }
 
   private final class Impl[A] extends WorkspaceCache[A] {

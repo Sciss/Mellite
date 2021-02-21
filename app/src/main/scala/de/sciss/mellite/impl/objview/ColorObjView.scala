@@ -15,22 +15,22 @@ package de.sciss.mellite.impl.objview
 
 import de.sciss.icons.raphael
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
-import de.sciss.lucre.swing.edit.EditVar
-import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
+import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{MessageException, ObjListView, ObjView, UniverseView}
+import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.component.PaintIcon
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
 import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.{desktop, numbers}
+import de.sciss.mellite.{MessageException, ObjListView, ObjView, UniverseView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Color, Universe}
-import javax.swing.Icon
+import de.sciss.{desktop, numbers}
 import org.rogach.scallop
 
+import javax.swing.Icon
 import scala.swing.{Action, BorderPanel, Button, ColorChooser, Component, FlowPanel, GridPanel, Label, Swing}
 import scala.util.{Failure, Success, Try}
 
@@ -110,7 +110,7 @@ object ColorObjView extends ObjListView.Factory {
     import config._
     val obj0  = Color.Obj.newConst[T](value)
     val obj   = if (const) obj0 else Color.Obj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

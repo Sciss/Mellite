@@ -20,8 +20,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ObjTimelineView
 import de.sciss.mellite.edit.EditTimelineRemoveObj
 import de.sciss.proc.Timeline
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{IndexedSeq => Vec}
 
 /** These actions require being executed on the EDT. */
@@ -29,11 +29,11 @@ object ProcGUIActions {
   // scalac still has bug finding Timeline.Modifiable
   private type TimelineMod[T <: Txn[T]] = Timeline.Modifiable[T] // , Proc[T], Obj.UpdateT[T, Proc.Elem[T]]]
 
-  def removeProcs[T <: Txn[T]](group: TimelineMod[T], views: TraversableOnce[ObjTimelineView[T]])
+  def removeProcs[T <: Txn[T]](group: TimelineMod[T], views: Iterator[ObjTimelineView[T]])
                               (implicit tx: T, cursor: Cursor[T]): Option[UndoableEdit] = {
     requireEDT()
     val name = "Remove Object"
-    val edits = views.toIterator.flatMap { pv0 =>
+    val edits = views.flatMap { pv0 =>
       val span  = pv0.span
       val obj   = pv0.obj
 

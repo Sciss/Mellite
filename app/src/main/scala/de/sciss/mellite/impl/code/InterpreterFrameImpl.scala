@@ -13,22 +13,16 @@
 
 package de.sciss.mellite.impl.code
 
-import java.io.{File, FileInputStream, IOException}
-
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, Window, WindowHandler}
-import de.sciss.mellite.InterpreterFrame
-import de.sciss.mellite.{Application, GUI}
-import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
+import de.sciss.mellite.{Application, GUI, InterpreterFrame}
 import de.sciss.proc.Workspace
+import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane, Style}
 
+import java.io.{File, FileInputStream, IOException}
 import scala.swing.event.Key
 
-// careful... tripping over SI-3809 "illegal cyclic reference involving class Array"...
-// actually SI-7481
 private[mellite] object InterpreterFrameImpl {
-  val boom = Array(1, 2, 3)  // forcing scalac to recompile, so it doesn't crash
-
   private def readFile(file: File): String = {
     val fis = new FileInputStream(file)
     try {

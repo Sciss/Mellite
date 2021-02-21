@@ -23,9 +23,9 @@ import de.sciss.mellite.Log.log
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{ActionCloseAllWorkspaces, DocumentCursorsFrame, DocumentCursorsView, DocumentViewHandler, FolderFrame, GUI, Mellite, WindowPlacement}
 import de.sciss.model.Change
-import de.sciss.{desktop, proc}
 import de.sciss.proc.{Cursors, Durable, GenContext, Scheduler, Universe, Workspace}
 import de.sciss.treetable.{AbstractTreeModel, TreeColumnModel, TreeTable, TreeTableCellRenderer, TreeTableSelectionChanged}
+import de.sciss.{desktop, proc}
 
 import java.io.File
 import java.text.SimpleDateFormat
@@ -77,6 +77,7 @@ object CursorsFrameImpl {
                                  var childViews: Vec[CursorView], var name: String,
                                  val created: Long, var updated: Long) extends TreeNode {
 
+    // N.B.: do not annotate return type due to JDK generics incompatibilities
     def children() /*: util.Enumeration[_]*/ = childViews.iterator.asJavaEnumeration
 
     def getChildCount: Int = childViews.size

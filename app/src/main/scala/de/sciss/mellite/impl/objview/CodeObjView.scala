@@ -13,21 +13,20 @@
 
 package de.sciss.mellite.impl.objview
 
-import java.util.Locale
-
 import de.sciss.desktop
 import de.sciss.icons.raphael
-import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
+import de.sciss.lucre.{Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
-import de.sciss.swingplus.ComboBox
+import de.sciss.mellite.{CodeFrame, ObjListView, ObjView}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Code, Universe}
-import javax.swing.Icon
+import de.sciss.swingplus.ComboBox
 import org.rogach.scallop
 
+import java.util.Locale
+import javax.swing.Icon
 import scala.swing.{Component, Label}
 import scala.util.Try
 
@@ -87,7 +86,7 @@ object CodeObjView extends ObjListView.Factory {
     import config._
     val obj0  = Code.Obj.newConst[T](value)
     val obj   = if (const) obj0 else Code.Obj.newVar[T](obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

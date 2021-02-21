@@ -26,12 +26,11 @@ import de.sciss.mellite.impl.timeline.ObjTimelineViewBasicImpl
 import de.sciss.mellite.{CodeFrame, CodeView, GUI, ObjListView, ObjTimelineView, ObjView, RunnerToggleButton, Shapes}
 import de.sciss.patterns
 import de.sciss.patterns.graph.Pat
-import de.sciss.proc.Pattern
-import de.sciss.proc.{Code, Universe}
 import de.sciss.proc.Implicits._
+import de.sciss.proc.{Code, Pattern, Universe}
+
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.swing.Button
 
 object PatternObjView extends NoArgsListObjViewFactory with ObjTimelineView.Factory {
@@ -64,7 +63,7 @@ object PatternObjView extends NoArgsListObjViewFactory with ObjTimelineView.Fact
 
   def makeObj[T <: Txn[T]](name: String)(implicit tx: T): List[Obj[T]] = {
     val obj  = Pattern.newVar[T](Pattern.empty[T])
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

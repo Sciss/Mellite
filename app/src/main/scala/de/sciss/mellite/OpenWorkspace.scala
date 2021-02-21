@@ -13,8 +13,6 @@
 
 package de.sciss.mellite
 
-import java.util.concurrent.TimeUnit
-import de.sciss.desktop
 import de.sciss.desktop.{Desktop, FileDialog, KeyStrokes, Menu, OptionPane, RecentFiles, Util}
 import de.sciss.file._
 import de.sciss.lucre.Cursor
@@ -22,10 +20,11 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.store.BerkeleyDB
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.{AnyTxn, Executor, Txn}
-import de.sciss.proc
 import de.sciss.proc.{Confluent, Durable, Universe, Workspace}
+import de.sciss.{desktop, proc}
 
 import java.net.URI
+import java.util.concurrent.TimeUnit
 import javax.swing.SwingUtilities
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Future, blocking}

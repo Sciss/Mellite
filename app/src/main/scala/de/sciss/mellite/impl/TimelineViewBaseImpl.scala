@@ -15,8 +15,7 @@ package de.sciss.mellite.impl
 
 import de.sciss.lucre.swing.Window
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{GUI, ObjView, TimelineViewBase}
-import de.sciss.mellite.AttrMapFrame
+import de.sciss.mellite.{AttrMapFrame, GUI, ObjView, TimelineViewBase}
 
 import scala.swing.{Action, Component}
 
@@ -78,14 +77,14 @@ trait TimelineViewBaseImpl[T <: Txn[T], Y, Child <: ObjView[T]]
   /** Component for viewing the editors of the currently selected children. */
   protected final def ggChildView: Component = _ggChildView
 
-  protected final def withSelection[A](fun: T => TraversableOnce[Child] => Option[A]): Option[A] =
+  protected final def withSelection[A](fun: T => Iterator[Child] => Option[A]): Option[A] =
     if (selectionModel.isEmpty) None else {
       val sel = selectionModel.iterator
       cursor.step { implicit tx => fun(tx)(sel) }
     }
 
   protected final def withFilteredSelection[A](p: Child => Boolean)
-                                        (fun: T => TraversableOnce[Child] => Option[A]): Option[A] = {
+                                        (fun: T => Iterator[Child] => Option[A]): Option[A] = {
     val sel = selectionModel.iterator
     val flt = sel.filter(p)
     if (flt.hasNext) cursor.step { implicit tx => fun(tx)(flt) } else None

@@ -17,10 +17,10 @@ import de.sciss.desktop.{Menu, OptionPane}
 import de.sciss.kollflitz.ISeq
 import de.sciss.lucre.Txn
 import de.sciss.lucre.swing.LucreSwing.deferTx
-import de.sciss.mellite.{CodeView, Veto}
 import de.sciss.mellite.impl.WindowImpl
-import de.sciss.processor.Processor.Aborted
+import de.sciss.mellite.{CodeView, Veto}
 import de.sciss.proc.Code.Example
+import de.sciss.processor.Processor.Aborted
 
 import scala.concurrent.{Future, Promise}
 
@@ -30,7 +30,7 @@ import scala.concurrent.{Future, Promise}
   * Also provides menu generation for examples.
   */
 trait CodeFrameBase[T <: Txn[T]] extends Veto[T] {
-  _: WindowImpl[T] =>
+  this: WindowImpl[T] =>
 
   protected def codeView: CodeView[T, _]
 

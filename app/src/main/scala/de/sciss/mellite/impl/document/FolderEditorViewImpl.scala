@@ -17,16 +17,15 @@ import de.sciss.desktop
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.expr
-import de.sciss.lucre.{Folder, Obj, StringObj}
+import de.sciss.lucre.{Folder, Obj, StringObj, expr}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.impl.component.CollectionViewImpl
 import de.sciss.mellite.{FolderEditorView, FolderView, ObjView}
-import de.sciss.swingplus.{GroupPanel, Spinner}
 import de.sciss.proc.{ObjKeys, Universe}
+import de.sciss.swingplus.{GroupPanel, Spinner}
+
 import javax.swing.SpinnerNumberModel
 import javax.swing.undo.UndoableEdit
-
 import scala.swing.Swing.EmptyIcon
 import scala.swing.event.Key
 import scala.swing.{Action, Alignment, CheckBox, Dialog, Label, Swing, TextField}
@@ -167,7 +166,7 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
               val orig    = nodeView.modelData()
               val idx     = p.indexOf(orig)
               val copies  = List.tabulate(count) { n =>
-                val cpy = Obj.copy(orig)
+                val cpy = Obj.copy[T, T, Obj](orig)
                 if (append) {
                   val suffix = incLast(appendText, n)
                   orig.attr.$[StringObj](ObjKeys.attrName).foreach { oldName =>

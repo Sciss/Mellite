@@ -18,11 +18,11 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Expr, IntObj, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.ObjViewCmdLineParser
 import de.sciss.mellite.{ObjListView, ObjView, Shapes}
-import de.sciss.swingplus.Spinner
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Confluent, Universe}
-import javax.swing.{Icon, SpinnerNumberModel}
+import de.sciss.swingplus.Spinner
 
+import javax.swing.{Icon, SpinnerNumberModel}
 import scala.util.{Success, Try}
 
 object IntObjView extends ObjListView.Factory {
@@ -76,7 +76,7 @@ object IntObjView extends ObjListView.Factory {
     import config._
     val obj0  = IntObj.newConst[T](value)
     val obj   = if (const) obj0 else IntObj.newVar(obj0)
-    if (!name.isEmpty) obj.name = name
+    if (name.nonEmpty) obj.name = name
     obj :: Nil
   }
 

@@ -82,6 +82,6 @@ final class AddImpl[T <: Txn[T]](val canvas: GraphemeCanvas[T])
       val startLevel  = DoubleObj.newVar[T](drag.modelY)
       val curve       = CurveObj .newVar[T](Curve.lin)
       val elem        = EnvSegment.Obj.ApplySingle(startLevel, curve)
-        EditGraphemeInsertObj(name, grMod, time = drag.time, elem = elem)
+        EditGraphemeInsertObj[T](name, grMod, time = drag.time, elem = elem)
     }
 }
