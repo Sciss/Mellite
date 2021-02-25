@@ -16,12 +16,11 @@ package de.sciss.mellite
 import de.sciss.desktop.impl.{SwingApplicationImpl, WindowHandlerImpl}
 import de.sciss.desktop.{Desktop, Menu, OptionPane, WindowHandler}
 import de.sciss.file._
-import de.sciss.log.Level
 import de.sciss.lucre.synth.{RT, Server, Txn}
 import de.sciss.lucre.{Cursor, TxnLike, Workspace}
 import de.sciss.mellite.impl.document.DocumentHandlerImpl
 import de.sciss.proc.Workspace.MetaData
-import de.sciss.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, SoundProcesses, Universe}
+import de.sciss.proc.{AuralSystem, Code, GenContext, Scheduler, SensorSystem, Universe}
 import de.sciss.synth.Client
 import de.sciss.{osc, proc}
 import org.rogach.scallop.{ScallopConf, ScallopOption => Opt}
@@ -273,8 +272,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     }
 
     // SoundProcesses.log      .level = Level.Warn
-    SoundProcesses.logAural     .level = Level.All
+    // SoundProcesses.logAural     .level = Level.All
     // SoundProcesses.logTransport .level = Level.All
+    // de.sciss.fscape.Log.stream.level = Level.All
 
     DocumentViewHandler.init()
     OpenWorkspace.install()

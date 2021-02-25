@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.4.0-SNAPSHOT"
+lazy val commonVersion              = "3.4.0"
 lazy val mimaCommonVersion          = "3.4.0"
-lazy val appVersion                 = "3.4.0-SNAPSHOT"
+lazy val appVersion                 = "3.4.0"
 lazy val mimaAppVersion             = "3.4.0"
 
 lazy val loggingEnabled             = true
@@ -18,7 +18,7 @@ lazy val authorEMail                = "contact@sciss.de"
 
 lazy val deps = new {
   val common = new {
-    val asyncFile           = "0.1.2"
+    val asyncFile           = "0.1.3"
     val audioFile           = "2.3.3"
     val audioWidgets        = "2.3.2"
     val desktop             = "0.11.3"
@@ -39,27 +39,27 @@ lazy val deps = new {
     val scallop             = "4.0.2"
     val serial              = "2.0.1"
     val sonogram            = "2.2.1"
-    val soundProcesses      = "4.7.1"
+    val soundProcesses      = "4.7.2"
     val span                = "2.0.2"
     val swingPlus           = "0.5.0"
   }
   val app = new {
-    val akka                = "2.6.12"
+    val akka                = "2.6.13"
     val appDirs             = "1.2.1"
     val dejaVuFonts         = "2.37"    // directly included
     val dotterweide         = "0.4.0"
     val fileCache           = "1.1.1"
     val fingerTree          = "1.5.5"
-    val freesound           = "2.4.0-SNAPSHOT"
-    val fscape              = "3.6.0-SNAPSHOT"
+    val freesound           = "2.4.0"
+    val fscape              = "3.6.0"
     val interpreterPane     = "1.11.0"
 //    val jline               = "2.14.6"
     val jump3r              = "1.0.5"
     val kollFlitz           = "0.2.4"
     val linKernighan        = "0.1.3"
     val lucrePi             = "1.4.0"
-    val negatum             = "1.4.0-SNAPSHOT"
-    val patterns            = "1.4.0"
+    val negatum             = "1.4.0"
+    val patterns            = "1.4.1"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
@@ -91,11 +91,12 @@ lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.13.4",
-  crossScalaVersions := Seq(/* "3.0.0-M3", */ "2.13.4", "2.12.13"),
+  scalaVersion       := "2.13.5",
+  crossScalaVersions := Seq(/* "3.0.0-RC1", */ "2.13.5", "2.12.13"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
   scalacOptions ++= {
-    if (isDotty.value) Nil else Seq("-Xlint:-stars-align,_", "-Xsource:2.13")
+    // if (isDotty.value) Nil else 
+    Seq("-Xlint:-stars-align,_", "-Xsource:2.13")
   },
   scalacOptions ++= {
     if (loggingEnabled || isSnapshot.value) Nil else Seq("-Xelide-below", "INFO")
@@ -105,9 +106,9 @@ lazy val commonSettings = Seq(
     val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) Seq("-Wconf:cat=deprecation&msg=Widening conversion:s") else Nil // nanny state defaults :-E
     sq1
   },
-  sources in (Compile, doc) := {
-    if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is pretty much broken
-  },
+  // sources in (Compile, doc) := {
+  //   if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is pretty much broken
+  // },
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   // resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271

@@ -34,21 +34,19 @@ provided by Didier Descouens under CC BY 4.0 license.
 
 - A binary (executable) version is provided via [archive.org](https://archive.org/details/Mellite) or
   [GitHub releases](https://github.com/Sciss/Mellite/releases/latest).
-  We provide a universal zip for all platforms as well as a dedicated Debian package.
+  We provide a universal zip for all platforms as well as a dedicated Debian package. These need an
+  additional JDK installation (see below). Even better, for the common Intel 64-bit architecture, you can use the 
+  "full" packages that bundle the JDK, available for Linux, Windows, macOS (10.10 or newer).
 - The source code can be downloaded from [git.iem.at/sciss/Mellite](https://git.iem.at/sciss/Mellite) or 
   [github.com/Sciss/Mellite](http://github.com/Sciss/Mellite).
   
-In order to run the application, you must have a Java Development Kit (JDK) installed. The recommended version
-is __JDK 8.__ You can use either OpenJDK or Oracle JDK. On the Raspberry Pi, we currently recommend Oracle JDK, 
-as there are stability issues with OpenJDK 8. Oracle JDK 8 is available from
-[here](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). On Linux, to install
-OpenJDK, use `sudo apt install openjdk-8-jdk`.
-
-In order to use the built-in API browser, you additionally need JavaFX. It may be part of Oracle JDK. When using
-OpenJDK, you should install the package `openjfx` (e.g. `sudo apt install openjfx`.)
+In order to run the application when not using the "full" bundle, you must have a Java Development Kit (JDK) installed. 
+The recommended version is __JDK 11.__
+On Linux, to install OpenJDK, use `sudo apt install openjdk-11-jdk`. In general, you find good binary builds
+for all platforms on [adoptopenjdk.net](https://adoptopenjdk.net/).
 
 For real-time sound reproduction, the [SuperCollider](https://supercollider.github.io/download) server is needed.
-The recommended version is 3.9.0 or above (technically 3.7.0 or higher should work).
+The recommended version is 3.10.0 or above (technically 3.7.0 or higher should work).
 
 ### issues
 

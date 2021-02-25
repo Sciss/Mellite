@@ -20,6 +20,7 @@ import de.sciss.icons.raphael
 import de.sciss.log.Level
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.edit.EditVar
+import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Obj, Source, Txn => LTxn}
@@ -35,7 +36,7 @@ import javax.swing.undo.UndoableEdit
 import scala.concurrent.Promise
 import scala.concurrent.stm.Ref
 import scala.swing.event.Key
-import scala.swing.{Action, Button, Orientation, ProgressBar}
+import scala.swing.{Action, Button, Component, Orientation, ProgressBar}
 import scala.util.Failure
 
 object FScapeObjView extends NoArgsListObjViewFactory {
@@ -117,6 +118,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
     val renderRef = Ref(Option.empty[FScape.Rendering[T]])
 
+    def disposeRender()(implicit tx: T): Unit =
+      renderRef.swap(None)(tx.peer).foreach(_.cancel())
+
     lazy val ggProgress: ProgressBar = new ProgressBar {
       max = 160
     }
@@ -127,7 +131,7 @@ object FScapeObjView extends NoArgsListObjViewFactory {
       def apply(): Unit = {
         import universe.cursor
         cursor.step { implicit tx =>
-          renderRef.swap(None)(tx.peer).foreach(_.cancel())
+          disposeRender()
         }
       }
       enabled = false
@@ -140,71 +144,78 @@ object FScapeObjView extends NoArgsListObjViewFactory {
     var debugLaunchP  = Option.empty[Promise[Unit]]
     var debugLaunchC  = 0
 
-    // XXX TODO --- should use custom view so we can cancel upon `dispose`
-    val viewRender = View.wrap[T, Button] {
-      val actionRender = new swing.Action("Render") { self =>
-        def apply(): Unit = {
-          import universe.cursor
-          cursor.step { implicit tx =>
-            if (renderRef.get(tx.peer).isEmpty) {
-              val obj       = objH()
-              val config    = FScape.defaultConfig.toBuilder
-              config.progressReporter = { report =>
-                defer {
-                  ggProgress.value = (report.total * ggProgress.max).toInt
-                }
-              }
-              // config.blockSize
-              // config.nodeBufferSize
-              // config.executionContext
-              // config.seed
-              if (DEBUG_LAUNCH) {
-                val pDebug              = Promise[Unit]()
-                debugLaunchP            = Some(pDebug)
-                debugLaunchC            = 0
-                config.debugWaitLaunch  = Some(pDebug.future)
-              }
+    val viewRender: View[T] = new View[T] with ComponentHolder[Component] {
+      type C = Component
 
-              def finished()(implicit tx: T): Unit = {
-                renderRef.set(None)(tx.peer)
-                deferTx {
-                  actionCancel.enabled  = false
-                  self.enabled          = true
-                }
-              }
+      override def dispose()(implicit tx: T): Unit = disposeRender()
 
-              try {
-                val rendering = obj.run(config)
-                deferTx {
-                  actionCancel.enabled = true
-                  self        .enabled = false
+      deferTx(guiInit())
+
+      private def guiInit(): Unit = {
+        val actionRender = new swing.Action("Render") { self =>
+          def apply(): Unit = {
+            import universe.cursor
+            cursor.step { implicit tx =>
+              if (renderRef.get(tx.peer).isEmpty) {
+                val obj       = objH()
+                val config    = FScape.defaultConfig.toBuilder
+                config.progressReporter = { report =>
+                  defer {
+                    ggProgress.value = (report.total * ggProgress.max).toInt
+                  }
                 }
-                /* val obs = */ rendering.reactNow { implicit tx => {
-                  case FScape.Rendering.Completed =>
-                    finished()
-                    rendering.result.foreach {
-                      case Failure(Cancelled()) => // ignore
-                      case Failure(ex) =>
-                        deferTx(ex.printStackTrace())
-                      case _ =>
-                    }
-                  case _ =>
-                }}
-                renderRef.set(Some(rendering))(tx.peer)
-              } catch {
-                case MissingIn(key) =>
-                  println(s"Attribute input '$key' is missing.")
-                //                throw ex
+                // config.blockSize
+                // config.nodeBufferSize
+                // config.executionContext
+                // config.seed
+                if (DEBUG_LAUNCH) {
+                  val pDebug              = Promise[Unit]()
+                  debugLaunchP            = Some(pDebug)
+                  debugLaunchC            = 0
+                  config.debugWaitLaunch  = Some(pDebug.future)
+                }
+
+                def finished()(implicit tx: T): Unit = {
+                  renderRef.set(None)(tx.peer)
+                  deferTx {
+                    actionCancel.enabled  = false
+                    self.enabled          = true
+                  }
+                }
+
+                try {
+                  val rendering = obj.run(config)
+                  deferTx {
+                    actionCancel.enabled = true
+                    self        .enabled = false
+                  }
+                  /* val obs = */ rendering.reactNow { implicit tx => {
+                    case FScape.Rendering.Completed =>
+                      finished()
+                      rendering.result.foreach {
+                        case Failure(Cancelled()) => // ignore
+                        case Failure(ex) =>
+                          deferTx(ex.printStackTrace())
+                        case _ =>
+                      }
+                    case _ =>
+                  }}
+                  renderRef.set(Some(rendering))(tx.peer)
+                } catch {
+                  case MissingIn(key) =>
+                    println(s"Attribute input '$key' is missing.")
+                  //                throw ex
+                }
               }
             }
           }
         }
+        val ks  = KeyStrokes.shift + Key.F10
+        val res = GUI.toolButton(actionRender, Shapes.Sparks)
+        Util.addGlobalKey(res, ks)
+        res.tooltip = s"Run Rendering (${GUI.keyStrokeText(ks)})"
+        component = res
       }
-      val ks  = KeyStrokes.shift + Key.F10
-      val res = GUI.toolButton(actionRender, Shapes.Sparks)
-      Util.addGlobalKey(res, ks)
-      res.tooltip = s"Run Rendering (${GUI.keyStrokeText(ks)})"
-      res
     }
 
     val viewDebug = View.wrap[T, Button] {
