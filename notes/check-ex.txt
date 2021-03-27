@@ -57,7 +57,7 @@
 - [X] Sys.Process, Sys.Process.Directory, Sys.Process.Output, Sys.Exit, Sys.Property, Sys.Env
 - [X] ThisRunner, ThisRunner.Stop, ThisRunner.Done, ThisRunner.Fail, ThisRunner.Progress, ThisRunner.Attr, ThisRunner.Attr.Update, ThisRunner.Attr.Set
 - [X] Timed.Span, Timed.Value
-- [X] Timeline, Timeline.Add, Timeline.AddAll, Timeline.Remove, Timeline.Split, Timeline.Split.Left, Timeline.Split.Right
+- [X] Timeline, Timeline.Add, Timeline.AddAll, Timeline.Remove, Timeline.Split, Timeline.Split.Left, Timeline.Split.Right, Timeline.Children,
 - [X] de.sciss.proc.Color.Predefined, de.sciss.proc.Color.User,
 
 ## Patterns

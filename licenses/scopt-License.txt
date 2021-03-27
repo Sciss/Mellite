@@ -1,6 +1,0 @@
-(scopt)
-https://github.com/scopt/scopt
-
-License
-
-MIT License.

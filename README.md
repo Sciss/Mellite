@@ -13,15 +13,15 @@ Mellite is a computer music environment, implemented as a graphical front end
 for [SoundProcesses](http://git.iem.at/sciss/SoundProcesses). It is (C)opyright 2012&ndash;2021 by Hanns Holger Rutz.
 All rights reserved. Mellite is released under the
 [GNU Affero General Public License](https://git.iem.at/sciss/Mellite/raw/main/LICENSE) v3+ and comes with
-absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
+absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 The website for Mellite is [www.sciss.de/mellite](https://www.sciss.de/mellite/).
 
 Please consider supporting this project through Liberapay (see badge above) – thank you!
 
-The `licenses` folder contains the license headers for all dependencies and transitive dependencies. See `overview.txt`
-for a dependency overview. For the binary release of Mellite, source code is not included but available via the
-respective OSS project pages, as indicated in the license files, or&mdash;in compliance with GPL/LGPL&mdash;on request
-via E-Mail. All source code with group-id `de.sciss` is available from
+The file [mellite-app-licenses.csv](app/src/main/resources/de/sciss/mellite/mellite-app-licenses.csv) contains 
+the license data for all  dependencies and transitive dependencies. For the binary release of Mellite, source code
+is not included but  available via the respective OSS project pages, as indicated in the license files, or&mdash;in
+compliance with  GPL/LGPL&mdash;on request  via E-Mail. All source code with group-id `de.sciss` is available from
 [git.iem.at](https://git.iem.at/sciss) or [github.com/Sciss](https://github.com/Sciss).
 
 The Mellite icon is based on the file
@@ -51,7 +51,7 @@ The recommended version is 3.10.0 or above (technically 3.7.0 or higher should w
 ### issues
 
 When using JDK 8 under Debian and GNOME, there is a __bug in the assistive technology (Atk)__ which results in
-performance degradation over time, as the some of the UI is used. To solve this problem, create a plain text file
+performance degradation over time, as some parts of the UI are used. To solve this problem, create a plain text file
 `~/.accessibility.properties` (that is, in your home directory) and put the following contents inside:
 
     javax.accessibility.assistive_technologies=
@@ -182,7 +182,7 @@ Then Windows can be built on Linux using wine:
  
 N.B.: sbt 1.4.x seems no longer to work under wine due to coursier updates; for now we can still build by setting the version in `build.properties` to 1.3.13 temporarily!
 
-For Mac we need a bloody fruit company machine:
+For Mac, we need a bloody fruit company machine:
 
  1. `git fetch; git merge origin/work`
  2. `./sbt -java-home /Users/naya/Downloads/jdk-11.0.9+11/Contents/Home clean update mellite-full/universal:packageBin`
