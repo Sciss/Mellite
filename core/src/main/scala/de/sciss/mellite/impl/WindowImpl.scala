@@ -29,6 +29,9 @@ import scala.swing.Action
 import scala.util.Success
 
 object WindowImpl {
+  final val StateKey_Bounds = "window-bounds"
+  final val StateKey_Base   = "view"
+
   private final class Peer[T <: Txn[T]](view: View[T], impl: WindowImpl[T],
                                         undoRedoActions: Option[(Action, Action)],
                                         override val style: desktop.Window.Style,
@@ -80,7 +83,7 @@ object WindowImpl {
   }
 }
 
-abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, String]])
+abstract class WindowImpl[T <: Txn[T]] protected (titleExpr: Option[CellView[T, String]])
   extends Window[T] with WindowHolder[desktop.Window] with DependentMayVeto[T] {
   impl =>
 

@@ -20,6 +20,7 @@ import de.sciss.osc
 
 import javax.swing.KeyStroke
 import scala.concurrent.stm.TxnExecutor
+import scala.swing.Action
 import scala.swing.event.Key
 
 object MenuBar {
@@ -72,7 +73,7 @@ object MenuBar {
 //      .add(Item("window-shot",        proxy("Export Window as PDF...")))
 
     val mView = Group("view", "View")
-      .add(CheckBox("save-state", proxy("Remember State")))
+      .add(CheckBox("save-state", actionViewSaveState)) // , proxy("Remember State")))
       .add(Item("show-log" )("Show Log Window"  -> keyShowLog )(Mellite.logToFront()))
       .add(Item("clear-log")("Clear Log Window" -> keyClearLog)(Mellite.clearLog  ()))
 
@@ -96,6 +97,19 @@ object MenuBar {
     // .add(mOperation)
 
     res
+  }
+
+  private object actionViewSaveState extends Action("Remember State") {
+    peer.putValue(javax.swing.Action.SELECTED_KEY, Prefs.viewSaveState.getOrElse(false))
+
+    override def apply(): Unit = {
+      val b = peer.getValue(javax.swing.Action.SELECTED_KEY) match {
+        case _b: java.lang.Boolean  => _b.booleanValue()
+        case _                      => false
+      }
+      println(s"REMEMBER STATE: $b")
+      Prefs.viewSaveState.put(b)
+    }
   }
 
   private def debugThreads(): Unit = {

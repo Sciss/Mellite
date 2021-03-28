@@ -31,7 +31,7 @@ import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
 import de.sciss.mellite.impl.timeline
 import de.sciss.mellite.util.Gain
-import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager}
+import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.gui.TransportView
 import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, Tag, TimeRef, Timeline, Transport, Universe}
@@ -147,11 +147,11 @@ object AudioCueViewImpl {
     private var stateVisualBoost  = 22.0
     private var dirtyVisualBoost  = false
 
-    override def viewState: Map[String, Any] = {
+    override def viewState: Set[ViewState] = {
       requireEDT()
-      if (dirtyVisualBoost) Map(
-        StateKey_VisualBoost -> stateVisualBoost,
-      ) else Map.empty
+      if (dirtyVisualBoost) Set(
+        ViewState(StateKey_VisualBoost, DoubleObj, stateVisualBoost),
+      ) else Set.empty
     }
 
     object actionBounce extends ActionBounce[T](impl, objH) {
