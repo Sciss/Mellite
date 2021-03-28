@@ -55,4 +55,7 @@ object MarkdownRenderView {
   }
 }
 trait MarkdownRenderView[T <: LTxn[T]]
-  extends MarkdownRenderView.Basic[T] with UniverseView[T]
+  extends MarkdownRenderView.Basic[T] with UniverseObjView[T] {
+
+  override def obj(implicit tx: T): Markdown[T]
+}

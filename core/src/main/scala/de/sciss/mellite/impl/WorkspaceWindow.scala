@@ -14,14 +14,13 @@
 package de.sciss.mellite.impl
 
 import de.sciss.lucre.expr.CellView
-import de.sciss.lucre.{IntVector, Obj, Txn}
-import de.sciss.mellite.{Prefs, ViewState}
+import de.sciss.lucre.{IntVector, Txn}
+import de.sciss.mellite.{Prefs, UniverseObjView, ViewState}
 import de.sciss.proc.Tag
 import de.sciss.synth.UGenSource.Vec
 
+import java.awt.event.{ComponentEvent, ComponentListener}
 import scala.concurrent.Future
-import scala.swing.event.{UIElementMoved, UIElementResized, UIElementShown}
-import scala.swing.{Reactions, UIElement}
 
 abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellView[T, String]])
   extends WindowImpl[T](titleExpr) {
@@ -34,14 +33,14 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
 
   private var dirtyBounds = false
 
-  protected def viewObj(implicit tx: T): Obj[T]
+  override def view: UniverseObjView[T]
 
   @volatile
   private var stateBounds: Bounds = _
 
-  final def init(viewObj: Obj[T])(implicit tx: T): this.type = {
+  final override def init()(implicit tx: T): this.type = {
     stateBounds = (for {
-      attr    <- tx.attrMapOption(viewObj)
+      attr    <- tx.attrMapOption(view.obj)
       tag     <- attr.$[Tag](WindowImpl.StateKey_Base)
       tAttr   <- tx.attrMapOption(tag)
       bounds  <- tAttr.$[IntVector](WindowImpl.StateKey_Bounds)
@@ -52,17 +51,16 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
       }
     }).orNull
 
-    init()
+    super.init()
   }
 
   override protected def packAndPlace: Boolean = stateBounds == null
 
-  private def saveViewState: Boolean = Prefs.viewSaveState.getOrElse(false)
+  final protected def viewState: Set[ViewState] = view.viewState
 
-  protected def viewState: Set[ViewState]
-
-  override protected def performClose(): Future[Unit] = {
-    if (saveViewState) {
+  protected final def saveViewState(): Unit = {
+    val b = Prefs.viewSaveState.getOrElse(false)
+    if (b) {
       val state0  = viewState
       val state1  = if (!dirtyBounds) state0 else {
         val entry = ViewState(WindowImpl.StateKey_Bounds, IntVector, stateBounds.toVector)
@@ -70,13 +68,18 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
       }
       lastViewState = state1
     }
+  }
+
+  override protected def performClose(): Future[Unit] = {
+    saveViewState()
     super.performClose()
   }
 
   override def dispose()(implicit tx: T): Unit = {
     if (!wasDisposed && lastViewState.nonEmpty) {
-      val attr  = viewObj.attr
-      val tag   = attr.$[Tag](WindowImpl.StateKey_Base).getOrElse {
+      val viewObj = view.obj
+      val attr    = viewObj.attr
+      val tag     = attr.$[Tag](WindowImpl.StateKey_Base).getOrElse {
         val t = Tag[T]()
         attr.put(WindowImpl.StateKey_Base, t)
         t
@@ -89,31 +92,40 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
   }
 
   override protected def initGUI(): Unit = {
-    var MIN_BOUNDS_TIME = Long.MaxValue
-
-    def updateBounds(e: UIElement): Unit = {
-      val pt = e.bounds
-      val b  = Bounds(pt.x, pt.y, pt.width, pt.height)
-      if (stateBounds != b) {
-        stateBounds = b
-        val vis     = System.currentTimeMillis() > MIN_BOUNDS_TIME //  e.visible
-        // println(s"updateBounds: $stateBounds - $vis")
-        if (vis) dirtyBounds = true
+    if (!packAndPlace) {
+      val b = stateBounds
+      val j = window.component.peer
+      if (resizable) {
+        // pack()
+        j.setBounds(b.x, b.y, b.width, b.height)
+      } else {
+        pack()
+        j.setLocation(b.x, b.y)
       }
     }
 
-    if (!packAndPlace) {
-      val b = stateBounds
-      window.component.peer.setBounds(b.x, b.y, b.width, b.height)
-    }
+    val rp = window.component
+    rp.peer.addComponentListener(new ComponentListener {
+      private var minBoundTime = Long.MaxValue
 
-    val rp  = window.component
-    val r   = new Reactions.Impl
-    rp.subscribe(r)
-    r += {
-      case UIElementMoved   (e) => updateBounds(e)
-      case UIElementResized (e) => updateBounds(e)
-      case UIElementShown   (_) => MIN_BOUNDS_TIME = System.currentTimeMillis() + 1000  // XXX TODO
-    }
+      private def updateBounds(e: ComponentEvent): Unit = {
+        val r = e.getComponent.getBounds
+        val b = Bounds(r.x, r.y, r.width, r.height)
+        if (stateBounds != b) {
+          stateBounds = b
+          val ok = System.currentTimeMillis() > minBoundTime
+          // println(s"updateBounds: $stateBounds - $ok")
+          if (ok) dirtyBounds = true
+        }
+      }
+
+      override def componentResized (e: ComponentEvent): Unit = updateBounds(e)
+      override def componentMoved   (e: ComponentEvent): Unit = updateBounds(e)
+      override def componentShown   (e: ComponentEvent): Unit = {
+        minBoundTime = System.currentTimeMillis() + 500  // XXX TODO
+      }
+
+      override def componentHidden(e: ComponentEvent): Unit = ()
+    })
   }
 }

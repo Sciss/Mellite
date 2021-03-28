@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.document
 
 import java.net.URI
-
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -25,16 +24,16 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Artifact, Disposable, Folder, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.edit.EditAttrMap
-import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView}
+import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.serial.TFormat
 import de.sciss.proc.{ObjKeys, Universe}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
+
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{CellEditor, DropMode}
-
 import scala.annotation.tailrec
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.swing.Component
@@ -89,6 +88,10 @@ object FolderViewImpl extends FolderView.Companion {
     with FolderViewTransferHandler[T] {
 
     view =>
+
+    override def obj(implicit tx: T): Folder[T] = root()
+
+    override def viewState: Set[ViewState] = Set.empty  // XXX TODO column widths
 
     type C = Component
 

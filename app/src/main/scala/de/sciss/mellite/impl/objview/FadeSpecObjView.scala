@@ -26,8 +26,8 @@ import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, DoubleObj, LongObj, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.impl.{ObjViewCmdLineParser, RenderingImpl, WindowImpl}
-import de.sciss.mellite.{GUI, ObjListView, ObjView, Shapes, UniverseView, Veto}
+import de.sciss.mellite.impl.{ObjViewCmdLineParser, RenderingImpl, WorkspaceWindow}
+import de.sciss.mellite.{GUI, ObjListView, ObjView, Shapes, UniverseObjView, Veto, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.numbers.Implicits.doubleNumberWrapper
 import de.sciss.proc.Implicits._
@@ -352,9 +352,13 @@ object FadeSpecObjView extends ObjListView.Factory {
   private final class ViewImpl[T <: Txn[T]](objH: Source[T, FadeSpec.Obj[T]], val editable: Boolean)
                                            (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends UniverseView[T] with View.Editable[T] with ComponentHolder[Component] {
+    extends UniverseObjView[T] with View.Editable[T] with ComponentHolder[Component] {
 
     type C = Component
+
+    override def obj(implicit tx: T): FadeSpec.Obj[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     private[this] var specValue   : FadeSpec          = _
     private[this] var panel       : PanelImpl         = _
@@ -452,7 +456,7 @@ object FadeSpecObjView extends ObjListView.Factory {
   // XXX TODO DRY with ParamSpecObjView
   private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
                                              name: CellView[T, String])
-    extends WindowImpl[T](name) with Veto[T] {
+    extends WorkspaceWindow[T](name) with Veto[T] {
 
     override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.editable || !view.dirty) None else Some(this)

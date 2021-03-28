@@ -14,8 +14,8 @@
 package de.sciss.mellite
 
 import de.sciss.desktop.UndoManager
-import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{Txn => LTxn}
 import de.sciss.mellite.DragAndDrop.Flavor
 import de.sciss.proc.gui.TransportView
 import de.sciss.proc.{Timeline, Universe}
@@ -56,6 +56,8 @@ trait TimelineView[T <: LTxn[T]] /*extends TimelineObjView[T]*/ extends ObjView[
   with TimelineViewBase[T, Int, ObjTimelineView[T]] with CanBounce {
 
   type Repr = Timeline[T]
+
+  override def obj(implicit tx: T): Timeline[T]
 
   override def canvas: TimelineTrackCanvas[T]
 

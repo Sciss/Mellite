@@ -19,7 +19,7 @@ import de.sciss.lucre.{BooleanObj, Cursor, Txn => LTxn}
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.{WindowImpl, WorkspaceWindow}
 import de.sciss.mellite.{MarkdownEditorView, MarkdownFrame, MarkdownRenderView, Veto}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.proc.{Markdown, Universe}
@@ -71,13 +71,13 @@ object MarkdownFrameImpl extends MarkdownFrame.Companion {
   // ---- frame impl ----
 
   private final class RenderFrameImpl[T <: Txn[T]](val view: MarkdownRenderView[T])
-    extends WindowImpl[T] with MarkdownFrame.Render[T] {
+    extends WorkspaceWindow[T] with MarkdownFrame.Render[T] {
   }
   private final class BasicImpl[T <: LTxn[T]](val view: MarkdownRenderView.Basic[T])
     extends WindowImpl[T] with MarkdownFrame.Basic[T]
 
   private final class EditorFrameImpl[T <: Txn[T]](val view: MarkdownEditorView[T])
-    extends WindowImpl[T] with MarkdownFrame.Editor[T] with Veto[T] {
+    extends WorkspaceWindow[T] with MarkdownFrame.Editor[T] with Veto[T] {
 
     override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.dirty) None else Some(this)

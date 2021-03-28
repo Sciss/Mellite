@@ -19,7 +19,7 @@ import de.sciss.lucre.confluent.{Access, Cursor}
 import de.sciss.lucre.swing.LucreSwing.{defer, deferTx}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Expr, Identified, Source, Txn, Workspace}
-import de.sciss.mellite.UniverseView
+import de.sciss.mellite.{UniverseView, ViewState}
 import de.sciss.processor.Processor
 import de.sciss.processor.impl.ProcessorImpl
 import de.sciss.serial.TFormat
@@ -66,6 +66,8 @@ object ExprHistoryView {
     extends UniverseView[T] with ComponentHolder[Component] {
 
     type C = Component
+
+    override def viewState: Set[ViewState] = Set.empty
 
     private val mod     = ListView.Model.empty[String]
     private val format  = new SimpleDateFormat("yyyy MM dd MM | HH:mm:ss", Locale.US) // don't bother user with alpha characters

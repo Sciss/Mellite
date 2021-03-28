@@ -23,7 +23,7 @@ import de.sciss.lucre.{Disposable, Obj, Source}
 import de.sciss.mellite.edit.{EditAddProcOutput, EditRemoveProcOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
-import de.sciss.mellite.{DragAndDrop, GUI, MapView, ObjListView, ObjView, ProcOutputsView}
+import de.sciss.mellite.{DragAndDrop, GUI, MapView, ObjListView, ObjView, ProcOutputsView, ViewState}
 import de.sciss.proc.{Proc, Universe}
 
 import javax.swing.undo.UndoableEdit
@@ -54,6 +54,8 @@ object OutputsViewImpl {
                                        (implicit universe: Universe[T],
                                         undoManager: UndoManager)
     extends MapViewImpl[T, ProcOutputsView[T]] with ProcOutputsView[T] with ComponentHolder[Component] { impl =>
+
+    override def viewState: Set[ViewState] = Set.empty
 
     protected final def editRenameKey(before: String, now: String, value: Obj[T])
                                      (implicit tx: T): Option[UndoableEdit] = None

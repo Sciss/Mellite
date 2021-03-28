@@ -23,7 +23,7 @@ import de.sciss.lucre.{IntObj, Obj, Source, SpanLikeObj, TxnLike, Txn => LTxn}
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.objview.IntObjView
 import de.sciss.mellite.impl.proc.{ProcGUIActions, ProcObjView}
-import de.sciss.mellite.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel}
+import de.sciss.mellite.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel, ViewState}
 import de.sciss.proc.{Proc, Timeline, Universe}
 import de.sciss.span.Span
 import de.sciss.swingplus.{ComboBox, GroupPanel}
@@ -66,7 +66,9 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
 
     type C = Component
 
-//    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
+    override def viewState: Set[ViewState] = Set.empty  // XXX TODO
+
+    //    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
     private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
 
     private def atomic[A](block: T => A): A = cursor.step(block)

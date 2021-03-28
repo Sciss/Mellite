@@ -63,7 +63,10 @@ object CodeObjView extends ObjListView.Factory {
                                  (implicit universe: Universe[T]): Unit = {
     val ggValue = new ComboBox(codeNames)
     val res0 = ObjViewImpl.primitiveConfig[T, Code](window, tpe = prefix, ggValue = ggValue, prepare =
-      Try(defaultCode(Code.getType(ggValue.selection.index)))
+      Try {
+        val tpe = codeSeq(ggValue.selection.index)
+        defaultCode(tpe)
+      }
     )
     val res = res0.map(c => Config[T](name = c.name, value = c.value))
     done(res)

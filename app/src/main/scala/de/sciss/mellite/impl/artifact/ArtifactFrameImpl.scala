@@ -17,7 +17,7 @@ import de.sciss.desktop.{FileDialog, UndoManager}
 import de.sciss.lucre.Artifact
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.WorkspaceWindow
 import de.sciss.mellite.impl.objview.ArtifactObjView.humanName
 import de.sciss.mellite.{ArtifactFrame, ArtifactView}
 import de.sciss.proc.Universe
@@ -30,11 +30,10 @@ object ArtifactFrameImpl {
     val name      = CellView.name(obj)
     val res       = new Impl(/* doc, */ view = afv, name = name)
     res.init()
-    res
   }
 
   private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: ArtifactView[T],
                                         name: CellView[T, String])
-    extends WindowImpl[T](name.map(n => s"$n : $humanName"))
+    extends WorkspaceWindow[T](name.map(n => s"$n : $humanName"))
       with ArtifactFrame[T]
 }

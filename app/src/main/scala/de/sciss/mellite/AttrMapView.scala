@@ -30,6 +30,8 @@ object AttrMapView {
   type SelectionChanged[T <: Txn[T]]  = MapView.SelectionChanged[T, AttrMapView[T]]
   val  SelectionChanged: MapView.SelectionChanged.type = MapView.SelectionChanged
 }
-trait AttrMapView[T <: LTxn[T]] extends MapView[T, AttrMapView[T]] {
-  def obj(implicit tx: T): Obj[T]
+trait AttrMapView[T <: LTxn[T]] extends MapView[T, AttrMapView[T]] with UniverseObjView[T] {
+  override def obj(implicit tx: T): Obj.AttrMap[T]
+
+  def receiver(implicit tx: T): Obj[T]
 }

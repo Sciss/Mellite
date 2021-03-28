@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.component
 
 import java.util.Locale
-
 import de.sciss.desktop
 import de.sciss.desktop.{KeyStrokes, OptionPane, Util}
 import de.sciss.equal.Implicits._
@@ -23,11 +22,11 @@ import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.{Application, AttrMapFrame, GUI, MessageException, ObjListView, ObjView, UniverseView}
+import de.sciss.mellite.{Application, AttrMapFrame, GUI, MessageException, ObjListView, ObjView, UniverseObjView, UniverseView}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.PopupMenu
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.annotation.tailrec
 import scala.swing.event.{EditDone, FocusLost, Key, KeyPressed}
 import scala.swing.{Action, Alignment, BorderPanel, Button, Component, Dialog, FlowPanel, SequentialContainer, Swing, TextField}
@@ -35,7 +34,7 @@ import scala.tools.cmd.CommandLineParser
 import scala.util.{Failure, Success}
 
 trait CollectionViewImpl[T <: Txn[T]]
-  extends UniverseView[T]
+  extends UniverseObjView[T]
   with View.Editable[T]
   with ComponentHolder[Component] {
 

@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Source, TxnLike, synth}
-import de.sciss.mellite.{GUI, MarkdownEditorView, MarkdownRenderView}
+import de.sciss.mellite.{GUI, MarkdownEditorView, MarkdownRenderView, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.{Markdown, Universe}
 import de.sciss.scalainterpreter.Fonts
@@ -76,6 +76,10 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
     extends ComponentHolder[Component] with MarkdownEditorView[T] with ModelImpl[MarkdownEditorView.Update] { impl =>
 
     type C = Component
+
+    override def obj(implicit tx: T): Markdown[T] = markdownH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     implicit val universe: Universe[T] = renderer.universe
 

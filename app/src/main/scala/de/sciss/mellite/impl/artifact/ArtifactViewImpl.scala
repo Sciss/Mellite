@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.artifact
 
 import java.net.URI
-
 import de.sciss.desktop.{Desktop, FileDialog, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
@@ -25,11 +24,11 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Artifact, Cursor, Disposable, Source}
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.objview.ArtifactObjView.humanName
-import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationObjView, ArtifactView}
+import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationObjView, ArtifactView, ViewState}
 import de.sciss.swingplus.ComboBox
 import de.sciss.proc.Universe
-import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException}
 
+import javax.swing.undo.{AbstractUndoableEdit, CannotRedoException, CannotUndoException}
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.Try
@@ -114,6 +113,10 @@ object ArtifactViewImpl {
 
     private[this] var ggPath      : PathField   = _
     private[this] var observer    : Disposable[T]  = _
+
+    override def obj(implicit tx: T): Artifact[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     def init(obj0: Artifact[T])(implicit tx: T): this.type = {
       val value0 = obj0.value

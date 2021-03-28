@@ -31,4 +31,6 @@ object FScapeOutputsView {
                                          undoManager: UndoManager): FScapeOutputsView[T] =
     FScapeOutputsViewImpl(obj)
 }
-trait FScapeOutputsView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]
+trait FScapeOutputsView[T <: Txn[T]] extends UniverseObjView[T] with View.Editable[T] {
+  override def obj(implicit tx: T): FScape[T]
+}

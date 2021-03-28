@@ -30,7 +30,7 @@ import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
-import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView}
+import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView, ViewState}
 import de.sciss.model.Change
 import de.sciss.proc.gui.TransportView
 import de.sciss.proc.impl.AuxContextImpl
@@ -121,6 +121,8 @@ object TimelineViewImpl extends TimelineView.Companion {
     implicit val universe: Universe[T] = globalView.universe
 
     def undoManager: UndoManager = globalView.undoManager
+
+    override def viewState: Set[ViewState] = Set.empty  // XXX TODO
 
     private def transport: Transport[T] = transportView.transport
 

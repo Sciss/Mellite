@@ -16,7 +16,6 @@ package de.sciss.mellite.impl.code
 import java.awt.font.FontRenderContext
 import java.awt.{Color, Font, GraphicsEnvironment}
 import java.util.Locale
-
 import de.sciss.desktop.edit.CompoundEdit
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
@@ -26,7 +25,7 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.{Source, Txn, TxnLike}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.ApiBrowser
-import de.sciss.mellite.{CodeView, GUI, Prefs}
+import de.sciss.mellite.{CodeView, GUI, Prefs, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.scalainterpreter.Interpreter
 import de.sciss.swingplus.SpinningProgressBar
@@ -39,9 +38,9 @@ import dotterweide.editor.painter.FlashPainter
 import dotterweide.editor.{ColorScheme, Editor, Flash, FlashImpl, FontSettings}
 import dotterweide.ide.ActionAdapter
 import dotterweide.languages.scala.ScalaLanguage
+
 import javax.swing.Icon
 import javax.swing.undo.UndoableEdit
-
 import scala.collection.immutable.{Seq => ISeq}
 import scala.collection.mutable
 import scala.concurrent.stm.Ref
@@ -137,18 +136,19 @@ object CodeViewImpl extends CodeView.Companion {
                          compiler: Code.Compiler,
                          undoManager: UndoManager): CodeView[T, code0.Out] = {
 
-    val codeEx      = obj
-    val codeVarHOpt = codeEx match {
+    val codeVarHOpt = obj match {
       case Code.Obj.Var(vr) =>
         Some(tx.newHandle(vr))
       case _            => None
     }
-    val res     = new Impl[T, code0.In, code0.Out](codeVarHOpt,
+    val objH = codeVarHOpt.getOrElse(tx.newHandle(obj))
+    val res     = new Impl[T, code0.In, code0.Out](objH, codeVarHOpt,
       code0, handlerOpt, bottom = bottom) // IntelliJ highlight bug
     res.init()
   }
 
-  private final class Impl[T <: Txn[T], In0, Out0](codeVarHOpt: Option[Source[T, Code.Obj.Var[T]]],
+  private final class Impl[T <: Txn[T], In0, Out0](objH: Source[T, Code.Obj[T]],
+                                                   codeVarHOpt: Option[Source[T, Code.Obj.Var[T]]],
                                                    private var code: Code { type In = In0; type Out = Out0 },
                                                    handlerOpt: Option[CodeView.Handler[T, In0, Out0]],
                                                    bottom: ISeq[View[T]])
@@ -157,6 +157,10 @@ object CodeViewImpl extends CodeView.Companion {
     extends CodeView[T, Out0] with ModelImpl[CodeView.Update] {
 
     type C = Component
+
+    override def obj(implicit tx: T): Code.Obj[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty    // XXX TODO: cursor position etc.
 
     // ---- generic lazy ----
 

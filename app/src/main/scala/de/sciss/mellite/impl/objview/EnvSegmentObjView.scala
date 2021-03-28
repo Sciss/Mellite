@@ -28,8 +28,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, DoubleObj, Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.ObjGraphemeView.{HandleDiameter, HandleRadius, HasStartLevels}
 import de.sciss.mellite.impl.objview.ObjViewImpl.raphaelIcon
-import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseView}
+import de.sciss.mellite.impl.{ObjGraphemeViewImpl, ObjViewCmdLineParser, WorkspaceWindow}
+import de.sciss.mellite.{GraphemeRendering, GraphemeView, Insets, ObjGraphemeView, ObjListView, ObjView, UniverseObjView, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.Grapheme.Entry
 import de.sciss.proc.Implicits._
@@ -185,9 +185,13 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   private final class ViewImpl[T <: Txn[T]](objH: Source[T, EnvSegment.Obj[T]], val editable: Boolean)
                                            (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends UniverseView[T] with View.Editable[T] with ComponentHolder[Component] {
+    extends UniverseObjView[T] with View.Editable[T] with ComponentHolder[Component] {
 
     type C = Component
+
+    override def obj(implicit tx: T): EnvSegment.Obj[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     private[this] var value       : EnvSegment        = _
     private[this] var panel       : PanelImpl         = _
@@ -285,9 +289,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
   // XXX TODO DRY with ParamSpecObjView
   private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
                                              name: CellView[T, String])
-    extends WindowImpl[T](name) /* with Veto[T] */ {
-
-    //    resizable = false
+    extends WorkspaceWindow[T](name) /* with Veto[T] */ {
 
 //    override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
 //      if (!view.editable || !view.dirty) None else Some(this)
@@ -317,6 +319,8 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 //      }
 //      p.future
 //    }
+
+    override protected def resizable: Boolean = false
   }
 
   private def detectEditable[T <: Txn[T]](obj: E[T]): Boolean =

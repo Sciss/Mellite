@@ -13,7 +13,7 @@
 
 package de.sciss.mellite
 
-import de.sciss.lucre.{Cursor, Txn}
+import de.sciss.lucre.{Cursor, Obj, Txn}
 import de.sciss.lucre.swing.View
 import de.sciss.proc.Universe
 
@@ -22,6 +22,10 @@ trait UniverseView[T <: Txn[T]] extends View.Cursor[T] {
 
   implicit def cursor: Cursor[T] = universe.cursor
 
-//  // on EDT
-//  def viewState: Map[String, Any]
+  // on EDT
+  def viewState: Set[ViewState]
+}
+
+trait UniverseObjView[T <: Txn[T]] extends UniverseView[T] {
+  def obj(implicit tx: T): Obj[T]
 }

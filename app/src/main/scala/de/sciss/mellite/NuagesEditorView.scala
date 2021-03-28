@@ -63,6 +63,8 @@ object NuagesEditorView {
     */
   final val attrLineOutputs = "line-outputs"
 }
-trait NuagesEditorView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T] with CanBounce {
+trait NuagesEditorView[T <: Txn[T]] extends UniverseObjView[T] with View.Editable[T] with CanBounce {
   def actionDuplicate: Action
+
+  override def obj(implicit tx: T): Nuages[T]
 }

@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.code
 
-import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
-
 import de.sciss.desktop.{Menu, UndoManager, Util}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -23,13 +21,14 @@ import de.sciss.lucre.swing.edit.EditVar
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BooleanObj, Obj, Source}
-import de.sciss.mellite.impl.WindowImpl
-import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseView}
-import de.sciss.synth.SynthGraph
+import de.sciss.mellite.impl.WorkspaceWindow
+import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseObjView, ViewState}
 import de.sciss.proc.Code.Example
 import de.sciss.proc.{Action, Code, Control, Proc, Universe, Widget}
-import javax.swing.undo.UndoableEdit
+import de.sciss.synth.SynthGraph
 
+import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
+import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.{BorderPanel, Component, FlowPanel, Orientation, TabbedPane}
 import scala.util.control.NonFatal
@@ -194,15 +193,18 @@ object CodeFrameImpl extends CodeFrame.Companion {
       bottom = bottom, rightViewOpt = None, debugMenuItems = Nil, canBounce = canBounce)
   }
 
-  private class PlainView[T <: Txn[T]](codeView: View[T], rightViewOpt: Option[(String, View[T])],
+  private class PlainView[T <: Txn[T]](objH: Source[T, Obj[T]], codeView: View[T],
+                                       rightViewOpt: Option[(String, View[T])],
                                        showEditor: Boolean, bottom: ISeq[View[T]])
                                       (implicit val universe: Universe[T],
                                        val undoManager: UndoManager)
-    extends View.Editable[T] with UniverseView[T] with ComponentHolder[Component] {
+    extends View.Editable[T] with UniverseObjView[T] with ComponentHolder[Component] {
 
     type C = Component
 
-//    private[this] var tabs: TabbedPane  = _
+    override def obj(implicit tx: T): Obj[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     def init()(implicit tx: T): this.type = {
       deferTx(guiInit())
@@ -273,7 +275,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
                                                  showEditor: Boolean, bottom: ISeq[View[T]])
                                                 (implicit universe: Universe[T],
                                                  undoManager: UndoManager)
-    extends PlainView[T](codeView, rightViewOpt, showEditor = showEditor, bottom = bottom) with CanBounce {
+    extends PlainView[T](objH, codeView, rightViewOpt, showEditor = showEditor, bottom = bottom) with CanBounce {
 
     object actionBounce extends ActionBounce[T](this, objH)
   }
@@ -303,9 +305,9 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val codeView    = CodeView(obj, code0, bottom = bottomCode)(handler)
 
     val view = if (canBounce)
-      new CanBounceView(pObjH,  codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
+      new CanBounceView (pObjH, codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
     else
-      new PlainView(            codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
+      new PlainView     (pObjH, codeView, rightViewOpt, showEditor = showEditor, bottom = bottomView)
 
     view.init()
     val _name = CellView.name(pObj)
@@ -338,13 +340,13 @@ object CodeFrameImpl extends CodeFrame.Companion {
   // ---- frame impl ----
 
   private final class FrameImpl[T <: Txn[T]](val codeView   : CodeView[T, _],
-                                             val view       : View[T],
+                                             val view       : UniverseObjView[T],
                                              name           : CellView[T, String],
                                              contextName    : String,
                                              debugMenuItems : ISeq[swing.Action],
                                              examples       : ISeq[Example]
                                             )
-    extends WindowImpl[T](name.map(n => s"$n : $contextName Code"))
+    extends WorkspaceWindow[T](name.map(n => s"$n : $contextName Code"))
       with CodeFrameBase[T]
       with CodeFrame[T] {
 

@@ -15,11 +15,10 @@ package de.sciss.mellite.impl.audiocue
 
 import de.sciss.asyncfile.Ops._
 import de.sciss.file._
-import de.sciss.lucre.Obj
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.impl.WorkspaceWindow
-import de.sciss.mellite.{AudioCueFrame, AudioCueView, ViewState}
+import de.sciss.mellite.{AudioCueFrame, AudioCueView}
 import de.sciss.proc.{AudioCue, Universe}
 
 import java.net.URI
@@ -38,17 +37,13 @@ object AudioCueFrameImpl {
     }
 
     val res = new Impl[T](/* doc, */ view = afv, name = name, uri = file)
-    res.init(obj)
+    res.init()
   }
 
   private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: AudioCueView[T],
                                         name: CellView[T, String], uri: URI)
     extends WorkspaceWindow[T](name)
     with AudioCueFrame[T] {
-
-    override protected def viewObj(implicit tx: T): Obj[T] = view.obj
-
-    override protected def viewState: Set[ViewState] = view.viewState
 
     override protected def initGUI(): Unit = {
       super.initGUI()

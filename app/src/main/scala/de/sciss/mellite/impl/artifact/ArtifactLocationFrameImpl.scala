@@ -18,7 +18,7 @@ import de.sciss.lucre.ArtifactLocation
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.ArtifactLocationObjView.humanName
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.WorkspaceWindow
 import de.sciss.mellite.{ArtifactLocationFrame, ArtifactLocationView}
 import de.sciss.proc.Universe
 
@@ -30,11 +30,10 @@ object ArtifactLocationFrameImpl {
     val name      = CellView.name(obj)
     val res       = new Impl(/* doc, */ view = afv, name = name)
     res.init()
-    res
   }
 
   private final class Impl[T <: Txn[T]](/* val document: Workspace[T], */ val view: ArtifactLocationView[T],
                                         name: CellView[T, String])
-    extends WindowImpl[T](name.map(n => s"$n : $humanName"))
+    extends WorkspaceWindow[T](name.map(n => s"$n : $humanName"))
       with ArtifactLocationFrame[T]
 }

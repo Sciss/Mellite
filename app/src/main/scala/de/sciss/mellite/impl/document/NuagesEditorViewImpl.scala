@@ -23,7 +23,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BooleanObj, Folder, IntVector, Source}
 import de.sciss.mellite.impl.WindowImpl
-import de.sciss.mellite.{ActionBounce, FolderEditorView, FolderFrame, GUI, NuagesEditorView, Prefs, TimelineFrame, Veto}
+import de.sciss.mellite.{ActionBounce, FolderEditorView, FolderFrame, GUI, NuagesEditorView, Prefs, TimelineFrame, Veto, ViewState}
 import de.sciss.nuages.{NamedBusConfig, Nuages, NuagesView, ScissProcs}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{GroupPanel, Separator, Spinner}
@@ -31,8 +31,8 @@ import de.sciss.synth.UGenSource.Vec
 import de.sciss.proc
 import de.sciss.proc.Universe
 import de.sciss.{desktop, equal}
-import javax.swing.SpinnerNumberModel
 
+import javax.swing.SpinnerNumberModel
 import scala.concurrent.Future
 import scala.swing.Swing._
 import scala.swing.{Action, BoxPanel, Button, Component, Dialog, Label, Orientation}
@@ -53,6 +53,10 @@ object NuagesEditorViewImpl {
     impl =>
 
     type C = Component
+
+    override def obj(implicit tx: T): Nuages[T] = nuagesH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     implicit val universe: Universe[T] = folderView.universe
 
@@ -227,7 +231,8 @@ object NuagesEditorViewImpl {
       val n     = nuagesH()
       val nCfg  = buildConfiguration()
       val frame: WindowImpl[T] = new WindowImpl[T] with Veto[T] {
-        val view = NuagesView(n, nCfg)
+        val view: NuagesView[T] = NuagesView(n, nCfg)
+
         override val undecorated = true
 
         override protected def initGUI(): Unit =

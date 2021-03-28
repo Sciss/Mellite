@@ -35,7 +35,7 @@ object WindowImpl {
   private final class Peer[T <: Txn[T]](view: View[T], impl: WindowImpl[T],
                                         undoRedoActions: Option[(Action, Action)],
                                         override val style: desktop.Window.Style,
-                                        undecorated: Boolean, callPack: Boolean)
+                                        undecorated: Boolean, callPack: Boolean, resizable0: Boolean)
     extends desktop.impl.WindowImpl {
 
     if (undecorated) makeUndecorated()
@@ -79,6 +79,7 @@ object WindowImpl {
       )
     }
 
+    if (!resizable0) resizable = false
     if (callPack) pack()
   }
 }
@@ -105,6 +106,7 @@ abstract class WindowImpl[T <: Txn[T]] protected (titleExpr: Option[CellView[T, 
 //  final def resizable_=(value: Boolean): Unit = windowImpl.resizable = value
 
   protected def undecorated : Boolean = false
+  protected def resizable   : Boolean = true
   protected def packAndPlace: Boolean = true
 
   final def windowFile        : Option[File]        = windowImpl.file
@@ -123,7 +125,7 @@ abstract class WindowImpl[T <: Txn[T]] protected (titleExpr: Option[CellView[T, 
     }
   }
 
-  final def init()(implicit tx: T): this.type = {
+  def init()(implicit tx: T): this.type = {
     view match {
       case vu: UniverseView[T] =>
         vu.universe.workspace.addDependent(impl)
@@ -138,7 +140,8 @@ abstract class WindowImpl[T <: Txn[T]] protected (titleExpr: Option[CellView[T, 
 
   private def initGUI0(): Unit = {
     val pp      = packAndPlace
-    val f       = new WindowImpl.Peer(view, impl, undoRedoActions, style, undecorated = undecorated, callPack = pp)
+    val f       = new WindowImpl.Peer(view, impl, undoRedoActions, style, undecorated = undecorated,
+      callPack = pp, resizable0 = resizable)
     window      = f
     windowImpl  = f
     Window.attach(f, this)

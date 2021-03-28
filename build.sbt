@@ -262,6 +262,7 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
       "de.sciss"          %% "scalaosc"                       % deps.common.scalaOSC,           // open sound control
       "de.sciss"          %% "scalacollider"                  % deps.common.scalaCollider,      // realtime sound synthesis
       "de.sciss"          %% "scalacolliderugens-api"         % deps.common.scalaColliderUGens, // realtime sound synthesis
+      "de.sciss"          %% "scalacolliderugens-core"        % deps.common.scalaColliderUGens, // realtime sound synthesis
       "de.sciss"          %% "scalacollider-if"               % deps.common.scalaColliderIf,    // realtime sound synthesis
       "de.sciss"          %% "serial"                         % deps.common.serial,             // serialization
       "de.sciss"          %% "sonogramoverview"               % deps.common.sonogram,           // sonogram component

@@ -20,9 +20,9 @@ import de.sciss.lucre.Obj
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
 import de.sciss.mellite.edit.EditAttrMap
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.WorkspaceWindow
 import de.sciss.mellite.impl.component.{CollectionViewImpl, NoMenuBarActions}
-import de.sciss.mellite.{AttrMapFrame, AttrMapView, ObjView}
+import de.sciss.mellite.{AttrMapFrame, AttrMapView, ObjView, ViewState}
 import de.sciss.proc.Universe
 
 import javax.swing.undo.UndoableEdit
@@ -46,7 +46,11 @@ object AttrMapFrameImpl {
 
     impl =>
 
-//    def workspace: Workspace[T] = peer.workspace
+    override def obj(implicit tx: T): Obj[T] = peer.obj
+
+    override def viewState: Set[ViewState] = peer.viewState
+
+    //    def workspace: Workspace[T] = peer.workspace
     val universe: Universe[T] = peer.universe
 
     def dispose()(implicit tx: T): Unit = ()
@@ -54,7 +58,7 @@ object AttrMapFrameImpl {
     protected lazy val actionDelete: Action = Action(null) {
       val sel = peer.selection
       val edits: List[UndoableEdit] = cursor.step { implicit tx =>
-        val obj0 = peer.obj
+        val obj0 = peer.receiver
         sel.map { case (key, _) =>
           EditAttrMap(name = s"Delete Attribute '$key'", obj = obj0, key = key, value = None)
         }
@@ -75,7 +79,7 @@ object AttrMapFrameImpl {
     protected def editInsert(f: ObjView.Factory, xs: List[Obj[T]], key: String)(implicit tx: T): Option[UndoableEdit] = {
       val editOpt = xs.lastOption.map { value =>
         val editName = s"Create Attribute '$key'"
-        EditAttrMap(name = editName, obj = peer.obj, key = key, value = Some(value))
+        EditAttrMap(name = editName, obj = peer.receiver, key = key, value = Some(value))
       }
       editOpt
 //      CompoundEdit(edits, "Create Attributes")
@@ -94,7 +98,7 @@ object AttrMapFrameImpl {
   private final class FrameImpl[T <: Txn[T]](/*objH: Source[T, Obj[T]],*/ val view: ViewImpl[T],
                                              name: CellView[T, String])
 //                                       (implicit undoManager: UndoManager)
-    extends WindowImpl[T](name.map(n => s"$n : Attributes"))
+    extends WorkspaceWindow[T](name.map(n => s"$n : Attributes"))
     with AttrMapFrame[T] with NoMenuBarActions {
 
     override protected def style: desktop.Window.Style = desktop.Window.Auxiliary

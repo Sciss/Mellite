@@ -48,5 +48,7 @@ trait GraphemeView[T <: LTxn[T]] extends TimelineViewBase[T, Double, ObjGrapheme
   def graphemeH: Source[T, Grapheme[T]]
   def grapheme(implicit tx: T): Grapheme[T]
 
+  override def obj(implicit tx: T): Grapheme[T]
+
   override def canvas: GraphemeCanvas[T]
 }

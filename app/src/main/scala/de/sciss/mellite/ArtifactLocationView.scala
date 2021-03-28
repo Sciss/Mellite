@@ -26,4 +26,6 @@ object ArtifactLocationView {
                          undo: UndoManager): ArtifactLocationView[T] =
     Impl(obj)
 }
-trait ArtifactLocationView[T <: Txn[T]] extends UniverseView[T] with View.Editable[T]
+trait ArtifactLocationView[T <: Txn[T]] extends UniverseObjView[T] with View.Editable[T] {
+  override def obj(implicit tx: T): ArtifactLocation[T]
+}

@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.artifact
 
-import java.net.URI
-
 import de.sciss.desktop.{Desktop, FileDialog, PathField, UndoManager}
 import de.sciss.file.File
 import de.sciss.icons.raphael
@@ -24,11 +22,12 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{ArtifactLocation, Disposable, Source}
 import de.sciss.mellite.ArtifactLocationObjView.humanName
-import de.sciss.mellite.ArtifactLocationView
+import de.sciss.mellite.{ArtifactLocationView, ViewState}
 import de.sciss.mellite.GUI.iconNormal
-import de.sciss.swingplus.ComboBox
 import de.sciss.proc.Universe
+import de.sciss.swingplus.ComboBox
 
+import java.net.URI
 import scala.swing.event.{SelectionChanged, ValueChanged}
 import scala.swing.{Action, Button, Component, FlowPanel}
 import scala.util.Try
@@ -84,6 +83,10 @@ object ArtifactLocationViewImpl {
 
     private[this] var ggPath      : PathField   = _
     private[this] var observer    : Disposable[T]  = _
+
+    override def obj(implicit tx: T): ArtifactLocation[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     def init(obj0: ArtifactLocation[T])(implicit tx: T): this.type = {
       val value0 = obj0.value

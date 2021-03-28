@@ -20,7 +20,7 @@ import de.sciss.lucre.swing.View
 import scala.swing.Action
 
 /** Common base for `TimelineView` and `GraphemeView`. */
-trait TimelineViewBase[T <: Txn[T], Y, Child] extends UniverseView[T] with View.Editable[T] {
+trait TimelineViewBase[T <: Txn[T], Y, Child] extends UniverseObjView[T] with View.Editable[T] {
   def timelineModel   : TimelineModel
   def selectionModel  : SelectionModel[T, Child]
 

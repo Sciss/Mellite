@@ -84,4 +84,6 @@ object CodeFrame {
 
 trait CodeFrame[T <: LTxn[T]] extends lucre.swing.Window[T] {
   def codeView: CodeView[T, _]
+
+  override def view: UniverseObjView[T]
 }

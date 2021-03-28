@@ -18,7 +18,7 @@ import de.sciss.lucre.Source
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.impl.BiGroupImpl
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.WorkspaceWindow
 import de.sciss.mellite.impl.proc.ProcObjView
 import de.sciss.mellite.{Application, TimelineFrame, TimelineView}
 import de.sciss.proc.{Timeline, Universe}
@@ -40,12 +40,14 @@ object TimelineFrameImpl {
 
   private final class Impl[T <: Txn[T]](val view: TimelineView[T], name: CellView[T, String],
                                         groupH: Source[T, Timeline[T]])
-    extends WindowImpl[T](name.map(n => s"$n : Timeline"))
+    extends WorkspaceWindow[T](name.map(n => s"$n : Timeline"))
     with TimelineFrame[T] {
 
     import view.{cursor => _cursor}
 
     override protected def initGUI(): Unit = {
+      super.initGUI()
+
       val mf = Application.windowHandler.menuFactory
       val me = Some(window)
 

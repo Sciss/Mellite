@@ -22,13 +22,13 @@ import de.sciss.lucre.Txn.peer
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Disposable, Source, synth}
 import de.sciss.mellite.impl.component.ZoomSupport
-import de.sciss.mellite.{GUI, WidgetEditorFrame, WidgetRenderView}
+import de.sciss.mellite.{GUI, ViewState, WidgetEditorFrame, WidgetRenderView}
 import de.sciss.model.Change
 import de.sciss.proc.UGenGraphBuilder.MissingIn
 import de.sciss.proc.Widget.{Graph, GraphChange}
 import de.sciss.proc.{ExprContext, Universe, Widget}
-import javax.swing.JComponent
 
+import javax.swing.JComponent
 import scala.collection.immutable.{Seq => ISeq}
 import scala.collection.mutable
 import scala.concurrent.stm.Ref
@@ -50,6 +50,10 @@ object WidgetRenderViewImpl {
       /*with ObservableImpl[T, WidgetRenderView.Update[T]]*/ with ZoomSupport { impl =>
 
     type C = Component
+
+    override def obj(implicit tx: T): Widget[T] = widget
+
+    override def viewState: Set[ViewState] = Set.empty  // XXX TODO: zoom level?
 
     private[this] val widgetRef   = Ref.make[(Source[T, Widget[T]], Disposable[T])]()
     private[this] val graphRef    = Ref.make[Widget.Graph]()

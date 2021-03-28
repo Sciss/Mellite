@@ -14,10 +14,9 @@
 package de.sciss.mellite.impl.grapheme
 
 import de.sciss.desktop.{KeyStrokes, Menu, UndoManager, Window}
-import de.sciss.lucre.Source
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.WorkspaceWindow
 import de.sciss.mellite.{Application, GraphemeFrame, GraphemeView}
 import de.sciss.proc.{Grapheme, Universe}
 
@@ -29,19 +28,18 @@ object GraphemeFrameImpl {
     implicit val undoMgr: UndoManager = UndoManager()
     val tlv     = GraphemeView[T](group)
     val name    = CellView.name(group)
-    import Grapheme.format
-    val groupH  = tx.newHandle(group)
-    val res     = new Impl(tlv, name, groupH)
+    val res     = new Impl(tlv, name)
     res.init()
     res
   }
 
-  private final class Impl[T <: Txn[T]](val view: GraphemeView[T], name: CellView[T, String],
-                                        groupH: Source[T, Grapheme[T]])
-    extends WindowImpl[T](name.map(n => s"$n : Grapheme"))
+  private final class Impl[T <: Txn[T]](val view: GraphemeView[T], name: CellView[T, String])
+    extends WorkspaceWindow[T](name.map(n => s"$n : Grapheme"))
       with GraphemeFrame[T] {
 
     override protected def initGUI(): Unit = {
+      super.initGUI()
+
       val mf = Application.windowHandler.menuFactory
       val me = Some(window)
 

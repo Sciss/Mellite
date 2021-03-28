@@ -44,8 +44,10 @@ object MarkdownEditorView {
   sealed trait Update
   final case class DirtyChange(value: Boolean) extends Update
 }
-trait MarkdownEditorView[T <: Txn[T]] extends UniverseView[T] with Model[MarkdownEditorView.Update] {
+trait MarkdownEditorView[T <: Txn[T]] extends UniverseObjView[T] with Model[MarkdownEditorView.Update] {
   def renderer: MarkdownRenderView[T]
+
+  override def obj(implicit tx: T): Markdown[T]
 
   def dirty(implicit tx: TxnLike): Boolean
 

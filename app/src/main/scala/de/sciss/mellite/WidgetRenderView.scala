@@ -31,11 +31,13 @@ object WidgetRenderView {
 //  final case class FollowedLink[T <: Txn[T]](view: WidgetRenderView[T], now: Widget[T]) extends Update[T]
 }
 trait WidgetRenderView[T <: LTxn[T]]
-  extends UniverseView[T] /*with Observable[T, WidgetRenderView.Update[T]]*/ {
+  extends UniverseObjView[T] {
 
   def widget(implicit tx: T): Widget[T]
 
   def widget_=(md: Widget[T])(implicit tx: T): Unit
+
+  override def obj(implicit tx: T): Widget[T]
 
   // def setInProgress(md: Widget[T], value: String)(implicit tx: T): Unit
 

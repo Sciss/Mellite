@@ -39,8 +39,10 @@ object FolderEditorView {
                                             undoManager: UndoManager = UndoManager()): FolderEditorView[T] =
     companion(folder)
 }
-trait FolderEditorView[T <: LTxn[T]] extends View.Editable[T] with UniverseView[T] {
+trait FolderEditorView[T <: LTxn[T]] extends View.Editable[T] with UniverseObjView[T] {
   def peer: FolderView[T]
+
+  override def obj(implicit tx: T): Folder[T]
 
   def bottomComponent: Component with SequentialContainer
 

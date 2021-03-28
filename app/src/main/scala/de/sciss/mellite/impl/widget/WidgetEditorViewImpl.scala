@@ -14,7 +14,6 @@
 package de.sciss.mellite.impl.widget
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, ComponentListener}
-
 import de.sciss.desktop.{KeyStrokes, UndoManager, Util}
 import de.sciss.icons.raphael
 import de.sciss.lucre.edit.{UndoManager => LUndoManager}
@@ -25,11 +24,11 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.{Source, synth}
 import de.sciss.mellite.Mellite.executionContext
 import de.sciss.mellite.impl.code.CodeFrameImpl
-import de.sciss.mellite.{CodeView, GUI, WidgetEditorView, WidgetRenderView}
+import de.sciss.mellite.{CodeView, GUI, ViewState, WidgetEditorView, WidgetRenderView}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.{Universe, Widget}
-import javax.swing.undo.UndoableEdit
 
+import javax.swing.undo.UndoableEdit
 import scala.collection.immutable.{Seq => ISeq}
 import scala.swing.event.{Key, SelectionChanged}
 import scala.swing.{Action, BorderPanel, Button, Component, TabbedPane}
@@ -56,6 +55,10 @@ object WidgetEditorViewImpl {
     extends ComponentHolder[Component] with WidgetEditorView[T] with ModelImpl[WidgetEditorView.Update] { impl =>
 
     type C = Component
+
+    override def obj(implicit tx: T): Widget[T] = widgetH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     implicit val universe: Universe[T] = renderer.universe
 

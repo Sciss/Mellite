@@ -24,7 +24,7 @@ import de.sciss.lucre.{Disposable, Obj, Source}
 import de.sciss.mellite.edit.{EditAddFScapeOutput, EditRemoveFScapeOutput}
 import de.sciss.mellite.impl.MapViewImpl
 import de.sciss.mellite.impl.component.DragSourceButton
-import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView, ObjView}
+import de.sciss.mellite.{DragAndDrop, FScapeOutputsView, GUI, MapView, ObjListView, ObjView, ViewState}
 import de.sciss.swingplus.{ComboBox, ListView}
 import de.sciss.proc.Universe
 
@@ -57,6 +57,10 @@ object FScapeOutputsViewImpl {
                                           (implicit universe: Universe[T],
                                            undoManager: UndoManager)
     extends MapViewImpl[T, FScapeOutputsView[T]] with FScapeOutputsView[T] with ComponentHolder[Component] { impl =>
+
+    override def obj(implicit tx: T): FScape[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     protected final def editRenameKey(before: String, now: String, value: Obj[T])
                                      (implicit tx: T): Option[UndoableEdit] = None

@@ -36,17 +36,12 @@ object WidgetEditorView {
   final case object EditorTab   extends Tab
   final case object RendererTab extends Tab
 }
-trait WidgetEditorView[T <: Txn[T]] extends UniverseView[T] with Model[WidgetEditorView.Update] {
+trait WidgetEditorView[T <: Txn[T]] extends UniverseObjView[T] with Model[WidgetEditorView.Update] {
   def codeView: CodeView[T, Widget.Graph]
 
   def renderer: WidgetRenderView[T]
 
   def currentTab: WidgetEditorView.Tab
 
-//  def dirty(implicit tx: TxnLike): Boolean
-
-//  def save(): Unit
-
-//  def undoAction: Action
-//  def redoAction: Action
+  override def obj(implicit tx: T): Widget[T]
 }

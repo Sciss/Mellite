@@ -19,7 +19,7 @@ import de.sciss.file.File
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.{Txn => STxn}
 import de.sciss.lucre.{Copy, Folder, Txn}
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.{WindowImpl, WorkspaceWindow}
 import de.sciss.mellite.{ActionCloseAllWorkspaces, Application, FolderEditorView, FolderFrame, FolderView, Mellite, WindowPlacement}
 import de.sciss.proc
 import de.sciss.proc.{Durable, Universe, Workspace}
@@ -37,7 +37,6 @@ object FolderFrameImpl {
     val view  = FolderEditorView(folder)
     val res   = new FrameImpl[T](view, name = name, isWorkspaceRoot = isWorkspaceRoot /* , interceptQuit = interceptQuit */)
     res.init()
-    res
   }
 
   def addDuplicateAction[T <: STxn[T]](w: WindowImpl[T], action: Action): Unit =
@@ -50,14 +49,11 @@ object FolderFrameImpl {
 
   private final class FrameImpl[T <: STxn[T]](val view: FolderEditorView[T], name: CellView[T, String],
                                              isWorkspaceRoot: Boolean /* , interceptQuit: Boolean */)
-    extends WindowImpl[T](name) with FolderFrame[T] /* with Veto[T] */ {
+    extends WorkspaceWindow[T](name) with FolderFrame[T] /* with Veto[T] */ {
 
-//    def workspace : Workspace [T] = view.workspace
     def folderView: FolderView[T] = view.peer
 
     def bottomComponent: Component with SequentialContainer = view.bottomComponent
-
-//    private[this] var quitAcceptor = Option.empty[() => Boolean]
 
     private object actionExportBinaryWorkspace extends scala.swing.Action("Export Binary Workspace...") {
       private def selectFile(): Option[File] = {
@@ -124,6 +120,7 @@ object FolderFrameImpl {
     }
 
     override protected def initGUI(): Unit = {
+      super.initGUI()
       addDuplicateAction (this, view.actionDuplicate)
       if (isWorkspaceRoot) {
         val mf = window.handler.menuFactory
@@ -139,6 +136,7 @@ object FolderFrameImpl {
     override protected def placement: WindowPlacement = WindowPlacement(0.5f, 0.0f)
 
     override protected def performClose(): Future[Unit] = if (!isWorkspaceRoot) super.performClose() else {
+      saveViewState()
       import view.universe.workspace
       ActionCloseAllWorkspaces.tryClose(workspace, Some(window))
     }

@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.objview
 
-import java.text.NumberFormat
-import java.util.Locale
 import de.sciss.audiowidgets.RotaryKnob
 import de.sciss.desktop.{OptionPane, UndoManager}
 import de.sciss.icons.raphael
@@ -25,18 +23,19 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Disposable, Expr, Obj, Source, Txn => LTxn}
-import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseView, Veto}
+import de.sciss.mellite.impl.{ObjViewCmdLineParser, WorkspaceWindow}
+import de.sciss.mellite.{GUI, ObjListView, ObjView, UniverseObjView, Veto, ViewState}
 import de.sciss.model.impl.ModelImpl
+import de.sciss.proc.Implicits._
 import de.sciss.proc.{ParamSpec, Universe, Warp}
 import de.sciss.processor.Processor.Aborted
 import de.sciss.swingplus.{ComboBox, GroupPanel, Spinner}
-import de.sciss.proc.Implicits._
 import de.sciss.{desktop, numbers}
-
-import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import org.rogach.scallop
 
+import java.text.NumberFormat
+import java.util.Locale
+import javax.swing.{DefaultBoundedRangeModel, Icon, SpinnerModel, SpinnerNumberModel}
 import scala.concurrent.stm.Ref
 import scala.concurrent.{Future, Promise}
 import scala.swing.Swing.EmptyIcon
@@ -75,10 +74,11 @@ object ParamSpecObjView extends ObjListView.Factory {
       Warp.Cosine, Warp.Sine, Warp.Fader, Warp.DbFader, Warp.Int
     )
     private[this] val nWarp     = sqWarp.map { w =>
-      val n = w.getClass.getSimpleName //.toLowerCase
-      val i = n.indexOf("Warp")
+      val n = w.toString // w.getClass.getSimpleName //.toLowerCase
+      val i = n.indexOf("(")
       if (i < 0) n else n.substring(0, i)
     }
+
     private[this] val mWarp     = ComboBox.Model.wrap(nWarp)
     private[this] val ggUnit    = new TextField(4)
 
@@ -319,9 +319,13 @@ object ParamSpecObjView extends ObjListView.Factory {
   private final class ViewImpl[T <: Txn[T]](objH: Source[T, ParamSpec.Obj[T]], val editable: Boolean)
                                            (implicit val universe: Universe[T],
                                             val undoManager: UndoManager)
-    extends UniverseView[T] with View.Editable[T] with ComponentHolder[Component] {
+    extends UniverseObjView[T] with View.Editable[T] with ComponentHolder[Component] {
 
     type C = Component
+
+    override def obj(implicit tx: T): ParamSpec.Obj[T] = objH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     private[this] var specValue   : ParamSpec         = _
     private[this] var panel       : PanelImpl         = _
@@ -402,7 +406,9 @@ object ParamSpecObjView extends ObjListView.Factory {
 
   private final class FrameImpl[T <: Txn[T]](val view: ViewImpl[T],
                                              name: CellView[T, String])
-    extends WindowImpl[T](name) with Veto[T] {
+    extends WorkspaceWindow[T](name) with Veto[T] {
+
+    override protected def resizable: Boolean = false
 
     override def prepareDisposal()(implicit tx: T): Option[Veto[T]] =
       if (!view.editable || !view.dirty) None else Some(this)

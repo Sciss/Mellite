@@ -20,7 +20,7 @@ import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.synth.Txn
-import de.sciss.mellite.impl.WindowImpl
+import de.sciss.mellite.impl.{WindowImpl, WorkspaceWindow}
 import de.sciss.mellite.impl.code.CodeFrameBase
 import de.sciss.mellite.{CodeView, WidgetEditorFrame, WidgetEditorView, WidgetRenderFrame, WidgetRenderView}
 import de.sciss.proc.{Universe, Widget}
@@ -76,7 +76,7 @@ object WidgetFrameImpl {
   }
 
   private final class EditorFrameImpl[T <: Txn[T]](val view: WidgetEditorView[T], tx0: T)
-    extends WindowImpl[T] with CodeFrameBase[T] with WidgetEditorFrame[T] {
+    extends WorkspaceWindow[T] with CodeFrameBase[T] with WidgetEditorFrame[T] {
     
     import view.cursor
 

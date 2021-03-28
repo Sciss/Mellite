@@ -20,7 +20,7 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Folder, Obj, StringObj, expr}
 import de.sciss.mellite.edit.{EditFolderInsertObj, EditFolderRemoveObj}
 import de.sciss.mellite.impl.component.CollectionViewImpl
-import de.sciss.mellite.{FolderEditorView, FolderView, ObjView}
+import de.sciss.mellite.{FolderEditorView, FolderView, ObjView, ViewState}
 import de.sciss.proc.{ObjKeys, Universe}
 import de.sciss.swingplus.{GroupPanel, Spinner}
 
@@ -47,6 +47,9 @@ object FolderEditorViewImpl extends FolderEditorView.Companion {
   {
 
     impl =>
+
+    override def obj(implicit tx: T): Folder[T] = peer.obj
+    override def viewState: Set[ViewState] = peer.viewState
 
     protected type InsertConfig = Unit
 

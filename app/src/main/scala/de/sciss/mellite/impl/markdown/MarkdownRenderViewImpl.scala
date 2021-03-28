@@ -22,7 +22,7 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.swing.{View, Window}
 import de.sciss.lucre.{Cursor, Disposable, Obj, Source, synth, Txn => LTxn}
 import de.sciss.mellite.impl.component.{NavigationHistory, ZoomSupport}
-import de.sciss.mellite.{GUI, MarkdownFrame, MarkdownRenderView, ObjListView}
+import de.sciss.mellite.{GUI, MarkdownFrame, MarkdownRenderView, ObjListView, ViewState}
 import de.sciss.proc.{Markdown, Universe}
 import de.sciss.{desktop, proc}
 import org.pegdown.{Extensions, PegDownProcessor}
@@ -49,6 +49,10 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
   private final class Impl[T <: synth.Txn[T]](bottom: ISeq[View[T]], embedded: Boolean)
                                         (implicit val universe: Universe[T])
     extends Base[T](bottom, embedded) with MarkdownRenderView[T] { impl =>
+
+    override def obj(implicit tx: T): Markdown[T] = markdown
+
+    override def viewState: Set[ViewState] = Set.empty
 
     protected def mkEditButton(): Option[Component] = {
       if (embedded) None else {

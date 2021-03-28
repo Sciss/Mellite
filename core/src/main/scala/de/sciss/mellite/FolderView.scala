@@ -67,7 +67,7 @@ object FolderView {
   final case class SelectionChanged[T <: Txn[T]](view: FolderView[T], selection: Selection[T])
     extends Update[T]
 }
-trait FolderView[T <: Txn[T]] extends Model[FolderView.Update[T]] with View.Editable[T] with UniverseView[T] {
+trait FolderView[T <: Txn[T]] extends Model[FolderView.Update[T]] with View.Editable[T] with UniverseObjView[T] {
   def selection: FolderView.Selection[T]
 
   def locations: Vec[ArtifactLocationObjView[T]]
@@ -77,4 +77,6 @@ trait FolderView[T <: Txn[T]] extends Model[FolderView.Update[T]] with View.Edit
   def findLocation(f: URI): Option[ActionArtifactLocation.QueryResult[T]]
 
   def root: Source[T, Folder[T]]
+
+  override def obj(implicit tx: T): Folder[T]
 }

@@ -21,6 +21,6 @@ object AudioCueView {
   def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] =
     Impl(obj)
 }
-trait AudioCueView[T <: Txn[T]] extends UniverseView[T] with AudioCueObjView[T] {
-  def viewState: Set[ViewState] = Set.empty
+trait AudioCueView[T <: Txn[T]] extends UniverseObjView[T] with AudioCueObjView[T] {
+  override def obj(implicit tx: T): AudioCue.Obj[T]
 }

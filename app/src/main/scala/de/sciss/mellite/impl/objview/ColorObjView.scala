@@ -23,8 +23,8 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Expr, Obj, Source, Txn => LTxn}
 import de.sciss.mellite.impl.component.PaintIcon
 import de.sciss.mellite.impl.objview.ObjViewImpl.{primitiveConfig, raphaelIcon}
-import de.sciss.mellite.impl.{ObjViewCmdLineParser, WindowImpl}
-import de.sciss.mellite.{MessageException, ObjListView, ObjView, UniverseView}
+import de.sciss.mellite.impl.{ObjViewCmdLineParser, WorkspaceWindow}
+import de.sciss.mellite.{MessageException, ObjListView, ObjView, UniverseObjView, ViewState}
 import de.sciss.proc.Implicits._
 import de.sciss.proc.{Color, Universe}
 import de.sciss.{desktop, numbers}
@@ -310,8 +310,11 @@ object ColorObjView extends ObjListView.Factory {
       //          messageType = OptionPane.Message.Plain)
       //        opt.show(parent) === OptionPane.Result.Ok
       val title = CellView.name(obj)
-      val w: WindowImpl[T] = new WindowImpl[T](title) { self =>
-        val view: UniverseView[T] = new UniverseView[T] with ComponentHolder[Component] {
+      val w: WorkspaceWindow[T] = new WorkspaceWindow[T](title) { self =>
+
+        override protected def resizable: Boolean = false
+
+        val view: UniverseObjView[T] = new UniverseObjView[T] with ComponentHolder[Component] {
           type C = Component
           val universe: Universe[T] = _universe
 
@@ -356,6 +359,10 @@ object ColorObjView extends ObjListView.Factory {
 
             component = pane
           }
+
+          override def obj(implicit tx: T): Obj[T] = listView.obj
+
+          override def viewState: Set[ViewState] = Set.empty
 
           def dispose()(implicit tx: T): Unit = ()
         }

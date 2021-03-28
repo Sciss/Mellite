@@ -15,7 +15,6 @@ package de.sciss.mellite.impl.grapheme
 
 import java.awt.{Font, Graphics2D, RenderingHints}
 import java.util.Locale
-
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
@@ -28,14 +27,14 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BiPin, Disposable, Obj, Source}
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.TimelineViewBaseImpl
-import de.sciss.mellite.{BasicTool, GUI, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel}
+import de.sciss.mellite.{BasicTool, GUI, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel, ViewState}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
 import de.sciss.proc.{Grapheme, TimeRef, Universe}
-import javax.swing.{JComponent, UIManager}
 
+import javax.swing.{JComponent, UIManager}
 import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
 import scala.concurrent.stm.Ref
@@ -135,7 +134,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
     type C = Component
 
-    private type Child    = ObjGraphemeView[T]
+    private type Child  = ObjGraphemeView[T]
 
     private final class ViewMapEntry(val key: Long, val value: List[Child]) {
       override def toString: String = s"ViewMapEntry($key, $value)"
@@ -165,8 +164,11 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     private[this] lazy val toolMove     = GraphemeTool.move    [T](canvas)
     private[this] lazy val toolAdd      = GraphemeTool.add     [T](canvas)
 
-    def grapheme  (implicit tx: T): Grapheme[T] = graphemeH()
-//    def plainGroup(implicit tx: T): Grapheme[T] = grapheme
+    def grapheme(implicit tx: T): Grapheme[T] = graphemeH()
+
+    override def obj(implicit tx: T): Grapheme[T] = graphemeH()
+
+    override def viewState: Set[ViewState] = Set.empty
 
     def dispose()(implicit tx: T): Unit = {
       val m: ViewMap = emptyMap

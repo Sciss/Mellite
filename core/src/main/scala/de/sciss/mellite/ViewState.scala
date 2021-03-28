@@ -38,5 +38,5 @@ object ViewState {
   }
 }
 trait ViewState {
-  def set[T <: Txn[T]](attr: Obj.AttrMap[T])(implicit tx: T)
+  def set[T <: Txn[T]](attr: Obj.AttrMap[T])(implicit tx: T): Unit
 }

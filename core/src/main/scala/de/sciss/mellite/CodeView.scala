@@ -66,7 +66,9 @@ object CodeView {
 
   def installFonts(): Unit = companion.installFonts()
 }
-trait CodeView[T <: LTxn[T], Out] extends UniverseView[T] with Model[CodeView.Update] {
+trait CodeView[T <: LTxn[T], Out] extends UniverseObjView[T] with Model[CodeView.Update] {
+  override def obj(implicit tx: T): Code.Obj[T]
+
   def isCompiling(implicit tx: TxnLike): Boolean
 
   def dirty(implicit tx: TxnLike): Boolean
