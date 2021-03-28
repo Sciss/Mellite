@@ -19,12 +19,12 @@ import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop.{Desktop, FileDialog, UndoManager, Util}
 import de.sciss.fscape.GE
 import de.sciss.icons.raphael
-import de.sciss.lucre.swing.LucreSwing.deferTx
+import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.{AudioFileIn => LWAudioFileIn}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, Source, Workspace}
+import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, DoubleObj, Source, Workspace}
 import de.sciss.mellite.ActionBounce.FileFormat
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
@@ -34,7 +34,7 @@ import de.sciss.mellite.util.Gain
 import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.gui.TransportView
-import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
+import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, Tag, TimeRef, Timeline, Transport, Universe}
 import de.sciss.processor.impl.FutureProxy
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span
@@ -123,6 +123,8 @@ object AudioCueViewImpl {
     res.init(obj)
   }
 
+  private final val StateKey_VisualBoost  = "visual-boost"
+
   private abstract class Impl[T <: Txn[T], I <: Txn[I]](var value: AudioCue, val objH: Source[T, AudioCue.Obj[T]],
                                                         artifactOptH: Option[Source[T, Artifact[T]]],
                                                         fullSpanTL: Span,
@@ -139,7 +141,18 @@ object AudioCueViewImpl {
     protected def transportView: TransportView[I]
     protected def timelineModel: TimelineModel
 
-    private var _sonogram: sonogram.Overview = _
+    private var _sonogram     : sonogram.Overview = _
+    private var sonogramView  : AudioCueViewJ[I]  = _
+
+    private var stateVisualBoost  = 22.0
+    private var dirtyVisualBoost  = false
+
+    override def viewState: Map[String, Any] = {
+      requireEDT()
+      if (dirtyVisualBoost) Map(
+        StateKey_VisualBoost -> stateVisualBoost,
+      ) else Map.empty
+    }
 
     object actionBounce extends ActionBounce[T](impl, objH) {
       override protected def prepare(set0: ActionBounce.QuerySettings[T],
@@ -301,6 +314,9 @@ object AudioCueViewImpl {
     def init(obj: AudioCue.Obj[T])
             (implicit tx: T): this.type = {
       initAttrs(obj)
+      obj.attr.$[Tag]("view").flatMap(_.attr.$[DoubleObj](StateKey_VisualBoost)).foreach { v =>
+        stateVisualBoost = v.value
+      }
       deferTx {
         guiInit()
       }
@@ -310,14 +326,18 @@ object AudioCueViewImpl {
     private def guiInit(): Unit = {
       val snapshot = value
 
-      var sonogramView  : AudioCueViewJ[I]  = null
-      var ggVisualBoost : Component         = null
+      var ggVisualBoost: Component = null
 
       try {
         val artF      = new File(snapshot.artifact)
         _sonogram     = SonogramManager.acquire(artF)
         sonogramView  = new AudioCueViewJ[I](_sonogram, transportView)
-        ggVisualBoost = GUI.boostRotaryR(init = 22f)(sonogramView.visualBoost = _)
+        ggVisualBoost = GUI.boostRotaryR(init = stateVisualBoost.toFloat) { v =>
+          stateVisualBoost = v.toDouble
+          sonogramView.visualBoost = v
+          dirtyVisualBoost = true
+        }
+        dirtyVisualBoost = false  // XXX TODO ugly. `boostRotaryR` always invokes function initially
       } catch {
         case NonFatal(ex) =>
           ex.printStackTrace()

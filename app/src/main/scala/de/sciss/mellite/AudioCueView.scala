@@ -21,4 +21,6 @@ object AudioCueView {
   def apply[T <: Txn[T]](obj: AudioCue.Obj[T])(implicit tx: T, universe: Universe[T]): AudioCueView[T] =
     Impl(obj)
 }
-trait AudioCueView[T <: Txn[T]] extends UniverseView[T] with AudioCueObjView[T]
+trait AudioCueView[T <: Txn[T]] extends UniverseView[T] with AudioCueObjView[T] {
+  def viewState: Map[String, Any] = Map.empty
+}

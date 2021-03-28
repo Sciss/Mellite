@@ -16,11 +16,11 @@ package de.sciss.mellite.impl
 import de.sciss.desktop
 import de.sciss.desktop.WindowHandler
 import de.sciss.file._
-import de.sciss.lucre.{Disposable, Txn}
 import de.sciss.lucre.Txn.peer
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.{deferTx, requireEDT}
 import de.sciss.lucre.swing.{View, Window}
+import de.sciss.lucre.{Disposable, Txn}
 import de.sciss.mellite.{Application, CanBounce, DependentMayVeto, DocumentViewHandler, UniverseView, Veto, WindowPlacement}
 
 import scala.concurrent.stm.Ref
@@ -32,7 +32,7 @@ object WindowImpl {
   private final class Peer[T <: Txn[T]](view: View[T], impl: WindowImpl[T],
                                         undoRedoActions: Option[(Action, Action)],
                                         override val style: desktop.Window.Style,
-                                        undecorated: Boolean)
+                                        undecorated: Boolean, callPack: Boolean)
     extends desktop.impl.WindowImpl {
 
     if (undecorated) makeUndecorated()
@@ -76,7 +76,7 @@ object WindowImpl {
       )
     }
 
-    pack()
+    if (callPack) pack()
   }
 }
 
@@ -101,7 +101,8 @@ abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, St
 //  final def resizable        : Boolean        = windowImpl.resizable
 //  final def resizable_=(value: Boolean): Unit = windowImpl.resizable = value
 
-  protected def undecorated: Boolean = false
+  protected def undecorated : Boolean = false
+  protected def packAndPlace: Boolean = true
 
   final def windowFile        : Option[File]        = windowImpl.file
   final def windowFile_=(value: Option[File]): Unit = windowImpl.file = value
@@ -121,7 +122,9 @@ abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, St
 
   final def init()(implicit tx: T): this.type = {
     view match {
-      case vu: UniverseView[T] => vu.universe.workspace.addDependent(impl)
+      case vu: UniverseView[T] =>
+        vu.universe.workspace.addDependent(impl)
+
       case _ =>
     }
 
@@ -131,15 +134,18 @@ abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, St
   }
 
   private def initGUI0(): Unit = {
-    val f       = new WindowImpl.Peer(view, impl, undoRedoActions, style, undecorated = undecorated)
+    val pp      = packAndPlace
+    val f       = new WindowImpl.Peer(view, impl, undoRedoActions, style, undecorated = undecorated, callPack = pp)
     window      = f
     windowImpl  = f
     Window.attach(f, this)
-    val p = placement
-    desktop.Util.placeWindow(f, p.horizontal, p.vertical, p.padding)
-    f.front()
+    if (pp) {
+      val p = placement
+      desktop.Util.placeWindow(f, p.horizontal, p.vertical, p.padding)
+    }
 
     initGUI()
+    f.front()
   }
 
   protected def initGUI(): Unit = ()
@@ -164,6 +170,7 @@ abstract class WindowImpl[T <: Txn[T]] private (titleExpr: Option[CellView[T, St
 
   private[this] val _wasDisposed = Ref(false)
 
+  // called on the EDT
   protected def performClose(): Future[Unit] =
     view match {
       case cv: View.Cursor[T] =>

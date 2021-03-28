@@ -17,8 +17,8 @@ import de.sciss.desktop.KeyStrokes.{menu1, shift}
 import de.sciss.desktop.{Desktop, KeyStrokes, Menu}
 import de.sciss.lucre.synth.RT
 import de.sciss.osc
-import javax.swing.KeyStroke
 
+import javax.swing.KeyStroke
 import scala.concurrent.stm.TxnExecutor
 import scala.swing.event.Key
 
@@ -72,6 +72,7 @@ object MenuBar {
 //      .add(Item("window-shot",        proxy("Export Window as PDF...")))
 
     val mView = Group("view", "View")
+      .add(CheckBox("save-state", proxy("Remember State")))
       .add(Item("show-log" )("Show Log Window"  -> keyShowLog )(Mellite.logToFront()))
       .add(Item("clear-log")("Clear Log Window" -> keyClearLog)(Mellite.clearLog  ()))
 

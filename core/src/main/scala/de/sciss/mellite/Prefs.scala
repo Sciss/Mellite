@@ -151,6 +151,8 @@ object Prefs {
 //  /** Placeholders: %p path, %d parent directory %f file-name; upper case for URLs. */
 //  def revealFileCmd: Entry[String] = userPrefs("reveal-file")
 
+  def viewSaveState: Entry[Boolean] = userPrefs("view-save-state")
+
   // ---- audio ----
 
   final val defaultSuperCollider: File  = file("<SC_HOME>")

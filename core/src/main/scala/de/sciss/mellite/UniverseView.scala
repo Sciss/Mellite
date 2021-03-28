@@ -21,4 +21,7 @@ trait UniverseView[T <: Txn[T]] extends View.Cursor[T] {
   implicit val universe: Universe[T]
 
   implicit def cursor: Cursor[T] = universe.cursor
+
+//  // on EDT
+//  def viewState: Map[String, Any]
 }
