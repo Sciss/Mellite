@@ -17,18 +17,17 @@ import de.sciss.asyncfile.Ops._
 import de.sciss.desktop.Menu
 import de.sciss.file._
 import de.sciss.kollflitz.Vec
-import de.sciss.lucre.{DoubleObj, IntVector}
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.synth.Txn
+import de.sciss.lucre.{DoubleObj, IntVector}
 import de.sciss.mellite.impl.WindowImpl
 import de.sciss.mellite.{AudioCueFrame, AudioCueView, Prefs}
 import de.sciss.proc.{AudioCue, Tag, Universe}
 
 import java.net.URI
-import javax.swing.JFrame
 import scala.concurrent.Future
 import scala.swing.event.{UIElementMoved, UIElementResized, UIElementShown}
-import scala.swing.{Action, CheckMenuItem, UIElement}
+import scala.swing.{Action, CheckMenuItem, Reactions, UIElement}
 import scala.util.Try
 
 object AudioCueFrameImpl {
@@ -148,25 +147,19 @@ object AudioCueFrameImpl {
         }
       }
 
-//      window.component.peer match {
-//        case jf: JFrame =>
-//          val b = jf.getJMenuBar.getPreferredSize
-//          println(b)
-//        case _ =>
-//      }
-
       if (!packAndPlace) {
         // pack()
         val Vec(x, y, w, h) = stateBounds
         window.component.peer.setBounds(x, y, w, h)
       }
 
-      val rp = window.component
-      rp.listenTo(rp)
-      rp.reactions += {
+      val rp  = window.component
+      val r   = new Reactions.Impl
+      rp.subscribe(r)
+      r += {
         case UIElementMoved   (e) => updateBounds(e)
         case UIElementResized (e) => updateBounds(e)
-        case UIElementShown   (e) => MIN_BOUNDS_TIME = System.currentTimeMillis() + 2000  // XXX TODO
+        case UIElementShown   (_) => MIN_BOUNDS_TIME = System.currentTimeMillis() + 1000  // XXX TODO
       }
     }
   }

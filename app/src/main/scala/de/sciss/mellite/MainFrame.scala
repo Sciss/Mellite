@@ -134,12 +134,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
     contents += HGlue
   }
 
-  // component.peer.getRootPane.putClientProperty("Window.style", "small")
-  component.peer.getRootPane.putClientProperty("apple.awt.brushMetalLook", true)
   resizable = false
   contents  = boxPane
-
-//  private[this] val iconOnline = GUI.sharpIcon(raphael.Shapes.Firefox, extent = 16)
 
   private[this] val iconOnline = raphael.Icon(extent = 14)(raphael.Shapes.Firefox)
 
