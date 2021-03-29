@@ -24,12 +24,12 @@ import de.sciss.lucre.swing.View
 import de.sciss.lucre.swing.graph.{AudioFileIn => LWAudioFileIn}
 import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
-import de.sciss.lucre.{Artifact, ArtifactLocation, Cursor, DoubleObj, Source, Workspace}
+import de.sciss.lucre.{Artifact, ArtifactLocation, BooleanObj, Cursor, DoubleObj, LongObj, Source, SpanLikeObj, SpanObj, Workspace}
 import de.sciss.mellite.ActionBounce.FileFormat
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
-import de.sciss.mellite.impl.timeline
+import de.sciss.mellite.impl.{WindowImpl, timeline}
 import de.sciss.mellite.util.Gain
 import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager, ViewState}
 import de.sciss.model.impl.ModelImpl
@@ -113,7 +113,7 @@ object AudioCueViewImpl {
     val objH = tx.newHandle(obj)
     implicit val undo: UndoManager = UndoManager()
     val res: Impl[T, I] = new Impl[T, I](value, objH, artifactOptH, fullSpanTL, inMemoryBridge = tx.inMemoryBridge) {
-      val timelineModel: TimelineModel =
+      val timelineModel: TimelineModel.Modifiable =
         TimelineModel(bounds = fullSpanTL, visible = fullSpanTL, virtual = fullSpanTL,
           sampleRate = TimeRef.SampleRate)
       val transportView: TransportView[I] =
@@ -123,7 +123,11 @@ object AudioCueViewImpl {
     res.init(obj)
   }
 
-  private final val StateKey_VisualBoost  = "visual-boost"
+  private final val StateKey_VisualBoost  = "vis-boost"
+  private final val StateKey_Catch        = "catch"
+  private final val StateKey_TlPosition   = "tl-pos"
+  private final val StateKey_TlVisible    = "tl-vis"
+  private final val StateKey_TlSelection  = "tl-sel"
 
   private abstract class Impl[T <: Txn[T], I <: Txn[I]](var value: AudioCue, val objH: Source[T, AudioCue.Obj[T]],
                                                         artifactOptH: Option[Source[T, Artifact[T]]],
@@ -139,19 +143,42 @@ object AudioCueViewImpl {
     type C = Component
 
     protected def transportView: TransportView[I]
-    protected def timelineModel: TimelineModel
+    protected def timelineModel: TimelineModel.Modifiable
 
     private var _sonogram     : sonogram.Overview = _
     private var sonogramView  : AudioCueViewJ[I]  = _
 
+    // ---- state ----
+
+    @volatile
     private var stateVisualBoost  = 22.0
     private var dirtyVisualBoost  = false
 
+    @volatile
+    private var stateCatch        = true
+    private var dirtyCatch        = false
+
+    @volatile
+    private var stateTlSelection  = Span.Void: Span.SpanOrVoid
+    private var dirtyTlSelection  = false
+
+    @volatile
+    private var stateTlVisible    = Span(0L, 0L)
+    private var dirtyTlVisible    = false
+
+    @volatile
+    private var stateTlPosition   = 0L
+    private var dirtyTlPosition   = false
+
     override def viewState: Set[ViewState] = {
       requireEDT()
-      if (dirtyVisualBoost) Set(
-        ViewState(StateKey_VisualBoost, DoubleObj, stateVisualBoost),
-      ) else Set.empty
+      var res = Set.empty[ViewState]
+      if (dirtyVisualBoost) res += ViewState(StateKey_VisualBoost , DoubleObj   , stateVisualBoost)
+      if (dirtyCatch      ) res += ViewState(StateKey_Catch       , BooleanObj  , stateCatch      )
+      if (dirtyTlPosition ) res += ViewState(StateKey_TlPosition  , LongObj     , stateTlPosition )
+      if (dirtyTlVisible  ) res += ViewState(StateKey_TlVisible   , SpanObj     , stateTlVisible  )
+      if (dirtyTlSelection) res += ViewState(StateKey_TlSelection , SpanLikeObj , stateTlSelection)
+      res
     }
 
     object actionBounce extends ActionBounce[T](impl, objH) {
@@ -314,8 +341,29 @@ object AudioCueViewImpl {
     def init(obj: AudioCue.Obj[T])
             (implicit tx: T): this.type = {
       initAttrs(obj)
-      obj.attr.$[Tag]("view").flatMap(_.attr.$[DoubleObj](StateKey_VisualBoost)).foreach { v =>
-        stateVisualBoost = v.value
+      for {
+        attr  <- tx.attrMapOption(obj)
+        tag   <- attr.$[Tag](WindowImpl.StateKey_Base)
+        tAttr <- tx.attrMapOption(tag)
+      } {
+        tAttr.$[DoubleObj](StateKey_VisualBoost).foreach { v =>
+          stateVisualBoost = v.value
+        }
+        tAttr.$[BooleanObj](StateKey_Catch).foreach { v =>
+          stateCatch = v.value
+        }
+        tAttr.$[LongObj](StateKey_TlPosition).foreach { v =>
+          stateTlPosition = v.value
+        }
+        tAttr.$[SpanObj](StateKey_TlVisible).foreach { v =>
+          stateTlVisible = v.value
+        }
+        tAttr.$[SpanLikeObj](StateKey_TlSelection).foreach { v =>
+          v.value match {
+            case sp: Span => stateTlSelection = sp
+            case _ =>
+          }
+        }
       }
       deferTx {
         guiInit()
@@ -331,13 +379,45 @@ object AudioCueViewImpl {
       try {
         val artF      = new File(snapshot.artifact)
         _sonogram     = SonogramManager.acquire(artF)
-        sonogramView  = new AudioCueViewJ[I](_sonogram, transportView)
+        val _transportView = transportView
+        val _tlm = timelineModel
+        _tlm.position = stateTlPosition
+        if (stateTlVisible.nonEmpty) {
+          _tlm.visible = stateTlVisible
+        }
+        _tlm.selection = stateTlSelection
+
+        val _cueViewJ = new AudioCueViewJ[I](_sonogram, _transportView)
+        val _catch    = _cueViewJ.transportCatch
+        _catch.catchEnabled = stateCatch
+        _catch.addListener {
+          case b =>
+            stateCatch  = b
+            dirtyCatch  = true
+        }
+        sonogramView = _cueViewJ
+
         ggVisualBoost = GUI.boostRotaryR(init = stateVisualBoost.toFloat) { v =>
           stateVisualBoost = v.toDouble
           sonogramView.visualBoost = v
           dirtyVisualBoost = true
         }
         dirtyVisualBoost = false  // XXX TODO ugly. `boostRotaryR` always invokes function initially
+
+        _tlm.addListener {
+          case TimelineModel.Position (_, p) =>
+            stateTlPosition   = p.now
+            dirtyTlPosition   = true
+
+          case TimelineModel.Visible(_, sp) =>
+            stateTlVisible    = sp.now
+            dirtyTlVisible    = true
+
+          case TimelineModel.Selection(_, sp) =>
+            stateTlSelection  = sp.now
+            dirtyTlSelection  = true
+        }
+
       } catch {
         case NonFatal(ex) =>
           ex.printStackTrace()

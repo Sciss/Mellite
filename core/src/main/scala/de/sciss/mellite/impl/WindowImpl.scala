@@ -29,7 +29,7 @@ import scala.swing.Action
 import scala.util.Success
 
 object WindowImpl {
-  final val StateKey_Bounds = "window-bounds"
+  final val StateKey_Bounds = "win-bounds"
   final val StateKey_Base   = "view"
 
   private final class Peer[T <: Txn[T]](view: View[T], impl: WindowImpl[T],

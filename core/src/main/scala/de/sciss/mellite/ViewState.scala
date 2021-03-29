@@ -23,11 +23,11 @@ object ViewState {
     extends ViewState {
 
     def set[T <: Txn[T]](attr: Obj.AttrMap[T])(implicit tx: T): Unit = {
-      val valueObj = tpe.newConst[T](value)
+      def valueObj = tpe.newConst[T](value)
       attr.get(key) match {
         case Some(obj) if obj.tpe == tpe =>
           val objC = obj.asInstanceOf[Repr[T]]
-          objC match {
+          if (objC.value != value) objC match {
             case tpe.Var(vr) => vr() = valueObj
             case _ => attr.put(key, valueObj)
           }

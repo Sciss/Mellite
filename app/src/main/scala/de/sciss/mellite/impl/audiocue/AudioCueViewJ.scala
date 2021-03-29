@@ -35,16 +35,6 @@ final class AudioCueViewJ[T <: Txn[T]](sonogram: Overview, transportView: Transp
 
   import TimelineCanvasImpl._
 
-  // private val numChannels = sono.inputSpec.numChannels
-  // private val minFreq     = sono.config.sonogram.minFreq
-  // private val maxFreq     = sono.config.sonogram.maxFreq
-
-  //  private val meters  = Vector.fill(numChannels) {
-  //    val res   = new PeakMeterBar(javax.swing.SwingConstants.VERTICAL)
-  //    res.ticks = 50
-  //    res
-  //  }
-
   transportView.catchOption = Some(transportCatch)
 
   protected def transportRunning: Boolean = transportView.isPlayingEDT
