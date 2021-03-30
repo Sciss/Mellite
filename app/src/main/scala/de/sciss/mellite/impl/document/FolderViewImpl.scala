@@ -13,7 +13,6 @@
 
 package de.sciss.mellite.impl.document
 
-import java.net.URI
 import de.sciss.desktop.UndoManager
 import de.sciss.lucre.expr.CellView
 import de.sciss.lucre.swing.LucreSwing.deferTx
@@ -24,13 +23,14 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{Artifact, Disposable, Folder, Obj, Source, StringObj, Txn => LTxn}
 import de.sciss.mellite.FolderView.Selection
 import de.sciss.mellite.edit.EditAttrMap
+import de.sciss.mellite.impl.state.TableViewState
 import de.sciss.mellite.{ActionArtifactLocation, ArtifactLocationObjView, FolderView, ObjListView, ViewState}
 import de.sciss.model.impl.ModelImpl
-import de.sciss.serial.TFormat
 import de.sciss.proc.{ObjKeys, Universe}
 import de.sciss.treetable.j.{DefaultTreeTableCellEditor, TreeTableCellEditor}
 import de.sciss.treetable.{TreeTableCellRenderer, TreeTableSelectionChanged}
 
+import java.net.URI
 import javax.swing.event.{CellEditorListener, ChangeEvent}
 import javax.swing.undo.UndoableEdit
 import javax.swing.{CellEditor, DropMode}
@@ -44,17 +44,8 @@ object FolderViewImpl extends FolderView.Companion {
     FolderView.peer = this
 
   def apply[T <: Txn[T]](root0: Folder[T])
-                        (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T] = {
-    implicit val folderFmt: TFormat[T, Folder[T]] = Folder.format[T]
-
-    new Impl[T] {
-      val treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]] = TreeTableView(root0, TTHandler)
-
-      deferTx {
-        guiInit()
-      }
-    }
-  }
+                        (implicit tx: T, universe: Universe[T], undoManager: UndoManager): FolderView[T] =
+    new Impl[T].init(root0)
 
   def cleanSelection[T <: LTxn[T]](in: Selection[T]): Selection[T] = {
     type NodeView = FolderView.NodeView[T]
@@ -81,7 +72,7 @@ object FolderViewImpl extends FolderView.Companion {
     resRev.reverse
   }
 
-  private abstract class Impl[T <: Txn[T]](implicit val undoManager: UndoManager, val universe: Universe[T])
+  private final class Impl[T <: Txn[T]](implicit val undoManager: UndoManager, val universe: Universe[T])
     extends ComponentHolder[Component]
     with FolderView[T]
     with ModelImpl[FolderView.Update[T]]
@@ -91,14 +82,14 @@ object FolderViewImpl extends FolderView.Companion {
 
     override def obj(implicit tx: T): Folder[T] = root()
 
-    override def viewState: Set[ViewState] = Set.empty  // XXX TODO column widths
+    override def viewState: Set[ViewState] = stateTable.entries
 
     type C = Component
 
     private type Data     = ObjListView[T]
     private type NodeView = FolderView.NodeView[T]
 
-    protected object TTHandler
+    private object TTHandler
       extends TreeTableView.Handler[T, Obj[T], Folder[T], ObjListView[T]] {
 
       def branchOption(node: Obj[T]): Option[Folder[T]] = node match {
@@ -256,40 +247,55 @@ object FolderViewImpl extends FolderView.Companion {
       def data(node: Obj[T])(implicit tx: T): Data = ObjListView(node)
     }
 
-    protected def treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]]
+    def treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]] = _treeView
 
-    def dispose()(implicit tx: T): Unit = {
-      treeView.dispose()
+    private var _treeView: TreeTableView[T, Obj[T], Folder[T], ObjListView[T]] = _
+
+    private val stateTable = new TableViewState[T]()
+
+    def init(root0: Folder[T])(implicit tx: T): this.type = {
+      _treeView = TreeTableView(root0, TTHandler)
+      ViewState.map(root0).foreach(stateTable.init)
+      deferTx {
+        guiInit()
+      }
+      this
     }
+
+    def dispose()(implicit tx: T): Unit =
+      treeView.dispose()
 
     def root: Source[T, Folder[T]] = treeView.root
 
-    protected def guiInit(): Unit = {
-      val t = treeView.treeTable
-      t.rootVisible = false
-      t.rowHeight   = 22  // XXX TODO : times font scale
+    private def guiInit(): Unit = {
+      val tt = treeView.treeTable
+      tt.rootVisible = false
+      tt.rowHeight   = 22  // XXX TODO : times font scale
 
-      val tabCM = t.peer.getColumnModel
+      val tabCM = tt.peer.getColumnModel
       tabCM.getColumn(0).setPreferredWidth(176)
       tabCM.getColumn(1).setPreferredWidth(272)
 
-      t.listenTo(t.selection)
-      t.reactions += {
+      tt.listenTo(tt.selection)
+      tt.reactions += {
         case _: TreeTableSelectionChanged[_, _] =>  // this crappy untyped event doesn't help us at all
           // println(s"selection: $e")
           dispatch(FolderView.SelectionChanged(view, selection))
         // case e => println(s"other: $e")
       }
-      t.showsRootHandles  = true
+      tt.showsRootHandles  = true
       // t.expandPath(TreeTable.Path(_model.root))
-      t.dragEnabled       = true
-      t.dropMode          = DropMode.ON_OR_INSERT_ROWS
-      t.peer.setTransferHandler(FolderTransferHandler)
+      tt.dragEnabled       = true
+      tt.dropMode          = DropMode.ON_OR_INSERT_ROWS
+      tt.peer.setTransferHandler(FolderTransferHandler)
       val tc        = treeView.component
 //      tc.peer.putClientProperty("styleId", "nofocus")
       tc.peer.putClientProperty("styleId", "undecorated")
-      component     = tc
 
+      val tj = tt.peer.getTableHeader.getTable
+      stateTable.guiInitJ(tj)
+
+      component = tc
     }
 
     def selection: Selection[T] = treeView.selection

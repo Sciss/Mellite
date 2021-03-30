@@ -40,9 +40,7 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
 
   final override def init()(implicit tx: T): this.type = {
     stateBounds = (for {
-      attr    <- tx.attrMapOption(view.obj)
-      tag     <- attr.$[Tag](WindowImpl.StateKey_Base)
-      tAttr   <- tx.attrMapOption(tag)
+      tAttr   <- ViewState.map(view.obj)
       bounds  <- tAttr.$[IntVector](WindowImpl.StateKey_Bounds)
     } yield {
       bounds.value match {
@@ -79,9 +77,9 @@ abstract class WorkspaceWindow[T <: Txn[T]] protected (titleExpr: Option[CellVie
     if (!wasDisposed && lastViewState.nonEmpty) {
       val viewObj = view.obj
       val attr    = viewObj.attr
-      val tag     = attr.$[Tag](WindowImpl.StateKey_Base).getOrElse {
+      val tag     = attr.$[Tag](ViewState.Key_Base).getOrElse {
         val t = Tag[T]()
-        attr.put(WindowImpl.StateKey_Base, t)
+        attr.put(ViewState.Key_Base, t)
         t
       }
       val tAttr = tag.attr

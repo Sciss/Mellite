@@ -14,10 +14,21 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.{Expr, Obj, Txn}
+import de.sciss.mellite.impl.WindowImpl
+import de.sciss.proc.Tag
 
 object ViewState {
+  final val Key_Base = "view"
+
   def apply[A, Repr[~ <: Txn[~]] <: Expr[~, A]](key: String, tpe: Expr.Type[A, Repr], value: A): ViewState =
     Impl(key, tpe, value)
+
+  def map[T <: Txn[T]](obj: Obj[T], key: String = Key_Base)(implicit tx: T): Option[Obj.AttrMap[T]] =
+    for {
+      attr  <- tx.attrMapOption(obj)
+      tag   <- attr.$[Tag](key)
+      tAttr <- tx.attrMapOption(tag)
+    } yield tAttr
 
   private case class Impl[A, Repr[~ <: Txn[~]] <: Expr[~, A]](key: String, tpe: Expr.Type[A, Repr], value: A)
     extends ViewState {

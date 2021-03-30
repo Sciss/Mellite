@@ -29,12 +29,12 @@ import de.sciss.mellite.ActionBounce.FileFormat
 import de.sciss.mellite.GUI.iconNormal
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.AudioCueObjViewImpl
-import de.sciss.mellite.impl.{WindowImpl, timeline}
+import de.sciss.mellite.impl.timeline
 import de.sciss.mellite.util.Gain
 import de.sciss.mellite.{ActionBounce, ArtifactFrame, AudioCueView, CanBounce, DragAndDrop, GUI, Mellite, ObjView, ProcActions, SonogramManager, ViewState}
 import de.sciss.model.impl.ModelImpl
 import de.sciss.proc.gui.TransportView
-import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, Tag, TimeRef, Timeline, Transport, Universe}
+import de.sciss.proc.{AudioCue, GenContext, Proc, Scheduler, TimeRef, Timeline, Transport, Universe}
 import de.sciss.processor.impl.FutureProxy
 import de.sciss.processor.{Processor, ProcessorLike}
 import de.sciss.span.Span
@@ -342,9 +342,7 @@ object AudioCueViewImpl {
             (implicit tx: T): this.type = {
       initAttrs(obj)
       for {
-        attr  <- tx.attrMapOption(obj)
-        tag   <- attr.$[Tag](WindowImpl.StateKey_Base)
-        tAttr <- tx.attrMapOption(tag)
+        tAttr <- ViewState.map(obj)
       } {
         tAttr.$[DoubleObj](StateKey_VisualBoost).foreach { v =>
           stateVisualBoost = v.value
