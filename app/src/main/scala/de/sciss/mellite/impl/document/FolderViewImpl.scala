@@ -82,7 +82,7 @@ object FolderViewImpl extends FolderView.Companion {
 
     override def obj(implicit tx: T): Folder[T] = root()
 
-    override def viewState: Set[ViewState] = stateTable.entries
+    override def viewState: Set[ViewState] = stateTable.entries()
 
     type C = Component
 

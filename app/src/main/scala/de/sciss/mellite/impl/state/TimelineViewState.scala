@@ -65,9 +65,9 @@ class TimelineViewState[T <: Txn[T]](
   private var stateVisualBoost  = sqrt(visBoostMin * visBoostMax)
   private var dirtyVisualBoost  = false
 
-  def entries: Set[ViewState] = {
+  def entries(set0: Set[ViewState] = Set.empty): Set[ViewState] = {
     requireEDT()
-    var res = Set.empty[ViewState]
+    var res = set0
     if (dirtyPosition   ) res += ViewState(TimelineViewState.Key_Position     , LongObj     , statePosition   )
     if (dirtyVisible    ) res += ViewState(TimelineViewState.Key_Visible      , SpanObj     , stateVisible    )
     if (dirtySelection  ) res += ViewState(TimelineViewState.Key_Selection    , SpanLikeObj , stateSelection  )

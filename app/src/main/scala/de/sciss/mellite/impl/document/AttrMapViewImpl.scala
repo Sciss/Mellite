@@ -46,7 +46,7 @@ object AttrMapViewImpl {
 
       private val stateTable = new TableViewState[T]()
 
-      override def viewState: Set[ViewState] = stateTable.entries
+      override def viewState: Set[ViewState] = stateTable.entries()
 
       override protected val observer: Disposable[T] = _receiver.attr.changed.react { implicit tx =>upd =>
         upd.changes.foreach {

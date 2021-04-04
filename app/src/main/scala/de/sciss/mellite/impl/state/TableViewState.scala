@@ -19,8 +19,8 @@ import de.sciss.lucre.{IntObj, IntVector, Obj, Txn}
 import de.sciss.mellite.ViewState
 
 import javax.swing.RowSorter.SortKey
-import javax.swing.{JTable, SortOrder}
 import javax.swing.event.{AncestorEvent, AncestorListener, ChangeEvent, ListSelectionEvent, RowSorterEvent, TableColumnModelEvent, TableColumnModelListener}
+import javax.swing.{JTable, SortOrder}
 import scala.collection.JavaConverters._
 import scala.swing.Table
 
@@ -47,9 +47,9 @@ class TableViewState[T <: Txn[T]](keyColWidths: String = TableViewState.Key_ColW
   @volatile
   private var stateColOrder   = Vec.empty[Int]
 
-  def entries: Set[ViewState] = {
+  def entries(set0: Set[ViewState] = Set.empty): Set[ViewState] = {
     requireEDT()
-    var res = Set.empty[ViewState]
+    var res = set0
     if (dirtyColWidths) res += ViewState(keyColWidths , IntVector , stateColWidths)
     if (dirtyRowSort  ) res += ViewState(keyRowSort   , IntObj    , stateRowSort  )
     if (dirtyColOrder ) res += ViewState(keyColOrder  , IntVector , stateColOrder )

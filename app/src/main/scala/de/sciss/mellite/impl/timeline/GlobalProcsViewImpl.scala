@@ -23,6 +23,7 @@ import de.sciss.lucre.{IntObj, Obj, Source, SpanLikeObj, TxnLike, Txn => LTxn}
 import de.sciss.mellite.edit.{EditAttrMap, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.objview.IntObjView
 import de.sciss.mellite.impl.proc.{ProcGUIActions, ProcObjView}
+import de.sciss.mellite.impl.state.TableViewState
 import de.sciss.mellite.{AttrMapFrame, DragAndDrop, GUI, GlobalProcsView, ObjTimelineView, ObjView, ProcActions, SelectionModel, ViewState}
 import de.sciss.proc.{Proc, Timeline, Universe}
 import de.sciss.span.Span
@@ -37,7 +38,6 @@ import javax.swing.{DropMode, JComponent, SwingUtilities, TransferHandler}
 import scala.annotation.switch
 import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.concurrent.stm.TxnExecutor
-import scala.swing.Swing._
 import scala.swing.event.{MouseButtonEvent, MouseEvent, SelectionChanged, TableRowsSelected}
 import scala.swing.{Action, BorderPanel, BoxPanel, Button, Component, FlowPanel, Label, Orientation, ScrollPane, Swing, Table, TextField}
 import scala.util.Try
@@ -53,9 +53,12 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
     // import ProcGroup.Modifiable.serializer
     val groupHOpt = group.modifiableOption.map(gm => tx.newHandle(gm))
     val view      = new Impl[T](/* tx.newHandle(group), */ groupHOpt, selectionModel)
-    deferTx(view.initGUI())
-    view
+    view.init(group)
   }
+
+  private final val Key_ColWidths  = "global-col-widths"
+  private final val Key_RowSort    = "global-row-sort"
+  private final val Key_ColOrder   = "global-col-order"
 
   private final class Impl[T <: Txn[T]](// groupH: Source[T, Timeline[T]],
                                         groupHOpt: Option[Source[T, Timeline.Modifiable[T]]],
@@ -66,7 +69,13 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
 
     type C = Component
 
-    override def viewState: Set[ViewState] = Set.empty  // XXX TODO
+    private val stateTable = new TableViewState[T](
+      keyColWidths = Key_ColWidths,
+      keyRowSort   = Key_RowSort,
+      keyColOrder  = Key_ColOrder
+    )
+
+    override def viewState: Set[ViewState] = stateTable.entries()
 
     //    private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
     private[this] var procSeq = Vec.empty[ProcObjView.Timeline[T]]
@@ -234,7 +243,22 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       // tc.setMaxWidth      (w)
     }
 
-    def initGUI(): Unit = {
+    private def getColumnWidth(tcm: TableColumnModel, idx: Int): Int = {
+      val tc = tcm.getColumn(idx)
+      tc.getPreferredWidth
+    }
+
+    def init(timeline: Timeline[T])(implicit tx: T): this.type = {
+      for {
+        tAttr <- ViewState.map(timeline)
+      } {
+        stateTable.init(tAttr)
+      }
+      deferTx(initGUI())
+      this
+    }
+
+    private def initGUI(): Unit = {
       table             = new Table(tm)
 
       // XXX TODO: enable the following - but we're loosing default boolean rendering
@@ -254,7 +278,15 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       setColumnWidth(tcm, 1, 47)
       setColumnWidth(tcm, 2, 29)
       setColumnWidth(tcm, 3, 43)
-      jt.setPreferredScrollableViewportSize(177 -> 100)
+
+      stateTable.initGUI_J(jt)
+//      val tabW = 3 +
+//        getColumnWidth(tcm, 0) +
+//        getColumnWidth(tcm, 1) +
+//        getColumnWidth(tcm, 2) +
+//        getColumnWidth(tcm, 3)
+//      println(s"tabW = $tabW")
+//      jt.setPreferredScrollableViewportSize(new Dimension(tabW, 100))
 
       // ---- drag and drop ----
       jt.setDropMode(DropMode.ON)
@@ -263,15 +295,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
         override def getSourceActions(c: JComponent): Int = TransferHandler.LINK
 
         override def createTransferable(c: JComponent): Transferable = {
-          val selRows         = table.selection.rows
-          //          if (selRows.isEmpty) null else {
-          //            val sel   = selRows.map(procSeq.apply)
-          //            val types = Set(Proc.typeId)
-          //            val tSel  = DragAndDrop.Transferable(FolderView.selectionFlavor) {
-          //              new FolderView.SelectionDnDData(document, sel, types)
-          //            }
-          //            tSel
-
+          val selRows = table.selection.rows
           selRows.headOption.map { row =>
             val pv = procSeq(row)
             DragAndDrop.Transferable(DnD.flavor)(DnD.GlobalProcDrag(universe, pv.objH))

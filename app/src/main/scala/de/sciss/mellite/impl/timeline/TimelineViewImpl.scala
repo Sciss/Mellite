@@ -29,7 +29,7 @@ import de.sciss.mellite.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.impl.proc.ProcObjView
-import de.sciss.mellite.impl.state.TimelineViewState
+import de.sciss.mellite.impl.state.{SplitPaneLViewState, TimelineViewState}
 import de.sciss.mellite.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
 import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView, ViewState}
 import de.sciss.model.Change
@@ -99,6 +99,9 @@ object TimelineViewImpl extends TimelineView.Companion {
     tlView.init(obj)
   }
 
+  private final val Key_GlobalShown = "global-shown"
+  private final val Key_GlobalWidth = "global-width"
+
   private final class Impl[T <: Txn[T]](val objH: Source[T, Timeline[T]],
                                         val viewMap: ObjTimelineView.Map[T],
                                         //                                        val scanMap: ProcObjView.ScanMap[T],
@@ -124,13 +127,16 @@ object TimelineViewImpl extends TimelineView.Companion {
     def undoManager: UndoManager = globalView.undoManager
 
     override def viewState: Set[ViewState] = {
-      // XXX TODO: add globalView state
-      stateTimeline.entries
+      var res = globalView.viewState
+      res     = stateTimeline   .entries(res)
+      res     = stateGlobalSplit.entries(res)
+      res
     }
 
     private def transport: Transport[T] = transportView.transport
 
-    private val stateTimeline = new TimelineViewState[T]()
+    private val stateTimeline     = new TimelineViewState [T]()
+    private val stateGlobalSplit  = new SplitPaneLViewState[T](keyShown = Key_GlobalShown, keyWidth = Key_GlobalWidth)
 
     private[this] var viewRange = RangedSeq.empty[ObjTimelineView[T], Long]
     private[this] val viewSet   = TSet     .empty[ObjTimelineView[T]]
@@ -182,7 +188,8 @@ object TimelineViewImpl extends TimelineView.Companion {
       for {
         tAttr <- ViewState.map(timeline)
       } {
-        stateTimeline.init(tAttr)
+        stateTimeline   .init(tAttr)
+        stateGlobalSplit.init(tAttr)
       }
 
       addDisposable(timeline.changed.react { implicit tx => upd =>
@@ -288,9 +295,11 @@ object TimelineViewImpl extends TimelineView.Companion {
       }
 
       val pane2 = new SplitPane(Orientation.Vertical, globalView.component, canvas.component)
-      pane2.dividerSize         = 4
+//      pane2.dividerSize         = 4
       pane2.border              = null
       pane2.oneTouchExpandable  = true
+
+      stateGlobalSplit.initGUI(pane2)
 
       val pane = new BorderPanel {
 

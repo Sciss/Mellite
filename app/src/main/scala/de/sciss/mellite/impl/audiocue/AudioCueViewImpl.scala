@@ -145,7 +145,7 @@ object AudioCueViewImpl {
 
     private val stateTimeline = new TimelineViewState[T]()
 
-    override def viewState: Set[ViewState] = stateTimeline.entries
+    override def viewState: Set[ViewState] = stateTimeline.entries()
 
     object actionBounce extends ActionBounce[T](impl, objH) {
       override protected def prepare(set0: ActionBounce.QuerySettings[T],
