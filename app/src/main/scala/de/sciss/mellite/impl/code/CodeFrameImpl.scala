@@ -22,8 +22,9 @@ import de.sciss.lucre.swing.impl.ComponentHolder
 import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BooleanObj, Obj, Source}
 import de.sciss.mellite.impl.WorkspaceWindow
-import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcActions, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseObjView, ViewState}
+import de.sciss.mellite.{ActionBounce, AttrMapView, CanBounce, CodeFrame, CodeView, ProcOutputsView, RunnerToggleButton, SplitPaneView, UniverseObjView, ViewState}
 import de.sciss.proc.Code.Example
+import de.sciss.proc.impl.MkSynthGraphSource
 import de.sciss.proc.{Action, Code, Control, Proc, Universe, Widget}
 import de.sciss.synth.SynthGraph
 
@@ -45,7 +46,7 @@ object CodeFrameImpl extends CodeFrame.Companion {
     val codeObj = mkSource(obj = obj, codeTpe = Code.Proc, key = Proc.attrSource)({
       val gv: SynthGraph = obj.graph.value
       val txt     = /*if (gv.isEmpty) "" else*/ try {
-        ProcActions.extractSource(gv)
+        MkSynthGraphSource(gv)
       } catch {
         case NonFatal(ex) =>
           s"// $ex"
@@ -207,11 +208,11 @@ object CodeFrameImpl extends CodeFrame.Companion {
     override def viewState: Set[ViewState] = Set.empty
 
     def init()(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       this
     }
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       val pane = rightViewOpt.fold[C](codeView.component) { case (rightTitle, rightView) =>
         val _tabs = new TabbedPane
         _tabs.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete

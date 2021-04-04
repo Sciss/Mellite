@@ -149,9 +149,9 @@ object FScapeObjView extends NoArgsListObjViewFactory {
 
       override def dispose()(implicit tx: T): Unit = disposeRender()
 
-      deferTx(guiInit())
+      deferTx(initGUI())
 
-      private def guiInit(): Unit = {
+      private def initGUI(): Unit = {
         val actionRender = new swing.Action("Render") { self =>
           def apply(): Unit = {
             import universe.cursor

@@ -335,7 +335,7 @@ object ParamSpecObjView extends ObjListView.Factory {
 
     def init(spec0: ParamSpec.Obj[T])(implicit tx: T): this.type = {
       val spec0V = spec0.value
-      deferTx(guiInit(spec0V))
+      deferTx(initGUI(spec0V))
       observer = spec0.changed.react { implicit tx => upd =>
         deferTx {
           specValue   = upd.now
@@ -345,7 +345,7 @@ object ParamSpecObjView extends ObjListView.Factory {
       this
     }
 
-    private def guiInit(spec0: ParamSpec): Unit = {
+    private def initGUI(spec0: ParamSpec): Unit = {
       this.specValue = spec0
       panel = new PanelImpl(nameIn = None, editable = editable)
       panel.spec = spec0

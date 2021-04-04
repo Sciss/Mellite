@@ -107,7 +107,7 @@ object MenuBar {
         case _b: java.lang.Boolean  => _b.booleanValue()
         case _                      => false
       }
-      println(s"REMEMBER STATE: $b")
+      // println(s"REMEMBER STATE: $b")
       Prefs.viewSaveState.put(b)
     }
   }

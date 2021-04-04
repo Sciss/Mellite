@@ -215,18 +215,6 @@ object Prefs {
   def audioMainPostMeter  : Entry[Boolean]  = userPrefs("audio-main-post-meter")
   def headphonesActive    : Entry[Boolean]  = userPrefs("headphones-active")
 
-  // XXX TODO remove in next major version
-  @deprecated("Use audioMainVolume; will be removed", since = "2.45.4")
-  def audioMasterVolume   : Entry[Int] = audioMainVolume
-
-  // XXX TODO remove in next major version
-  @deprecated("Use audioMainLimiter; will be removed", since = "2.45.4")
-  def audioMasterLimiter  : Entry[Boolean] = audioMainLimiter
-
-  // XXX TODO remove in next major version
-  @deprecated("Use audioMainPostMeter; will be removed", since = "2.45.4")
-  def audioMasterPostMeter  : Entry[Boolean]  = audioMainPostMeter
-
   // ---- applications can set these ----
 
   /** Whether to create a log (post) window or not. Defaults to `true`. */

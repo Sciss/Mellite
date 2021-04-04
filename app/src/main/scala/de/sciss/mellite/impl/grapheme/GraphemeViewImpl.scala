@@ -180,12 +180,12 @@ object GraphemeViewImpl extends GraphemeView.Companion {
     }
 
     def init()(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       this
     }
 
-    override protected def guiInit(): Unit = {
-      super.guiInit()
+    override protected def initGUI(): Unit = {
+      super.initGUI()
 
       canvas = new View
 

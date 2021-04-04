@@ -272,9 +272,9 @@ object CursorsFrameImpl {
           }
       }
 
-    final def init()(implicit tx: D): Unit = deferTx(guiInit())
+    final def init()(implicit tx: D): Unit = deferTx(initGUI())
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       _model = new ElementTreeModel
 
       val colName = new TreeColumnModel.Column[Node, String]("Name") {

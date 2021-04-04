@@ -111,7 +111,7 @@ object OutputsViewImpl {
       ggDrag      .enabled  = enabled
     }
 
-    final protected def guiInit1(scroll: ScrollPane): Unit = {
+    final protected def initGUI1(scroll: ScrollPane): Unit = {
       // tab.preferredSize = (400, 100)
       val ggAddOut  = GUI.toolButton(ActionAdd   , raphael.Shapes.Plus , "Add Output"   )
       val ggDelete  = GUI.toolButton(actionRemove, raphael.Shapes.Minus, "Remove Output")

@@ -121,14 +121,14 @@ object WidgetEditorViewImpl {
       import de.sciss.mellite.Mellite.compiler
       _codeView = CodeView[T](codeObj, code0, bottom = bot +: bottom)(Some(handler))
 
-      deferTx(guiInit(/* initialText, */ showEditor = showEditor))
+      deferTx(initGUI(/* initialText, */ showEditor = showEditor))
       this
     }
 
     def currentTab: WidgetEditorView.Tab =
       if (tabs.selection.index == 0) WidgetEditorView.EditorTab else WidgetEditorView.RendererTab
 
-    private def guiInit(/* initialText: String, */ showEditor: Boolean): Unit = {
+    private def initGUI(/* initialText: String, */ showEditor: Boolean): Unit = {
       val paneEdit: BorderPanel = new BorderPanel {
         private def addEditor(): Unit =
           add(codeView.component, BorderPanel.Position.Center)

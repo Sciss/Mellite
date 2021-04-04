@@ -147,11 +147,11 @@ object MarkdownEditorViewImpl extends MarkdownEditorView.Companion {
     }
 
     def init(initialText: String, showEditor: Boolean)(implicit tx: T): this.type = {
-      deferTx(guiInit(initialText, showEditor = showEditor))
+      deferTx(initGUI(initialText, showEditor = showEditor))
       this
     }
 
-    private def guiInit(initialText: String, showEditor: Boolean): Unit = {
+    private def initGUI(initialText: String, showEditor: Boolean): Unit = {
       paneImpl            = createPane(initialText)
       actionApply         = Action("Apply")(save())
       actionRender        = Action(null   )(renderAndShow())

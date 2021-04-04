@@ -120,7 +120,7 @@ object ArtifactViewImpl {
 
     def init(obj0: Artifact[T])(implicit tx: T): this.type = {
       val value0 = obj0.value
-      deferTx(guiInit(value0))
+      deferTx(initGUI(value0))
       observer = obj0.changed.react { implicit tx => upd =>
         deferTx {
           val fileNowOpt = Try(new File(upd.now)).toOption
@@ -130,7 +130,7 @@ object ArtifactViewImpl {
       this
     }
 
-    private def guiInit(value0: URI): Unit = {
+    private def initGUI(value0: URI): Unit = {
       val (_ggPath, p) = mkPathField(reveal = true, mode = mode, initMode = initMode)
       val file0Opt = Try(new File(value0)).toOption
       _ggPath.valueOption = file0Opt

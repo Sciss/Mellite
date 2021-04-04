@@ -42,7 +42,7 @@ object NuagesEditorViewImpl {
     val folder  = FolderEditorView[T](obj.folder)
     val res     = new Impl[T](tx.newHandle(obj), folder)
     deferTx {
-      res.guiInit()
+      res.initGUI()
     }
     res
   }
@@ -93,7 +93,7 @@ object NuagesEditorViewImpl {
       nCfg
     }
 
-    def guiInit(): Unit = {
+    def initGUI(): Unit = {
       val ggPower = Button("Live!") {
         impl.cursor.step { implicit tx => openLive() }
       }

@@ -100,7 +100,7 @@ trait CollectionViewImpl[T <: Txn[T]]
   final protected var ggAttr  : Button = _
 
   final def init()(implicit tx: T): this.type = {
-    deferTx(guiInit())
+    deferTx(initGUI())
     this
   }
 
@@ -310,7 +310,7 @@ trait CollectionViewImpl[T <: Txn[T]]
 
   private[this] var _bottomComponent: FlowPanel = _
 
-  private def guiInit(): Unit = {
+  private def initGUI(): Unit = {
     ggAdd    = GUI.addButton   (actionAdd   , "Add Element")
     ggDelete = GUI.removeButton(actionDelete, "Remove Selected Element")
     ggAttr   = GUI.attrButton  (actionAttr  , nameAttr)

@@ -201,7 +201,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
 
     def init(obj0: EnvSegment.Obj[T])(implicit tx: T): this.type = {
       val value0 = obj0.value
-      deferTx(guiInit(value0))
+      deferTx(initGUI(value0))
       observer = obj0.changed.react { implicit tx => upd =>
         deferTx {
           value       = upd.now
@@ -211,7 +211,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       this
     }
 
-    private def guiInit(value0: EnvSegment): Unit = {
+    private def initGUI(value0: EnvSegment): Unit = {
       this.value  = value0
       panel       = new PanelImpl(nameIn = None, editable = editable)
       panel.value = value0

@@ -53,7 +53,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
     // import ProcGroup.Modifiable.serializer
     val groupHOpt = group.modifiableOption.map(gm => tx.newHandle(gm))
     val view      = new Impl[T](/* tx.newHandle(group), */ groupHOpt, selectionModel)
-    deferTx(view.guiInit())
+    deferTx(view.initGUI())
     view
   }
 
@@ -234,7 +234,7 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       // tc.setMaxWidth      (w)
     }
 
-    def guiInit(): Unit = {
+    def initGUI(): Unit = {
       table             = new Table(tm)
 
       // XXX TODO: enable the following - but we're loosing default boolean rendering

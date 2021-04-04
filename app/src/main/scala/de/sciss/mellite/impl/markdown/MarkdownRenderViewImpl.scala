@@ -124,7 +124,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
     def markdown(implicit tx: T): Markdown[T] = mdRef()._1.apply()
 
     def init(obj: Markdown[T])(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       markdown = obj
       obsNav = nav.react { implicit tx => upd =>
         deferTx {
@@ -177,7 +177,7 @@ object MarkdownRenderViewImpl extends MarkdownRenderView.Companion {
     protected def setZoomFactor(f: Float): Unit =
       _editor.zoom = f
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       _editor = new HTMLEditorPaneWithZoom("") {
         editable      = false
         border        = Swing.EmptyBorder(8)

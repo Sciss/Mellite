@@ -29,6 +29,7 @@ import de.sciss.mellite.edit.{EditFolderInsertObj, EditTimelineInsertObj, Edits}
 import de.sciss.mellite.impl.component.DragSourceButton
 import de.sciss.mellite.impl.objview.{CodeObjView, IntObjView, TimelineObjView}
 import de.sciss.mellite.impl.proc.ProcObjView
+import de.sciss.mellite.impl.state.TimelineViewState
 import de.sciss.mellite.impl.{TimelineCanvas2DImpl, TimelineViewBaseImpl}
 import de.sciss.mellite.{ActionArtifactLocation, AudioCueObjView, BasicTool, DragAndDrop, GUI, GlobalProcsView, Mellite, ObjTimelineView, ObjView, ObjectActions, ProcActions, SelectionModel, TimelineTool, TimelineTools, TimelineView, ViewState}
 import de.sciss.model.Change
@@ -122,9 +123,14 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     def undoManager: UndoManager = globalView.undoManager
 
-    override def viewState: Set[ViewState] = Set.empty  // XXX TODO
+    override def viewState: Set[ViewState] = {
+      // XXX TODO: add globalView state
+      stateTimeline.entries
+    }
 
     private def transport: Transport[T] = transportView.transport
+
+    private val stateTimeline = new TimelineViewState[T]()
 
     private[this] var viewRange = RangedSeq.empty[ObjTimelineView[T], Long]
     private[this] val viewSet   = TSet     .empty[ObjTimelineView[T]]
@@ -173,6 +179,11 @@ object TimelineViewImpl extends TimelineView.Companion {
 
     def init(timeline: Timeline[T])(implicit tx: T): this.type = {
       initAttrs(timeline)
+      for {
+        tAttr <- ViewState.map(timeline)
+      } {
+        stateTimeline.init(tAttr)
+      }
 
       addDisposable(timeline.changed.react { implicit tx => upd =>
         upd.changes.foreach {
@@ -190,9 +201,9 @@ object TimelineViewImpl extends TimelineView.Companion {
         }
       })
 
-      deferTx(guiInit())
+      deferTx(initGUI())
 
-      // must come after guiInit because views might call `repaint` in the meantime!
+      // must come after initGUI because views might call `repaint` in the meantime!
       timeline.iterator.foreach { case (span, seq) =>
         seq.foreach { timed =>
           objAdded(span, timed, repaint = false)
@@ -207,11 +218,13 @@ object TimelineViewImpl extends TimelineView.Companion {
     private def mkDefaultTransferable(): Transferable =
       DragAndDrop.Transferable(TimelineView.Flavor)(TimelineView.Drag(universe, impl))
 
-    override protected def guiInit(): Unit = {
-      super.guiInit()
+    override protected def initGUI(): Unit = {
+      super.initGUI()
 
       canvas = new View
-      val ggVisualBoost = GUI.boostRotaryR(init = 22f)(canvas.timelineTools.visualBoost = _)
+      val ggVisualBoost = GUI.boostRotaryR()(v => canvas.timelineTools.visualBoost = v.toFloat)
+
+      stateTimeline.initGUI(timelineModel, canvas.transportCatch, ggVisualBoost)
 
       val ggDragObject = new DragSourceButton() {
         protected def createTransferable(): Option[Transferable] = {

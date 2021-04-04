@@ -25,7 +25,7 @@ trait TimelineViewBaseImpl[T <: Txn[T], Y, Child <: ObjView[T]]
   private[this] var _ggChildAttr: Component = _
   private[this] var _ggChildView: Component = _
 
-  protected def guiInit(): Unit = {
+  protected def initGUI(): Unit = {
     val actionChildAttr = Action(null) {
       withSelection { implicit tx =>
         seq => {

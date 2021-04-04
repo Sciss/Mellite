@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.swing.Reactions.Reaction
 import scala.swing.Swing._
 import scala.swing.event.{Key, SelectionChanged, ValueChanged}
-import scala.swing.{Action, Alignment, Button, Color, Component, Dialog, Dimension, Label, RootPanel, TextField}
+import scala.swing.{Action, Alignment, Button, Color, Component, Dialog, Dimension, Label, RootPanel, Slider, TextField}
 import scala.util.{Failure, Success, Try}
 
 object GUI {
@@ -182,21 +182,22 @@ object GUI {
     pf.head.peer.putClientProperty("mellite.reaction", reaction)
   }
 
-  // XXX TODO remove in major version
-  def boostRotary(lo: Float = 1f, hi: Float = 512f, tooltip: String = "Sonogram Contrast")
-                 (fun: Float => Unit): Component =
-    boostRotaryR(lo = lo, hi = hi, tooltip = tooltip)(fun)
+  final val Default_VisualBoostMin  =   1.0
+  final val Default_VisualBoostMax  = 512.0
 
   // if `init` it greater than or equal to `lo`, the rotary position is initialized and the function is called
-  def boostRotaryR(lo: Float = 1f, hi: Float = 512f, init: Float = -1f, tooltip: String = "Sonogram Contrast")
-                  (fun: Float => Unit): Component = {
+  def boostRotaryR(lo: Double = Default_VisualBoostMin,
+                   hi: Double = Default_VisualBoostMax,
+                   init: Double = -1.0,
+                   tooltip: String = "Sonogram Contrast")
+                  (fun: Double => Unit): Slider = {
     import numbers.Implicits._
     val knob = new RotaryKnob {
       min       = 0
       max       = 64
       focusable = false
       if (init >= lo && init <= hi) {
-        value = (init.expLin(lo, hi, 0, 64) + 0.5f).toInt
+        value = (init.expLin(lo, hi, 0, 64) + 0.5).toInt
         fun(init)
       } else {
         value = 0

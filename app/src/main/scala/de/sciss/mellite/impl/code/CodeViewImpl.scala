@@ -192,7 +192,7 @@ object CodeViewImpl extends CodeView.Companion {
 
     private[this] var _guiInitialized = false
 
-    private[this] lazy val _initEDT: Unit = guiInit()
+    private[this] lazy val _initEDT: Unit = initGUI()
 
     def undoAction: Action = {
       ensureEDT()
@@ -386,10 +386,8 @@ object CodeViewImpl extends CodeView.Companion {
 
     private[this] var clearGreen = false
 
-    def init()(implicit tx: T): this.type = {
-//      deferTx(guiInit())
+    def init()(implicit tx: T): this.type =
       this
-    }
 
     private class InterpreterFlash(ed: Editor, intp: Interpreter, flash: Flash)
       extends FlashAction(ed.document, ed.terminal, flash) {
@@ -416,8 +414,7 @@ object CodeViewImpl extends CodeView.Companion {
         editorPanel.status.message = msg
     }
 
-    private def guiInit(): Unit = {
-//      println("guiInit()")
+    private def initGUI(): Unit = {
 //      (new Exception).fillInStackTrace().printStackTrace()
 
       val prFamily  = Prefs.codeFontFamily

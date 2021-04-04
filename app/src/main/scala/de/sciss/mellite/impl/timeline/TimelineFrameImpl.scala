@@ -124,7 +124,5 @@ object TimelineFrameImpl {
 
       mf.add(me, mTimeline)
     }
-
-    // GUI.placeWindow(this, 0f, 0.25f, 24)
   }
 }

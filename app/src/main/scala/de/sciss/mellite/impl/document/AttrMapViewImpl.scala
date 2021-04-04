@@ -71,8 +71,8 @@ object AttrMapViewImpl {
         CompoundEdit(ed1 :: ed2 :: Nil, s"Rename Attribute Key")
       }
 
-      protected def guiInit1(scroll: ScrollPane): Unit = {
-        stateTable.guiInit(table)
+      protected def initGUI1(scroll: ScrollPane): Unit = {
+        stateTable.initGUI(table)
         component = scroll
       }
 

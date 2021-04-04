@@ -3,5 +3,5 @@ addSbtPlugin("com.eed3si9n"     % "sbt-buildinfo"       % "0.10.0")   // meta-da
 addSbtPlugin("com.typesafe"     % "sbt-mima-plugin"     % "0.8.1")    // binary compatibility testing
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.8.0")    // release standalone binaries
 addSbtPlugin("com.typesafe.sbt" % "sbt-license-report"  % "1.2.0")    // generates list of dependencies licenses
-// addSbtPlugin("ch.epfl.lamp"     % "sbt-dotty"           % "0.5.3")    // cross-compile for dotty
+// addSbtPlugin("ch.epfl.lamp"     % "sbt-dotty"           % "0.5.4")    // cross-compile for dotty
 

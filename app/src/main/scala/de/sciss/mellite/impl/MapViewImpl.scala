@@ -53,7 +53,7 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
 
   protected def editRenameKey(before: String, now: String, value: Obj[T])(implicit tx: T): Option[UndoableEdit]
 
-  protected def guiInit1(scroll: ScrollPane): Unit
+  protected def initGUI1(scroll: ScrollPane): Unit
 
   // ---- impl ----
 
@@ -196,12 +196,12 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
     viewMap ++= list0
     list0.foreach(tup => observeView(tup._1, tup._2))
     deferTx {
-      guiInit()
+      initGUI()
     }
     this
   }
 
-  private[this] def guiInit(): Unit = {
+  private def initGUI(): Unit = {
     _table = new Table(tableModel) {
       // Table default has bad renderer/editor handling
       override lazy val peer: JTable = new JTable /* with Table.JTableMixin */ with SuperMixin
@@ -350,7 +350,7 @@ abstract class MapViewImpl[T <: Txn[T], Repr]
         val sel = selection
         dispatch(MapView.SelectionChanged(impl, sel))
     }
-    guiInit1(_scroll)
+    initGUI1(_scroll)
   }
 
   private def prepareImport(support: TransferSupport, isInsert: Boolean, dropModelRow: Int) = {

@@ -65,7 +65,7 @@ object RunnerToggleButton {
     }
 
     def init()(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       obs = runner.react { implicit tx => state =>
         select(state)
         state match {
@@ -77,7 +77,7 @@ object RunnerToggleButton {
       this
     }
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       val ggPower = new ToggleButton {
         listenTo(this)
         reactions += {

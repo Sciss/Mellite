@@ -257,7 +257,7 @@ object FolderViewImpl extends FolderView.Companion {
       _treeView = TreeTableView(root0, TTHandler)
       ViewState.map(root0).foreach(stateTable.init)
       deferTx {
-        guiInit()
+        initGUI()
       }
       this
     }
@@ -267,7 +267,7 @@ object FolderViewImpl extends FolderView.Companion {
 
     def root: Source[T, Folder[T]] = treeView.root
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       val tt = treeView.treeTable
       tt.rootVisible = false
       tt.rowHeight   = 22  // XXX TODO : times font scale
@@ -293,7 +293,7 @@ object FolderViewImpl extends FolderView.Companion {
       tc.peer.putClientProperty("styleId", "undecorated")
 
       val tj = tt.peer.getTableHeader.getTable
-      stateTable.guiInitJ(tj)
+      stateTable.initGUI_J(tj)
 
       component = tc
     }

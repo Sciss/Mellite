@@ -56,7 +56,7 @@ object ExprHistoryView {
     }
 
     val res = new Impl[A](workspace, cursor, exprH, pos0, time0, val0, stop = stop)
-    deferTx(res.guiInit())
+    deferTx(res.initGUI())
     res
   }
 
@@ -125,7 +125,7 @@ object ExprHistoryView {
       }
     }
 
-    def guiInit(): Unit = {
+    def initGUI(): Unit = {
       val lv      = new ListView(mod)
       lv.prototypeCellValue = s"${mkString(System.currentTimeMillis(), value0)}XXXXX"
       val scroll  = new ScrollPane(lv)

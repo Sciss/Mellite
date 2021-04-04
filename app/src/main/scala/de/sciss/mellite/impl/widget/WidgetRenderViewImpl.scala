@@ -76,7 +76,7 @@ object WidgetRenderViewImpl {
     def widget(implicit tx: T): Widget[T] = widgetRef()._1.apply()
 
     def init(obj: Widget[T])(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       widget = obj
       this
     }
@@ -189,7 +189,7 @@ object WidgetRenderViewImpl {
       }
     }
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       val bot1: List[Component] = if (bottom.isEmpty) Nil else bottom.iterator.map(_.component).toList
       val bot2 = if (embedded) bot1 else {
         val actionEdit = Action(null) {

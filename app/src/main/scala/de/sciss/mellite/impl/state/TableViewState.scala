@@ -68,9 +68,9 @@ class TableViewState[T <: Txn[T]](keyColWidths: String = TableViewState.Key_ColW
     }
   }
 
-  def guiInit(t: Table): Unit = guiInitJ(t.peer)
+  def initGUI(t: Table): Unit = initGUI_J(t.peer)
 
-  def guiInitJ(tj: JTable): Unit = {
+  def initGUI_J(tj: JTable): Unit = {
     val rs      = tj.getRowSorter
     val numCols = tj.getColumnCount
 

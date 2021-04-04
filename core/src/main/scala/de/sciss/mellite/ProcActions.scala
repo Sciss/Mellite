@@ -13,14 +13,10 @@
 
 package de.sciss.mellite
 
-import de.sciss.equal
-import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn}
-import de.sciss.lucre.expr
-import de.sciss.span.Span
-import de.sciss.proc.impl.MkSynthGraphSource
+import de.sciss.lucre.{BooleanObj, Copy, DoubleObj, Folder, IntObj, LongObj, Obj, SpanLikeObj, StringObj, Txn, expr}
+import de.sciss.{equal, proc}
 import de.sciss.proc.{AudioCue, ObjKeys, Proc, Timeline}
-import de.sciss.synth.SynthGraph
-import de.sciss.proc
+import de.sciss.span.Span
 
 object ProcActions {
   private val MinDur    = 32
@@ -295,7 +291,4 @@ object ProcActions {
     group.add(Span.All, obj) // constant span expression
     obj
   }
-
-  /** Forwarder to `MkSynthGraphSource`. Can be removed in next major revision. */
-  def extractSource(g: SynthGraph): String = MkSynthGraphSource(g)
 }

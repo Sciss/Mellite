@@ -30,11 +30,11 @@ object SplitPaneView {
     extends SplitPaneView[T] with ComponentHolder[SplitPane] {
 
     def init()(implicit tx: T): this.type = {
-      deferTx(guiInit())
+      deferTx(initGUI())
       this
     }
 
-    private def guiInit(): Unit = {
+    private def initGUI(): Unit = {
       component = new SplitPane(orientation, left.component, right.component)
     }
 

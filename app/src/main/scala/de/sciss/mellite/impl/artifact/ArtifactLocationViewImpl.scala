@@ -90,7 +90,7 @@ object ArtifactLocationViewImpl {
 
     def init(obj0: ArtifactLocation[T])(implicit tx: T): this.type = {
       val value0 = obj0.value
-      deferTx(guiInit(value0))
+      deferTx(initGUI(value0))
       observer = obj0.changed.react { implicit tx => upd =>
         deferTx {
           ggPath.valueOption = Try(new File(upd.now)).toOption
@@ -104,7 +104,7 @@ object ArtifactLocationViewImpl {
       ggPath.valueOption.map(_.toURI)
     }
 
-    private def guiInit(value0: URI): Unit = {
+    private def initGUI(value0: URI): Unit = {
       val _ggPath      = new PathField
       _ggPath.mode     = FileDialog.Folder
       _ggPath.enabled  = editable
