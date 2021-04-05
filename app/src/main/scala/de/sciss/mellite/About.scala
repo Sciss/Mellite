@@ -110,8 +110,8 @@ object About {
       cacheSize = "(unknown size)"
     }
 
-    val launcherPort = Mellite.config.launcherPort
-    val entries0 = if (launcherPort >= 0) Button("Check for Updates")(checkUpdate(launcherPort)) :: Nil else Nil
+    val cfg = Mellite.config
+    val entries0 = if (cfg.hasLauncher) Button("Check for Updates")(checkUpdate(cfg.launcherPort)) :: Nil else Nil
     val entries =
       Button("  Ok  "         )(dispose(box)) ::
       Button("Visit Website…" )(Desktop.browseURI(new URL(url).toURI)) ::
@@ -140,11 +140,7 @@ object About {
         case osc.Message("/reboot", _ @ _*) =>
           defer {
             client.close()
-            import de.sciss.mellite.Mellite.executionContext
-            Desktop.mayQuit().foreach { _ =>
-              // Application.quit()
-              sys.exit(82 /* 'R' */)
-            }
+            Mellite.tryRestart()
           }
 
         case other =>

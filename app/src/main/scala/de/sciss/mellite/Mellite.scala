@@ -62,6 +62,12 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     throw err
   }
 
+  def tryRestart(): Unit =
+    Desktop.mayQuit().foreach { _ =>
+      // Application.quit()
+      sys.exit(82 /* 'R' */)
+    }
+
   override def main(args: Array[String]): Unit = {
     try {
       // all UI and number formatters assume US locale

@@ -22,4 +22,7 @@ final case class Config(open        : List[File]    = Nil,
                         logFrame    : Boolean       = true,
                         launcherPort: Int           = -1,
                         prefix      : String        = "default",
-                       )
+                       ) {
+
+  def hasLauncher: Boolean = launcherPort >= 0
+}

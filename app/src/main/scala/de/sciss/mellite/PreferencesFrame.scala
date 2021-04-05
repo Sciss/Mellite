@@ -21,7 +21,7 @@ import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
 
-import scala.swing.{Action, Alignment, Component, Label, TabbedPane}
+import scala.swing.{Action, Alignment, Button, Component, FlowPanel, Label, Swing, TabbedPane}
 
 final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
 
@@ -79,10 +79,25 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     val ggCodeLineSpacing   = intField(Prefs.codeLineSpacing, default = Prefs.defaultCodeLineSpacing, min = 90, max = 200)
 
     val icnWarn             = GUI.iconNormal(raphael.Shapes.Warning)
-    def lbWarnAppIcon       = new Label(null, icnWarn, Alignment.Trailing)
-    def lbWarnText(sec: String) = new Label(
-      s"<html><body>Some changes to $sec take only effect<br>after restarting the application.",
-      null, Alignment.Leading)
+//    def lbWarnAppIcon       = Swing.HGlue // new Label(null, icnWarn, Alignment.Trailing)
+    def lbWarnText(entries: Preferences.Entry[_]*): Component = {
+      val lb = new Label(
+        s"<html><body>Some changes take only effect<br>after restarting the application.",
+        icnWarn, Alignment.Leading)
+      val cfg = Mellite.config
+      val res = if (!cfg.hasLauncher) lb else {
+        val b = Button("Restart")(Mellite.tryRestart())
+        new FlowPanel(lb, b)
+      }
+      res.visible = false
+      entries.foreach(_.addListener {
+        case _ => if (!res.visible) {
+          res.visible = true
+          pack()
+        }
+      })
+      res
+    }
 
 //    val lbRevealFileCmd = label("Reveal File Command")
 //    val ggRevealFileCmd = textField(Prefs.revealFileCmd, Prefs.defaultRevealFileCmd)
@@ -215,7 +230,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbCodeLineSpacing  , ggCodeLineSpacing ),
       ),
       List(
-        (lbWarnAppIcon, lbWarnText("appearance"))
+        (Swing.HGlue /*lbWarnAppIcon*/, lbWarnText(Prefs.lookAndFeel, Prefs.nativeWindowDecoration, Prefs.screenMenuBar /*"appearance"*/))
 //      ),
 //      List(
 //        (lbRevealFileCmd    , ggRevealFileCmd   )
@@ -257,7 +272,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbLockTimeout      , ggLockTimeout     )
       ),
       List(
-        (lbWarnAppIcon, lbWarnText("system"))
+        (Swing.HGlue /*lbWarnAppIcon*/, lbWarnText(Prefs.tempDir /*"system"*/))
       )
     )
 
