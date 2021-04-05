@@ -72,6 +72,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     object p extends ScallopConf(args) {
       printedName = "mellite"
       version(fullName)
+      private val default = Config()
 
       val workspaces: Opt[List[File]] = trailArg(required = false, default = Some(Nil),
         descr = "Workspaces (.mllt directories) to open"
@@ -88,14 +89,21 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
       val autoRun: Opt[List[String]] = opt[String]("auto-run", short = 'r', default = Some(""),
         descr = "Run object with given name from root folder's top level. Comma separated list for multiple objects."
       ).map(_.split(',').filter(_.nonEmpty).toList)
-
+      val launcherPort: Opt[Int] = opt("launcher", default = Some(-1),
+        descr = s"OSC provided by the Mellite launcher if used (otherwise ${default.launcherPort})."
+      )
+      val prefix: Opt[String] = opt("prefix", default = Some("default"),
+        descr = s"Installation prefix when using different Mellite versions (default: '${default.prefix}')."
+      )
       verify()
       val config: Config = Config(
-        open      = workspaces(),
-        headless  = headless(),
-        bootAudio = bootAudio(),
-        autoRun   = autoRun(),
-        logFrame  = !noLogFrame(),
+        open          = workspaces(),
+        headless      = headless(),
+        bootAudio     = bootAudio(),
+        autoRun       = autoRun(),
+        logFrame      = !noLogFrame(),
+        launcherPort  = launcherPort(),
+        prefix        = prefix(),
       )
     }
 

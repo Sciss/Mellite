@@ -6,7 +6,7 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "3.5.0-SNAPSHOT"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.0-SNAPSHOT"
+lazy val appVersion                 = "3.5.1-SNAPSHOT"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -81,16 +81,17 @@ lazy val bdb = "bdb"
 
 // ---- app packaging ----
 
-lazy val appMainClass               = Some("de.sciss.mellite.Mellite")
-def appName                         = baseName
-def appNameL                        = baseNameL
+lazy val appMainClass = Some("de.sciss.mellite.Mellite")
+def appName           = baseName
+def appNameL          = baseNameL
 
 // ---- common ----
 
 lazy val commonSettings = Seq(
   organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
-  licenses           := Seq("AGPL v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
+  // note: license _name_ is printed in 'about' dialog
+  licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
   scalaVersion       := "2.13.5",
   crossScalaVersions := Seq(/* "3.0.0-RC1", */ "2.13.5", "2.12.13"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),

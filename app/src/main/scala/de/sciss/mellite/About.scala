@@ -13,23 +13,24 @@
 
 package de.sciss.mellite
 
-import java.io.InputStream
-import java.net.URL
-import java.nio.file.Path
-import java.util.function.ToLongFunction
-
-import de.sciss.desktop.{Desktop, OptionPane}
+import de.sciss.desktop.{Desktop, OptionPane, Util}
 import de.sciss.lucre.swing.LucreSwing.defer
 import de.sciss.lucre.synth.Server
 import de.sciss.mellite.Mellite.applyAudioPreferences
+import de.sciss.osc
 import de.sciss.synth.{Client, Server => SServer}
-import javax.swing.SwingUtilities
 
+import java.io.InputStream
+import java.net.{InetSocketAddress, URL}
+import java.nio.file.Path
+import java.util.function.ToLongFunction
+import javax.swing.SwingUtilities
 import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future, blocking}
 import scala.swing.Table.IntervalMode
 import scala.swing.event.TableRowsSelected
-import scala.swing.{Action, BorderPanel, Button, Component, Label, Orientation, ScrollPane, SplitPane, Swing, Table, TextArea}
+import scala.swing.{Action, BorderPanel, Button, Component, Dialog, Label, Orientation, ScrollPane, SplitPane, Swing, Table, TextArea}
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 object About {
@@ -109,12 +110,13 @@ object About {
       cacheSize = "(unknown size)"
     }
 
-//    OptionPane.message(message = lb.peer, icon = Logo.icon(128)).show(None, title = "About")
-    val entries = List(
-      Button("  Ok  "         )(dispose(box)),
-      Button("Visit Website…" )(Desktop.browseURI(new URL(url).toURI)),
-      Button("License Details")(showLicenses())
-    )
+    val launcherPort = Mellite.config.launcherPort
+    val entries0 = if (launcherPort >= 0) Button("Check for Updates")(checkUpdate(launcherPort)) :: Nil else Nil
+    val entries =
+      Button("  Ok  "         )(dispose(box)) ::
+      Button("Visit Website…" )(Desktop.browseURI(new URL(url).toURI)) ::
+      Button("License Details")(showLicenses()) :: entries0
+
     val pane = OptionPane(
       message     = box.peer,
       optionType  = OptionPane.Options.OkCancel,  // irrelevant
@@ -127,6 +129,38 @@ object About {
 
   private def dispose(c: Component): Unit =
     Option(SwingUtilities.windowForComponent(c.peer)).foreach(_.dispose())
+
+  def checkUpdate(port: Int): Unit = {
+    try {
+      val c = osc.UDP.Config()
+      c.localIsLoopback = true
+      val client = osc.UDP.Client(new InetSocketAddress("127.0.0.1", port), c)
+      client.connect()
+      client.action = {
+        case osc.Message("/reboot", _ @ _*) =>
+          defer {
+            client.close()
+            import de.sciss.mellite.Mellite.executionContext
+            Desktop.mayQuit().foreach { _ =>
+              // Application.quit()
+              sys.exit(82 /* 'R' */)
+            }
+          }
+
+        case other =>
+          println(s"Unsupported OSC message: $other")
+      }
+      client ! osc.Message("/check-update", 0)
+
+    } catch {
+      case NonFatal(ex) =>
+        Dialog.showMessage(
+        message     = Util.formatException(ex, stackTraceLines = 4),
+        title       = "Check for Updates",
+        messageType = Dialog.Message.Error
+      )
+    }
+  }
 
   def showLicenses(): Unit = {
     val lic       = readMelliteLicenseText()

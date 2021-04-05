@@ -243,10 +243,10 @@ object GlobalProcsViewImpl extends GlobalProcsView.Companion {
       // tc.setMaxWidth      (w)
     }
 
-    private def getColumnWidth(tcm: TableColumnModel, idx: Int): Int = {
-      val tc = tcm.getColumn(idx)
-      tc.getPreferredWidth
-    }
+//    private def getColumnWidth(tcm: TableColumnModel, idx: Int): Int = {
+//      val tc = tcm.getColumn(idx)
+//      tc.getPreferredWidth
+//    }
 
     def init(timeline: Timeline[T])(implicit tx: T): this.type = {
       for {
