@@ -126,19 +126,19 @@ lazy val commonSettings = Seq(
   },
   publishArtifact in Test := false,
   pomIncludeRepository := { _ => false },
-  pomExtra := { val n = name.value
-  <scm>
-    <url>git@git.iem.at:sciss/{n}.git</url>
-    <connection>scm:git:git@git.iem.at:sciss/{n}.git</connection>
-  </scm>
-    <developers>
-      <developer>
-        <id>sciss</id>
-        <name>Hanns Holger Rutz</name>
-        <url>http://www.sciss.de</url>
-      </developer>
-    </developers>
-  }
+  developers := List(
+    Developer(
+      id    = "sciss",
+      name  = "Hanns Holger Rutz",
+      email = "contact@sciss.de",
+      url   = url("https://www.sciss.de")
+    )
+  ),
+  scmInfo := {
+    val h = "git.iem.at"
+    val a = s"sciss/$baseName"
+    Some(ScmInfo(url(s"https://$h/$a"), s"scm:git@$h:$a.git"))
+  },
 )
 
 // ---- packaging ----
@@ -406,6 +406,24 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
     debianPackageDependencies in Debian ++= Seq("java11-runtime"),
     debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
+    // ---- publishing ----
+    pomExtra := {
+      <properties>
+        <mllt.change>
+          fixes a bug that prevented Pattern source code to be compiled.
+        </mllt.change>
+        <mllt.change>
+          option to remember the view settings of workspace elements,
+          such as window bounds, timeline positions, table orderings.
+          It can be activated with the menu item 'View : Remember State'.
+        </mllt.change>
+        <mllt.change>
+          supports the new Mellite-launcher. Automatic update checks can be
+          configured in the preferences, manual update check can be performed
+          from the 'About' menu item.
+        </mllt.change>
+      </properties>
+    }
   )
 
 // Determine OS version of JavaFX binaries
