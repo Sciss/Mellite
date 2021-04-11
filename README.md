@@ -131,30 +131,38 @@ Note that should probably specify an explicit java-home, otherwise the bundled p
 
 This section is an aide-mémoire for me in releasing stable versions.
 
- 1. check that no `SNAPSHOT` versions of libraries are used: `cat build.sbt | grep SNAPSHOT`.
-    Change `commonVersion` and `appVersion` appropriately.
- 2. if releasing a new minor version, make sure it is binary compatible: `sbt mimaReportBinaryIssues`
- 3. check that libraries are up-to-date, and that there are no binary conflicts:
-`sbt mellite-core/dependencyUpdates mellite-core/evicted`
- 4. note that we have a "ping-pong" process now: we need to publish (locally) a new version of `mellite-core`,
- then of `negatum-core` and `negatum-views`. The core library should be published using JDK 8
- (I use script `java-use-8` which calls `update-java-alternatives`). Then:
- `sbt +mellite-core/clean +mellite-core/update +mellite-core/publishLocal`.
- 5. Check Negatum:
- `sbt negatum-core/dependencyUpdates negatum-core/evicted`. Publish locally:
- `sbt +negatum-core/clean  +negatum-core/update  +negatum-core/publishLocal` and
- `sbt +negatum-views/clean +negatum-views/update +negatum-views/publishLocal`
- 6. Check ScalaFreesound:
- `sbt dependencyUpdates evicted`. Publish locally:
- `sbt +clean  +update +test +publishLocal`
- 7. now for app: `sbt mellite-app/dependencyUpdates mellite-app/evicted`
- 8. License information in is updated by running
- `sbt mellite-app/dumpLicenseReport` via [sbt-license-report](https://github.com/sbt/sbt-license-report).
-  Output is found in `app/src/main/resources/de/sciss/mellite/mellite-app-licenses.csv`.
- 9. Make sure the XFree desktop file version is set:
-  `vim app/src/debian/Mellite.desktop`
+1. check that no `SNAPSHOT` versions of libraries are used: `cat build.sbt | grep SNAPSHOT`.
+   Change `commonVersion` and `appVersion` appropriately.
+2. if releasing a new minor version, make sure it is binary compatible: `sbt mimaReportBinaryIssues`
+3. check that libraries are up-to-date, and that there are no binary conflicts:
+   `sbt mellite-core/dependencyUpdates mellite-core/evicted`
+4. note that we have a "ping-pong" process now: we need to publish (locally) a new version of `mellite-core`,
+   then of `negatum-core` and `negatum-views`. The core library should be published using JDK 8
+   (I use script `java-use-8` which calls `update-java-alternatives`). Then:
+   `sbt +mellite-core/clean +mellite-core/update +mellite-core/publishLocal`.
+5. Check Negatum:
+   `sbt negatum-core/dependencyUpdates negatum-core/evicted`. Publish locally:
+   `sbt +negatum-core/clean  +negatum-core/update  +negatum-core/publishLocal` and
+   `sbt +negatum-views/clean +negatum-views/update +negatum-views/publishLocal`
+6. Check ScalaFreesound:
+   `sbt dependencyUpdates evicted`. Publish locally:
+   `sbt +clean  +update +test +publishLocal`
+7. now for app: `sbt mellite-app/dependencyUpdates mellite-app/evicted`
+8. License information in is updated by running
+   `sbt mellite-app/dumpLicenseReport` via [sbt-license-report](https://github.com/sbt/sbt-license-report).
+   Output is found in `app/src/main/resources/de/sciss/mellite/mellite-app-licenses.csv`.
+9. Make sure the XFree desktop file version is set:
+   `vim app/src/debian/Mellite.desktop`
 10. Update the release versions in `README.md`
-11. Test the app building: `sbt +mellite-app/clean +mellite-app/update +mellite-app/test mellite-app/assembly`
+11. Update the release notes in `pomExtra` of `build.sbt`
+12. Test the app building: `sbt +mellite-app/clean +mellite-app/update +mellite-app/test mellite-app/assembly`
+
+### publish to Maven Central
+
+`scripts/publishSignedApp.sh` will release the Scala 2.13 build of the `app` module. If the `core` module
+has been updated, it must be published separately and explicitly with `scripts/publishSignedCore.sh`.
+
+### fully bundled standalone
 
 We're currently publishing the following artifacts:
 

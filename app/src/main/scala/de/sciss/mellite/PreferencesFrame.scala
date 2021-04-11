@@ -20,11 +20,15 @@ import de.sciss.mellite.impl.component.{BaselineFlowPanel, NoMenuBarActions}
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
 import de.sciss.{desktop, equal, osc}
+import net.harawata.appdirs.AppDirsFactory
 
+import java.io.{FileInputStream, FileOutputStream}
+import java.util.{Properties => JProperties}
 import scala.swing.{Action, Alignment, Button, Component, FlowPanel, Label, Swing, TabbedPane}
+import scala.util.Try
+import scala.util.control.NonFatal
 
 final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
-
   def handler: WindowHandler = Application.windowHandler
 
   override protected def style: Window.Style = Window.Auxiliary
@@ -170,21 +174,26 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     val lbLockTimeout   = label("Database Lock Timeout [ms]")
     val ggLockTimeout   = intField(Prefs.dbLockTimeout, Prefs.defaultDbLockTimeout)
 
+    val lbCheckUpdates  = label("Automatic Update Checks")
+    val pCheckUpdates   = Prefs.updateCheckPeriod
+    val ggCheckUpdates  = comboL(pCheckUpdates, Prefs.defaultUpdateCheckPeriod, values = Seq(0, 1, 7, 30)) {
+      case 0 => "Never"
+      case 1 => "Daily"
+      case 7 => "Weekly"
+      case x if x >= 28 && x <= 31 => "Monthly"
+      case x => s"Every $x Days"
+    }
+
+    // save the new interval in the launcher's properties file
+    pCheckUpdates.addListener { case opt =>
+      val days = opt.getOrElse(Prefs.defaultUpdateCheckPeriod)
+      saveLauncherUpdateCheckPeriod(days)
+    }
+
     // ---- panel ----
 
     val tabbed = new TabbedPane
     tabbed.peer.putClientProperty("styleId", "attached")  // XXX TODO: obsolete
-
-//    def interleave[A](a: List[A], b: List[A]): List[A] = {
-//      val aIt = a.iterator
-//      val bIt = b.iterator
-//      val res = List.newBuilder[A]
-//      while (aIt.hasNext) {
-//        res += aIt.next()
-//        if (bIt.hasNext) res += bIt.next()
-//      }
-//      res.result()
-//    }
 
     def mkPage(name: String)(entries: List[(Component, Component)]*): Unit = {
       val sepPar    = List.newBuilder[Element.Par]
@@ -243,7 +252,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbAudioDevice      , ggAudioDevice     ),
         (lbNumInputs        , ggNumInputs       ),
         (lbNumOutputs       , ggNumOutputs      ),
-        (lbSampleRate       , ggSampleRate      )
+        (lbSampleRate       , ggSampleRate      ),
       ),
       List(
         (lbBlockSize        , ggBlockSize       ),
@@ -251,10 +260,10 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbNumAudioBufs     , ggNumAudioBufs    ),
         (lbNumWireBufs      , ggNumWireBufs     ),
         (lbMemorySize       , ggMemorySize      ),
-        (lbLatency          , ggLatency         )
+        (lbLatency          , ggLatency         ),
       ),
       List(
-        (lbHeadphones       , ggHeadphones      )
+        (lbHeadphones       , ggHeadphones      ),
       )
     )
     mkPage("Sensors")(
@@ -263,13 +272,14 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
         (lbSensorPort       , ggSensorPort      ),
         (lbSensorAutoStart  , ggSensorAutoStart ),
         (lbSensorCommand    , ggSensorCommand   ),
-        (lbSensorChannels   , ggSensorChannels  )
+        (lbSensorChannels   , ggSensorChannels  ),
       )
     )
     mkPage("System")(
       List(
         (lbTempDir          , ggTempDir         ),
-        (lbLockTimeout      , ggLockTimeout     )
+        (lbLockTimeout      , ggLockTimeout     ),
+        (lbCheckUpdates     , ggCheckUpdates    ),
       ),
       List(
         (Swing.HGlue /*lbWarnAppIcon*/, lbWarnText(Prefs.tempDir /*"system"*/))
@@ -277,6 +287,49 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
     )
 
     tabbed
+  }
+
+  private def saveLauncherUpdateCheckPeriod(days: Int): Unit = {
+    val autoCheck         = days > 0
+    val updateInterval    = if (!autoCheck) Long.MaxValue else days * 24 * 60 * 60 * 1000L // milliseconds
+    val p                 = new JProperties()
+    val KeyNextUpdate     = "next-update"
+    val KeyUpdateInterval = "update-interval"
+    val propFileName      = "launcher.properties"
+    val groupId           = "de.sciss"
+    val appId             = "mellite"
+    val appDirs           = AppDirsFactory.getInstance
+    val configBase        = appDirs.getUserConfigDir(appId, /* version */ null, /* author */ groupId)
+    val prefix            = Mellite.config.prefix
+    val configBaseF       = new File(configBase , prefix)
+    val propFile          = new File(configBaseF, propFileName)
+    if (!propFile.isFile) return
+    try {
+      val fi = new FileInputStream(propFile)
+      try {
+        p.load(fi)
+      } finally {
+        fi.close()
+      }
+
+      val now             = System.currentTimeMillis()
+      val oldNextTimeOpt  = Option(p.getProperty(KeyNextUpdate)).flatMap(s => Try(s.toLong).toOption)
+      val newNextTime     = if (!autoCheck) Long.MaxValue else now + updateInterval
+      val oldNextTime     = oldNextTimeOpt.getOrElse(newNextTime)
+      val nextUpdateTime  = if (!autoCheck) newNextTime else math.min(oldNextTime, newNextTime)
+
+      p.put(KeyNextUpdate     , nextUpdateTime.toString)
+      p.put(KeyUpdateInterval , updateInterval.toString)
+      val fo = new FileOutputStream(propFile)
+      try {
+        p.store(fo, "Mellite launcher")
+      } finally {
+        fo.close()
+      }
+    } catch {
+      case NonFatal(ex) =>
+        ex.printStackTrace()
+    }
   }
 
   contents = box

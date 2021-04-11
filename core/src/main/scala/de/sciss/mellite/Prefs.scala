@@ -49,6 +49,11 @@ object Prefs {
   /** Temporary directory; is set at application start, using system property `java.io.tmpdir`. */
   def tempDir: Entry[File] = userPrefs("temp-dir")
 
+  /** Unit: days. Zero means disabled */
+  def updateCheckPeriod: Entry[Int] = userPrefs("update-check-period")
+
+  final val defaultUpdateCheckPeriod: Int = 7
+
   // ---- appearance ----
 
   object LookAndFeel {

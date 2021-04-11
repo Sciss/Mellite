@@ -6,7 +6,7 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "3.5.0"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.0"
+lazy val appVersion                 = "3.5.1"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -103,8 +103,8 @@ lazy val commonSettings = Seq(
     if (loggingEnabled || isSnapshot.value) Nil else Seq("-Xelide-below", "INFO")
   },
   scalacOptions /* in (Compile, compile) */ ++= {
-    val sq0 = if (scala.util.Properties.isJavaAtLeast("9")) Seq("-release", "8") else Nil // JDK >8 breaks API; skip scala-doc
-    val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) Seq("-Wconf:cat=deprecation&msg=Widening conversion:s") else Nil // nanny state defaults :-E
+    val sq0 = if (scala.util.Properties.isJavaAtLeast("9")) List("-release", "8") else Nil // JDK >8 breaks API; skip scala-doc
+    val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) "-Wconf:cat=deprecation&msg=Widening conversion:s" :: sq0 else sq0 // nanny state defaults :-E
     sq1
   },
   // sources in (Compile, doc) := {
@@ -409,14 +409,6 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     // ---- publishing ----
     pomExtra := {
       <properties>
-        <mllt.change>
-          fixes a bug that prevented Pattern source code to be compiled.
-        </mllt.change>
-        <mllt.change>
-          option to remember the view settings of workspace elements,
-          such as window bounds, timeline positions, table orderings.
-          It can be activated with the menu item 'View : Remember State'.
-        </mllt.change>
         <mllt.change>
           supports the new Mellite-launcher. Automatic update checks can be
           configured in the preferences, manual update check can be performed
