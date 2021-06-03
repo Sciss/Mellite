@@ -32,14 +32,14 @@ lazy val deps = new {
     val raphaelIcons        = "1.0.7"
     val scalaCollider       = "2.6.4"
     val scalaColliderUGens  = "1.21.1"
-    val scalaColliderIf     = "1.7.5"
+    val scalaColliderIf     = "1.7.6"
     val scalaOSC            = "1.3.1"
     val scalaSTM            = "0.11.1"
     val scalaSwing          = "3.0.0"
-    val scallop             = "4.0.2"
+    val scallop             = "4.0.3"
     val serial              = "2.0.1"
     val sonogram            = "2.2.1"
-    val soundProcesses      = "4.7.5-SNAPSHOT"
+    val soundProcesses      = "4.7.6"
     val span                = "2.0.2"
     val swingPlus           = "0.5.0"
   }
@@ -64,7 +64,7 @@ lazy val deps = new {
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
 //    val plexMono            = "4.0.2"   // directly included
-    val scalaColliderSwing  = "2.6.3"
+    val scalaColliderSwing  = "2.6.4"
     val scissDSP            = "2.2.2"
     val slf4j               = "1.7.30"
     val submin              = "0.3.4"
@@ -92,8 +92,8 @@ lazy val commonSettings = Seq(
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   // note: license _name_ is printed in 'about' dialog
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
-  scalaVersion       := "2.13.5",
-  crossScalaVersions := Seq(/* "3.0.0-RC1", */ "2.13.5", "2.12.13"),
+  scalaVersion       := "2.13.6",
+  crossScalaVersions := Seq(/* "3.0.0", */ "2.13.6", "2.12.14"),
   scalacOptions     ++= Seq("-deprecation", "-unchecked", "-feature", "-encoding", "utf8"),
   scalacOptions ++= {
     // if (isDotty.value) Nil else 
