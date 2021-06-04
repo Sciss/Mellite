@@ -68,11 +68,11 @@ class TimelineViewState[T <: Txn[T]](
   def entries(set0: Set[ViewState] = Set.empty): Set[ViewState] = {
     requireEDT()
     var res = set0
-    if (dirtyPosition   ) res += ViewState(TimelineViewState.Key_Position     , LongObj     , statePosition   )
-    if (dirtyVisible    ) res += ViewState(TimelineViewState.Key_Visible      , SpanObj     , stateVisible    )
-    if (dirtySelection  ) res += ViewState(TimelineViewState.Key_Selection    , SpanLikeObj , stateSelection  )
-    if (dirtyCatch      ) res += ViewState(TimelineViewState.Key_Catch        , BooleanObj  , stateCatch      )
-    if (dirtyVisualBoost) res += ViewState(TimelineViewState.Key_VisualBoost  , DoubleObj   , stateVisualBoost)
+    if (dirtyPosition   ) res += ViewState(keyPosition     , LongObj     , statePosition   )
+    if (dirtyVisible    ) res += ViewState(keyVisible      , SpanObj     , stateVisible    )
+    if (dirtySelection  ) res += ViewState(keySelection    , SpanLikeObj , stateSelection  )
+    if (dirtyCatch      ) res += ViewState(keyCatch        , BooleanObj  , stateCatch      )
+    if (dirtyVisualBoost) res += ViewState(keyVisualBoost  , DoubleObj   , stateVisualBoost)
     res
   }
 
@@ -97,6 +97,9 @@ class TimelineViewState[T <: Txn[T]](
     }
   }
 
+  /**
+    * @param visBoost can be `null` if it does not apply
+    */
   def initGUI(tlm: TimelineModel.Modifiable, cch: TransportCatch, visBoost: Slider): Unit = {
     tlm.position = statePosition
     if (stateVisible.nonEmpty) {
@@ -125,17 +128,19 @@ class TimelineViewState[T <: Txn[T]](
         dirtyCatch  = true
     }
 
-    if (stateVisualBoost >= visBoostMin && stateVisualBoost <= visBoostMax) {
-      val visBoostView0 = (stateVisualBoost.expLin(
-        visBoostMin, visBoostMax, visBoost.min, visBoost.max) + 0.5).toInt
-        .clip(visBoost.min, visBoost.max)
-      visBoost.value = visBoostView0
-    }
-    visBoost.peer.addChangeListener { _ =>
-      val visBoostModel = visBoost.value.linExp(visBoost.min, visBoost.max, visBoostMin, visBoostMax)
-      if (stateVisualBoost != visBoostModel) {
-        stateVisualBoost  = visBoostModel
-        dirtyVisualBoost  = true
+    if (visBoost != null) {
+      if (stateVisualBoost >= visBoostMin && stateVisualBoost <= visBoostMax) {
+        val visBoostView0 = (stateVisualBoost.expLin(
+          visBoostMin, visBoostMax, visBoost.min, visBoost.max) + 0.5).toInt
+          .clip(visBoost.min, visBoost.max)
+        visBoost.value = visBoostView0
+      }
+      visBoost.peer.addChangeListener { _ =>
+        val visBoostModel = visBoost.value.linExp(visBoost.min, visBoost.max, visBoostMin, visBoostMax)
+        if (stateVisualBoost != visBoostModel) {
+          stateVisualBoost = visBoostModel
+          dirtyVisualBoost = true
+        }
       }
     }
   }

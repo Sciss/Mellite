@@ -93,6 +93,12 @@ We try to use the same keyboard mappings as IntelliJ IDEA, with some additional 
 |`ESCAPE`           |Cancel ongoing tool edit           |
 |`M`                |Drop marker at current position    |
 
+## Grapheme editor
+
+|**Key**                  |**Action**                                        |
+|:------------------------|:-------------------------------------------------|
+|`ctrl UP`, `ctrl DOWN`   |increase or decrease vertical zoom                |
+
 ## Oscilloscope
 
 |**Key**                  |**Action**                                                   |

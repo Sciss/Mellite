@@ -13,8 +13,6 @@
 
 package de.sciss.mellite.impl.grapheme
 
-import java.awt.{Font, Graphics2D, RenderingHints}
-import java.util.Locale
 import de.sciss.audiowidgets.TimelineModel
 import de.sciss.desktop
 import de.sciss.desktop.UndoManager
@@ -27,13 +25,16 @@ import de.sciss.lucre.synth.Txn
 import de.sciss.lucre.{BiPin, Disposable, Obj, Source}
 import de.sciss.mellite.GraphemeView.Mode
 import de.sciss.mellite.impl.TimelineViewBaseImpl
-import de.sciss.mellite.{BasicTool, GUI, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel, ViewState}
+import de.sciss.mellite.impl.state.{GraphemeViewState, TimelineViewState}
+import de.sciss.mellite.{BasicTool, GUI, GraphemeModel, GraphemeTool, GraphemeTools, GraphemeView, Insets, ObjGraphemeView, ObjView, SelectionModel, ViewState}
 import de.sciss.model.Change
 import de.sciss.numbers.Implicits._
+import de.sciss.proc.{Grapheme, TimeRef, Universe}
 import de.sciss.span.Span
 import de.sciss.synth.UGenSource.Vec
-import de.sciss.proc.{Grapheme, TimeRef, Universe}
 
+import java.awt.{Font, Graphics2D, RenderingHints}
+import java.util.Locale
 import javax.swing.{JComponent, UIManager}
 import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
@@ -63,9 +64,9 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       sampleRate = sampleRate)
     // tlm.visible         = Span(0L, (sampleRate * 60 * 2).toLong)
     val graphemeH       = tx.newHandle(gr)
-    var disposables     = List.empty[Disposable[T]]
     val selectionModel  = SelectionModel[T, ObjGraphemeView[T]]
-    val grView          = new Impl[T](graphemeH, tlm, selectionModel)
+    val grm             = GraphemeModel()
+    val grView          = new Impl[T](graphemeH, tlm, selectionModel, grm)
 
     // XXX TODO --- this is all horrible; we really need a proper iterator on grapheme
     // that gives time values and full leaf data
@@ -97,32 +98,14 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       populate(Nil, time0, entries0)
     }
 
-    val obsGrapheme = gr.changed.react { implicit tx => upd =>
-      val gr = upd.pin
-      upd.changes.foreach {
-        case BiPin.Added(time, entry) =>
-          if (DEBUG) println(s"Added   $time, $entry")
-          grView.objAdded(gr, time, entry)
-
-        case BiPin.Removed(time, entry) =>
-          if (DEBUG) println(s"Removed $time, $entry")
-          grView.objRemoved(gr, time, entry)
-
-        case BiPin.Moved  (timeChange, entry) =>
-          if (DEBUG) println(s"Moved   $entry, $timeChange")
-          grView.objMoved(gr, entry, timeCh = timeChange)
-      }
-    }
-    disposables ::= obsGrapheme
-
-    grView.disposables.set(disposables)
-
-    grView.init()
+    grView.init(gr)
   }
 
   private final class Impl[T <: Txn[T]](val graphemeH     : Source[T, Grapheme[T]],
-                                        val timelineModel : TimelineModel,
-                                        val selectionModel: SelectionModel[T, ObjGraphemeView[T]])
+                                        val timelineModel : TimelineModel.Modifiable,
+                                        val selectionModel: SelectionModel[T, ObjGraphemeView[T]],
+                                        val graphemeModel : GraphemeModel.Modifiable,
+                                       )
                                        (implicit val universe: Universe[T],
                                         val undoManager: UndoManager)
     extends GraphemeView[T]
@@ -156,7 +139,10 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
     var canvas: GraphemeCanvasImpl[T] = _
 
-    val disposables: Ref[List[Disposable[T]]] = Ref(Nil)
+    private val disposables: Ref[List[Disposable[T]]] = Ref(Nil)
+
+    protected def addDisposable(d: Disposable[T])(implicit tx: T): Unit =
+      disposables.transform(xs => d :: xs)(tx.peer)
 
     def mode: Mode = Mode.TwoDim
 
@@ -168,7 +154,14 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
     override def obj(implicit tx: T): Grapheme[T] = graphemeH()
 
-    override def viewState: Set[ViewState] = Set.empty
+    override def viewState: Set[ViewState] = {
+      var res = stateTimeline .entries()
+      res     = stateGrapheme .entries(res)
+      res
+    }
+
+    private val stateTimeline = new TimelineViewState[T]()
+    private val stateGrapheme = new GraphemeViewState[T]()
 
     def dispose()(implicit tx: T): Unit = {
       val m: ViewMap = emptyMap
@@ -179,7 +172,31 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       viewMapT.swap(m).iterator.foreach(_.value.foreach(_.dispose()))
     }
 
-    def init()(implicit tx: T): this.type = {
+    def init(gr: Grapheme[T])(implicit tx: T): this.type = {
+      for {
+        tAttr <- ViewState.map(gr)
+      } {
+        stateTimeline .init(tAttr)
+        stateGrapheme .init(tAttr)
+      }
+
+      addDisposable(gr.changed.react { implicit tx => upd =>
+        val gr = upd.pin
+        upd.changes.foreach {
+          case BiPin.Added(time, entry) =>
+            if (DEBUG) println(s"Added   $time, $entry")
+            objAdded(gr, time, entry)
+
+          case BiPin.Removed(time, entry) =>
+            if (DEBUG) println(s"Removed $time, $entry")
+            objRemoved(gr, time, entry)
+
+          case BiPin.Moved  (timeChange, entry) =>
+            if (DEBUG) println(s"Moved   $entry, $timeChange")
+            objMoved(gr, entry, timeCh = timeChange)
+        }
+      })
+
       deferTx(initGUI())
       this
     }
@@ -188,6 +205,9 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       super.initGUI()
 
       canvas = new View
+
+      stateTimeline.initGUI(timelineModel, canvas.transportCatch, visBoost = null)
+      stateGrapheme.initGUI(graphemeModel)
 
       val transportPane = new BoxPanel(Orientation.Horizontal) {
         contents ++= Seq(
@@ -403,6 +423,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
 
       def timelineModel : TimelineModel                         = impl.timelineModel
       def selectionModel: SelectionModel[T, ObjGraphemeView[T]] = impl.selectionModel
+      def graphemeModel : GraphemeModel                         = impl.graphemeModel
+
       def grapheme(implicit tx: T): Grapheme[T]                 = impl.grapheme
 
 //      def findChildView(frame: Long): Option[GraphemeObjView[T]] = {

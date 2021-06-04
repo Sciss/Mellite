@@ -10,9 +10,9 @@
 ## statement
 
 Mellite is a computer music environment, implemented as a graphical front end
-for [SoundProcesses](http://git.iem.at/sciss/SoundProcesses). It is (C)opyright 2012&ndash;2021 by Hanns Holger Rutz.
+for [SoundProcesses](http://github.com/Sciss/SoundProcesses). It is (C)opyright 2012&ndash;2021 by Hanns Holger Rutz.
 All rights reserved. Mellite is released under the
-[GNU Affero General Public License](https://git.iem.at/sciss/Mellite/raw/main/LICENSE) v3+ and comes with
+[GNU Affero General Public License](https://github.com/Sciss/Mellite/raw/main/LICENSE) v3+ and comes with
 absolutely no warranties. To contact the author, send an e-mail to `contact at sciss.de`.
 The website for Mellite is [www.sciss.de/mellite](https://www.sciss.de/mellite/).
 
@@ -22,7 +22,7 @@ The file [mellite-app-licenses.csv](app/src/main/resources/de/sciss/mellite/mell
 the license data for all  dependencies and transitive dependencies. For the binary release of Mellite, source code
 is not included but  available via the respective OSS project pages, as indicated in the license files, or&mdash;in
 compliance with  GPL/LGPL&mdash;on request  via E-Mail. All source code with group-id `de.sciss` is available from
-[git.iem.at](https://git.iem.at/sciss) or [github.com/Sciss](https://github.com/Sciss).
+[github.com/Sciss](https://github.com/Sciss).
 
 The Mellite icon is based on the file
 [MELLITE Taillée Hongrie.jpg](https://de.wikipedia.org/wiki/Mellit#/media/File:MELLITE_Taill%C3%A9e_Hongrie.jpg), 
@@ -37,7 +37,7 @@ provided by Didier Descouens under CC BY 4.0 license.
   We provide a universal zip for all platforms as well as a dedicated Debian package. These need an
   additional JDK installation (see below). Even better, for the common Intel 64-bit architecture, you can use the 
   "full" packages that bundle the JDK, available for Linux, Windows, macOS (10.10 or newer).
-- The source code can be downloaded from [git.iem.at/sciss/Mellite](https://git.iem.at/sciss/Mellite) or 
+- The source code can be downloaded from [github.com/Sciss/Mellite](https://github.com/Sciss/Mellite) or 
   [github.com/Sciss/Mellite](http://github.com/Sciss/Mellite).
   
 In order to run the application when not using the "full" bundle, you must have a Java Development Kit (JDK) installed. 
@@ -110,7 +110,7 @@ The dependencies will be downloaded automatically from Maven Central repository,
 development. 
 
 Dependencies not found are all available from their respective
-[git repositories](https://git.iem.at/users/sciss/projects), so in case you want to build a snapshot version, you
+[git repositories](https://github.com/Sciss?tab=repositories), so in case you want to build a snapshot version, you
 may need to check out these projects and publish them yourself using `sbt publishLocal`.
 
 See section 'running' for ways of building and installing standalone bundles.

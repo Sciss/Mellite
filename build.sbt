@@ -135,8 +135,8 @@ lazy val commonSettings = Seq(
     )
   ),
   scmInfo := {
-    val h = "git.iem.at"
-    val a = s"sciss/$baseName"
+    val h = "github.com"
+    val a = s"Sciss/$baseName"
     Some(ScmInfo(url(s"https://$h/$a"), s"scm:git@$h:$a.git"))
   },
 )
@@ -410,9 +410,14 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     pomExtra := {
       <properties>
         <mllt.change>
-          supports the new Mellite-launcher. Automatic update checks can be
-          configured in the preferences, manual update check can be performed
-          from the 'About' menu item.
+          SoundProcesses: new graph elements `Buffer.Empty`, `Action.WriteBuf`.
+        </mllt.change>
+        <mllt.change>
+          SoundProcesses.js: buffer contents can be read and written. While audio files still cannot
+          be streamed, this allows to load them entirely into a buffer, and use `PlayBuf` for example.
+        </mllt.change>
+        <mllt.change>
+          Ex: fix bugs in serialization of `SocketAddress` and `OscNode.Send`.
         </mllt.change>
       </properties>
     }

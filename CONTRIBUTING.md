@@ -161,7 +161,7 @@ changes to be accepted, the CLA must be signed. It's a quick process, we promise
   [github.com/Sciss/Contributing](https://github.com/Sciss/Contributing).
 - In particular read the document [sign-cla.md](https://github.com/Sciss/Contributing/blob/main/sign-cla.md).
 
-This CLA covers all projects at [git.iem.at/sciss](https://git.iem.at/sciss) 
+This CLA covers all projects at [github.com/Sciss](https://github.com/Sciss) 
 or [github.com/Sciss](https://github.com/Sciss), so you should have to go through
 this process only once. Thanks for your understanding.
 
