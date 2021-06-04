@@ -465,6 +465,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
         val endTime       = if (endSelected   ) endTime0    + r.ttMoveState.deltaTime else endTime0
         val x1            = c.frameToScreen(startTime)
         val x2            = c.frameToScreen(endTime)
+        val strkOrig = g.getStroke
         g.setStroke(r.strokeInletSpan)
         g.setPaint (r.pntInletSpan)
         val path      = r.shape1
@@ -504,6 +505,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
           ch += 1
         }
         g.draw(path)
+        g.setStroke(strkOrig)
 
       case _ =>
     }
@@ -543,6 +545,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
         ch += 1
       }
 
+      val strkOrig = g.getStroke
       g.setStroke(r.strokeInletSpan)
       g.setPaint (r.pntInletSpan)
       val ln = r.shape1
@@ -556,6 +559,7 @@ object EnvSegmentObjView extends ObjListView.Factory with ObjGraphemeView.Factor
       g.fill(a1)
       g.setPaint(if (selected) r.pntRegionOutlineSelected else r.pntRegionOutline)
       g.draw(a2)
+      g.setStroke(strkOrig)
     }
   }
 }

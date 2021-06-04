@@ -498,7 +498,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       }
 
       object canvasComponent extends Component /* with DnD[T] */ /* with sonogram.PaintController */ {
-        protected def graphemeModel: TimelineModel  = impl.timelineModel
+//        protected def graphemeModel: TimelineModel  = impl.timelineModel
 //        protected def workspace: Workspace[T]       = impl.workspace
 
         // private var currentDrop = Option.empty[DnD.Drop[T]]
@@ -570,6 +570,7 @@ object GraphemeViewImpl extends GraphemeView.Companion {
           }
 
           // --- timeline cursor and selection ---
+          g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_DEFAULT)
           paintPosAndSelection(g, h)
 
           // --- ongoing drag and drop / tools ---
