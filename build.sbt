@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.5.3-SNAPSHOT"
+lazy val commonVersion              = "3.5.3"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.3-SNAPSHOT"
+lazy val appVersion                 = "3.5.3"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -415,6 +415,9 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
         <mllt.change>
           SoundProcesses.js: buffer contents can be read and written. While audio files still cannot
           be streamed, this allows to load them entirely into a buffer, and use `PlayBuf` for example.
+        </mllt.change>
+        <mllt.change>
+          Grapheme editor: store view state, allow adjustment of y-axis range
         </mllt.change>
         <mllt.change>
           Ex: fix bugs in serialization of `SocketAddress` and `OscNode.Send`.
