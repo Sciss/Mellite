@@ -6,13 +6,20 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "3.5.3"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.3"
+lazy val appVersion                 = "3.5.4"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
 
 lazy val authorName                 = "Hanns Holger Rutz"
 lazy val authorEMail                = "contact@sciss.de"
+
+// ---- changes ----
+
+lazy val changeLog = Seq(
+  "Freesound: fix base URL.",
+  "Grapheme editor: fix for negative low Y.",
+)
 
 // ---- dependencies ----
 
@@ -50,7 +57,7 @@ lazy val deps = new {
     val dotterweide         = "0.4.0"
     val fileCache           = "1.1.1"
     val fingerTree          = "1.5.5"
-    val freesound           = "2.5.0"
+    val freesound           = "2.5.1"
     val fscape              = "3.6.0"
     val interpreterPane     = "1.11.0"
 //    val jline               = "2.14.6"
@@ -87,8 +94,10 @@ def appNameL          = baseNameL
 
 // ---- common ----
 
+ThisBuild / organization  := "de.sciss"
+ThisBuild / versionScheme := Some("pvp")
+
 lazy val commonSettings = Seq(
-  organization       := "de.sciss",
   homepage           := Some(url(s"https://sciss.de/$baseNameL")),
   // note: license _name_ is printed in 'about' dialog
   licenses           := Seq("GNU Affero General Public License v3+" -> url("http://www.gnu.org/licenses/agpl-3.0.txt")),
@@ -407,23 +416,7 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     debianPackageDependencies in Debian ++= Seq("java11-runtime"),
     debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
     // ---- publishing ----
-    pomExtra := {
-      <properties>
-        <mllt.change>
-          SoundProcesses: new graph elements `Buffer.Empty`, `Action.WriteBuf`.
-        </mllt.change>
-        <mllt.change>
-          SoundProcesses.js: buffer contents can be read and written. While audio files still cannot
-          be streamed, this allows to load them entirely into a buffer, and use `PlayBuf` for example.
-        </mllt.change>
-        <mllt.change>
-          Grapheme editor: store view state, allow adjustment of y-axis range
-        </mllt.change>
-        <mllt.change>
-          Ex: fix bugs in serialization of `SocketAddress` and `OscNode.Send`.
-        </mllt.change>
-      </properties>
-    }
+    pomPostProcess := addChanges,
   )
 
 // Determine OS version of JavaFX binaries
@@ -443,6 +436,16 @@ def archSuffix: String =
     case "amd64" | "x86_64" => "x64"
     case other              => other
   }
+
+lazy val addChanges: xml.Node => xml.Node = {
+  case root: xml.Elem =>
+    val changeNodes: Seq[xml.Node] = changeLog.map(t => <mllt.change>{t}</mllt.change>)
+    val newChildren = root.child.map {
+      case e: xml.Elem if e.label == "properties" => e.copy(child = e.child.toSeq ++ changeNodes)
+      case other => other
+    }
+    root.copy(child = newChildren)
+}
 
 lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
   .dependsOn(app)

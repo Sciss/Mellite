@@ -39,6 +39,7 @@ import javax.swing.{JComponent, UIManager}
 import scala.annotation.tailrec
 import scala.collection.immutable.{SortedMap => ISortedMap}
 import scala.concurrent.stm.Ref
+import scala.math.abs
 import scala.swing.Swing._
 import scala.swing.{BorderPanel, BoxPanel, Component, Orientation}
 
@@ -473,8 +474,8 @@ object GraphemeViewImpl extends GraphemeView.Companion {
       def findChildView(frame: Long, modelY: Double): Option[ObjGraphemeView[T]] = {
         val dLeft   = math.ceil(screenToFrames(ObjGraphemeView.ScreenTolerance)).toLong
         val dRight  = dLeft // math.ceil(screenToFrames(GraphemeObjView.ScreenTolerance)).toLong
-        val dTop    = screenToModelExtent     (ObjGraphemeView.ScreenTolerance)
-        val dBottom = dTop // screenToModelExtent     (GraphemeObjView.ScreenTolerance)
+        val dTop    = abs(screenToModelExtent(ObjGraphemeView.ScreenTolerance))
+        val dBottom = dTop
         val frame1  = frame  - dLeft
         val frame2  = frame  + dRight
         val modelY1 = modelY - dTop

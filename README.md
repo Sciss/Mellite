@@ -95,7 +95,7 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 The following artifact is available from Maven Central:
 
     "de.sciss" %% "mellite-core" % "3.5.3"
-    "de.sciss" %% "mellite-app"  % "3.5.3"
+    "de.sciss" %% "mellite-app"  % "3.5.4"
 
 ## building from source
 
@@ -155,7 +155,7 @@ This section is an aide-mémoire for me in releasing stable versions.
 10. Make sure the XFree desktop file version is set:
    `vim app/src/debian/Mellite.desktop`
 11. Update the release versions in `README.md`
-12. Update the release notes in `pomExtra` of `build.sbt`
+12. Update the release notes in `changeLog` of `build.sbt`
 13. Test the app building: `sbt +mellite-app/clean +mellite-app/update +mellite-app/test mellite-app/assembly`
 
 ### publish to Maven Central

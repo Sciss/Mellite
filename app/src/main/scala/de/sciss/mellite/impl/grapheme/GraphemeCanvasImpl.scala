@@ -75,7 +75,7 @@ trait GraphemeCanvasImpl[T <: Txn[T]] extends TimelineCanvas2DImpl[T, Double, Ob
     val hi  = yr.stop
     val hm  = _yAxis.peer.getHeight - 1
     import numbers.Implicits._
-    y.linLin(0, hm, lo, hi) // note 'lo to hi'
+    y.linLin(0, hm, 0.0, hi - lo) // note 'lo to hi'
   }
 
   override def screenToModelExtentF(dy: Int): Double = screenToModelExtent(dy)
@@ -95,7 +95,7 @@ trait GraphemeCanvasImpl[T <: Txn[T]] extends TimelineCanvas2DImpl[T, Double, Ob
     val hi  = yr.stop
     val hm  = _yAxis.peer.getHeight - 1
     import numbers.Implicits._
-    m.linLin(lo, hi, 0, hm) // note 'lo to hi'
+    m.linLin(0.0, hi - lo, 0, hm) // note 'lo to hi'
   }
 
   final def modelYBox(a: Double, b: Double): (Double, Double) = if (a < b) (a, b - a) else (b, a - b)
