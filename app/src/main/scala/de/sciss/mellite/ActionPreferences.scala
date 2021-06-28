@@ -23,5 +23,10 @@ object ActionPreferences extends Action("Preferences...") {
 
   accelerator = Some(menu1 + Key.Comma)
 
-  def apply(): Unit = new PreferencesFrame
+  def apply(): Unit = open()
+
+  val Tab: PreferencesFrame.Tab.type = PreferencesFrame.Tab
+
+  def open(tab: Tab.Value = Tab.Default): Unit =
+    new PreferencesFrame(tab)
 }

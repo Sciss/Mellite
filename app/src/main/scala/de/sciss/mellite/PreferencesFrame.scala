@@ -16,6 +16,7 @@ package de.sciss.mellite
 import de.sciss.desktop.{Desktop, FileDialog, Preferences, PrefsGUI, Window, WindowHandler}
 import de.sciss.file._
 import de.sciss.icons.raphael
+import de.sciss.mellite.PreferencesFrame.Tab
 import de.sciss.mellite.impl.component.{BaselineFlowPanel, NoMenuBarActions}
 import de.sciss.swingplus.GroupPanel.Element
 import de.sciss.swingplus.{GroupPanel, Separator}
@@ -28,8 +29,16 @@ import scala.swing.{Action, Alignment, Button, Component, FlowPanel, Label, Swin
 import scala.util.Try
 import scala.util.control.NonFatal
 
-final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActions {
+object PreferencesFrame {
+  object Tab extends Enumeration {
+    val Appearance, Audio, Sensors, System = Value
+    val Default: Value = Appearance
+  }
+}
+final class PreferencesFrame(selectedTab: Tab.Value) extends desktop.impl.WindowImpl with NoMenuBarActions {
   def handler: WindowHandler = Application.windowHandler
+
+  def this() = this(Tab.Default)
 
   override protected def style: Window.Style = Window.Auxiliary
 
@@ -286,6 +295,7 @@ final class PreferencesFrame extends desktop.impl.WindowImpl with NoMenuBarActio
       )
     )
 
+    tabbed.selection.index = selectedTab.id
     tabbed
   }
 

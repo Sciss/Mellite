@@ -83,6 +83,7 @@ trait Application extends SwingApplication[Application.Document] {
 
   implicit def compiler: Code.Compiler
 
+  // note: does not require EDT
   def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
                             useDevice: Boolean, pickPort: Boolean): Unit =
     throw new NotImplementedError()

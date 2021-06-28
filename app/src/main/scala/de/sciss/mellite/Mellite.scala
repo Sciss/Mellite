@@ -31,7 +31,7 @@ import scala.collection.immutable.{Seq => ISeq}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.stm.{TxnExecutor, atomic}
 import scala.language.existentials
-import scala.swing.Label
+import scala.swing.{Label, Swing}
 import scala.util.control.NonFatal
 
 object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") with Application with Init {
@@ -84,7 +84,7 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
         descr = "Workspaces (.mllt directories) to open"
       )
       val headless: Opt[Boolean] = opt("headless", short = 'h',
-        descr = "Run without graphical user-interface (Note: does not initialize preferences)."
+        descr = "Run without graphical user-interface."
       )
       val bootAudio: Opt[Boolean] = opt("boot-audio", short = 'b',
         descr = "Boot audio server when in headless mode."
@@ -158,6 +158,51 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   def clearLog  (): Unit = LogFrame.instance.log.clear()
   def logToFront(): Unit = LogFrame.instance.front()  // XXX TODO - should avoid focus transfer
 
+  /* Checks that the temporary directory set in the preferences is valid.
+   * If so, it sets the system property.
+   * If not, shows a warning dialog.
+   *
+   * @return `true` if all good, `false` is a warning dialog was shown
+   */
+  private def checkSetTmpDir(headless: Boolean): Boolean = {
+    val pref = Prefs.tempDir
+    pref.getOrElse(Prefs.defaultTempDir) match {
+      case Prefs.defaultTempDir =>
+        true
+      case dir0 =>
+        val tmpDirOk = dir0.isDirectory && dir0.canWrite
+        if (tmpDirOk) {
+          System.setProperty("java.io.tmpdir", dir0.path)
+        } else {
+          if (headless) {
+            Console.err.println(s"WARNING: The temporary folder cannot be accessed: '$dir0'")
+          } else {
+            val entries     = Seq("Use default", "Edit preferences")
+            val dirDefault  = System.getProperty("java.io.tmpdir")
+            val pane = OptionPane(
+              message     =
+                s"""The temporary folder cannot be accessed:
+                   |'$dir0'
+                   |The system's default folder is
+                   |'$dirDefault'
+                   |""".stripMargin,
+              optionType  = OptionPane.Options.OkCancel,  // irrelevant
+              messageType = OptionPane.Message.Warning,
+              icon        = Swing.EmptyIcon, // Logo.icon(128),
+              entries     = entries,
+            )
+            pane.show(title = "Temporary Folder").id match {
+              case 0 =>     // use default
+                pref.remove() // .put(dirDefault)
+              case 1 =>     // edit preferences
+                ActionPreferences.open(ActionPreferences.Tab.System)
+              case _ => ()  // cancelled
+            }
+          }
+        }
+        tmpDirOk
+    }
+  }
 
   /** Tries to start the aural system by booting SuperCollider.
     * This reads the relevant preferences entries such as
@@ -178,7 +223,6 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 //    serverCfg.verbosity = -1
     val clientCfg = Client.Config()
     applyAudioPreferences(serverCfg, clientCfg, useDevice = true, pickPort = true)
-    import de.sciss.file._
 
     val f = file(serverCfg.program)
     if (!f.isFile && (f.parentOption.nonEmpty || {
@@ -204,7 +248,6 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
   override def applyAudioPreferences(serverCfg: Server.ConfigBuilder, clientCfg: Client.ConfigBuilder,
                                      useDevice: Boolean, pickPort: Boolean): Unit = {
 //    requireEDT()
-    import de.sciss.file._
     import de.sciss.numbers.Implicits._
     val programPath         = Prefs.superCollider.getOrElse(Prefs.defaultSuperCollider)
     if (programPath != Prefs.defaultSuperCollider) serverCfg.program = programPath.path
@@ -315,21 +358,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
   // runs on the EDT (unless `config.headless`)
   override protected def init(): Unit = {
-    // if (lafInfo.description.contains("Submin")) {
-    // }
-
     Application.init(this)
 
     val headless = _config.headless
-
-    // ---- temporary directory ----
-
-    if (!headless) {  // XXX TODO --- we should have headless preferences access
-      val tempDir = Prefs.tempDir.getOrElse(Prefs.defaultTempDir)
-      if (tempDir != Prefs.defaultTempDir) {
-        System.setProperty("java.io.tmpdir", tempDir.getPath)
-      }
-    }
 
     // ---- look and feel ----
 
@@ -344,11 +375,9 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
 
     // ---- expr ----
 
-    if (!headless) {  // XXX TODO --- we should have headless preferences access
-      // XXX TODO ugly
-      de.sciss.lucre.expr.graph.Bounce.applyAudioPreferences =
-        applyAudioPreferences(_, _, useDevice = false, pickPort = false)
-    }
+    // XXX TODO ugly
+    de.sciss.lucre.expr.graph.Bounce.applyAudioPreferences =
+      applyAudioPreferences(_, _, useDevice = false, pickPort = false)
 
     // ---- main window and boot ----
 
@@ -361,6 +390,10 @@ object Mellite extends SwingApplicationImpl[Application.Document]("Mellite") wit
     } else {
       new MainFrame
     }
+
+    // ---- temporary directory ----
+
+    checkSetTmpDir(headless = headless)
 
     // ---- workspaces and auto-run ----
 

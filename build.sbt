@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.5.3"
+lazy val commonVersion              = "3.5.5-SNAPSHOT"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.4"
+lazy val appVersion                 = "3.5.5-SNAPSHOT"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -31,7 +31,7 @@ lazy val deps = new {
     val desktop             = "0.11.3"
     val equal               = "0.1.6"
     val fileUtil            = "1.1.5"
-    val lucre               = "4.4.4"
+    val lucre               = "4.4.5"
     val lucreSwing          = "2.6.3"
     val model               = "0.3.5"
     val numbers             = "0.2.1"
@@ -46,12 +46,12 @@ lazy val deps = new {
     val scallop             = "4.0.3"
     val serial              = "2.0.1"
     val sonogram            = "2.2.1"
-    val soundProcesses      = "4.7.6"
+    val soundProcesses      = "4.7.7"
     val span                = "2.0.2"
     val swingPlus           = "0.5.0"
   }
   val app = new {
-    val akka                = "2.6.13"
+    val akka                = "2.6.14"  // note -- should correspond to FScape always
     val appDirs             = "1.2.1"
     val dejaVuFonts         = "2.37"    // directly included
     val dotterweide         = "0.4.0"
@@ -73,7 +73,7 @@ lazy val deps = new {
 //    val plexMono            = "4.0.2"   // directly included
     val scalaColliderSwing  = "2.6.4"
     val scissDSP            = "2.2.2"
-    val slf4j               = "1.7.30"
+    val slf4j               = "1.7.31"
     val submin              = "0.3.4"
     val syntaxPane          = "1.2.0"
     val treeTable           = "1.6.1"
@@ -116,14 +116,11 @@ lazy val commonSettings = Seq(
     val sq1 = if (VersionNumber(scalaVersion.value).matchesSemVer(SemanticSelector(">=2.13"))) "-Wconf:cat=deprecation&msg=Widening conversion:s" :: sq0 else sq0 // nanny state defaults :-E
     sq1
   },
-  // sources in (Compile, doc) := {
-  //   if (isDotty.value) Nil else (sources in (Compile, doc)).value // dottydoc is pretty much broken
-  // },
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
   // resolvers += "Typesafe Maven Repository" at "http://repo.typesafe.com/typesafe/maven-releases/", // https://stackoverflow.com/questions/23979577
   // resolvers += "Typesafe Simple Repository" at "http://repo.typesafe.com/typesafe/simple/maven-releases/", // https://stackoverflow.com/questions/20497271
   updateOptions := updateOptions.value.withLatestSnapshots(false),
-  aggregate in assembly := false,
+  assembly / aggregate := false,
   // ---- publishing ----
   publishMavenStyle := true,
   publishTo := {
@@ -133,7 +130,7 @@ lazy val commonSettings = Seq(
       "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
     )
   },
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   pomIncludeRepository := { _ => false },
   developers := List(
     Developer(
@@ -161,7 +158,7 @@ lazy val pkgUniversalSettings = Seq(
 // instead recommend to users of Linux with JDK 8 to create
 // `~/.accessibility.properties`
 //
-//  javaOptions in Universal ++= Seq(
+//  Universal / javaOptions ++= Seq(
 //    // -J params will be added as jvm parameters
 //    // "-J-Xmx1024m",
 //    // others will be added as app parameters
@@ -175,20 +172,20 @@ lazy val pkgUniversalSettings = Seq(
   // also affects debian package building :-/
   // We need this settings for Windows.
   scriptClasspath /* in Universal */ := Seq("*"),
-  name                      in Linux     := appName,
-  packageName               in Linux     := appNameL, // XXX TODO -- what was this for?
-  // mainClass                 in Universal := appMainClass,
-  maintainer                in Universal := s"$authorName <$authorEMail>",
-  target      in Universal := (target in Compile).value,
+  Linux / name        := appName,
+  Linux / packageName := appNameL, // XXX TODO -- what was this for?
+  // Universal / mainClass := appMainClass,
+  Universal / maintainer := s"$authorName <$authorEMail>",
+  Universal / target := (Compile / target).value,
 )
 
 //////////////// debian installer
 lazy val pkgDebianSettings = Seq(
-  packageName               in Debian := appNameL,  // this is the installed package (e.g. in `apt remove <name>`).
-  packageSummary            in Debian := appDescription,
-  // mainClass                 in Debian := appMainClass,
-  maintainer                in Debian := s"$authorName <$authorEMail>",
-  packageDescription        in Debian :=
+  Debian / packageName        := appNameL,  // this is the installed package (e.g. in `apt remove <name>`).
+  Debian / packageSummary     := appDescription,
+  // Debian / mainClass          := appMainClass,
+  Debian / maintainer         := s"$authorName <$authorEMail>",
+  Debian / packageDescription :=
     """Mellite is a computer music environment,
       | a desktop application based on SoundProcesses.
       | It manages workspaces of musical objects, including
@@ -196,9 +193,9 @@ lazy val pkgDebianSettings = Seq(
       | live improvisation sets.
       |""".stripMargin,
   // include all files in src/debian in the installed base directory
-  linuxPackageMappings      in Debian ++= {
-    val n     = appNameL // (name in Debian).value.toLowerCase
-    val dir   = (sourceDirectory in Debian).value / "debian"
+  Debian / linuxPackageMappings ++= {
+    val n     = appNameL // (Debian / name).value.toLowerCase
+    val dir   = (Debian / sourceDirectory).value / "debian"
     val f1    = (dir * "*").filter(_.isFile).get  // direct child files inside `debian` folder
     val f2    = ((dir / "doc") * "*").get
     //
@@ -215,15 +212,15 @@ lazy val pkgDebianSettings = Seq(
 
 //////////////// fat-jar assembly
 lazy val assemblySettings = Seq(
-    mainClass             in assembly := appMainClass,
-    target                in assembly := baseDirectory.value,
-    assemblyJarName       in assembly := s"$baseName.jar",
-    assemblyMergeStrategy in assembly := {
-      case PathList("org", "xmlpull", _ @ _*) => MergeStrategy.first
-      case PathList("org", "w3c", "dom", "events", _ @ _*) => MergeStrategy.first // bloody Apache Batik
+    assembly / mainClass             := appMainClass,
+    assembly / target                := baseDirectory.value,
+    assembly / assemblyJarName       := s"$baseName.jar",
+    assembly / assemblyMergeStrategy := {
+      case PathList("org", "xmlpull", _ @ _*)                   => MergeStrategy.first
+      case PathList("org", "w3c", "dom", "events", _ @ _*)      => MergeStrategy.first // bloody Apache Batik
       case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.first
       case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
         oldStrategy(x)
     }
   )
@@ -237,9 +234,9 @@ lazy val root = project.withId(baseNameL).in(file("."))
   .settings(
     name    := baseName,
     version := appVersion,
-    publishArtifact in(Compile, packageBin) := false, // there are no binaries
-    publishArtifact in(Compile, packageDoc) := false, // there are no javadocs
-    publishArtifact in(Compile, packageSrc) := false, // there are no sources
+    Compile / packageBin / publishArtifact := false, // there are no binaries
+    Compile / packageDoc / publishArtifact := false, // there are no javadocs
+    Compile / packageSrc / publishArtifact := false, // there are no sources
     // packagedArtifacts := Map.empty
     autoScalaLibrary := false
   )
@@ -288,8 +285,8 @@ lazy val core = project.withId(s"$baseNameL-core").in(file("core"))
   )
 
 lazy val appSettings = Seq(
-  description := appDescription,
-  mainClass in Compile := appMainClass,
+  description         := appDescription,
+  Compile / mainClass := appMainClass,
 )
 
 lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
@@ -307,8 +304,8 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
     version := appVersion,
     // resolvers += "Oracle Repository" at "http://download.oracle.com/maven", // required for sleepycat
     libraryDependencies ++= Seq(
-      "com.typesafe.akka" %%  "akka-stream"         % deps.app.akka,
-      "com.typesafe.akka" %%  "akka-stream-testkit" % deps.app.akka,
+      "com.typesafe.akka" %%  "akka-stream"                   % deps.app.akka,
+      "com.typesafe.akka" %%  "akka-stream-testkit"           % deps.app.akka,
       "de.sciss"          %% "audiofile"                      % deps.common.audioFile,          // reading/writing audio files
       "de.sciss"          %% "audiowidgets-app"               % deps.common.audioWidgets,       // audio application widgets
       "de.sciss"          %% "audiowidgets-core"              % deps.common.audioWidgets,       // audio application widgets
@@ -372,8 +369,8 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "de.sciss"          %% "treetable-scala"                % deps.app.treeTable,             // widget
 //      "de.sciss"          %  "weblaf-core"                    % deps.app.webLaF,                // look-and-feel
 //      "de.sciss"          % mainClassmainClassaf-ui"                      % deps.app.webLaF,                // look-and-feel
-      "com.weblookandfeel" % "weblaf-core"     % deps.app.webLaF,
-      "com.weblookandfeel" % "weblaf-ui"       % deps.app.webLaF,
+      "com.weblookandfeel" % "weblaf-core"                    % deps.app.webLaF,
+      "com.weblookandfeel" % "weblaf-ui"                      % deps.app.webLaF,
       "de.sciss"          %% "wolkenpumpe-basic"              % deps.app.wolkenpumpe,           // live improvisation
       "de.sciss"          %% "wolkenpumpe-core"               % deps.app.wolkenpumpe,           // live improvisation
       "net.harawata"      %  "appdirs"                        % deps.app.appDirs,               // finding cache directory
@@ -386,9 +383,9 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       "org.slf4j"         %  "slf4j-simple"                   % deps.app.slf4j,                 // logging (used by weblaf)
     ),
     mimaPreviousArtifacts := Set("de.sciss" %% s"$baseNameL-app" % mimaAppVersion),
-    initialCommands in console :=
+    console / initialCommands :=
       """import de.sciss.mellite._""".stripMargin,
-    fork in run := true,  // required for shutdown hook, and also the scheduled thread pool, it seems
+    run / fork := true,  // required for shutdown hook, and also the scheduled thread pool, it seems
     // ---- build-info ----
     buildInfoKeys := Seq("name" -> baseName /* name */, organization, version, scalaVersion, description,
       BuildInfoKey.map(homepage) { case (k, opt) => k -> opt.get },
@@ -409,12 +406,12 @@ lazy val app = project.withId(s"$baseNameL-app").in(file("app"))
       )
       regular.copy(licenses = regular.licenses :+ fontsLic)
     },
-    licenseReportDir := (sourceDirectory in Compile).value / "resources" / "de" / "sciss" / "mellite",
+    licenseReportDir := (Compile / sourceDirectory).value / "resources" / "de" / "sciss" / "mellite",
     // ---- packaging ----
-    packageName in Universal := s"${appNameL}_${version.value}_all",
-    name                      in Debian := appNameL,  // this is used for .deb file-name; NOT appName,
-    debianPackageDependencies in Debian ++= Seq("java11-runtime"),
-    debianPackageRecommends   in Debian ++= Seq("openjfx"), // you could run without, just the API browser won't work
+    Universal / packageName := s"${appNameL}_${version.value}_all",
+    Debian / name                      := appNameL,  // this is used for .deb file-name; NOT appName,
+    Debian / debianPackageDependencies ++= Seq("java11-runtime"),
+    Debian / debianPackageRecommends   ++= Seq("openjfx"), // you could run without, just the API browser won't work
     // ---- publishing ----
     pomPostProcess := addChanges,
   )
@@ -441,7 +438,7 @@ lazy val addChanges: xml.Node => xml.Node = {
   case root: xml.Elem =>
     val changeNodes: Seq[xml.Node] = changeLog.map(t => <mllt.change>{t}</mllt.change>)
     val newChildren = root.child.map {
-      case e: xml.Elem if e.label == "properties" => e.copy(child = e.child.toSeq ++ changeNodes)
+      case e: xml.Elem if e.label == "properties" => e.copy(child = e.child ++ changeNodes)
       case other => other
     }
     root.copy(child = newChildren)
@@ -463,8 +460,8 @@ lazy val full = project.withId(s"$baseNameL-full").in(file("full"))
     jlinkIgnoreMissingDependency := JlinkIgnore.everything, // temporary for testing
     jlinkModules += "jdk.unsupported", // needed for Akka
     libraryDependencies ++= Seq("base", "swing", "controls", "graphics", "media", "web").map(jfxDep),
-    packageName in Universal := s"$appNameL-full_${version.value}_${jfxClassifier}_$archSuffix",
-    name                in Debian := s"$appNameL-full",  // this is used for .deb file-name; NOT appName,
-    packageArchitecture in Debian := sys.props("os.arch"), // archSuffix,
+    Universal / packageName := s"$appNameL-full_${version.value}_${jfxClassifier}_$archSuffix",
+    Debian / name                := s"$appNameL-full",  // this is used for .deb file-name; NOT appName,
+    Debian / packageArchitecture := sys.props("os.arch"), // archSuffix,
   )
 
