@@ -206,8 +206,13 @@ object AudioCueViewImpl {
           val spec = AudioFileSpec(AudioFileType.Wave64, numChannels = numChannels, sampleRate = SR)
           (fTmp, fTmp.toURI, Some(spec))
         } else {
-          // val FileFormat.PCM(tpe, smp) = settings.fileFormat
-          (fileOut, uri, None) //  AudioFileSpec(tpe, smp, numChannels = numChannels, sampleRate = SR))
+          val specOpt = settings.fileFormat match {
+            case FileFormat.PCM(tpe, fmt) =>
+              val spec = AudioFileSpec(tpe, fmt, numChannels = numChannels, sampleRate = SR)
+              Some(spec)
+            case _ => None
+          }
+          (fileOut, uri, specOpt)
         }
 
         def gBnc(bncSpec: AudioFileSpec) = fscape.Graph {
