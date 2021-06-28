@@ -10,7 +10,7 @@ object ExDnDExample {
     val drop  = tgt.select[_TimelineView]
     val timed = drop.value.selectedObjects
     val span  = timed.map(_.span)
-    drop.received ---> PrintLn(span.toStr)
+    drop.received --> PrintLn(span.toStr)
     tgt
   }
 }

@@ -14,7 +14,6 @@
 package de.sciss.mellite
 
 import de.sciss.lucre.{Expr, Obj, Txn}
-import de.sciss.mellite.impl.WindowImpl
 import de.sciss.proc.Tag
 
 object ViewState {

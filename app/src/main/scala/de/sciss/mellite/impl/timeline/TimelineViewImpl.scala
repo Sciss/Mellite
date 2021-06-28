@@ -172,7 +172,7 @@ object TimelineViewImpl extends TimelineView.Companion {
     }
 
     private def clearSet[A](s: TSet[A])(implicit tx: T): Unit =
-      s.retain(_ => false)(tx.peer) // no `clear` method
+      s.retain(_ => false)(tx.peer) // no `clear` method ; retain for Scala 2.12
 
     private def debugCheckConsistency(info: => String)(implicit tx: T): Unit = if (DEBUG) {
       val check = BiGroupImpl.verifyConsistency(timeline, reportOnly = true)
