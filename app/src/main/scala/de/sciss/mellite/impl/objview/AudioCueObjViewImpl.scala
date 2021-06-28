@@ -48,7 +48,7 @@ object AudioCueObjViewImpl extends AudioCueObjView.Companion {
       dirCache.get[T]()
     }
     val dlg = FileDialog.open(init = dirIn, title = "Add Audio Files")
-    dlg.setFilter(f => Try(AudioFile.identify(f).isDefined).getOrElse(false))
+    dlg.setFilter(f => f.isDirectory || Try(AudioFile.identify(f).isDefined).getOrElse(false))
     dlg.multiple = true
     val dlgOk = GUI.optionToAborted(dlg.show(window))
 
