@@ -291,7 +291,8 @@ final class MainFrame extends desktop.impl.WindowImpl { me =>
       val hpBusR    = hpBusL + 1
       val hpAmp     = Lag.ar("hp-amp".kr(0f))
       val hpInL     = Mix.tabulate((numOuts + 1) / 2)(i => in.out(i * 2))
-      val hpInR     = Mix.tabulate( numOuts      / 2)(i => in.out(i * 2 + 1))
+      def _hpInR    = Mix.tabulate( numOuts      / 2)(i => in.out(i * 2 + 1))
+      val hpInR     = if (numOuts == 1) DC.ar(0) else _hpInR
       val hpLimL    = Limiter.ar(hpInL * hpAmp, level = ceil)
       val hpLimR    = Limiter.ar(hpInR * hpAmp, level = ceil)
 
