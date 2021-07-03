@@ -94,8 +94,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "3.5.5"
-    "de.sciss" %% "mellite-app"  % "3.5.5"
+    "de.sciss" %% "mellite-core" % "3.5.6"
+    "de.sciss" %% "mellite-app"  % "3.5.6"
 
 ## building from source
 
@@ -123,7 +123,7 @@ The produced installation is _platform dependent_, so will create a version that
 
 Note that should probably specify an explicit java-home, otherwise the bundled package might be unreasonably large:
 
-    sbt ++2.13.3 -java-home ~/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11/jdk-11.0.9+11 clean update mellite-full/debian:packageBin
+    sbt ++2.13.6 -java-home ~/Downloads/OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11/jdk-11.0.9+11 clean update mellite-full/debian:packageBin
 
 ---------
 

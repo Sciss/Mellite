@@ -4,9 +4,9 @@ import com.typesafe.sbt.packager.linux.LinuxPackageMapping
 lazy val baseName                   = "Mellite"
 lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
-lazy val commonVersion              = "3.5.5"
+lazy val commonVersion              = "3.5.6"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.5"
+lazy val appVersion                 = "3.5.6"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -17,21 +17,14 @@ lazy val authorEMail                = "contact@sciss.de"
 // ---- changes ----
 
 lazy val changeLog = Seq(
-  "Ex/Control: fix mapping sequence of Act (Lucre #53)",
-  "Ex/Control: <-- and --> are preferred now",
-  "Audio: fix for repeated run/stop of Proc linked to other Proc  (SoundProcesses #107)",
-  "Startup: Warn if temporary directory is invalid (Mellite #124)",
-  "Fix bug in certain audio cue bounces (Mellite #130)",
-  "Fix main volume control when using monophonic output (Mellite #139)",
-  "Fix file dialog selection when using Metal look-and-feel (Mellite #142)",
-  "Respect preferences when running headless (Mellite #143)",
+  "Fix bug in certain audio file paths (Mellite #144)",
 )
 
 // ---- dependencies ----
 
 lazy val deps = new {
   val common = new {
-    val asyncFile           = "0.1.3"
+    val asyncFile           = "0.1.4"
     val audioFile           = "2.3.3"
     val audioWidgets        = "2.3.2"
     val desktop             = "0.11.3"
