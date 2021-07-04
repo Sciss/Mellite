@@ -6,7 +6,7 @@ lazy val baseNameL                  = baseName.toLowerCase
 lazy val appDescription             = "A computer music application based on SoundProcesses"
 lazy val commonVersion              = "3.5.6"
 lazy val mimaCommonVersion          = "3.5.0"
-lazy val appVersion                 = "3.5.6"
+lazy val appVersion                 = "3.5.7"
 lazy val mimaAppVersion             = "3.5.0"
 
 lazy val loggingEnabled             = true
@@ -17,7 +17,7 @@ lazy val authorEMail                = "contact@sciss.de"
 // ---- changes ----
 
 lazy val changeLog = Seq(
-  "Fix bug in certain audio file paths (Mellite #144)",
+  "Fix bug in the GeomSeq pattern (Patterns #9)",
 )
 
 // ---- dependencies ----
@@ -65,7 +65,7 @@ lazy val deps = new {
     val linKernighan        = "0.1.3"
     val lucrePi             = "1.4.0"
     val negatum             = "1.5.0"
-    val patterns            = "1.4.1"
+    val patterns            = "1.4.2"
     val pdflitz             = "1.5.0"
     val pegDown             = "1.6.0"
 //    val playJSON            = "0.4.0"
