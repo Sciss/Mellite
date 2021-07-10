@@ -94,8 +94,8 @@ If you want to use Mellite as a "library" in your project, you can link to a Mav
 
 The following artifact is available from Maven Central:
 
-    "de.sciss" %% "mellite-core" % "3.5.6"
-    "de.sciss" %% "mellite-app"  % "3.5.6"
+    "de.sciss" %% "mellite-core" % "3.6.0"
+    "de.sciss" %% "mellite-app"  % "3.6.0"
 
 ## building from source
 
